@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import QuemSomos from "./sections/QuemSomos";
+import QuemSomos from "./sections/quemSomos";
 import AreaCliente from "./sections/AreaCliente";
 import Contato from "./sections/Contato";
 
