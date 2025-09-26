@@ -2,7 +2,7 @@ import './globals.css';
 import { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'Brandão Contabilidade',
+  <title>Brandão Contabilidade - Atualizado</title>
   description: 'Escritório de contabilidade em Sidrolândia - MS',
 };
 
