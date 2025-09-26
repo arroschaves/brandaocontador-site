@@ -1,8 +1,8 @@
+import Image from "next/image";
+import Link from "next/link";
 import QuemSomos from "./sections/QuemSomos";
 import AreaCliente from "./sections/AreaCliente";
 import Contato from "./sections/Contato";
-import Image from "next/image";
-import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -35,13 +35,40 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Seções do site */}
-      <section id="servicos">
-        {/* Conteúdo dos serviços existente */}
+      {/* Serviços Section */}
+      <section id="servicos" className="py-16 px-5 text-center bg-gray-800">
+        <h2 className="text-3xl md:text-4xl font-bold text-yellow-500 mb-6">Nossos Serviços</h2>
+        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 border border-gray-700 rounded hover:bg-gray-700 transition">
+            <h3 className="text-xl font-semibold mb-2">Escrituração Fiscal</h3>
+            <p>Controle completo de documentos fiscais e contábeis para sua empresa.</p>
+          </div>
+          <div className="p-6 border border-gray-700 rounded hover:bg-gray-700 transition">
+            <h3 className="text-xl font-semibold mb-2">Abertura de Empresas</h3>
+            <p>Agilidade e segurança na abertura de novos negócios, sem burocracia.</p>
+          </div>
+          <div className="p-6 border border-gray-700 rounded hover:bg-gray-700 transition">
+            <h3 className="text-xl font-semibold mb-2">Área Trabalhista</h3>
+            <p>Gestão completa de folha, admissões, rescisões e obrigações trabalhistas.</p>
+          </div>
+          <div className="p-6 border border-gray-700 rounded hover:bg-gray-700 transition">
+            <h3 className="text-xl font-semibold mb-2">Imposto de Renda</h3>
+            <p>Declarações e planejamento tributário para pessoas físicas e jurídicas.</p>
+          </div>
+          <div className="p-6 border border-gray-700 rounded hover:bg-gray-700 transition">
+            <h3 className="text-xl font-semibold mb-2">Gestão Empresarial</h3>
+            <p>Consultoria e suporte para melhorar resultados e processos da sua empresa.</p>
+          </div>
+        </div>
       </section>
 
+      {/* Quem Somos Section */}
       <QuemSomos />
+
+      {/* Área do Cliente Section */}
       <AreaCliente />
+
+      {/* Contato Section */}
       <Contato />
     </main>
   );
