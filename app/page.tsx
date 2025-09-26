@@ -15,13 +15,8 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Quem Somos */}
       <QuemSomos />
-
-      {/* Área do Cliente */}
       <AreaCliente />
-
-      {/* Contato */}
       <Contato />
     </main>
   );

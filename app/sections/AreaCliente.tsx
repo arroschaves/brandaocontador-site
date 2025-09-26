@@ -1,13 +1,16 @@
+// app/sections/AreaCliente.tsx
 export default function AreaCliente() {
   return (
-    <section id="area-cliente" className="py-16 px-5 text-center bg-gray-900">
-      <h2 className="text-3xl md:text-4xl font-bold text-yellow-500 mb-6">Área do Cliente</h2>
-      <p className="max-w-3xl mx-auto text-gray-200 text-lg md:text-xl mb-6">
-        Acesse nossa plataforma digital para acompanhar seus documentos, relatórios contábeis e serviços contratados.
+    <section className="p-10 text-center bg-green-900">
+      <h3 className="text-3xl font-bold text-yellow-400">Área do Cliente</h3>
+      <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">
+        Acesse sua área exclusiva para visualizar documentos, relatórios e acompanhar
+        serviços contratados. Plataforma digital em constante evolução para oferecer
+        praticidade e segurança aos nossos clientes.
       </p>
-      <a 
-        href="#"
-        className="px-6 py-3 bg-yellow-500 text-gray-900 font-bold rounded hover:bg-yellow-400 transition"
+      <a
+        href="/cliente/login"
+        className="mt-6 inline-block bg-yellow-400 text-black font-bold px-6 py-3 rounded hover:bg-yellow-300 transition"
       >
         Entrar na Área do Cliente
       </a>

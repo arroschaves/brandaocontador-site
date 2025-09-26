@@ -1,4 +1,4 @@
-'use client'; // necessário para usar useState
+'use client';
 
 import { useState } from 'react';
 
@@ -16,8 +16,11 @@ export default function Contato() {
 
   return (
     <section className="p-10 text-center bg-green-800">
-      <h3 className="text-2xl font-bold text-yellow-400">Contato</h3>
-      <form onSubmit={handleSubmit} className="mt-4 flex flex-col items-center space-y-3 max-w-md mx-auto">
+      <h3 className="text-3xl font-bold text-yellow-400">Contato</h3>
+      <form
+        onSubmit={handleSubmit}
+        className="mt-4 flex flex-col items-center space-y-3 max-w-md mx-auto"
+      >
         <input
           type="text"
           name="nome"
@@ -41,7 +44,10 @@ export default function Contato() {
           onChange={handleChange}
           className="w-full p-2 rounded text-black"
         />
-        <button type="submit" className="bg-yellow-400 text-black font-bold px-4 py-2 rounded">
+        <button
+          type="submit"
+          className="bg-yellow-400 text-black font-bold px-4 py-2 rounded hover:bg-yellow-300 transition"
+        >
           Enviar
         </button>
       </form>

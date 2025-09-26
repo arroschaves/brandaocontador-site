@@ -1,10 +1,12 @@
+// app/sections/quemSomos.tsx
 export default function QuemSomos() {
   return (
-    <section id="quem-somos" className="py-16 px-5 text-center bg-gray-800">
-      <h2 className="text-3xl md:text-4xl font-bold text-yellow-500 mb-6">Quem Somos</h2>
-      <p className="max-w-3xl mx-auto text-gray-200 text-lg md:text-xl">
-        A Brandão Contabilidade é uma equipe especializada em soluções contábeis modernas e digitais. 
-        Atuamos com transparência, tecnologia e segurança, garantindo que nossos clientes possam focar no crescimento de seus negócios.
+    <section className="p-10 text-center bg-green-800">
+      <h3 className="text-3xl font-bold text-yellow-400">Quem Somos</h3>
+      <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">
+        A Brandão Contabilidade é um escritório especializado em soluções contábeis modernas
+        e digitais. Atuamos com escrituração fiscal, abertura de empresas, área trabalhista,
+        imposto de renda e gestão empresarial, sempre com tecnologia e segurança.
       </p>
     </section>
   );
