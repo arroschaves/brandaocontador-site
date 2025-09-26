@@ -1,4 +1,3 @@
-// app/layout.tsx
 import './globals.css';
 import { ReactNode } from 'react';
 
@@ -10,8 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className="bg-green-700 text-white font-sans">
-        {/* HEADER */}
+      <body className="bg-green-900 text-white font-sans">
         <header className="p-6 bg-green-800 border-b border-yellow-400 flex justify-between items-center">
           <h1 className="text-yellow-400 font-bold text-xl">Brandão Contabilidade</h1>
           <nav className="space-x-4">
@@ -22,10 +20,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </nav>
         </header>
 
-        {/* MAIN CONTENT */}
         <main className="min-h-screen">{children}</main>
 
-        {/* FOOTER */}
         <footer className="bg-green-800 border-t border-yellow-400 p-6 text-center">
           <p className="text-sm">&copy; 2025 Brandão Contabilidade - Todos os direitos reservados</p>
         </footer>
