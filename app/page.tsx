@@ -1,5 +1,6 @@
 import QuemSomos from "./sections/QuemSomos";
 import AreaCliente from "./sections/AreaCliente";
+import Contato from "./sections/Contato";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -36,11 +37,12 @@ export default function HomePage() {
 
       {/* Seções do site */}
       <section id="servicos">
-        {/* Aqui vai o conteúdo dos serviços já existente */}
+        {/* Conteúdo dos serviços existente */}
       </section>
 
       <QuemSomos />
       <AreaCliente />
+      <Contato />
     </main>
   );
 }
