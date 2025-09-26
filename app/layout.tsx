@@ -21,8 +21,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </header>
         <main className="min-h-screen">{children}</main>
         <footer className="bg-brandBlack border-t border-brandGold p-6 text-center">
-          <p className="text-sm">&copy; 2025 Brandão Contabilidade - Todos os direitos reservados</p>
+            <p className="text-sm">&copy; 2025 Brandão Contabilidade - Todos os direitos reservados</p>
+                {/* TESTE DE DEPLOY VERCEL */}
         </footer>
+
       </body>
     </html>
   );
