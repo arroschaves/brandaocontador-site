@@ -1,104 +1,110 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import Link from "next/link";
+import { useState } from "react";
+import { Menu, X, Calculator, MessageCircle } from "lucide-react";
 
-export default function Header() {
+function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="bg-slate-900/95 backdrop-blur-sm text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-        <Link href="/" className="flex items-center">
-          <div className="h-14 w-14 rounded-full overflow-hidden bg-white border-2 border-gray-200">
-            <img
-              src="/logo-square.jpg"
-              alt="Logo Brandão Contabilidade"
-              className="h-14 w-14 object-cover scale-150"
-            />
+    <div className="fixed top-0 left-0 right-0 z-50 bg-neutral-950/95 backdrop-blur-md border-b border-neutral-800">
+      <div className="container-custom">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex-shrink-0">
+            <Link href="/" className="flex items-center group">
+              <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center mr-3 group-hover:bg-primary-600 transition-colors">
+                <Calculator className="w-6 h-6 text-neutral-900" />
+              </div>
+              <span className="text-xl font-bold text-neutral-50 group-hover:text-primary-400 transition-colors">
+                Brandão Contabilidade
+              </span>
+            </Link>
           </div>
-        </Link>
-        
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
-          <nav className="flex space-x-6 text-sm font-medium">
-            <Link href="/" className="hover:text-yellow-500 transition-colors">
-              Início
-            </Link>
-            <Link href="/servicos" className="hover:text-yellow-500 transition-colors">
-              Serviços
-            </Link>
-            <Link href="/contato" className="hover:text-yellow-500 transition-colors">
-              Contato
-            </Link>
-            <Link href="/cliente/login" className="hover:text-yellow-500 transition-colors">
-              Área do Cliente
-            </Link>
-          </nav>
-          <a
-            href="https://wa.me/5567996011356"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 text-sm"
-          >
-            WhatsApp
-          </a>
-        </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-slate-800 border-t border-slate-700">
-          <nav className="flex flex-col space-y-2 p-4">
-            <Link 
-              href="/" 
-              className="hover:text-yellow-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Início
-            </Link>
-            <Link 
-              href="/servicos" 
-              className="hover:text-yellow-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Serviços
-            </Link>
-            <Link 
-              href="/contato" 
-              className="hover:text-yellow-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Contato
-            </Link>
-            <Link 
-              href="/cliente/login" 
-              className="hover:text-yellow-500 transition-colors py-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Área do Cliente
-            </Link>
+          <div className="hidden md:flex items-center space-x-6">
+            <nav className="flex items-center space-x-8">
+              <Link href="/" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Início
+              </Link>
+              <Link href="/servicos" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Serviços
+              </Link>
+              <Link href="/contato" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Contato
+              </Link>
+              <Link href="/area-cliente" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Área do Cliente
+              </Link>
+            </nav>
             <a
               href="https://wa.me/5567996011356"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 text-center mt-2"
-              onClick={() => setIsMenuOpen(false)}
+              className="btn-primary flex items-center"
             >
+              <MessageCircle className="w-4 h-4 mr-2" />
               WhatsApp
             </a>
-          </nav>
+          </div>
+
+          <button
+            className="md:hidden text-neutral-300 hover:text-primary-400 focus:outline-none focus:text-primary-400 transition-colors"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
-      )}
-    </header>
+
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-neutral-800">
+            <div className="px-4 pt-4 pb-6 space-y-2 bg-neutral-950/98">
+              <Link
+                href="/"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Início
+              </Link>
+              <Link
+                href="/servicos"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Serviços
+              </Link>
+              <Link
+                href="/contato"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contato
+              </Link>
+              <Link
+                href="/area-cliente"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Área do Cliente
+              </Link>
+              <div className="pt-4 border-t border-neutral-800">
+                <a
+                  href="https://wa.me/5567996011356"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary w-full flex items-center justify-center"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Falar no WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
+
+export default Header;

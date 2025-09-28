@@ -84,43 +84,43 @@ export default function ServicosPage() {
   ];
 
   const colorClasses = {
-    yellow: "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30 text-yellow-400",
-    blue: "from-blue-500/20 to-blue-600/20 border-blue-500/30 text-blue-400",
-    green: "from-green-500/20 to-green-600/20 border-green-500/30 text-green-400",
-    purple: "from-purple-500/20 to-purple-600/20 border-purple-500/30 text-purple-400",
-    orange: "from-orange-500/20 to-orange-600/20 border-orange-500/30 text-orange-400",
-    emerald: "from-emerald-500/20 to-emerald-600/20 border-emerald-500/30 text-emerald-400"
+    yellow: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
+    blue: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
+    green: "from-success-500/20 to-success-600/20 border-success-500/30 text-success-400",
+    purple: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
+    orange: "from-warning-500/20 to-warning-600/20 border-warning-500/30 text-warning-400",
+    emerald: "from-success-500/20 to-success-600/20 border-success-500/30 text-success-400"
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
+    <div className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 text-white min-h-screen">
       <Header />
       
       {/* Hero Section */}
-      <section className="py-16 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
+      <section className="py-20">
+        <div className="container-custom text-center">
+          <div className="inline-flex items-center bg-primary-500/20 text-primary-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Award className="w-4 h-4 mr-2" />
             Serviços Especializados
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Nossos <span className="text-yellow-500">Serviços</span>
+            Nossos <span className="text-gradient">Serviços</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
             Oferecemos soluções completas e personalizadas para empresários, 
-            produtores rurais e pessoas físicas em Sidrolândia-MS
+            produtores rurais e pessoas físicas em Campo Grande-MS
           </p>
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-400">
+          <div className="flex items-center justify-center gap-8 text-sm text-neutral-400">
             <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-green-400" />
+              <Shield className="w-4 h-4 mr-2 text-success-400" />
               Certificado Digital
             </div>
             <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-blue-400" />
+              <Clock className="w-4 h-4 mr-2 text-primary-400" />
               Atendimento Rápido
             </div>
             <div className="flex items-center">
-              <Award className="w-4 h-4 mr-2 text-yellow-400" />
+              <Award className="w-4 h-4 mr-2 text-primary-400" />
               32+ Anos de Tradição
             </div>
           </div>
@@ -128,29 +128,29 @@ export default function ServicosPage() {
       </section>
 
       {/* Serviços Detalhados */}
-      <section className="py-16 px-6">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20">
+        <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-8">
             {servicos.map((servico, idx) => (
               <div
                 key={idx}
-                className={`bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]} rounded-xl p-8 border backdrop-blur-sm hover:transform hover:scale-105 transition-all duration-300`}
+                className={`card bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]} border backdrop-blur-sm hover:transform hover:scale-105 transition-all duration-300`}
               >
                 <div className="flex items-start gap-4 mb-6">
-                  <div className={`p-3 rounded-lg bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]}`}>
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]}`}>
                     {servico.icon}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">{servico.title}</h3>
-                    <p className="text-gray-300">{servico.description}</p>
+                    <h3 className="text-2xl font-bold text-neutral-100 mb-2">{servico.title}</h3>
+                    <p className="text-neutral-300 leading-relaxed">{servico.description}</p>
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-white">O que inclui:</h4>
+                  <h4 className="font-semibold text-neutral-100">O que inclui:</h4>
                   <ul className="space-y-2">
                     {servico.detalhes.map((detalhe, detIdx) => (
-                      <li key={detIdx} className="flex items-start gap-2 text-gray-300">
-                        <span className="text-yellow-400 mt-1">•</span>
+                      <li key={detIdx} className="flex items-start gap-2 text-neutral-300">
+                        <span className="text-primary-400 mt-1">•</span>
                         <span className="text-sm">{detalhe}</span>
                       </li>
                     ))}
@@ -163,12 +163,12 @@ export default function ServicosPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-6 bg-slate-800/50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-yellow-500 mb-6">
+      <section className="py-20 bg-neutral-800/50">
+        <div className="container-custom max-w-4xl text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gradient mb-6">
             Precisa de Algum Desses Serviços?
           </h2>
-          <p className="text-xl text-gray-300 mb-8">
+          <p className="text-xl text-neutral-300 mb-8 leading-relaxed">
             Entre em contato conosco e solicite um orçamento personalizado
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -176,13 +176,13 @@ export default function ServicosPage() {
               href="https://wa.me/5567996011356"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-yellow-500 text-black px-8 py-4 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 flex items-center justify-center"
+              className="btn-primary flex items-center justify-center"
             >
               Solicitar Orçamento
             </a>
             <a
               href="/contato"
-              className="border-2 border-yellow-500 text-yellow-500 px-8 py-4 rounded-lg font-semibold hover:bg-yellow-500 hover:text-black transition-all duration-300"
+              className="btn-secondary"
             >
               Fale Conosco
             </a>

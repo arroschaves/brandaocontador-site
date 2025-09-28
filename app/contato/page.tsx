@@ -1,22 +1,19 @@
-import Header from '../components/Header';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
 
 export default function ContatoPage() {
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
-      <Header />
-      
+    <div className="bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 text-neutral-100 min-h-screen">
       {/* Hero Section */}
-      <section className="py-16 px-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
+      <section className="py-20">
+        <div className="container-custom text-center">
+          <div className="inline-flex items-center bg-primary-500/20 text-primary-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <MessageCircle className="w-4 h-4 mr-2" />
             Entre em Contato
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Fale <span className="text-yellow-500">Conosco</span>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
+            Fale <span className="text-gradient">Conosco</span>
           </h1>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
             Estamos prontos para atender você e sua empresa. 
             Entre em contato e solicite um orçamento personalizado.
           </p>
@@ -24,72 +21,72 @@ export default function ContatoPage() {
       </section>
 
       {/* Contato e Formulário */}
-      <section className="py-16 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
+      <section className="py-20">
+        <div className="container-custom grid lg:grid-cols-2 gap-12">
           
           {/* Informações de Contato */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-3xl font-bold text-yellow-500 mb-6">
+              <h2 className="text-3xl font-bold text-gradient mb-6">
                 Informações de Contato
               </h2>
-              <p className="text-gray-300 mb-8">
+              <p className="text-neutral-300 mb-8 leading-relaxed">
                 Nossa equipe está sempre disponível para esclarecer suas dúvidas 
                 e oferecer as melhores soluções contábeis para seu negócio.
               </p>
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-lg">
-                <div className="p-3 bg-yellow-500/20 rounded-lg">
-                  <Phone className="w-6 h-6 text-yellow-400" />
+              <div className="card flex items-start gap-4">
+                <div className="p-3 bg-primary-500/20 rounded-xl">
+                  <Phone className="w-6 h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-2">Telefones</h3>
-                  <p className="text-gray-300">(67) 3272-1356</p>
-                  <p className="text-gray-300">(67) 99601-1356</p>
+                  <h3 className="font-semibold text-neutral-100 mb-2">Telefones</h3>
+                  <p className="text-neutral-300">(67) 3272-1356</p>
+                  <p className="text-neutral-300">(67) 99601-1356</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-lg">
-                <div className="p-3 bg-blue-500/20 rounded-lg">
-                  <Mail className="w-6 h-6 text-blue-400" />
+              <div className="card flex items-start gap-4">
+                <div className="p-3 bg-primary-500/20 rounded-xl">
+                  <Mail className="w-6 h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-2">E-mail</h3>
-                  <p className="text-gray-300">contato@brandaocontador.com.br</p>
+                  <h3 className="font-semibold text-neutral-100 mb-2">E-mail</h3>
+                  <p className="text-neutral-300">contato@brandaocontador.com.br</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-lg">
-                <div className="p-3 bg-green-500/20 rounded-lg">
-                  <MapPin className="w-6 h-6 text-green-400" />
+              <div className="card flex items-start gap-4">
+                <div className="p-3 bg-primary-500/20 rounded-xl">
+                  <MapPin className="w-6 h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-2">Endereço</h3>
+                  <h3 className="font-semibold text-neutral-100 mb-2">Endereço</h3>
                   <a 
-                    href="https://maps.google.com/maps?q=Sidrolândia,+MS,+Brasil"
+                    href="https://maps.google.com/maps?q=Campo+Grande,+MS,+Brasil"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-gray-300 hover:text-green-400 transition-colors cursor-pointer"
+                    className="text-neutral-300 hover:text-primary-400 transition-colors cursor-pointer"
                   >
                     Rua Exemplo, 123<br />
-                    Centro - Sidrolândia/MS<br />
-                    CEP: 79170-000
+                    Centro - Campo Grande/MS<br />
+                    CEP: 79000-000
                   </a>
-                  <p className="text-sm text-green-400 mt-2">
+                  <p className="text-sm text-primary-400 mt-2">
                     📍 Clique para ver no Google Maps
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-4 p-4 bg-slate-800/50 rounded-lg">
-                <div className="p-3 bg-purple-500/20 rounded-lg">
-                  <Clock className="w-6 h-6 text-purple-400" />
+              <div className="card flex items-start gap-4">
+                <div className="p-3 bg-primary-500/20 rounded-xl">
+                  <Clock className="w-6 h-6 text-primary-400" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white mb-2">Horário de Funcionamento</h3>
-                  <p className="text-gray-300">
+                  <h3 className="font-semibold text-neutral-100 mb-2">Horário de Funcionamento</h3>
+                  <p className="text-neutral-300">
                     Segunda a Sexta: 8h às 18h<br />
                     Sábado: 8h às 12h
                   </p>
@@ -97,103 +94,95 @@ export default function ContatoPage() {
               </div>
             </div>
 
-            {/* WhatsApp CTA */}
-            <div className="p-6 bg-gradient-to-r from-green-600/20 to-green-500/20 border border-green-500/30 rounded-xl">
+            {/* CTA WhatsApp */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-success-600 to-success-700 rounded-xl">
               <h3 className="text-xl font-bold text-white mb-3">
-                Atendimento Rápido via WhatsApp
+                Precisa de atendimento imediato?
               </h3>
-              <p className="text-gray-300 mb-4">
-                Para um atendimento mais ágil, entre em contato conosco pelo WhatsApp
+              <p className="text-success-100 mb-4 leading-relaxed">
+                Fale conosco pelo WhatsApp e receba atendimento personalizado.
               </p>
               <a
                 href="https://wa.me/5567996011356"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-500 transition-all duration-300"
+                className="inline-flex items-center gap-2 bg-white text-success-600 px-6 py-3 rounded-lg font-semibold hover:bg-success-50 transition-all duration-300 hover:scale-105"
               >
-                <MessageCircle className="w-5 h-5 mr-2" />
-                Chamar no WhatsApp
+                <MessageCircle className="w-5 h-5" />
+                Falar no WhatsApp
               </a>
             </div>
           </div>
 
           {/* Formulário de Contato */}
-          <div className="bg-slate-800/50 rounded-xl p-8 border border-slate-700">
-            <h2 className="text-2xl font-bold text-yellow-500 mb-6">
+          <div className="card">
+            <h2 className="text-2xl font-bold text-neutral-100 mb-6">
               Envie sua Mensagem
             </h2>
             <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Nome Completo *
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">
+                    Nome Completo
                   </label>
                   <input
                     type="text"
-                    required
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
                     placeholder="Seu nome completo"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Telefone *
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">
+                    E-mail
                   </label>
                   <input
-                    type="tel"
-                    required
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="(67) 99999-9999"
+                    type="email"
+                    className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                    placeholder="seu@email.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  E-mail *
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Telefone
                 </label>
                 <input
-                  type="email"
-                  required
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  placeholder="seu@email.com"
+                  type="tel"
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  placeholder="(67) 99999-9999"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Tipo de Serviço
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Assunto
                 </label>
-                <select className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-                  <option value="">Selecione um serviço</option>
-                  <option value="abertura">Abertura de Empresa</option>
-                  <option value="contabilidade">Contabilidade Geral</option>
-                  <option value="fiscal">Escrituração Fiscal</option>
-                  <option value="trabalhista">Área Trabalhista</option>
-                  <option value="ir">Imposto de Renda</option>
-                  <option value="rural">Contabilidade Rural</option>
+                <select className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors">
+                  <option value="">Selecione um assunto</option>
+                  <option value="contabilidade">Serviços Contábeis</option>
+                  <option value="fiscal">Questões Fiscais</option>
+                  <option value="trabalhista">Questões Trabalhistas</option>
                   <option value="consultoria">Consultoria</option>
                   <option value="outros">Outros</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Mensagem *
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Mensagem
                 </label>
                 <textarea
-                  required
                   rows={5}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-colors"
                   placeholder="Descreva como podemos ajudá-lo..."
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-yellow-500 text-black px-8 py-4 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 flex items-center justify-center"
+                className="btn-primary w-full"
               >
-                <Send className="w-5 h-5 mr-2" />
                 Enviar Mensagem
               </button>
             </form>

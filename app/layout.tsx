@@ -32,64 +32,55 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>
+      <body className={`${inter.className} antialiased`}>
+        <SpeedInsights />
         <Header />
-        {children}
-        
-        {/* Footer Global */}
-        <footer className="bg-slate-950 py-8 border-t border-slate-800">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="md:col-span-2">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="h-12 w-12 rounded-full overflow-hidden bg-white border-2 border-gray-200">
-              <img
-                src="/logo-square.jpg"
-                alt="Logo Brandão Contabilidade"
-                className="h-12 w-12 object-cover scale-150"
-              />
-            </div>
-                </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  Escritório de contabilidade com tradição desde 1992, 
-                  especializado em soluções para empresários, produtores rurais e pessoas físicas.
+        <main className="pt-16">
+          {children}
+        </main>
+        <footer className="bg-neutral-950 text-neutral-100 py-16">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-primary-400">Brandão Contabilidade</h3>
+                <p className="text-neutral-400 leading-relaxed">
+                  Soluções contábeis completas e personalizadas para o seu negócio prosperar com segurança e eficiência.
                 </p>
               </div>
               <div>
-                <h4 className="text-white font-semibold mb-4">Links Rápidos</h4>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li><a href="/" className="hover:text-yellow-500 transition-colors">Início</a></li>
-                  <li><a href="/servicos" className="hover:text-yellow-500 transition-colors">Serviços</a></li>
-                  <li><a href="/contato" className="hover:text-yellow-500 transition-colors">Contato</a></li>
-                  <li><a href="/cliente/login" className="hover:text-yellow-500 transition-colors">Área do Cliente</a></li>
+                <h4 className="font-semibold mb-4 text-neutral-200">Serviços</h4>
+                <ul className="space-y-2 text-neutral-400">
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">Contabilidade Empresarial</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">Planejamento Tributário</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">Consultoria Fiscal</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">Abertura de Empresas</li>
                 </ul>
               </div>
               <div>
-                <h4 className="text-white font-semibold mb-4">Contato</h4>
-                <ul className="space-y-2 text-sm text-gray-400">
-                  <li>(67) 99601-1356</li>
-                  <li>adm@brandaocontador.com.br</li>
-                  <li>
-                    <a 
-                      href="https://maps.google.com/maps?q=Sidrolândia,+MS,+Brasil"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-yellow-500 transition-colors"
-                    >
-                      📍 Sidrolândia - MS
-                    </a>
-                  </li>
+                <h4 className="font-semibold mb-4 text-neutral-200">Contato</h4>
+                <ul className="space-y-2 text-neutral-400">
+                  <li>Campo Grande, MS</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">(67) 99601-1356</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">contato@brandaocontabilidade.com</li>
                 </ul>
               </div>
+              <div>
+                <h4 className="font-semibold mb-4 text-neutral-200">Redes Sociais</h4>
+                <div className="flex space-x-4">
+                  <a href="#" className="text-neutral-400 hover:text-primary-400 transition-colors">
+                    Facebook
+                  </a>
+                  <a href="#" className="text-neutral-400 hover:text-primary-400 transition-colors">
+                    Instagram
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="border-t border-slate-800 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between text-sm text-gray-400">
-              <span>© {new Date().getFullYear()} Brandão Contabilidade. Todos os direitos reservados.</span>
-              <span className="mt-2 md:mt-0">Desenvolvido com ❤️ em Next.js + Tailwind</span>
+            <div className="border-t border-neutral-800 mt-12 pt-8 text-center text-neutral-400">
+              <p>&copy; 2024 Brandão Contabilidade. Todos os direitos reservados.</p>
             </div>
           </div>
         </footer>
-        
-        <SpeedInsights />
       </body>
     </html>
   )
