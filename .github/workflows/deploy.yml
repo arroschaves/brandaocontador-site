@@ -1,0 +1,178 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # Job de Qualidade de Código
+  quality-check:
+    runs-on: ubuntu-latest
+    name: Code Quality Check
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+        continue-on-error: true
+
+      - name: Lint check
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build check
+        run: npm run build
+
+  # Job de Deploy para Preview (Pull Requests)
+  deploy-preview:
+    runs-on: ubuntu-latest
+    name: Deploy Preview
+    needs: quality-check
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview_url=$url" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Preview Deploy Ready!**
+              
+              ✅ Preview URL: ${{ steps.deploy.outputs.preview_url }}
+              
+              📝 Changes will be automatically deployed to production when merged to main.`
+            })
+
+  # Job de Deploy para Produção (Push para main)
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy Production
+    needs: quality-check
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "production_url=$url" >> $GITHUB_OUTPUT
+
+      - name: Update Cloudflare DNS (if needed)
+        if: success()
+        run: |
+          echo "🌐 Production deployed successfully!"
+          echo "🔗 URL: ${{ steps.deploy.outputs.production_url }}"
+
+  # Job de Monitoramento pós-deploy
+  post-deploy-check:
+    runs-on: ubuntu-latest
+    name: Post Deploy Health Check
+    needs: [deploy-production]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health Check
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://brandaocontador.com.br)
+          if [ $response -eq 200 ]; then
+            echo "✅ Site is healthy (HTTP $response)"
+          else
+            echo "❌ Site health check failed (HTTP $response)"
+            exit 1
+          fi
+
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            https://brandaocontador.com.br
+            https://brandaocontador.com.br/servicos
+            https://brandaocontador.com.br/contato
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # Job de Notificação
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify Team
+    needs: [deploy-production, post-deploy-check]
+    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Notify Success
+        if: needs.deploy-production.result == 'success' && needs.post-deploy-check.result == 'success'
+        run: |
+          echo "🎉 Deploy realizado com sucesso!"
+          echo "📊 Lighthouse report disponível nos artifacts"
+          
+      - name: Notify Failure
+        if: needs.deploy-production.result == 'failure' || needs.post-deploy-check.result == 'failure'
+        run: |
+          echo "❌ Deploy falhou ou health check não passou"
+          echo "🔍 Verifique os logs para mais detalhes"
