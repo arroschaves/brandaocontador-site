@@ -13,6 +13,13 @@ Este projeto é o site institucional e base para futura plataforma SaaS da Brand
 2. Importar no Vercel.
 3. Configurar domínio `brandaocontador.com.br`.
 
+### Deploy Automático
+O projeto está configurado para deploy automático:
+- **GitHub**: Repositório principal em `arroschaves/brandaocontador-site`
+- **Vercel**: Deploy automático a cada push na branch `main`
+- **URL de Preview**: https://brandaocontador-site-alessandro-chaves-projects.vercel.app
+- **Processo**: Qualquer alteração commitada e enviada para o GitHub será automaticamente deployada no Vercel
+
 ## Tecnologias
 - Next.js 14 (App Router)
 - TailwindCSS
