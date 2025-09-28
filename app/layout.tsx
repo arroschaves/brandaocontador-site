@@ -2,12 +2,13 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import Header from './components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Brandão Contabilidade | Escritório Contábil em Sidrolândia-MS',
-  description: 'Escritório de contabilidade especializado em empresários, produtores rurais e pessoas físicas em Sidrolândia-MS. Mais de 15 anos de experiência.',
+  description: 'Escritório de contabilidade especializado em empresários, produtores rurais e pessoas físicas em Sidrolândia-MS. Tradição e confiança desde 1992.',
   keywords: 'contabilidade, sidrolandia, ms, escritorio contabil, imposto de renda, abertura empresa, contabilidade rural',
   authors: [{ name: 'Brandão Contabilidade' }],
   openGraph: {
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
+        <Header />
         {children}
         
         {/* Footer Global */}
@@ -40,11 +42,16 @@ export default function RootLayout({
             <div className="grid md:grid-cols-4 gap-8">
               <div className="md:col-span-2">
                 <div className="flex items-center space-x-3 mb-4">
-                  <img src="/logocirculo.png" alt="Logo" className="h-12 w-12" />
-                  <span className="text-xl font-bold text-yellow-500">Brandão Contabilidade</span>
+                  <div className="h-12 w-12 rounded-full overflow-hidden bg-white border-2 border-gray-200">
+              <img
+                src="/logo-square.jpg"
+                alt="Logo Brandão Contabilidade"
+                className="h-12 w-12 object-cover scale-150"
+              />
+            </div>
                 </div>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Escritório de contabilidade com mais de 15 anos de experiência, 
+                  Escritório de contabilidade com tradição desde 1992, 
                   especializado em soluções para empresários, produtores rurais e pessoas físicas.
                 </p>
               </div>
@@ -60,10 +67,18 @@ export default function RootLayout({
               <div>
                 <h4 className="text-white font-semibold mb-4">Contato</h4>
                 <ul className="space-y-2 text-sm text-gray-400">
-                  <li>(67) 3272-3266</li>
                   <li>(67) 99601-1356</li>
                   <li>adm@brandaocontador.com.br</li>
-                  <li>Sidrolândia - MS</li>
+                  <li>
+                    <a 
+                      href="https://maps.google.com/maps?q=Sidrolândia,+MS,+Brasil"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-yellow-500 transition-colors"
+                    >
+                      📍 Sidrolândia - MS
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>

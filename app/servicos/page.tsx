@@ -121,7 +121,7 @@ export default function ServicosPage() {
             </div>
             <div className="flex items-center">
               <Award className="w-4 h-4 mr-2 text-yellow-400" />
-              +15 Anos de Experiência
+              32+ Anos de Tradição
             </div>
           </div>
         </div>

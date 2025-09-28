@@ -10,30 +10,41 @@ export default function Header() {
   return (
     <header className="bg-slate-900/95 backdrop-blur-sm text-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-        <Link href="/" className="flex items-center space-x-3">
-          <img
-            src="/logocirculo.png"
-            alt="Logo Brandão Contabilidade"
-            className="h-12 w-12"
-          />
-          <h1 className="text-xl font-bold text-yellow-500">Brandão Contabilidade</h1>
+        <Link href="/" className="flex items-center">
+          <div className="h-14 w-14 rounded-full overflow-hidden bg-white border-2 border-gray-200">
+            <img
+              src="/logo-square.jpg"
+              alt="Logo Brandão Contabilidade"
+              className="h-14 w-14 object-cover scale-150"
+            />
+          </div>
         </Link>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6 text-sm font-medium">
-          <Link href="/" className="hover:text-yellow-500 transition-colors">
-            Início
-          </Link>
-          <Link href="/servicos" className="hover:text-yellow-500 transition-colors">
-            Serviços
-          </Link>
-          <Link href="/contato" className="hover:text-yellow-500 transition-colors">
-            Contato
-          </Link>
-          <Link href="/cliente/login" className="hover:text-yellow-500 transition-colors">
-            Área do Cliente
-          </Link>
-        </nav>
+        <div className="hidden md:flex items-center space-x-6">
+          <nav className="flex space-x-6 text-sm font-medium">
+            <Link href="/" className="hover:text-yellow-500 transition-colors">
+              Início
+            </Link>
+            <Link href="/servicos" className="hover:text-yellow-500 transition-colors">
+              Serviços
+            </Link>
+            <Link href="/contato" className="hover:text-yellow-500 transition-colors">
+              Contato
+            </Link>
+            <Link href="/cliente/login" className="hover:text-yellow-500 transition-colors">
+              Área do Cliente
+            </Link>
+          </nav>
+          <a
+            href="https://wa.me/5567996011356"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 text-sm"
+          >
+            WhatsApp
+          </a>
+        </div>
 
         {/* Mobile Menu Button */}
         <button
@@ -76,6 +87,15 @@ export default function Header() {
             >
               Área do Cliente
             </Link>
+            <a
+              href="https://wa.me/5567996011356"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 text-center mt-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              WhatsApp
+            </a>
           </nav>
         </div>
       )}

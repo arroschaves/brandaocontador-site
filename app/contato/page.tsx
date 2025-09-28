@@ -67,10 +67,18 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white mb-2">Endereço</h3>
-                  <p className="text-gray-300">
+                  <a 
+                    href="https://maps.google.com/maps?q=Sidrolândia,+MS,+Brasil"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-green-400 transition-colors cursor-pointer"
+                  >
                     Rua Exemplo, 123<br />
                     Centro - Sidrolândia/MS<br />
                     CEP: 79170-000
+                  </a>
+                  <p className="text-sm text-green-400 mt-2">
+                    📍 Clique para ver no Google Maps
                   </p>
                 </div>
               </div>

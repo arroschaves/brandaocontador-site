@@ -5,22 +5,22 @@ export default function Home() {
   return (
     <main className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white min-h-screen">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-16 px-6 overflow-hidden">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent"></div>
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-left">
               <div className="inline-flex items-center bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <Award className="w-4 h-4 mr-2" />
-                Mais de 15 anos de experiência
+                Tradição e confiança desde 1992 em Sidrolândia-MS
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
                 Sua <span className="text-yellow-500">Contabilidade</span> em 
                 <span className="block text-yellow-400">Mãos Seguras</span>
               </h1>
-              <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-                Especialistas em contabilidade para <strong>empresários</strong>, <strong>produtores rurais</strong> e <strong>pessoas físicas</strong> em Sidrolândia-MS. 
-                Cuidamos da sua empresa para você focar no que realmente importa: <strong>crescer</strong>.
+              <p className="text-lg sm:text-xl text-gray-300 mb-8 leading-relaxed max-w-2xl">
+                Especialistas em contabilidade para <strong className="text-white">empresários</strong>, <strong className="text-white">produtores rurais</strong> e <strong className="text-white">pessoas físicas</strong> em Sidrolândia-MS. 
+                Cuidamos da sua empresa para você focar no que realmente importa: <strong className="text-yellow-400">crescer</strong>.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <a
@@ -210,13 +210,6 @@ export default function Home() {
               <Phone className="w-5 h-5 mr-2" />
               WhatsApp: (67) 99601-1356
             </a>
-            <a
-              href="tel:6732723266"
-              className="border-2 border-yellow-500 text-yellow-500 px-8 py-4 rounded-lg font-semibold hover:bg-yellow-500 hover:text-black transition-all duration-300 flex items-center justify-center"
-            >
-              <Phone className="w-5 h-5 mr-2" />
-              Telefone: (67) 3272-3266
-            </a>
           </div>
         </div>
       </section>
@@ -237,9 +230,8 @@ export default function Home() {
               <div className="bg-yellow-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Phone className="w-8 h-8 text-yellow-400" />
               </div>
-              <h3 className="text-xl font-bold text-yellow-400 mb-4">Telefones</h3>
+              <h3 className="text-xl font-bold text-yellow-400 mb-4">WhatsApp</h3>
               <div className="space-y-2 text-gray-300">
-                <p>(67) 3272-3266</p>
                 <p>(67) 99601-1356</p>
               </div>
             </div>
