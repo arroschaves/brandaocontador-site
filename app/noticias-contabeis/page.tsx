@@ -1,3 +1,5 @@
+"use client";
+
 import Link from 'next/link';
 import { AlertCircle, FileText, Briefcase, DollarSign, Landmark, Scale, TrendingUp } from 'lucide-react';
 import { useState } from 'react'; // Para placeholder de refresh (simulado)
