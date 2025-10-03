@@ -11,7 +11,7 @@ export default function Home() {
             Contabilidade que <span className="text-gradient">Impulsiona</span> seu Negócio
           </h1>
           <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            <strong className="text-neutral-100">Mais de 15 anos</strong> de experiência oferecendo soluções contábeis completas para <strong className="text-primary-400">empresas de todos os portes</strong>. Transformamos números em estratégias de crescimento.
+            <strong className="text-neutral-100">Mais de 30 anos</strong> de experiência oferecendo soluções contábeis completas para <strong className="text-primary-400">empresas de todos os portes</strong>. Transformamos números em estratégias de crescimento.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="btn-primary w-full sm:w-auto">
@@ -223,10 +223,15 @@ export default function Home() {
                 <MapPin className="w-8 h-8 text-warning-400" />
               </div>
               <h3 className="text-xl font-bold text-warning-400 mb-4">Endereço</h3>
-              <p className="text-neutral-300">
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Campo+Grande+MS"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-300 hover:text-primary-400 transition-colors block"
+              >
                 Rua Santa Catarina, 1010<br />
                 Centro - Campo Grande - MS
-              </p>
+              </a>
             </div>
           </div>
         </div>

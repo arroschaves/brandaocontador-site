@@ -13,10 +13,12 @@ function Header() {
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center group">
-              <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center mr-3 group-hover:bg-primary-600 transition-colors">
-                <Calculator className="w-6 h-6 text-neutral-900" />
-              </div>
-              <span className="text-xl font-bold text-neutral-50 group-hover:text-primary-400 transition-colors">
+              <img 
+                src="/logocirculo.png" 
+                alt="Brandão Contabilidade Logo" 
+                className="w-12 h-12 rounded-full mr-4 group-hover:scale-105 transition-transform duration-200" 
+              />
+              <span className="text-lg md:text-xl font-bold text-neutral-50 group-hover:text-primary-400 transition-colors whitespace-nowrap">
                 Brandão Contabilidade
               </span>
             </Link>
@@ -32,6 +34,15 @@ function Header() {
               </Link>
               <Link href="/contato" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
                 Contato
+              </Link>
+              <Link href="/reforma-tributaria" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Reforma Tributária
+              </Link>
+              <Link href="/noticias-contabeis" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Notícias Contábeis
+              </Link>
+              <Link href="/agronegocio" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+                Agronegócio
               </Link>
               <Link href="/area-cliente" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
                 Área do Cliente
@@ -80,6 +91,27 @@ function Header() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contato
+              </Link>
+              <Link
+                href="/reforma-tributaria"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Reforma Tributária
+              </Link>
+              <Link
+                href="/noticias-contabeis"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Notícias Contábeis
+              </Link>
+              <Link
+                href="/agronegocio"
+                className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Agronegócio
               </Link>
               <Link
                 href="/area-cliente"
