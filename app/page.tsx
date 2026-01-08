@@ -52,7 +52,7 @@ export default function Home() {
                 <Shield className="w-8 h-8 text-primary-400" />
               </div>
               <h3 className="text-xl font-semibold text-neutral-100 mb-4">Segurança Total</h3>
-              <p className="text-neutral-300 leading-relaxed">Seus dados protegidos com tecnologia de ponta e conformidade total com a LGPD</p>
+              <p className="text-neutral-300 leading-relaxed">Seus dador protegidos com tecnologia de ponta e conformidade total com a LGPD</p>
             </div>
             <div className="card text-center group">
               <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
@@ -224,13 +224,13 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-warning-400 mb-4">Endereço</h3>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Campo+Grande+MS"
+                href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Sidrolândia+MS"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-neutral-300 hover:text-primary-400 transition-colors block"
               >
                 Rua Santa Catarina, 1010<br />
-                Centro - Campo Grande - MS
+                Centro - Sidrolândia - MS
               </a>
             </div>
           </div>

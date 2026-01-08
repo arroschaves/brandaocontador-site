@@ -54,7 +54,7 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-neutral-100 mb-2">E-mail</h3>
-                  <p className="text-neutral-300">contato@brandaocontador.com.br</p>
+                  <p className="text-neutral-300">adm@brandaocontador.com.br</p>
                 </div>
               </div>
 
@@ -65,14 +65,14 @@ export default function ContatoPage() {
                 <div>
                   <h3 className="font-semibold text-neutral-100 mb-2">Endereço</h3>
                   <a 
-                    href="https://maps.google.com/maps?q=Campo+Grande,+MS,+Brasil"
+                    href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Sidrolândia+MS"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-neutral-300 hover:text-primary-400 transition-colors cursor-pointer"
                   >
-                    Rua Exemplo, 123<br />
-                    Centro - Campo Grande/MS<br />
-                    CEP: 79000-000
+                    Rua Santa Catarina, 1010<br />
+                    Centro - Sidrolândia/MS<br />
+                    CEP: 79170-000
                   </a>
                   <p className="text-sm text-primary-400 mt-2">
                     📍 Clique para ver no Google Maps

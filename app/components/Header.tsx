@@ -44,7 +44,7 @@ function Header() {
               <Link href="/agronegocio" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
                 Agronegócio
               </Link>
-              <Link href="/area-cliente" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
+              <Link href="/cliente/login" className="text-neutral-300 hover:text-primary-400 transition-colors font-medium">
                 Área do Cliente
               </Link>
             </nav>
@@ -114,7 +114,7 @@ function Header() {
                 Agronegócio
               </Link>
               <Link
-                href="/area-cliente"
+                href="/cliente/login"
                 className="text-neutral-300 hover:text-primary-400 hover:bg-neutral-900/50 block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >

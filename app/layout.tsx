@@ -59,15 +59,15 @@ export default function RootLayout({
               <div>
                 <h4 className="font-semibold mb-4 text-neutral-200">Contato</h4>
                 <ul className="space-y-2 text-neutral-400">
-                  <li>Campo Grande, MS</li>
+                  <li>Sidrolândia, MS</li>
                   <li className="hover:text-primary-400 transition-colors cursor-pointer">(67) 99601-1356</li>
-                  <li className="hover:text-primary-400 transition-colors cursor-pointer">contato@brandaocontabilidade.com</li>
+                  <li className="hover:text-primary-400 transition-colors cursor-pointer">adm@brandaocontador.com.br</li>
                 </ul>
               </div>
               <div>
                 <h4 className="font-semibold mb-4 text-neutral-200">Redes Sociais</h4>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-neutral-400 hover:text-primary-400 transition-colors">
+                  <a href="https://www.facebook.com/profile.php?id=61583096446223" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-primary-400 transition-colors">
                     Facebook
                   </a>
                   <a href="#" className="text-neutral-400 hover:text-primary-400 transition-colors">
