@@ -65,7 +65,7 @@ export default function ClientesPage() {
             setEditingClient(client);
             setFormData({
                 nome: client.nome,
-                cnpj_cpf: client.cnpj_cpf,
+                cnpj_cpf: client.cnpj_cpf?.toString() || '',
                 telefone_whatsapp: client.telefone_whatsapp || '',
                 email: client.email || '',
                 cidade: client.cidade || 'Sidrolândia'
