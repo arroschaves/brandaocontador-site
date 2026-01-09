@@ -7,7 +7,9 @@ import {
     CheckCircle2,
     MessageSquare,
     ArrowUpRight,
-    Loader2
+    Loader2,
+    Plus,
+    Calendar
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
