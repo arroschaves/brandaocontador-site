@@ -80,16 +80,19 @@ export default function ClientesPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
+            // Remover o campo 'cidade' que não existe na tabela
+            const { cidade, ...dataToSave } = formData;
+
             if (editingClient) {
                 const { error } = await supabase
                     .from('clientes')
-                    .update(formData)
+                    .update(dataToSave)
                     .eq('id', editingClient.id);
                 if (error) throw error;
             } else {
                 const { error } = await supabase
                     .from('clientes')
-                    .insert([formData]);
+                    .insert([dataToSave]);
                 if (error) throw error;
             }
             setIsModalOpen(false);
