@@ -38,11 +38,6 @@ export default function AdminDashboard() {
                     .select('*', { count: 'exact', head: true })
                     .ilike('status', '%pendente%'); // Tenta pegar qualquer coisa que tenha pendente
 
-                // DEBUG: Ver o que tem no banco
-                const { data: debugPedidos } = await supabase.from('atendimentos').select('status').limit(5);
-                console.log('Status encontrados no banco:', debugPedidos);
-                console.log('Contagem de pendentes:', countPedidos);
-
                 setStats(prev => ({
                     ...prev,
                     totalClientes: countClientes || 0,
