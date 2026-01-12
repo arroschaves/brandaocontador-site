@@ -44,10 +44,16 @@ export default function AdminLayout({
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
             <Link href="/admin" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-neutral-900" />
+              {/* Replaced Brandão CRM text with image */}
+              <div className="flex items-center gap-3 px-2">
+                <div className="relative w-full h-12">
+                  <img
+                    src="/logo-full.jpg"
+                    alt="Brandão Contabilidade"
+                    className="h-full w-auto object-contain"
+                  />
+                </div>
               </div>
-              <span className="font-bold text-lg text-gradient">Brandão CRM</span>
             </Link>
           ) : (
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center mx-auto">
@@ -66,8 +72,8 @@ export default function AdminLayout({
                 key={item.path}
                 href={item.path}
                 className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                    ? 'bg-primary-500/10 text-primary-400'
-                    : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100'
+                  ? 'bg-primary-500/10 text-primary-400'
+                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100'
                   }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`} />
