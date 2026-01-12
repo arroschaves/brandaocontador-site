@@ -1,0 +1,70 @@
+ 12552947600014512552947600014520180730024234                                                                                       
+                                                                                                                                    
+ -------------------------------------------------------------------------                                                          
+                                                                                                                                    
+ C A I X A   E C O N O M I C A   F E D E R A L                                                                                      
+                                                                                                                                    
+ FGTS - EXTRATO ANALITICO DO TRABALHADOR                                                                                            
+                                                                                                                                    
+                                    SOLICITADO EM: 27/07/2018 AS 15:18:57                                                           
+                                                                                                                                    
+ NOME DO TRABALHADOR                        NUM.CONTA CAT      TX    PAG                                                            
+ FRANCIELE COSTA ANTUNES                          197 01        3   1/  1                                                           
+                                                                                                                                    
+  PIS/PASEP    CART.TRAB.    UNID.TRABALHO        DTA.ADM.   SITUACAO CTA                                                           
+ 20374845063  1388561-00050                      12/08/2016   OPTANTE                                                               
+                                                                                                                                    
+ DATA DE OPCAO       OPCAO RETROAT.     DATA DE AFAST.          MATRICULA                                                           
+  12/08/2016           00/00/0000       00/00/0000 -                    1                                                           
+                                                                                                                                    
+ NOME DO EMPREGADOR                                  INSCRICAO EMPREGADOR                                                           
+ STUDIO ENERGIA E MOVIMENTO                             25529476000145                                                              
+                                                                                                                                    
+ COD. EMPREGADOR      BASE DA CONTA      VALOR BASE PARA FINS RESCISORIOS                                                           
+ 09963602883118            MS                                     319,10*                                                           
+                                                                                                                                    
+                                                                                                                                    
+ HISTORICO DOS LANCAMENTOS                                                                                                          
+ DATA        LANCAMENTOS                                         VALOR                                                              
+             SALDO ANTERIOR                                          0,00                                                           
+ 14/10/2016  DEPOSITO EM ATRASO SETEMBRO/2016                       70,40                                                           
+ 10/11/2016  CREDITO DE JAM 0,004071                                 0,28                                                           
+ 10/12/2016  CREDITO DE JAM 0,003897                                 0,27                                                           
+ 10/01/2017  CREDITO DE JAM 0,004319                                 0,30                                                           
+ 23/01/2017  DEPOSITO EM ATRASO DEZEMBRO/2016                       88,00                                                           
+ 06/02/2017  DEPOSITO JANEIRO/2017                                  70,40                                                           
+ 10/02/2017  CREDITO DE JAM 0,004170                                 0,66                                                           
+ 10/03/2017  CREDITO DE JAM 0,002769                                 0,63                                                           
+ 10/04/2017  CREDITO DE JAM 0,003989                                 0,92                                                           
+ 12/04/2017  DEPOSITO EM ATRASO MARCO/2017                          74,96                                                           
+ 10/05/2017  CREDITO DE JAM 0,002466                                 0,75                                                           
+ 10/06/2017  CREDITO DE JAM 0,003232                                 0,99                                                           
+ 10/07/2017  CREDITO DE JAM 0,003003                                 0,92                                                           
+ 10/08/2017  CREDITO DE JAM 0,003090                                 0,95                                                           
+ 10/08/2017  CRED DIST RESULTADO ANO BASE 12/2016                    1,37                                                           
+ 10/09/2017  CREDITO DE JAM 0,002976                                 0,92                                                           
+ 10/10/2017  CREDITO DE JAM 0,002466                                 0,77                                                           
+ 10/11/2017  CREDITO DE JAM 0,002466                                 0,77                                                           
+ 10/12/2017  CREDITO DE JAM 0,002466                                 0,77                                                           
+ 10/01/2018  CREDITO DE JAM 0,002466                                 0,77                                                           
+ 10/02/2018  CREDITO DE JAM 0,002466                                 0,77                                                           
+ 10/03/2018  CREDITO DE JAM 0,002466                                 0,78                                                           
+ 10/04/2018  CREDITO DE JAM 0,002466                                 0,78                                                           
+ 10/05/2018  CREDITO DE JAM 0,002466                                 0,78                                                           
+ 10/06/2018  CREDITO DE JAM 0,002466                                 0,78                                                           
+ 10/07/2018  CREDITO DE JAM 0,002466                                 0,78                                                           
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+                                                                                                                                    
+ SALDO            DEPOSITO                JAM              TOTAL                                                                    
+                    305,13*             15,34*            320,47*                                                                   
+ * VALOR EXPRESSO EM REAIS                                                                                                          
+ DATA/HORA DE GERACAO: 30/07/2018 02:42:34                         017084                                                           
+ 12552947600014512552947600014500000001                                                                                             

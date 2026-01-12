@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?rml version="1.0" href="RML.dtd"?>
+<?rml dictionary type="text/xml" href="RML_dic.xsl"?>
+<?xsl stylesheet type="text/xsl" href="Extrato_Fins_Rescisorios.xsl"?>
+<relatorio>
+<metadata>
+<HEADERVER>200</HEADERVER>
+<HEADERNAME>25529476000145 Rej Analitico</HEADERNAME>
+<HEADERDESCRIPTION>PIS/PASEP/NIT nao selecionados pelos criterios CSE</HEADERDESCRIPTION>
+<HEADERDATE>20180730024255</HEADERDATE>
+<HEADERREPORT_TYPE>MSG</HEADERREPORT_TYPE>
+</metadata>
+<titulo>
+<col>
+</col>
+</titulo>
+  <dados>
+    <subtitulo>
+      <col nome="TITULO_REL1">CAIXA ECON&#212;MICA FEDERAL</col>
+    </subtitulo>
+    <subtitulo>
+      <col nome="TITULO_REL2">FGTS - Relat&#243;rio de Rejei&#231;&#245;es - Extrato Anal&#237;tico do Trabalhador</col>
+    </subtitulo>
+  </dados>
+  <dados>
+  <quebra>
+  <legenda>
+    <col nome="BASE_SUREG">Base : MS</col>
+    <col nome="DATA_GERACAO">Data/Hora de Gera&#231;&#227;o : 30/07/2018 02:42:55</col>
+  </legenda>
+  <legenda>
+    <col nome="INSCRICAO_EMPREGADOR">Inscri&#231;&#227;o do Empregador : 25.529.476/0001-45</col>
+    <col nome="NOM_EMPREGADOR">Nome do Empregador : STUDIO ENERGIA E MOVIMENTO              </col>
+  </legenda>
+  </quebra>
+  </dados>
+  <dados>
+  <quebra>
+  <legenda>
+    <col nome="DATA_SOLIC">Data da Solicita&#231;&#227;o : 27/07/2018</col>
+  </legenda>
+  </quebra>
+  </dados>
+  <dados>
+  <titulo2>
+    <col nome="MENS_REJEICAO" tipo="data">C&#243;digo/Motivo de Rejei&#231;&#227;o</col>
+  </titulo2>
+  <linha>
+    <col nome="MENS_REJEICAO" tipo="data">N&#195;O EXISTEM NIS REJEITADOS                                          </col>
+  </linha>
+  </dados>
+</relatorio>
