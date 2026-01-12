@@ -36,7 +36,7 @@ export default function AdminDashboard() {
                 const { count: countPedidos, error: errorPedidos } = await supabase
                     .from('atendimentos')
                     .select('*', { count: 'exact', head: true })
-                    .eq('status', 'pendente');
+                    .ilike('status', 'pendente');
 
                 setStats(prev => ({
                     ...prev,

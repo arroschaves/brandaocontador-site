@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
-    MessageSquare, 
-    User, 
-    Clock, 
-    CheckCircle, 
+import {
+    MessageSquare,
+    User,
+    Clock,
+    CheckCircle,
     AlertCircle,
     Search,
     Filter,
@@ -21,7 +21,7 @@ export default function AtendimentoPage() {
 
     useEffect(() => {
         fetchTickets();
-        
+
         // Inscrever para atualizações em tempo real
         const channel = supabase
             .channel('atendimentos_realtime')
@@ -61,7 +61,7 @@ export default function AtendimentoPage() {
                 .from('atendimentos')
                 .update({ status: newStatus })
                 .eq('id', id);
-            
+
             if (error) throw error;
             // O realtime vai atualizar a lista automaticamente
         } catch (err) {
@@ -105,9 +105,9 @@ export default function AtendimentoPage() {
             <div className="flex gap-4 items-center bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                    <input 
-                        type="text" 
-                        placeholder="Buscar por nome, telefone ou mensagem..." 
+                    <input
+                        type="text"
+                        placeholder="Buscar por nome, telefone ou mensagem..."
                         className="w-full bg-neutral-800 border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary-500"
                     />
                 </div>
@@ -116,11 +116,10 @@ export default function AtendimentoPage() {
                         <button
                             key={s}
                             onClick={() => setFilter(s)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                                filter === s 
-                                    ? 'bg-primary-500 text-neutral-950' 
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === s
+                                    ? 'bg-primary-500 text-neutral-950'
                                     : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
-                            }`}
+                                }`}
                         >
                             {s === 'todos' ? 'Todos' : getStatusLabel(s)}
                         </button>
@@ -143,25 +142,48 @@ export default function AtendimentoPage() {
                         <div key={ticket.id} className="bg-neutral-900/50 backdrop-blur-sm p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all group">
                             <div className="flex justify-between items-start">
                                 <div className="flex gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-primary-500 font-bold text-lg shrink-0">
-                                        {ticket.clientes?.nome?.charAt(0) || <User className="w-6 h-6" />}
+                                    <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-primary-500 font-bold text-lg shrink-0 overflow-hidden ring-2 ring-neutral-800 group-hover:ring-primary-500/50 transition-all">
+                                        {ticket.clientes?.nome ? (
+                                            ticket.clientes.nome.charAt(0)
+                                        ) : (
+                                            <User className="w-6 h-6 text-neutral-500" />
+                                        )}
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-neutral-200 flex items-center gap-2">
-                                            {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border border-current uppercase tracking-wider ${getStatusColor(ticket.status)}`}>
+                                    <div className="flex-1">
+                                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                                            <h3 className="text-lg font-bold text-neutral-200">
+                                                {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
+                                            </h3>
+
+                                            {/* Badge de Status */}
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border border-current uppercase tracking-wider font-bold ${getStatusColor(ticket.status)}`}>
                                                 {getStatusLabel(ticket.status)}
                                             </span>
-                                        </h3>
-                                        <div className="flex items-center gap-4 text-sm text-neutral-400 mt-1">
+
+                                            {/* Badge de Identificação */}
+                                            {ticket.clientes ? (
+                                                <span className="text-[10px] bg-primary-500/10 text-primary-400 px-2 py-0.5 rounded-full border border-primary-500/20 flex items-center gap-1 font-medium">
+                                                    <CheckCircle className="w-3 h-3" /> Cliente
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full border border-neutral-700 flex items-center gap-1 font-medium">
+                                                    <User className="w-3 h-3" /> Visitante
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-4 text-sm text-neutral-500">
                                             <span className="flex items-center gap-1">
-                                                <Phone className="w-3 h-3" /> {ticket.numero_whatsapp}
+                                                <Phone className="w-3.5 h-3.5" />
+                                                {ticket.numero_whatsapp}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" /> {new Date(ticket.created_at).toLocaleString('pt-BR')}
+                                                <Clock className="w-3.5 h-3.5" />
+                                                {new Date(ticket.created_at).toLocaleString('pt-BR')}
                                             </span>
                                         </div>
-                                        <p className="mt-3 text-neutral-300 bg-neutral-800/50 p-3 rounded-lg border border-neutral-800/50">
+
+                                        <p className="mt-3 text-neutral-300 bg-neutral-800/30 p-3 rounded-lg border border-neutral-800/50 italic leading-relaxed">
                                             "{ticket.mensagem}"
                                         </p>
                                     </div>
@@ -169,7 +191,7 @@ export default function AtendimentoPage() {
 
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {ticket.status === 'pendente' && (
-                                        <button 
+                                        <button
                                             onClick={() => updateStatus(ticket.id, 'em_atendimento')}
                                             className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
                                         >
@@ -177,7 +199,7 @@ export default function AtendimentoPage() {
                                         </button>
                                     )}
                                     {ticket.status !== 'concluido' && (
-                                        <button 
+                                        <button
                                             onClick={() => updateStatus(ticket.id, 'concluido')}
                                             className="px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
                                         >
