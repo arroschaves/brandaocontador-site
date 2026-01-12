@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   BarChart3,
   Users,
@@ -25,6 +25,13 @@ export default function AdminLayout({
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const { supabase } = await import('@/lib/supabase');
+    await supabase.auth.signOut();
+    router.push('/login');
+  }
 
   const menuItems = [
     { name: 'Dashboard', icon: BarChart3, path: '/admin' },
@@ -87,7 +94,10 @@ export default function AdminLayout({
         </nav>
 
         <div className="p-4 border-t border-neutral-800">
-          <button className="flex items-center w-full px-4 py-3 text-neutral-400 hover:text-error-400 hover:bg-error-500/10 rounded-xl transition-all duration-200">
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-4 py-3 text-neutral-400 hover:text-error-400 hover:bg-error-500/10 rounded-xl transition-all duration-200"
+          >
             <LogOut className="w-5 h-5" />
             {isSidebarOpen && <span className="ml-4 font-medium">Sair</span>}
           </button>
