@@ -15,6 +15,7 @@ import {
     X,
     CheckCircle2
 } from 'lucide-react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 export default function ClientesPage() {
@@ -161,7 +162,9 @@ export default function ClientesPage() {
                                     <tr key={c.id} className="hover:bg-neutral-800/20 group">
                                         <td className="px-4 py-4">
                                             <div className="font-semibold text-neutral-200 flex items-center gap-2">
-                                                {c.nome}
+                                                <Link href={`/admin/clientes/${c.id}`} className="hover:text-primary-400 hover:underline transition-colors decoration-2 underline-offset-4">
+                                                    {c.nome}
+                                                </Link>
                                                 {c.status_rfb === 'ATIVA' && (
                                                     <div className="text-green-500 p-1 bg-green-500/10 rounded-full" title="Status Receita: ATIVA">
                                                         <CheckCircle2 className="w-3 h-3" />

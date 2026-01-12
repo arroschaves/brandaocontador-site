@@ -5,10 +5,8 @@ const https = require('https');
 
 // --- CONFIGURAÇÃO ---
 const RAIZ = String.raw`E:\PROJETOS\brandaocontador-site\ARQUIVOS  DAS FGTS INSS XML E SPED DARF`;
-const ANOS_FOCO = ['2025', '2026'];
 
-// --- LEITURA DE ENV PARA SUPABASE ---
-// (Reaproveitando a lógica de ler .env.local via regex para não depender de pacotes)
+// --- ENV ---
 function getEnv() {
     try {
         const envPath = path.join(__dirname, '.env.local');
@@ -25,10 +23,10 @@ function getEnv() {
 const { url, key } = getEnv();
 if (!url || !key) { console.error('❌ .env.local não encontrado ou sem chaves.'); process.exit(1); }
 
-// --- HELPERS DE API (Supabase & BrasilAPI) ---
+// --- HELPERS ---
 
 function supabaseRequest(method, endpoint, body = null) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const options = {
             method: method,
             headers: {
@@ -44,10 +42,12 @@ function supabaseRequest(method, endpoint, body = null) {
             res.on('end', () => {
                 if (res.statusCode >= 200 && res.statusCode < 300) {
                     try { resolve(data ? JSON.parse(data) : null); } catch { resolve(data); }
-                } else { resolve(null); } // Não quebra o loop em erro 409 etc
+                } else {
+                    resolve({ error: true, status: res.statusCode, body: data });
+                }
             });
         });
-        req.on('error', (e) => resolve(null));
+        req.on('error', (e) => resolve({ error: true, message: e.message }));
         if (body) req.write(JSON.stringify(body));
         req.end();
     });
@@ -59,7 +59,7 @@ function consultaReceita(cnpj) {
             hostname: 'brasilapi.com.br',
             path: `/api/cnpj/v1/${cnpj}`,
             method: 'GET',
-            headers: { 'User-Agent': 'BrandaoBot/2.0' }
+            headers: { 'User-Agent': 'BrandaoBot/5.0' }
         };
         const req = https.request(options, (res) => {
             let data = '';
@@ -73,121 +73,198 @@ function consultaReceita(cnpj) {
     });
 }
 
-// --- CORE ---
+// --- XML ---
+function extrairDadosXML(caminhoArquivo) {
+    try {
+        const content = fs.readFileSync(caminhoArquivo, 'utf-8');
+        const matchDest = content.match(/<dest>([\s\S]*?)<\/dest>/);
+        if (!matchDest) return null;
 
+        const blocoDest = matchDest[1];
+        const cnpjMatch = blocoDest.match(/<CNPJ>(\d+)<\/CNPJ>/);
+        const cpfMatch = blocoDest.match(/<CPF>(\d+)<\/CPF>/);
+        const nomeMatch = blocoDest.match(/<xNome>([^<]+)<\/xNome>/);
+        const ieMatch = blocoDest.match(/<IE>([^<]+)<\/IE>/);
+
+        if (cnpjMatch || cpfMatch) {
+            return {
+                doc: cnpjMatch ? cnpjMatch[1] : cpfMatch[1],
+                tipoDoc: cnpjMatch ? 'CNPJ' : 'CPF',
+                nome: nomeMatch ? nomeMatch[1] : null,
+                ie: ieMatch ? ieMatch[1] : null
+            };
+        }
+        return null;
+    } catch (e) { return null; }
+}
+
+// --- MAIN ---
 async function main() {
-    console.log('🤖 INICIANDO IMPORTADOR FISCAL 2025-2026 🤖');
-    console.log(`Pasta Raiz: ${RAIZ}`);
-
+    console.log('🤖 INICIANDO IMPORTADOR FISCAL (V8 - Timestamp Killer) 🤖');
     const arquivosCandidatos = [];
-    const cnpjsProcessados = new Set(); // Para não consultar o mesmo CNPJ mil vezes
     let clientesNovos = 0;
-    let clientesAtualizados = 0;
 
     // 1. Scan
-    console.log('📂 Escaneando arquivos...');
     function scan(dir) {
         try {
             const itens = fs.readdirSync(dir);
             itens.forEach(item => {
                 const fullPath = path.join(dir, item);
                 const stat = fs.statSync(fullPath);
-
-                if (stat.isDirectory()) {
-                    scan(fullPath);
-                } else {
-                    // Filtro de Anos e Extensão
-                    if ((fullPath.includes('2025') || fullPath.includes('2026')) &&
-                        item.match(/\.(pdf|xml)$/i)) {
-                        arquivosCandidatos.push(fullPath);
-                    }
+                if (stat.isDirectory()) scan(fullPath);
+                else if ((fullPath.includes('2025') || fullPath.includes('2026')) && item.match(/\.(pdf|xml)$/i)) {
+                    arquivosCandidatos.push(fullPath);
                 }
             });
         } catch (e) { }
     }
+    console.log('📂 Escaneando arquivos...');
     scan(RAIZ);
-    console.log(`📝 Encontrados ${arquivosCandidatos.length} arquivos relevantes dos anos 2025/2026.`);
+    console.log(`📝 Encontrados ${arquivosCandidatos.length} arquivos.`);
 
-    // 2. Processamento
-    console.log('🔎 Iniciando análise e cadastro...');
+    const processadosSession = new Set();
+    const blacklistProcessados = new Set();
 
     for (const arquivo of arquivosCandidatos) {
-        const nomeArquivo = path.basename(arquivo);
-        const nomePasta = path.basename(path.dirname(arquivo));
+        const ext = path.extname(arquivo).toLowerCase();
+        let dadosCliente = null;
 
-        // Tenta achar CNPJ (14 dígitos)
-        const match = nomeArquivo.match(/(\d{14})/) || nomePasta.match(/(\d{14})/);
+        // A. XML
+        if (ext === '.xml') {
+            const xmlData = extrairDadosXML(arquivo);
+            if (xmlData) dadosCliente = { ...xmlData, origem: 'XML' };
+        }
 
-        if (match) {
-            const cnpj = match[0];
+        // B. Nome (Guias)
+        if (!dadosCliente) {
+            const nomeArquivo = path.basename(arquivo);
+            let doc = null;
 
-            // Se já processamos esse CNPJ nesta rodada, ignora (cache local de execução)
-            if (cnpjsProcessados.has(cnpj)) continue;
-            cnpjsProcessados.add(cnpj);
+            // Busca 14 digitos (CNPJ)
+            const matches14 = nomeArquivo.match(/(\d{14})/g) || [];
+            for (const m of matches14) {
+                // IGNORAR ABSOLUTAMENTE TUDO QUE TENHA '2025' ou '2026' dentro
+                // Isso mata Timestamps (ex: 02102025151118) e Chaves NFe (ex: 5025...)
+                if (m.includes('2025') || m.includes('2026')) continue;
 
-            console.log(`\n🔍 Analisando CNPJ: ${cnpj} (Encontrado em: ${nomeArquivo})`);
+                doc = m;
+                break;
+            }
+            // Busca 11 digitos (CPF)
+            if (!doc) {
+                const matches11 = nomeArquivo.match(/(\d{11})/g) || [];
+                for (const m of matches11) {
+                    if (m.includes('2025') || m.includes('2026')) continue;
+                    doc = m;
+                    break;
+                }
+            }
+            if (doc) dadosCliente = { doc: doc, origem: 'PDF_NAME' };
+        }
 
-            // A. Verifica se existe no Supabase
-            const buscaBanco = await supabaseRequest('GET', `clientes?cnpj_cpf=eq.${cnpj}&select=*`);
+        // C. Execução
+        if (dadosCliente && dadosCliente.doc) {
+            const { doc, nome, ie } = dadosCliente;
 
-            if (buscaBanco && buscaBanco.length > 0) {
-                // Cliente já existe -> Vamos atualizar dados fiscais se faltar
-                const cliente = buscaBanco[0];
-                if (!cliente.regime_tributario) {
-                    console.log(`   ⏳ Cliente existe (${cliente.nome}), mas sem regime. Consultando Receita...`);
-                    const dadosReceita = await consultaReceita(cnpj);
-                    if (dadosReceita && dadosReceita.razao_social) {
-                        const regime = dadosReceita.opcao_pelo_simples ? 'Simples Nacional' : 'Lucro Presumido/Real';
-                        await supabaseRequest('PATCH', `clientes?id=eq.${cliente.id}`, {
-                            regime_tributario: regime,
-                            cnae_principal: dadosReceita.cnae_fiscal_descricao,
-                            status_rfb: dadosReceita.descricao_situacao_cadastral,
-                            log_atualizacao: new Date()
-                        });
-                        console.log(`   ✅ Atualizado para: ${regime}`);
-                        clientesAtualizados++;
-                    }
-                } else {
-                    console.log(`   🆗 Já cadastrado e completo: ${cliente.nome}`);
+            if (blacklistProcessados.has(doc)) continue;
+
+            const busca = await supabaseRequest('GET', `clientes?cnpj_cpf=eq.${doc}&select=*`);
+            let clienteId = null;
+
+            if (busca && !busca.error && busca.length > 0) {
+                clienteId = busca[0].id;
+                // Atualiza IE via XML
+                if (dadosCliente.origem === 'XML' && ie && !busca[0].inscricao_estadual) {
+                    await supabaseRequest('PATCH', `clientes?id=eq.${clienteId}`, { inscricao_estadual: ie });
                 }
             } else {
-                // Cliente NÃO existe -> Cadastrar!
-                console.log(`   🆕 Cliente NOVO! Consultando Receita...`);
-                const dadosReceita = await consultaReceita(cnpj);
-                if (dadosReceita && dadosReceita.razao_social) {
-                    const novoCliente = {
-                        nome: dadosReceita.nome_fantasia || dadosReceita.razao_social, // Prefere fantasia
-                        cnpj_cpf: cnpj,
-                        email: null, // Não temos email no nome do arquivo
-                        telefone_whatsapp: dadosReceita.ddd_telefone_1 ? '55' + dadosReceita.ddd_telefone_1.replace(/\D/g, '') : null,
-                        regime_tributario: dadosReceita.opcao_pelo_simples ? 'Simples Nacional' : 'Lucro Presumido/Real',
-                        cnae_principal: dadosReceita.cnae_fiscal_descricao,
-                        status_rfb: dadosReceita.descricao_situacao_cadastral,
-                        observacoes: `Importado automaticamente via BrandãoBot (Fonte: ${nomeArquivo})`
-                    };
+                // Cadastro Novo
+                if (!processadosSession.has(doc)) {
+                    processadosSession.add(doc);
 
-                    const resInsert = await supabaseRequest('POST', 'clientes', novoCliente);
-                    if (resInsert) {
-                        console.log(`   ✨ CADASTRO REALIZADO: ${novoCliente.nome}`);
-                        clientesNovos++;
+                    let payload = { cnpj_cpf: doc };
+                    let deveCadastrar = false;
+
+                    if (nome) {
+                        payload.nome = nome.toUpperCase();
+                        payload.inscricao_estadual = ie;
+                        payload.observacoes = 'Cadastro via XML (Destinatário)';
+                        deveCadastrar = true;
                     } else {
-                        console.error(`   ❌ Falha ao cadastrar.`);
+                        // via PDF -> Consulta API
+                        const api = await consultaReceita(doc);
+                        if (api && api.razao_social) {
+                            payload.nome = api.nome_fantasia || api.razao_social;
+                            payload.regime_tributario = api.opcao_pelo_simples ? 'Simples Nacional' : 'Lucro Presumido/Real';
+                            payload.status_rfb = api.descricao_situacao_cadastral;
+                            deveCadastrar = true;
+                        } else {
+                            // Valida nome da pasta
+                            const nomePasta = path.basename(path.dirname(arquivo)).toUpperCase();
+                            const ehLixo = nomePasta.match(/^\d{2}-(JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)/i) ||
+                                nomePasta.match(/^\d{4}/) || nomePasta.length < 3;
+
+                            if (!ehLixo) {
+                                payload.nome = nomePasta;
+                                payload.observacoes = 'Cadastro via Nome Arquivo';
+                                deveCadastrar = true;
+                            } else {
+                                const pastaPai = path.basename(path.dirname(path.dirname(arquivo))).toUpperCase();
+                                if (!pastaPai.match(/^\d{2}-/) && pastaPai.length > 3 && pastaPai !== 'SIMPLES NACIONAL') {
+                                    payload.nome = pastaPai;
+                                    payload.observacoes = 'Cadastro via Pasta Pai';
+                                    deveCadastrar = true;
+                                } else {
+                                    blacklistProcessados.add(doc);
+                                }
+                            }
+                        }
                     }
-                } else {
-                    console.log(`   ⚠️ CNPJ não encontrado na Receita ou API fora do ar.`);
+
+                    if (deveCadastrar) {
+                        console.log(`   🆕 Cadastrando: ${doc} - ${payload.nome}`);
+                        const insert = await supabaseRequest('POST', 'clientes', payload);
+                        if (insert && !insert.error) {
+                            clienteId = insert[0]?.id || insert.id;
+                            clientesNovos++;
+                        }
+                    }
                 }
             }
 
-            // Delay para respeitar API pública (evitar bloqueio)
-            await new Promise(r => setTimeout(r, 1000));
+            // D. Cronograma
+            if (clienteId) {
+                await processarObrigacao(clienteId, path.basename(arquivo));
+            }
         }
+        await new Promise(r => setTimeout(r, 50));
     }
+    console.log(`\n🎉 FIM! ${clientesNovos} novos cadastros.`);
+}
 
-    console.log('\n--- RESUMO DA OPERAÇÃO ---');
-    console.log(`CNPJs Únicos Encontrados: ${cnpjsProcessados.size}`);
-    console.log(`Novos Clientes Cadastrados: ${clientesNovos}`);
-    console.log(`Clientes Atualizados: ${clientesAtualizados}`);
-    console.log('🤖 FIM DA IMPORTAÇÃO 🤖');
+async function processarObrigacao(clienteId, nomeArquivo) {
+    let tipo = null;
+    const n = nomeArquivo.toUpperCase();
+    if (n.includes('DAS') || n.includes('SIMPLES')) tipo = 'DAS';
+    else if (n.includes('FGTS') || n.includes('GRF')) tipo = 'FGTS';
+    else if (n.includes('INSS') || n.includes('GPS')) tipo = 'INSS';
+    else if (n.includes('DARF')) tipo = 'DARF';
+
+    if (!tipo) return;
+
+    const matchData = nomeArquivo.match(/(0[1-9]|1[0-2])[-_. ]?(202[5-6])/);
+    if (!matchData) return;
+
+    const comp = `${matchData[2]}-${matchData[1]}-01`;
+
+    // Check para evitar flood de logs, mas faz POST igual para garantir
+    const check = await supabaseRequest('GET', `obrigacoes_acessorias?cliente_id=eq.${clienteId}&tipo=eq.${tipo}&competencia=eq.${comp}&select=id`);
+    if (check && !check.error && check.length === 0) {
+        await supabaseRequest('POST', 'obrigacoes_acessorias', {
+            cliente_id: clienteId, tipo, competencia: comp, status: 'concluido', arquivo_url: nomeArquivo
+        });
+        console.log(`      📅 Obrigação ${tipo} / ${comp} registrada!`);
+    }
 }
 
 main();
