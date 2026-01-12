@@ -12,7 +12,8 @@ import {
     Paperclip,
     Send,
     User,
-    ArrowRight
+    ArrowRight,
+    Plus
 } from 'lucide-react';
 
 export default function PedidosPage() {
