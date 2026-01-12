@@ -1,0 +1,196 @@
+RELATÓRIO DE AUDITORIA FISCAL - 12/01/2026, 18:19:14
+Total Arquivos: 14759
+
+[Arquivo] GuiaPagamento_04792962000181_170220251631158573PISCOFINS012025.pdf
+   Pasta: 01-JAN
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_110320251713103689.pdf
+   Pasta: 02-FEV
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_230420251613492273.pdf
+   Pasta: 03-MAR
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] recibo contribuiçoes 032025.pdf
+   Pasta: 03-MAR
+-----------------------------------
+[Arquivo] relatorio lucro - 1º trimestre.pdf
+   Pasta: 03-MAR
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_130620251103518289.pdf
+   Pasta: 05-MAI
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_210720250931349345.pdf
+   Pasta: 06-JUN
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] IRPJ04a062025.pdf
+   Pasta: 06-JUN
+-----------------------------------
+[Arquivo] RECIBO 062025.pdf
+   Pasta: 06-JUN
+-----------------------------------
+[Arquivo] 7172522427836466.pdf
+   Pasta: 07-JUL
+   Identificado DOC: 71725224278364
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_120820251540238772.pdf
+   Pasta: 07-JUL
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] 7172525324085640.pdf
+   Pasta: 08-AGO
+   Identificado DOC: 71725253240856
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_100920251052276311.pdf
+   Pasta: 08-AGO
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] recibo contribuições 082025.pdf
+   Pasta: 08-AGO
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_131020250924456665 09-2025.pdf
+   Pasta: 09-SET
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] RECIBO CONTRIBUICOES 09-2025.pdf
+   Pasta: 09-SET
+-----------------------------------
+[Arquivo] relatorio apuracao 3º trimestre.pdf
+   Pasta: 09-SET
+-----------------------------------
+[Arquivo] relatorio lucro - Cópia (2) - Cópia.pdf
+   Pasta: 09-SET
+-----------------------------------
+[Arquivo] 10-2025 PIS-COFINS GuiaPagamento_04792962000181_121120251018481084.pdf
+   Pasta: 10-OUT
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] 7172531640762562.pdf
+   Pasta: 10-OUT
+   Identificado DOC: 71725316407625
+-----------------------------------
+[Arquivo] RECIBO 10-2025.pdf
+   Pasta: 10-OUT
+-----------------------------------
+[Arquivo] GuiaPagamento_04792962000181_121220251113029997.pdf
+   Pasta: 11-NOV
+   Identificado DOC: 04792962000181
+   Receita Federal: SUPERMERCADO FRUTILANDIA LTDA
+   Simples Nacional: NÃO
+   CNAE Principal: Comércio varejista de mercadorias em geral, com predominância de produtos alimentícios - supermercados
+-----------------------------------
+[Arquivo] RECIBO 11-2025.pdf
+   Pasta: 11-NOV
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: JOAO
+-----------------------------------
+[Arquivo] AFASTAMENTO DAMYLE001.pdf
+   Pasta: DAMILLE
+-----------------------------------
+[Arquivo] DAMYLE M545001.pdf
+   Pasta: DAMILLE
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade-MIDINHA.pdf
+   Pasta: ALLISON
+-----------------------------------
+[Arquivo] CRER (6).pdf
+   Pasta: GILSON
+-----------------------------------
+[Arquivo] resultado-de-pericia (3).pdf
+   Pasta: ODIMAR
+-----------------------------------
+[Arquivo] CRER - ELIZABETH.pdf
+   Pasta: CELINA CORREA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: CAMILA
+-----------------------------------
+[Arquivo] CRER ODIMAR.pdf
+   Pasta: AFASTAMENTO
+-----------------------------------
+[Arquivo] RESULTADO PÉRICIA CRER (1).pdf
+   Pasta: ELIZIANE
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: ELIZIANE
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade - ERBIO.pdf
+   Pasta: ITAOCA
+-----------------------------------
+[Arquivo] ZELIA Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: ITAOCA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: JOSAFA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: FRANCIANE
+-----------------------------------
+[Arquivo] Resultado Perícia - Marcia de Sá (003).pdf
+   Pasta: MARCIA DE SÁ
+-----------------------------------
+[Arquivo] AGENDAMENTO 21-05-2019.pdf
+   Pasta: MARIA APARECIDA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: MARIA APARECIDA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: LUIS LOPES SIQUEIRA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade - ANDERSON ALONSO.pdf
+   Pasta: ANDERSON ALONSO
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: AURORA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: CLEUZA
+-----------------------------------
+[Arquivo] AGENDAMENTO CRISTIANE MEIRELLES.pdf
+   Pasta: CRISTIANE
+-----------------------------------
+[Arquivo] novo Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: CRISTIANE
+-----------------------------------
+[Arquivo] comprovante (4).pdf
+   Pasta: MARILENE
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade.pdf
+   Pasta: NILDA
+-----------------------------------
+[Arquivo] Sistema de Administração de Benefício por Incapacidade - OZIANE.pdf
+   Pasta: OZIANE
+-----------------------------------

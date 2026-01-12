@@ -12,7 +12,8 @@ import {
     Eye,
     Loader2,
     AlertCircle,
-    X
+    X,
+    CheckCircle2
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -148,8 +149,9 @@ export default function ClientesPage() {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="text-neutral-500 text-xs uppercase border-b border-neutral-800">
-                                    <th className="px-4 pb-4">Nome</th>
+                                    <th className="px-4 pb-4">Nome / Status</th>
                                     <th className="px-4 pb-4">Documento</th>
+                                    <th className="px-4 pb-4">Regime Tributário</th>
                                     <th className="px-4 pb-4">Contato</th>
                                     <th className="px-4 pb-4 text-right">Ações</th>
                                 </tr>
@@ -157,8 +159,36 @@ export default function ClientesPage() {
                             <tbody className="divide-y divide-neutral-800">
                                 {filteredClientes.map((c) => (
                                     <tr key={c.id} className="hover:bg-neutral-800/20 group">
-                                        <td className="px-4 py-4 font-semibold text-neutral-200">{c.nome}</td>
+                                        <td className="px-4 py-4">
+                                            <div className="font-semibold text-neutral-200 flex items-center gap-2">
+                                                {c.nome}
+                                                {c.status_rfb === 'ATIVA' && (
+                                                    <div className="text-green-500 p-1 bg-green-500/10 rounded-full" title="Status Receita: ATIVA">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {c.cnae_principal && (
+                                                <div className="text-[10px] text-neutral-500 truncate max-w-[200px]" title={c.cnae_principal}>
+                                                    {c.cnae_principal}
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-4 font-mono text-sm text-neutral-400">{c.cnpj_cpf}</td>
+                                        <td className="px-4 py-4">
+                                            {c.regime_tributario ? (
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium border ${c.regime_tributario.includes('Simples')
+                                                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                                                    : c.regime_tributario.includes('Presumido')
+                                                        ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                        : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+                                                    }`}>
+                                                    {c.regime_tributario}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-neutral-600 italic">Não identificado</span>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-4 text-xs text-neutral-400">
                                             <div>{c.telefone_whatsapp}</div>
                                             <div className="opacity-60">{c.email}</div>
