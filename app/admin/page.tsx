@@ -18,22 +18,32 @@ export default function AdminDashboard() {
         totalClientes: 0,
         prazosHoje: 12, // Mock por enquanto
         concluidosMes: 85, // Mock por enquanto
-        pedidosZap: 7 // Mock por enquanto
+        pedidosZap: 0
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchStats() {
             try {
-                const { count, error } = await supabase
+                // Total de Clientes
+                const { count: countClientes, error: errorClientes } = await supabase
                     .from('clientes')
                     .select('*', { count: 'exact', head: true })
                     .not('nome', 'is', null)
                     .not('cnpj_cpf', 'is', null);
 
-                if (!error) {
-                    setStats(prev => ({ ...prev, totalClientes: count || 0 }));
-                }
+                // Pedidos WhatsApp (Atendimentos Pendentes)
+                const { count: countPedidos, error: errorPedidos } = await supabase
+                    .from('atendimentos')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'pendente');
+
+                setStats(prev => ({
+                    ...prev,
+                    totalClientes: countClientes || 0,
+                    pedidosZap: countPedidos || 0
+                }));
+
             } catch (err) {
                 console.error(err);
             } finally {
@@ -47,7 +57,7 @@ export default function AdminDashboard() {
         { name: 'Total de Clientes', value: stats.totalClientes.toString(), icon: Users, color: 'text-primary-400', bg: 'bg-primary-500/10' },
         { name: 'Prazos para Hoje', value: stats.prazosHoje.toString(), icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
         { name: 'Concluídos (Mês)', value: stats.concluidosMes.toString(), icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-500/10' },
-        { name: 'Pedidos WhatsApp', value: stats.pedidosZap.toString(), icon: MessageSquare, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+        { name: 'Atendimentos Pendentes', value: stats.pedidosZap.toString(), icon: MessageSquare, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
     ];
 
     return (
@@ -64,7 +74,7 @@ export default function AdminDashboard() {
                             <stat.icon className="w-6 h-6" />
                         </div>
                         <h3 className="text-neutral-400 text-sm font-medium">{stat.name}</h3>
-                        {loading && stat.name === 'Total de Clientes' ? (
+                        {loading && (stat.name === 'Total de Clientes' || stat.name === 'Atendimentos Pendentes') ? (
                             <Loader2 className="w-6 h-6 animate-spin text-neutral-600 mt-1" />
                         ) : (
                             <p className="text-2xl font-bold text-neutral-100 mt-1">{stat.value}</p>
