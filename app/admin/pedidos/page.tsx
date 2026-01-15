@@ -1,36 +1,59 @@
 "use client";
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import {
     MessageCircle,
     Clock,
     CheckCircle2,
-    AlertCircle,
     Search,
-    Filter,
-    MoreHorizontal,
     Paperclip,
     Send,
     User,
     ArrowRight,
-    Plus
+    Loader2
 } from 'lucide-react';
 
 export default function PedidosPage() {
     const [searchTerm, setSearchTerm] = useState('');
+    const [pedidos, setPedidos] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const mockPedidos = [
-        { id: '1', cliente: 'AASS', pedido: 'Segunda via DAS - Outubro', status: 'em_aberto', tempo: '15 min', canal: 'WhatsApp', responsavel: 'Alessandro' },
-        { id: '2', cliente: 'BARBAQ', pedido: 'Rescisão Funcionário - João Silva', status: 'processando', tempo: '2h', canal: 'WhatsApp', responsavel: 'Maria' },
-        { id: '3', cliente: 'AÇO MS', pedido: 'Certidão Negativa SEFAZ', status: 'concluido', tempo: 'Ontem', canal: 'E-mail', responsavel: 'Alessandro' },
-        { id: '4', cliente: 'ANA OTICAS', pedido: 'Abertura de Ticket: Dúvida IR', status: 'em_aberto', tempo: '1h', canal: 'WhatsApp', responsavel: 'Pendente' },
-        { id: '5', cliente: 'CAMPOS MS', pedido: 'Guia de GPS - Novembro', status: 'concluido', tempo: 'Hoje', canal: 'WhatsApp', responsavel: 'Maria' },
-    ];
+    useEffect(() => {
+        fetchPedidos();
+
+        // Realtime updates
+        const channel = supabase
+            .channel('pedidos_realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, () => {
+                fetchPedidos();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
+    async function fetchPedidos() {
+        try {
+            const { data, error } = await supabase
+                .from('atendimentos')
+                .select('*, clientes(nome)')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setPedidos(data || []);
+        } catch (err) {
+            console.error('Erro ao buscar pedidos:', err);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'em_aberto': return 'bg-error-500/10 text-error-400 border-error-500/20';
-            case 'processando': return 'bg-warning-500/10 text-warning-400 border-warning-500/20';
+            case 'pendente': return 'bg-error-500/10 text-error-400 border-error-500/20';
+            case 'em_atendimento': return 'bg-warning-500/10 text-warning-400 border-warning-500/20';
             case 'concluido': return 'bg-success-500/10 text-success-400 border-success-500/20';
             default: return 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
         }
@@ -38,93 +61,91 @@ export default function PedidosPage() {
 
     const getStatusLabel = (status: string) => {
         switch (status) {
-            case 'em_aberto': return 'Novo Pedido';
-            case 'processando': return 'Em Trabalho';
+            case 'pendente': return 'Novo Pedido';
+            case 'em_atendimento': return 'Em Trabalho';
             case 'concluido': return 'Finalizado';
             default: return status;
         }
     };
+
+    const filteredPedidos = pedidos.filter(p =>
+        p.mensagem?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.numero_whatsapp?.includes(searchTerm) ||
+        p.clientes?.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.pushName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-neutral-100">Atendimento</h1>
-                    <p className="text-neutral-400 mt-1">Monitore e responda as solicitações dos clientes via WhatsApp e Site.</p>
+                    <p className="text-neutral-400 mt-1">Monitore e responda as solicitações reais dos clientes em tempo real.</p>
                 </div>
-                <div className="flex bg-neutral-900 border border-neutral-800 p-1 rounded-lg">
-                    <button className="px-4 py-1.5 text-sm font-medium bg-neutral-800 text-neutral-100 rounded-md shadow-sm">Todos</button>
-                    <button className="px-4 py-1.5 text-sm font-medium text-neutral-400 hover:text-neutral-200 transition-colors">Meus</button>
-                    <button className="px-4 py-1.5 text-sm font-medium text-neutral-400 hover:text-neutral-200 transition-colors">Não Atribuídos</button>
+                <div className="relative max-w-xs w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                    <input
+                        type="text"
+                        placeholder="Pesquisar..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary-500 transition-colors"
+                    />
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockPedidos.map((pedido) => (
-                    <div key={pedido.id} className="card group hover:border-neutral-700 transition-all duration-300 flex flex-col h-full bg-neutral-900/50 backdrop-blur-sm border-neutral-800">
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-neutral-800 rounded-full flex items-center justify-center border border-neutral-700">
-                                    <User className="w-5 h-5 text-neutral-400" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-neutral-100 group-hover:text-primary-400 transition-colors">{pedido.cliente}</h3>
-                                    <div className="flex items-center gap-2 text-xs text-neutral-500">
-                                        <MessageCircle className="w-3 h-3" />
-                                        {pedido.canal}
+            {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-neutral-500">
+                    <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary-500" />
+                    <p>Carregando pedidos reais...</p>
+                </div>
+            ) : filteredPedidos.length === 0 ? (
+                <div className="text-center py-20 bg-neutral-900/50 rounded-2xl border border-neutral-800">
+                    <MessageCircle className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
+                    <p className="text-neutral-400">Nenhum pedido encontrado no momento.</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredPedidos.map((p) => (
+                        <div key={p.id} className="card group hover:border-neutral-700 transition-all duration-300 flex flex-col h-full bg-neutral-900/50 backdrop-blur-sm border-neutral-800">
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-neutral-800 rounded-full flex items-center justify-center border border-neutral-700 overflow-hidden text-primary-500 font-bold uppercase">
+                                        {(p.clientes?.nome || p.pushName || '?').charAt(0)}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-neutral-100 group-hover:text-primary-400 transition-colors">
+                                            {p.clientes?.nome || p.pushName || 'Visitante'}
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-xs text-neutral-500">
+                                            <MessageCircle className="w-3 h-3" />
+                                            {p.numero_whatsapp}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <button className="text-neutral-600 hover:text-neutral-400">
-                                <MoreHorizontal className="w-5 h-5" />
-                            </button>
-                        </div>
 
-                        <div className="flex-1 bg-neutral-950/50 p-4 rounded-xl border border-neutral-800/50 mb-4">
-                            <p className="text-sm text-neutral-300 leading-relaxed font-medium">
-                                "{pedido.pedido}"
-                            </p>
-                        </div>
+                            <div className="flex-1 bg-neutral-950/50 p-4 rounded-xl border border-neutral-800/50 mb-4 overflow-hidden">
+                                <p className="text-sm text-neutral-300 leading-relaxed font-medium italic">
+                                    "{p.mensagem}"
+                                </p>
+                            </div>
 
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-neutral-800">
-                            <div className="flex flex-col gap-2">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-center border ${getStatusColor(pedido.status)}`}>
-                                    {getStatusLabel(pedido.status)}
-                                </span>
-                                <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    {pedido.tempo}
+                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-neutral-800">
+                                <div className="flex flex-col gap-2">
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-center border ${getStatusColor(p.status)}`}>
+                                        {getStatusLabel(p.status)}
+                                    </span>
+                                    <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        {new Date(p.created_at).toLocaleDateString('pt-BR')} {new Date(p.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="flex items-center gap-2">
-                                <button className="p-2 text-neutral-500 hover:text-primary-400 transition-colors" title="Responder">
-                                    <Send className="w-5 h-5" />
-                                </button>
-                                <button className="p-2 text-neutral-500 hover:text-primary-400 transition-colors" title="Ver Detalhes">
-                                    <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </div>
                         </div>
-
-                        <div className="mt-4 flex items-center gap-2">
-                            <div className="w-6 h-6 bg-neutral-800 rounded-full flex items-center justify-center text-[10px] text-neutral-500 font-bold border border-neutral-700">
-                                {pedido.responsavel === 'Pendente' ? '?' : pedido.responsavel.charAt(0)}
-                            </div>
-                            <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-tight">Resp: {pedido.responsavel}</span>
-                        </div>
-                    </div>
-                ))}
-
-                {/* Action Card: New Offline Request */}
-                <button className="border-2 border-dashed border-neutral-800 rounded-2xl p-8 flex flex-col items-center justify-center text-neutral-500 hover:border-primary-500/50 hover:text-primary-400 transition-all group">
-                    <div className="w-12 h-12 rounded-full border-2 border-dashed border-neutral-700 flex items-center justify-center mb-4 group-hover:border-primary-500 group-hover:bg-primary-500/10">
-                        <Plus className="w-6 h-6" />
-                    </div>
-                    <span className="font-semibold text-sm">Novo Registro Manual</span>
-                    <span className="text-xs text-neutral-600 mt-1">E-mail, Visita ou Telefone</span>
-                </button>
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

@@ -30,6 +30,8 @@ export default function AdminLayout({
   async function handleLogout() {
     const { supabase } = await import('@/lib/supabase');
     await supabase.auth.signOut();
+    document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
   }
 
