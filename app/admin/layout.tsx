@@ -10,12 +10,15 @@ import {
   MessageSquare,
   Settings,
   LogOut,
+  ClipboardList,
   Menu,
   X,
   Bell,
   Search,
   User as UserIcon,
-  ShieldCheck
+  ShieldCheck,
+  Cpu,
+  Zap
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -38,10 +41,11 @@ export default function AdminLayout({
   const menuItems = [
     { name: 'Dashboard', icon: BarChart3, path: '/admin' },
     { name: 'Clientes', icon: Users, path: '/admin/clientes' },
-    { name: 'Cronograma', icon: Calendar, path: '/admin/calendario' },
+    { name: 'Cronograma', icon: ClipboardList, path: '/admin/cronograma' },
+    { name: 'Calendário', icon: Calendar, path: '/admin/calendario' },
     { name: 'Atendimento', icon: MessageSquare, path: '/admin/atendimento' },
     { name: 'Vencimentos', icon: Bell, path: '/admin/vencimentos' },
-    { name: 'Automação', icon: BarChart3, path: '/admin/automacao' },
+    { name: 'Automação', icon: Zap, path: '/admin/automacao' },
     { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
   ];
 
