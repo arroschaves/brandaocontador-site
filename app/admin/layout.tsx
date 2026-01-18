@@ -40,6 +40,8 @@ export default function AdminLayout({
     { name: 'Clientes', icon: Users, path: '/admin/clientes' },
     { name: 'Cronograma', icon: Calendar, path: '/admin/calendario' },
     { name: 'Atendimento', icon: MessageSquare, path: '/admin/atendimento' },
+    { name: 'Vencimentos', icon: Bell, path: '/admin/vencimentos' },
+    { name: 'Automação', icon: BarChart3, path: '/admin/automacao' },
     { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
   ];
 

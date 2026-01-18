@@ -11,7 +11,9 @@ import {
     Search,
     Filter,
     MoreVertical,
-    Phone
+    Phone,
+    Tag,
+    Star
 } from 'lucide-react';
 
 export default function AtendimentoPage() {
@@ -92,6 +94,30 @@ export default function AtendimentoPage() {
         }
     };
 
+    const getCategoryLabel = (cat: string) => {
+        const labels: any = {
+            'CERTIDAO': 'Certidão',
+            'ALVARA': 'Alvará',
+            'CARTAO_CNPJ_IE': 'CNPJ/IE',
+            'FOLHA_PAGAMENTO': 'Folha',
+            'GUIAS_IMPOSTOS': 'Impostos',
+            'DOCUMENTOS_FISCAIS': 'Fiscal',
+            'IR_DECLARACOES': 'Renda/Terra',
+            'SOCIETARIO': 'Contrato',
+            'OUTROS': 'Outros'
+        };
+        return labels[cat] || cat || 'Sem Categoria';
+    };
+
+    const getPriorityColor = (prio: number) => {
+        switch (prio) {
+            case 1: return 'bg-red-500/20 text-red-500 border-red-500/30';
+            case 2: return 'bg-orange-500/20 text-orange-500 border-orange-500/30';
+            case 3: return 'bg-blue-500/20 text-blue-500 border-blue-500/30';
+            default: return 'bg-neutral-800 text-neutral-400 border-neutral-700';
+        }
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
@@ -117,8 +143,8 @@ export default function AtendimentoPage() {
                             key={s}
                             onClick={() => setFilter(s)}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === s
-                                    ? 'bg-primary-500 text-neutral-950'
-                                    : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                                ? 'bg-primary-500 text-neutral-950'
+                                : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
                                 }`}
                         >
                             {s === 'todos' ? 'Todos' : getStatusLabel(s)}
@@ -155,10 +181,19 @@ export default function AtendimentoPage() {
                                                 {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
                                             </h3>
 
-                                            {/* Badge de Status */}
-                                            <span className={`text-[10px] px-2 py-0.5 rounded-full border border-current uppercase tracking-wider font-bold ${getStatusColor(ticket.status)}`}>
-                                                {getStatusLabel(ticket.status)}
-                                            </span>
+                                            {/* Badge de Categoria */}
+                                            {ticket.categoria_solicitacao && (
+                                                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full border border-neutral-700 flex items-center gap-1 font-medium">
+                                                    <Tag className="w-3 h-3" /> {getCategoryLabel(ticket.categoria_solicitacao)}
+                                                </span>
+                                            )}
+
+                                            {/* Badge de Prioridade */}
+                                            {ticket.prioridade && ticket.prioridade < 3 && (
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-bold ${getPriorityColor(ticket.prioridade)}`}>
+                                                    <Star className="w-3 h-3 fill-current" /> {ticket.prioridade === 1 ? 'Urgente' : 'Alta'}
+                                                </span>
+                                            )}
 
                                             {/* Badge de Identificação */}
                                             {ticket.clientes ? (
