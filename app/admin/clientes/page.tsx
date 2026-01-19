@@ -13,7 +13,10 @@ import {
     Loader2,
     AlertCircle,
     X,
-    CheckCircle2
+    CheckCircle2,
+    FolderOpen,
+    ExternalLink,
+    FolderX
 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -121,7 +124,11 @@ export default function ClientesPage() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold text-neutral-100 italic">Gestão de Clientes</h1>
-                    <p className="text-neutral-400 mt-1">{clientes.length} clientes cadastrados no banco real.</p>
+                    <p className="text-neutral-400 mt-1">
+                        {clientes.length} clientes cadastrados •
+                        <span className="text-green-400">{clientes.filter(c => c.drive_folder_id).length} com pasta</span> •
+                        <span className="text-amber-400">{clientes.filter(c => !c.drive_folder_id).length} sem pasta</span>
+                    </p>
                 </div>
                 <button
                     onClick={() => handleOpenModal()}
@@ -153,6 +160,7 @@ export default function ClientesPage() {
                                     <th className="px-4 pb-4">Nome / Status</th>
                                     <th className="px-4 pb-4">Documento</th>
                                     <th className="px-4 pb-4">Regime Tributário</th>
+                                    <th className="px-4 pb-4">Google Drive</th>
                                     <th className="px-4 pb-4">Contato</th>
                                     <th className="px-4 pb-4 text-right">Ações</th>
                                 </tr>
@@ -190,6 +198,26 @@ export default function ClientesPage() {
                                                 </span>
                                             ) : (
                                                 <span className="text-xs text-neutral-600 italic">Não identificado</span>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            {c.drive_folder_id ? (
+                                                <a
+                                                    href={`https://drive.google.com/drive/folders/${c.drive_folder_id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors group/drive"
+                                                    title="Abrir pasta no Google Drive"
+                                                >
+                                                    <FolderOpen className="w-4 h-4" />
+                                                    <span className="text-xs">Pasta criada</span>
+                                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover/drive:opacity-100 transition-opacity" />
+                                                </a>
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-amber-500" title="Pasta não criada">
+                                                    <FolderX className="w-4 h-4" />
+                                                    <span className="text-xs">Sem pasta</span>
+                                                </div>
                                             )}
                                         </td>
                                         <td className="px-4 py-4 text-xs text-neutral-400">
