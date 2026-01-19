@@ -180,13 +180,13 @@ export default function ClientesPage() {
                                         <td className="px-4 py-4 font-mono text-sm text-neutral-400">{c.cnpj_cpf}</td>
                                         <td className="px-4 py-4">
                                             {c.regime_tributario ? (
-                                                <span className={`text-xs px-2 py-1 rounded-full font-medium border ${c.regime_tributario.includes('Simples')
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium border ${c.regime_tributario.toLowerCase().includes('simples')
                                                     ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                                                    : c.regime_tributario.includes('Presumido')
+                                                    : c.regime_tributario.toLowerCase().includes('presumido') || c.regime_tributario.toLowerCase().includes('real')
                                                         ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                                                         : 'bg-purple-500/10 text-purple-400 border-purple-500/20'
                                                     }`}>
-                                                    {c.regime_tributario}
+                                                    {c.regime_tributario.replace(/_/g, ' ')}
                                                 </span>
                                             ) : (
                                                 <span className="text-xs text-neutral-600 italic">Não identificado</span>

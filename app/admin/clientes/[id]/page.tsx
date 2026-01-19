@@ -63,11 +63,13 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                     <div className="flex items-center gap-3 text-sm text-neutral-500 mt-1">
                         <span>{cliente.cnpj_cpf}</span>
                         {cliente.inscricao_estadual && <span>• IE: {cliente.inscricao_estadual}</span>}
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium uppercase border ${cliente.regime_tributario?.includes('Simples')
-                                ? 'border-green-500/30 text-green-400 bg-green-500/10'
-                                : 'border-blue-500/30 text-blue-400 bg-blue-500/10'
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium uppercase border ${cliente.regime_tributario?.toLowerCase().includes('simples')
+                            ? 'border-green-500/30 text-green-400 bg-green-500/10'
+                            : cliente.regime_tributario?.toLowerCase().includes('presumido') || cliente.regime_tributario?.toLowerCase().includes('real')
+                                ? 'border-blue-500/30 text-blue-400 bg-blue-500/10'
+                                : 'border-neutral-500/30 text-neutral-400 bg-neutral-500/10'
                             }`}>
-                            {cliente.regime_tributario || 'Regime N/D'}
+                            {cliente.regime_tributario?.replace(/_/g, ' ') || 'Regime N/D'}
                         </span>
                     </div>
                 </div>
@@ -78,8 +80,8 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                 <button
                     onClick={() => setActiveTab('obrigacoes')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === 'obrigacoes'
-                            ? 'bg-neutral-800 text-white'
-                            : 'text-neutral-400 hover:text-white'
+                        ? 'bg-neutral-800 text-white'
+                        : 'text-neutral-400 hover:text-white'
                         }`}
                 >
                     <Calendar className="w-4 h-4" /> Guias & Impostos
@@ -87,8 +89,8 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                 <button
                     onClick={() => setActiveTab('notas')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === 'notas'
-                            ? 'bg-neutral-800 text-white'
-                            : 'text-neutral-400 hover:text-white'
+                        ? 'bg-neutral-800 text-white'
+                        : 'text-neutral-400 hover:text-white'
                         }`}
                 >
                     <FileText className="w-4 h-4" /> Notas Fiscais (XML)
@@ -96,8 +98,8 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                 <button
                     onClick={() => setActiveTab('dados')}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === 'dados'
-                            ? 'bg-neutral-800 text-white'
-                            : 'text-neutral-400 hover:text-white'
+                        ? 'bg-neutral-800 text-white'
+                        : 'text-neutral-400 hover:text-white'
                         }`}
                 >
                     Dados Cadastrais
@@ -117,8 +119,8 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                             <div key={guia.id} className="bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-all rounded-lg p-4">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className={`p-2 rounded-lg ${guia.tipo === 'DAS' ? 'bg-blue-500/10 text-blue-500' :
-                                            guia.tipo === 'FGTS' ? 'bg-orange-500/10 text-orange-500' :
-                                                'bg-purple-500/10 text-purple-500'
+                                        guia.tipo === 'FGTS' ? 'bg-orange-500/10 text-orange-500' :
+                                            'bg-purple-500/10 text-purple-500'
                                         }`}>
                                         <FileText className="w-6 h-6" />
                                     </div>
