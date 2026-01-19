@@ -27,6 +27,29 @@ export default function AutomationSystemPage() {
         totalObrigacoes: 0,
     });
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+
+    async function handleSyncDrive() {
+        if (!confirm('Deseja iniciar a criação das pastas no Google Drive para todos os clientes? Este processo pode levar alguns minutos.')) return;
+
+        setSyncing(true);
+        try {
+            const response = await fetch('https://webhook.brandaocontador.com.br/webhook/3232dacd-f6a4-40ed-9b57-5a22045de998', {
+                method: 'GET',
+            });
+
+            if (response.ok) {
+                alert('Sincronização iniciada com sucesso! O n8n está processando as pastas em segundo plano.');
+            } else {
+                alert('Erro ao iniciar sincronização. Verifique os logs do n8n.');
+            }
+        } catch (err) {
+            console.error('Erro ao chamar webhook:', err);
+            alert('Falha na conexão com o servidor de automação.');
+        } finally {
+            setSyncing(false);
+        }
+    }
 
     useEffect(() => {
         async function fetchStats() {
@@ -97,7 +120,12 @@ export default function AutomationSystemPage() {
             status: "Integrando",
             color: "text-cyan-400",
             bg: "bg-cyan-500/10",
-            details: ["Folder IDs persistentes", "Estrutura temporal (Ano/Mês)", "Acesso rápido do Admin"]
+            details: ["Folder IDs persistentes", "Estrutura temporal (Ano/Mês)", "Acesso rápido do Admin"],
+            action: {
+                label: syncing ? "Sincronizando..." : "Sincronizar Agora",
+                onClick: handleSyncDrive,
+                loading: syncing
+            }
         },
         {
             title: "Monitor de Vencimentos",
@@ -198,21 +226,41 @@ export default function AutomationSystemPage() {
                             </span>
                         </div>
 
-                        <h3 className="text-xl font-bold text-neutral-100 mb-3 group-hover:text-primary-400 transition-colors">
-                            {f.title}
-                        </h3>
-                        <p className="text-sm text-neutral-400 leading-relaxed mb-6">
-                            {f.description}
-                        </p>
+                        <div className="flex-1">
+                            <h3 className="text-xl font-bold text-neutral-100 mb-3 group-hover:text-primary-400 transition-colors">
+                                {f.title}
+                            </h3>
+                            <p className="text-sm text-neutral-400 leading-relaxed mb-6">
+                                {f.description}
+                            </p>
 
-                        <div className="space-y-2 mt-auto">
-                            {f.details.map((d, i) => (
-                                <div key={i} className="flex items-center gap-2 text-xs text-neutral-500">
-                                    <ShieldCheck className="w-3.5 h-3.5 text-neutral-700" />
-                                    {d}
-                                </div>
-                            ))}
+                            <div className="space-y-2 mb-6">
+                                {f.details.map((d, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-xs text-neutral-500">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-neutral-700" />
+                                        {d}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
+
+                        {f.action && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    f.action?.onClick();
+                                }}
+                                disabled={f.action.loading}
+                                className="w-full mt-4 py-3 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700 rounded-xl text-neutral-200 text-xs font-bold transition-all flex items-center justify-center gap-2 group-hover:border-primary-500/50"
+                            >
+                                {f.action.loading ? (
+                                    <RefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                    <Zap className="w-3 h-3 text-primary-400" />
+                                )}
+                                {f.action.label}
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>
@@ -228,7 +276,10 @@ export default function AutomationSystemPage() {
                         <p className="text-neutral-400 text-sm">Todas as automações são logadas e auditáveis via Supabase e n8n logs.</p>
                     </div>
                 </div>
-                <button className="px-6 py-3 bg-neutral-100 text-neutral-950 rounded-xl font-bold text-sm hover:bg-white transition-colors flex items-center gap-2 group">
+                <button
+                    onClick={() => window.open('https://webhook.brandaocontador.com.br/', '_blank')}
+                    className="px-6 py-3 bg-neutral-100 text-neutral-950 rounded-xl font-bold text-sm hover:bg-white transition-colors flex items-center gap-2 group"
+                >
                     Explorar Logs do n8n
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
