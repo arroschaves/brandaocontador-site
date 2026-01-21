@@ -13,18 +13,28 @@ import {
     MoreVertical,
     Phone,
     Tag,
-    Star
+    Star,
+    Image as ImageIcon,
+    FileText,
+    Video,
+    Mic,
+    Bot,
+    UserCircle,
+    Edit3,
+    Save,
+    X
 } from 'lucide-react';
 
 export default function AtendimentoPage() {
     const [tickets, setTickets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState('todos'); // todos, pendente, em_atendimento, concluido
+    const [filter, setFilter] = useState('todos');
+    const [editingTicket, setEditingTicket] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState<any>({});
 
     useEffect(() => {
         fetchTickets();
 
-        // Inscrever para atualizações em tempo real
         const channel = supabase
             .channel('atendimentos_realtime')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, (payload) => {
@@ -65,9 +75,27 @@ export default function AtendimentoPage() {
                 .eq('id', id);
 
             if (error) throw error;
-            // O realtime vai atualizar a lista automaticamente
         } catch (err) {
             alert('Erro ao atualizar status');
+        }
+    }
+
+    async function saveClassification(id: string) {
+        try {
+            const { error } = await supabase
+                .from('atendimentos')
+                .update({
+                    categoria_solicitacao: editForm.categoria_solicitacao,
+                    prioridade: parseInt(editForm.prioridade),
+                    atendimento_automatico: editForm.atendimento_automatico === 'true'
+                })
+                .eq('id', id);
+
+            if (error) throw error;
+            setEditingTicket(null);
+            setEditForm({});
+        } catch (err) {
+            alert('Erro ao salvar classificação');
         }
     }
 
@@ -118,12 +146,40 @@ export default function AtendimentoPage() {
         }
     };
 
+    const getPriorityLabel = (prio: number) => {
+        switch (prio) {
+            case 1: return 'Urgente';
+            case 2: return 'Alta';
+            case 3: return 'Normal';
+            default: return 'Não definida';
+        }
+    };
+
+    const getMediaIcon = (tipo: string) => {
+        switch (tipo) {
+            case 'audio': return <Mic className="w-4 h-4" />;
+            case 'imagem': return <ImageIcon className="w-4 h-4" />;
+            case 'documento': return <FileText className="w-4 h-4" />;
+            case 'video': return <Video className="w-4 h-4" />;
+            default: return <MessageSquare className="w-4 h-4" />;
+        }
+    };
+
+    const startEditing = (ticket: any) => {
+        setEditingTicket(ticket.id);
+        setEditForm({
+            categoria_solicitacao: ticket.categoria_solicitacao || '',
+            prioridade: ticket.prioridade || 3,
+            atendimento_automatico: ticket.atendimento_automatico ? 'true' : 'false'
+        });
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold text-neutral-100 italic">Central de Atendimento</h1>
-                    <p className="text-neutral-400 mt-1">Gerencie as solicitações recebidas via WhatsApp.</p>
+                    <p className="text-neutral-400 mt-1">Gerencie as solicitações recebidas via WhatsApp com IA.</p>
                 </div>
             </div>
 
@@ -166,8 +222,8 @@ export default function AtendimentoPage() {
                 ) : (
                     filteredTickets.map((ticket) => (
                         <div key={ticket.id} className="bg-neutral-900/50 backdrop-blur-sm p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all group">
-                            <div className="flex justify-between items-start">
-                                <div className="flex gap-4">
+                            <div className="flex justify-between items-start gap-4">
+                                <div className="flex gap-4 flex-1">
                                     <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-primary-500 font-bold text-lg shrink-0 overflow-hidden ring-2 ring-neutral-800 group-hover:ring-primary-500/50 transition-all">
                                         {ticket.clientes?.nome ? (
                                             ticket.clientes.nome.charAt(0)
@@ -181,6 +237,13 @@ export default function AtendimentoPage() {
                                                 {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
                                             </h3>
 
+                                            {/* Badge de Tipo de Mídia */}
+                                            {ticket.tipo_midia && ticket.tipo_midia !== 'texto' && (
+                                                <span className="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20 flex items-center gap-1 font-medium">
+                                                    {getMediaIcon(ticket.tipo_midia)} {ticket.tipo_midia}
+                                                </span>
+                                            )}
+
                                             {/* Badge de Categoria */}
                                             {ticket.categoria_solicitacao && (
                                                 <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full border border-neutral-700 flex items-center gap-1 font-medium">
@@ -189,9 +252,16 @@ export default function AtendimentoPage() {
                                             )}
 
                                             {/* Badge de Prioridade */}
-                                            {ticket.prioridade && ticket.prioridade < 3 && (
+                                            {ticket.prioridade && (
                                                 <span className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-bold ${getPriorityColor(ticket.prioridade)}`}>
-                                                    <Star className="w-3 h-3 fill-current" /> {ticket.prioridade === 1 ? 'Urgente' : 'Alta'}
+                                                    <Star className="w-3 h-3 fill-current" /> {getPriorityLabel(ticket.prioridade)}
+                                                </span>
+                                            )}
+
+                                            {/* Badge de Atendimento Automático */}
+                                            {ticket.atendimento_automatico && (
+                                                <span className="text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20 flex items-center gap-1 font-medium">
+                                                    <Bot className="w-3 h-3" /> Automático
                                                 </span>
                                             )}
 
@@ -216,15 +286,126 @@ export default function AtendimentoPage() {
                                                 <Clock className="w-3.5 h-3.5" />
                                                 {new Date(ticket.created_at).toLocaleString('pt-BR')}
                                             </span>
+                                            {ticket.confianca_classificacao && (
+                                                <span className="flex items-center gap-1">
+                                                    <Bot className="w-3.5 h-3.5" />
+                                                    Confiança: {(ticket.confianca_classificacao * 100).toFixed(0)}%
+                                                </span>
+                                            )}
                                         </div>
 
+                                        {/* Mensagem ou Transcrição */}
                                         <p className="mt-3 text-neutral-300 bg-neutral-800/30 p-3 rounded-lg border border-neutral-800/50 italic leading-relaxed">
-                                            "{ticket.mensagem}"
+                                            {ticket.transcricao_audio ? (
+                                                <>
+                                                    <span className="text-xs text-neutral-500 block mb-1">Transcrição de áudio:</span>
+                                                    "{ticket.transcricao_audio}"
+                                                </>
+                                            ) : (
+                                                `"${ticket.mensagem}"`
+                                            )}
                                         </p>
+
+                                        {/* Resposta Automática (se houver) */}
+                                        {ticket.resposta_automatica && (
+                                            <div className="mt-3 bg-green-500/5 border border-green-500/20 rounded-lg p-3">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Bot className="w-4 h-4 text-green-400" />
+                                                    <span className="text-xs font-bold text-green-400">Resposta Automática:</span>
+                                                </div>
+                                                <p className="text-sm text-neutral-300 italic">"{ticket.resposta_automatica}"</p>
+                                            </div>
+                                        )}
+
+                                        {/* Motivo de Atendimento Humano */}
+                                        {ticket.motivo_humano && (
+                                            <div className="mt-3 bg-orange-500/5 border border-orange-500/20 rounded-lg p-3">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <UserCircle className="w-4 h-4 text-orange-400" />
+                                                    <span className="text-xs font-bold text-orange-400">Requer Atendimento Humano:</span>
+                                                </div>
+                                                <p className="text-sm text-neutral-300">{ticket.motivo_humano}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Formulário de Edição */}
+                                        {editingTicket === ticket.id && (
+                                            <div className="mt-4 bg-neutral-800/50 p-4 rounded-lg border border-neutral-700 space-y-3">
+                                                <h4 className="text-sm font-bold text-neutral-200 mb-3">Classificar Manualmente</h4>
+
+                                                <div>
+                                                    <label className="text-xs text-neutral-400 block mb-1">Categoria</label>
+                                                    <select
+                                                        value={editForm.categoria_solicitacao}
+                                                        onChange={(e) => setEditForm({ ...editForm, categoria_solicitacao: e.target.value })}
+                                                        className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
+                                                    >
+                                                        <option value="">Selecione...</option>
+                                                        <option value="CERTIDAO">Certidão</option>
+                                                        <option value="ALVARA">Alvará</option>
+                                                        <option value="CARTAO_CNPJ_IE">CNPJ/IE</option>
+                                                        <option value="FOLHA_PAGAMENTO">Folha de Pagamento</option>
+                                                        <option value="GUIAS_IMPOSTOS">Guias/Impostos</option>
+                                                        <option value="DOCUMENTOS_FISCAIS">Documentos Fiscais</option>
+                                                        <option value="IR_DECLARACOES">IR/Declarações</option>
+                                                        <option value="SOCIETARIO">Societário</option>
+                                                        <option value="OUTROS">Outros</option>
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-xs text-neutral-400 block mb-1">Prioridade</label>
+                                                    <select
+                                                        value={editForm.prioridade}
+                                                        onChange={(e) => setEditForm({ ...editForm, prioridade: e.target.value })}
+                                                        className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
+                                                    >
+                                                        <option value="1">1 - Urgente</option>
+                                                        <option value="2">2 - Alta</option>
+                                                        <option value="3">3 - Normal</option>
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label className="text-xs text-neutral-400 block mb-1">Tipo de Atendimento</label>
+                                                    <select
+                                                        value={editForm.atendimento_automatico}
+                                                        onChange={(e) => setEditForm({ ...editForm, atendimento_automatico: e.target.value })}
+                                                        className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
+                                                    >
+                                                        <option value="false">Humano</option>
+                                                        <option value="true">Automático</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => saveClassification(ticket.id)}
+                                                        className="flex-1 px-3 py-2 bg-primary-500 text-neutral-950 rounded-lg text-sm font-bold hover:bg-primary-400 transition-colors flex items-center justify-center gap-2"
+                                                    >
+                                                        <Save className="w-4 h-4" /> Salvar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingTicket(null)}
+                                                        className="px-3 py-2 bg-neutral-700 text-neutral-300 rounded-lg text-sm font-bold hover:bg-neutral-600 transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {!editingTicket && (
+                                        <button
+                                            onClick={() => startEditing(ticket)}
+                                            className="px-3 py-1.5 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 rounded-lg text-xs font-bold uppercase transition-colors flex items-center gap-1"
+                                        >
+                                            <Edit3 className="w-3 h-3" /> Classificar
+                                        </button>
+                                    )}
                                     {ticket.status === 'pendente' && (
                                         <button
                                             onClick={() => updateStatus(ticket.id, 'em_atendimento')}
