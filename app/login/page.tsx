@@ -31,15 +31,8 @@ export default function LoginPage() {
             setError(`Erro: ${error.message} (${error.status})`)
             setLoading(false)
         } else {
-            console.log('✅ Login bem-sucedido! Configurando cookies...')
+            console.log('✅ Login bem-sucedido! Redirecionando para admin...')
 
-            // Definir cookies que o middleware espera
-            if (data.session) {
-                document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`
-                document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=604800; SameSite=Lax`
-            }
-
-            console.log('🚀 Redirecionando para admin...')
 
             // Forçar redirecionamento se o router.push falhar
             router.push('/admin')

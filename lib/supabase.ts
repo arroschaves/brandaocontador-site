@@ -1,19 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from './supabase/client'
 
-// Usar o proxy local ao invés de acessar diretamente o Supabase
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Export a singleton instance for client-side use
+export const supabase = createClient()
 
-// Cliente Supabase configurado com headers corretos
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-    },
-    global: {
-        headers: {
-            'apikey': supabaseAnonKey,
-        },
-    },
-});

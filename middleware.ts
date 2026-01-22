@@ -1,27 +1,20 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(req: NextRequest) {
-    // Verificar se tem cookie de sessão do Supabase
-    const token = req.cookies.get('sb-access-token')?.value ||
-        req.cookies.get('sb-refresh-token')?.value
-
-    const isAdminRoute = req.nextUrl.pathname.startsWith('/admin')
-    const isLoginRoute = req.nextUrl.pathname === '/login'
-
-    // Se está tentando acessar /admin sem token, redireciona para login
-    if (isAdminRoute && !token) {
-        return NextResponse.redirect(new URL('/login', req.url))
-    }
-
-    // Se está logado e tenta acessar /login, redireciona para admin
-    if (isLoginRoute && token) {
-        return NextResponse.redirect(new URL('/admin', req.url))
-    }
-
-    return NextResponse.next()
+export async function middleware(request: NextRequest) {
+    return await updateSession(request)
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/login'],
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * Feel free to modify this pattern to include more paths.
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
 }
+

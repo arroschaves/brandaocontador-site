@@ -31,12 +31,12 @@ export default function AdminLayout({
   const router = useRouter();
 
   async function handleLogout() {
-    const { supabase } = await import('@/lib/supabase');
+    const { createClient } = await import('@/lib/supabase/client');
+    const supabase = createClient();
     await supabase.auth.signOut();
-    document.cookie = 'sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     router.push('/login');
   }
+
 
   const menuItems = [
     { name: 'Dashboard', icon: BarChart3, path: '/admin' },
