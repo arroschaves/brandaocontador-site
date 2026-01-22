@@ -1,8 +1,18 @@
-import Header from '../components/Header';
+import { Metadata } from 'next';
 import { Calculator, Building, Users, FileText, TrendingUp, Leaf, Shield, Clock, Award } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Serviços Contábeis | Brandão Contabilidade',
+  description: 'Conheça nossos serviços especializados: Escrituração Fiscal, Abertura de Empresas, Gestão Trabalhista, Imposto de Renda e Consultoria Empresarial em Sidrolândia - MS.',
+  openGraph: {
+    title: 'Serviços Especializados | Brandão Contabilidade',
+    description: 'Soluções completas para produtores rurais e empresas. Tradição e inovação em contabilidade.',
+  }
+}
 
 export default function ServicosPage() {
   const servicos = [
+    // ... existing services code
     {
       title: "Escrituração Fiscal",
       description: "Escrituração completa e atualizada conforme legislação vigente",
@@ -94,8 +104,7 @@ export default function ServicosPage() {
 
   return (
     <div className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 text-white min-h-screen">
-      <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20">
         <div className="container-custom text-center">
@@ -107,8 +116,8 @@ export default function ServicosPage() {
             Nossos <span className="text-gradient">Serviços</span>
           </h1>
           <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Oferecemos soluções completas e personalizadas para empresários, 
-            produtores rurais e pessoas físicas em Campo Grande-MS
+            Oferecemos soluções completas e personalizadas para empresários,
+            produtores rurais e pessoas físicas em Sidrolândia-MS
           </p>
           <div className="flex items-center justify-center gap-8 text-sm text-neutral-400">
             <div className="flex items-center">
@@ -192,3 +201,4 @@ export default function ServicosPage() {
     </div>
   );
 }
+

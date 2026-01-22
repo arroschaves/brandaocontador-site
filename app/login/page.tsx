@@ -67,16 +67,17 @@ export default function LoginPage() {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-neutral-300 mb-2">
+                            <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">
                                 Email
                             </label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" />
                                 <input
+                                    id="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg pl-11 pr-4 py-3 text-neutral-100 focus:outline-none focus:border-primary-500 transition-colors"
+                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg pl-11 pr-4 py-3 text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                                     placeholder="seu@email.com"
                                     required
                                 />
@@ -84,16 +85,17 @@ export default function LoginPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-neutral-300 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-neutral-300 mb-2">
                                 Senha
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" />
                                 <input
+                                    id="password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg pl-11 pr-4 py-3 text-neutral-100 focus:outline-none focus:border-primary-500 transition-colors"
+                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg pl-11 pr-4 py-3 text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                                     placeholder="••••••••"
                                     required
                                 />
@@ -103,10 +105,11 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn-primary w-full py-4 text-lg"
                         >
-                            {loading ? 'Entrando...' : 'Entrar'}
+                            {loading ? 'Entrando...' : 'Entrar no Sistema'}
                         </button>
+
                     </form>
 
                     <div className="mt-6 text-center">

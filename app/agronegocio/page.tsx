@@ -1,7 +1,14 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, TrendingUp, Shield, Award, Calculator, Users, Phone, MessageSquare } from 'lucide-react';
 
+export const metadata: Metadata = {
+  title: 'Contabilidade Rural e Agronegócio | Brandão Contabilidade',
+  description: 'Especialistas em contabilidade para produtores rurais em Sidrolândia e região. Gestão de ICMS rural, Funrural, ITR e assessoria para a Reforma Tributária 2026.',
+}
+
 export default function Agronegocio() {
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800">
       {/* Hero Section */}

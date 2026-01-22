@@ -1,6 +1,13 @@
+import { Metadata } from 'next';
 import { Phone, Mail, MapPin, Clock, MessageCircle, Send } from 'lucide-react';
 
+export const metadata: Metadata = {
+  title: 'Contato | Brandão Contabilidade',
+  description: 'Entre em contato com a Brandão Contabilidade em Sidrolândia - MS. Telefone, WhatsApp, E-mail e localização. Solicite seu orçamento personalizado.',
+}
+
 export default function ContatoPage() {
+
   return (
     <div className="bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 text-neutral-100 min-h-screen">
       {/* Hero Section */}
@@ -14,7 +21,7 @@ export default function ContatoPage() {
             Fale <span className="text-gradient">Conosco</span>
           </h1>
           <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Estamos prontos para atender você e sua empresa. 
+            Estamos prontos para atender você e sua empresa.
             Entre em contato e solicite um orçamento personalizado.
           </p>
         </div>
@@ -23,7 +30,7 @@ export default function ContatoPage() {
       {/* Contato e Formulário */}
       <section className="py-20">
         <div className="container-custom grid lg:grid-cols-2 gap-12">
-          
+
           {/* Informações de Contato */}
           <div className="space-y-8">
             <div>
@@ -31,7 +38,7 @@ export default function ContatoPage() {
                 Informações de Contato
               </h2>
               <p className="text-neutral-300 mb-8 leading-relaxed">
-                Nossa equipe está sempre disponível para esclarecer suas dúvidas 
+                Nossa equipe está sempre disponível para esclarecer suas dúvidas
                 e oferecer as melhores soluções contábeis para seu negócio.
               </p>
             </div>
@@ -64,7 +71,7 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-neutral-100 mb-2">Endereço</h3>
-                  <a 
+                  <a
                     href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Sidrolândia+MS"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -116,49 +123,58 @@ export default function ContatoPage() {
 
           {/* Formulário de Contato */}
           <div className="card">
-            <h2 className="text-2xl font-bold text-neutral-100 mb-6">
+            <h2 className="text-2xl font-bold text-neutral-100 mb-6 font-primary">
               Envie sua Mensagem
             </h2>
             <form className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-2">
                     Nome Completo
                   </label>
                   <input
+                    id="name"
                     type="text"
-                    className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
                     placeholder="Seu nome completo"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  <label htmlFor="email_contato" className="block text-sm font-medium text-neutral-300 mb-2">
                     E-mail
                   </label>
                   <input
+                    id="email_contato"
                     type="email"
-                    className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
                     placeholder="seu@email.com"
+                    required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-2">
                   Telefone
                 </label>
                 <input
+                  id="phone"
                   type="tel"
-                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
                   placeholder="(67) 99999-9999"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                <label htmlFor="subject" className="block text-sm font-medium text-neutral-300 mb-2">
                   Assunto
                 </label>
-                <select className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors">
+                <select
+                  id="subject"
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
+                  required
+                >
                   <option value="">Selecione um assunto</option>
                   <option value="contabilidade">Serviços Contábeis</option>
                   <option value="fiscal">Questões Fiscais</option>
@@ -169,24 +185,28 @@ export default function ContatoPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-neutral-300 mb-2">
                   Mensagem
                 </label>
                 <textarea
+                  id="message"
                   rows={5}
-                  className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-100 placeholder-neutral-400 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-colors"
+                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-all font-body"
                   placeholder="Descreva como podemos ajudá-lo..."
+                  required
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="btn-primary w-full"
+                className="btn-primary w-full py-4 text-lg shadow-primary-500/20 shadow-lg"
               >
+                <Send className="w-5 h-5 mr-2" />
                 Enviar Mensagem
               </button>
             </form>
           </div>
+
         </div>
       </section>
     </div>

@@ -1,26 +1,46 @@
-"use client";
-
+import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import Header from './components/Header'
-import { usePathname } from 'next/navigation'
+import ClientWrapper from './components/ClientWrapper'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  // Esconde o header do site principal se estiver no admin
-  const isAdmin = pathname?.startsWith('/admin');
+export const metadata: Metadata = {
+  title: 'Brandão Contabilidade | Soluções Contábeis em Sidrolândia - MS',
+  description: 'Mais de 30 anos de experiência em assessoria contábil, fiscal e pessoal. Especialistas em impulsionar seu negócio com estratégia e segurança.',
+  keywords: 'contabilidade, contador, Sidrolândia, MS, fiscal, abertura de empresas, imposto de renda, Brandão Contabilidade',
+  authors: [{ name: 'Brandão Contabilidade' }],
+  openGraph: {
+    title: 'Brandão Contabilidade | Sua Gestão em Boas Mãos',
+    description: 'Soluções contábeis completas para empresas em Sidrolândia e região. Transformamos números em estratégias de crescimento.',
+    url: 'https://www.brandaocontador.com.br',
+    siteName: 'Brandão Contabilidade',
+    images: [
+      {
+        url: 'https://www.brandaocontador.com.br/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Brandão Contabilidade Logo',
+      },
+    ],
+    locale: 'pt-BR',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
 
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className={`${inter.className} antialiased`}>
         <SpeedInsights />
-        {!isAdmin && <Header />}
-        <main className={!isAdmin ? "pt-16" : ""}>
+        <ClientWrapper>
           {children}
-        </main>
+        </ClientWrapper>
       </body>
     </html>
   )

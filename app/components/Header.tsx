@@ -14,7 +14,7 @@ function Header() {
           {/* Logo e Nome bem à esquerda */}
           <div className="flex-shrink-0 mr-12">
             <Link href="/" className="flex items-center group">
-              <img src="/logocirculo.png" alt="Logo" className="w-12 h-12 rounded-full mr-4 group-hover:scale-110 transition-transform" />
+              <img src="/logocirculo.png" alt="Brandão Contabilidade Logo" className="w-12 h-12 rounded-full mr-4 group-hover:scale-110 transition-transform" />
               <span className="text-xl font-bold text-neutral-50 group-hover:text-primary-400 transition-colors">
                 Brandão Contabilidade
               </span>

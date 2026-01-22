@@ -69,33 +69,58 @@ export default function AtendimentoPage() {
 
     async function updateStatus(id: string, newStatus: string) {
         try {
-            const { error } = await supabase
+            console.log('Atualizando status:', { id, newStatus });
+
+            const { data, error } = await supabase
                 .from('atendimentos')
                 .update({ status: newStatus })
-                .eq('id', id);
+                .eq('id', id)
+                .select();
 
-            if (error) throw error;
-        } catch (err) {
-            alert('Erro ao atualizar status');
+            if (error) {
+                console.error('Erro do Supabase:', error);
+                throw error;
+            }
+
+            console.log('Status atualizado com sucesso:', data);
+
+            // Recarregar a lista de atendimentos
+            await fetchTickets();
+        } catch (err: any) {
+            console.error('Erro completo:', err);
+            alert(`Erro ao atualizar status: ${err.message || 'Erro desconhecido'}`);
         }
     }
 
     async function saveClassification(id: string) {
         try {
-            const { error } = await supabase
+            console.log('Salvando classificação:', { id, editForm });
+
+            const { data, error } = await supabase
                 .from('atendimentos')
                 .update({
-                    categoria_solicitacao: editForm.categoria_solicitacao,
-                    prioridade: parseInt(editForm.prioridade),
+                    categoria: editForm.categoria_solicitacao,
+                    prioridade: editForm.prioridade, // Manter como TEXT (CRITICA, ALTA, NORMAL)
                     atendimento_automatico: editForm.atendimento_automatico === 'true'
                 })
-                .eq('id', id);
+                .eq('id', id)
+                .select();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Erro do Supabase:', error);
+                throw error;
+            }
+
+            console.log('Classificação salva com sucesso:', data);
+
             setEditingTicket(null);
             setEditForm({});
-        } catch (err) {
-            alert('Erro ao salvar classificação');
+
+            // Recarregar a lista de atendimentos
+            await fetchTickets();
+        } catch (err: any) {
+            console.error('Erro completo:', err);
+            alert(`Erro ao salvar classificação: ${err.message || 'Erro desconhecido'}`);
         }
     }
 
@@ -360,9 +385,9 @@ export default function AtendimentoPage() {
                                                         onChange={(e) => setEditForm({ ...editForm, prioridade: e.target.value })}
                                                         className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-3 py-2 text-sm"
                                                     >
-                                                        <option value="1">1 - Urgente</option>
-                                                        <option value="2">2 - Alta</option>
-                                                        <option value="3">3 - Normal</option>
+                                                        <option value="CRITICA">Urgente (CRITICA)</option>
+                                                        <option value="ALTA">Alta</option>
+                                                        <option value="NORMAL">Normal</option>
                                                     </select>
                                                 </div>
 

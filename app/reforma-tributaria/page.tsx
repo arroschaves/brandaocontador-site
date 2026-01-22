@@ -1,7 +1,14 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { FileText, TrendingUp, Shield, Users, Calculator, Clock, MessageSquare, Award, Phone } from 'lucide-react';
 
+export const metadata: Metadata = {
+  title: 'Guia Reforma Tributária 2026 | Brandão Contabilidade',
+  description: 'Entenda os impactos da Reforma Tributária (IBS/CBS) no seu negócio. Guia completo sobre a transição 2025-2026 para Comércio, Indústria, Serviços e Agronegócio.',
+}
+
 export default function ReformaTributaria() {
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800">
       {/* Hero Section */}
