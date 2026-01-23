@@ -4,234 +4,228 @@ import { Phone, Mail, MapPin, Users, Shield, Clock, Award, Calculator, FileText,
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20">
-        <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-50 mb-6 text-balance">
-            Contabilidade que <span className="text-gradient">Impulsiona</span> seu Negócio
-          </h1>
-          <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            <strong className="text-neutral-100">Mais de 30 anos</strong> de experiência oferecendo soluções contábeis completas para <strong className="text-primary-400">empresas de todos os portes</strong>. Transformamos números em estratégias de crescimento.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="btn-primary w-full sm:w-auto">
-              <MessageSquare className="w-5 h-5 mr-2" />
-              Solicitar Proposta
-            </button>
-            <button className="btn-secondary w-full sm:w-auto">
-              <Phone className="w-5 h-5 mr-2" />
-              Falar no WhatsApp
-            </button>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-neutral-400 mt-8 justify-center">
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-success-400" />
-              Certificado Digital
+      {/* Hero Section - Digital Heritage Overhaul */}
+      <section className="relative min-h-[90vh] flex items-center pt-32 pb-20 overflow-hidden">
+        {/* Background Decorative Element */}
+        <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/2 h-full bg-amber-electric/5 border-l border-amber-electric/10 z-0"></div>
+        <div className="absolute top-20 left-10 mono-label opacity-40">PROTOCOL_V4.2 // SECURITY_LAYERS</div>
+
+        <div className="container-custom relative z-10 w-full">
+          <div className="flex flex-col lg:flex-row gap-16 items-start">
+            <div className="lg:w-2/3">
+              <div className="mono-label mb-6 flex items-center gap-4">
+                <span className="w-12 h-[1px] bg-amber-electric"></span>
+                CONFIANÇA DESDE 1993
+              </div>
+              <h1 className="mb-10 text-reveal active">
+                CONTABILIDADE <br />
+                <span className="text-amber-electric italic">ESTRATÉGICA</span> <br />
+                PARA A NOVA ERA.
+              </h1>
+              <p className="text-xl md:text-2xl text-neutral-400 mb-12 max-w-2xl leading-relaxed font-sans">
+                Unimos a solidez de <strong className="text-neutral-100 italic">30 anos de mercado</strong> com a agilidade digital do futuro. Segurança rústica, entrega de ponta.
+              </p>
+              <div className="flex flex-wrap gap-6">
+                <button className="btn-brutal group">
+                  SOLICITAR_ACESSO <MessageSquare className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button className="btn-brutal-outline group">
+                  FALAR_COM_ESPECIALISTA <Phone className="w-5 h-5 ml-3 group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-primary-400" />
-              Atendimento Rápido
-            </div>
-            <div className="flex items-center">
-              <Users className="w-4 h-4 mr-2 text-warning-400" />
-              +200 Clientes
+
+            <div className="lg:w-1/3 flex flex-col justify-end items-end h-full">
+              <div className="p-8 border border-neutral-800 bg-obsidian/50 backdrop-blur-sm self-stretch lg:self-end">
+                <div className="mono-label mb-4">STATUS_SISTEMA</div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-neutral-500">DISPONIBILIDADE</span>
+                    <span className="text-amber-electric">99.9%</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-neutral-500">CLIENTES_ATIVOS</span>
+                    <span className="text-amber-electric">+200</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-neutral-500">RESPOSTA_MÉDIA</span>
+                    <span className="text-amber-electric">&lt; 15MIN</span>
+                  </div>
+                </div>
+                <div className="mt-8 pt-8 border-t border-neutral-800">
+                  <Shield className="w-12 h-12 text-amber-electric mb-4" />
+                  <p className="text-xs text-neutral-500 font-mono italic">
+                    "A evolução do rústico para o digital seguro."
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Diferenciais */}
-      <section className="py-20 bg-neutral-800/30">
+      {/* Digital Command Center - Services Overhaul */}
+      <section id="servicos" className="py-24 bg-obsidian relative">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-neutral-50 mb-16 text-balance">
-            Por que escolher a <span className="text-gradient">Brandão Contabilidade</span>?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <Shield className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Segurança Total</h3>
-              <p className="text-neutral-300 leading-relaxed">Seus dador protegidos com tecnologia de ponta e conformidade total com a LGPD</p>
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+            <div className="max-w-2xl">
+              <div className="mono-label mb-4">CENTRO_DE_COMANDO // SERVIÇOS</div>
+              <h2 className="text-reveal active">
+                SOLUÇÕES EM <br />
+                <span className="text-amber-electric">ALTA DEFINIÇÃO</span>
+              </h2>
             </div>
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <Clock className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Agilidade</h3>
-              <p className="text-neutral-300 leading-relaxed">Processos otimizados que economizam seu tempo e aceleram resultados</p>
-            </div>
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <Users className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Atendimento Personalizado</h3>
-              <p className="text-neutral-300 leading-relaxed">Cada cliente é único. Oferecemos soluções sob medida para seu negócio</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Serviços Principais */}
-      <section id="servicos" className="py-20">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-50 mb-4 text-balance">
-              Nossos <span className="text-gradient">Serviços</span>
-            </h2>
-            <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
-              Soluções completas em contabilidade para impulsionar seu negócio
+            <p className="text-neutral-500 font-mono text-sm max-w-xs text-right hidden md:block">
+              INFRAESTRUTURA DIGITAL SEGURA PARA OPERAÇÕES CONTÁBEIS COMPLEXAS.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Calculator className="w-6 h-6 text-primary-400" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-neutral-800 border border-neutral-800">
+            {[
+              {
+                title: "CONTABILIDADE ESTRATÉGICA",
+                desc: "Escrituração e balanços com visão de crescimento exponencial.",
+                icon: Calculator,
+                tags: ["BALANÇOS", "INDICADORES", "DRE"]
+              },
+              {
+                title: "INTELIGÊNCIA FISCAL",
+                desc: "Otimização tributária e conformidade total com regulação.",
+                icon: FileText,
+                tags: ["TRIBUTOS", "PLANEJAMENTO", "SPED"]
+              },
+              {
+                title: "ECOSISTEMA PESSOAL",
+                desc: "Gestão de folha e RH com precisão digital absoluta.",
+                icon: Users,
+                tags: ["FOLHA", "RH_DIGITAL", "ESOCIAL"]
+              },
+              {
+                title: "GOVERNANÇA CORPORATIVA",
+                desc: "Abertura e estruturação de novas entidades no mercado.",
+                icon: Award,
+                tags: ["ABERTURA", "STATUTOS", "ALVARÁS"]
+              },
+              {
+                title: "CONSULTORIA DATA-DRIVEN",
+                desc: "Decisões baseadas em dados reais para sua empresa subir de nível.",
+                icon: TrendingUp,
+                tags: ["ESTRATÉGIA", "FINANÇAS", "DATA"]
+              },
+              {
+                title: "GESTÃO PATRIMONIAL",
+                desc: "Proteção e declaração de ativos com sigilo e segurança.",
+                icon: Shield,
+                tags: ["IRPF", "IRPJ", "ATIVOS"]
+              },
+            ].map((item, i) => (
+              <div key={i} className="brutalist-card group bg-obsidian hover:bg-neutral-900 overflow-hidden">
+                <div className="flex justify-between items-start mb-12">
+                  <div className="p-4 bg-amber-electric/5 border border-amber-electric/10 group-hover:bg-amber-electric group-hover:text-obsidian transition-all duration-500">
+                    <item.icon size={24} />
+                  </div>
+                  <span className="font-mono text-[10px] text-neutral-600">MOD_0{i + 1}</span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-display font-bold mb-4 tracking-tight group-hover:text-amber-electric transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-neutral-400 text-sm mb-8 leading-relaxed">
+                  {item.desc}
+                </p>
+                <div className="flex flex-wrap gap-2 mt-auto">
+                  {item.tags.map(tag => (
+                    <span key={tag} className="px-2 py-1 bg-neutral-800 text-neutral-500 font-mono text-[9px] tracking-widest">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Contabilidade Empresarial</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Escrituração completa, balanços e demonstrações financeiras</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Escrituração fiscal e contábil</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Balanços e demonstrações</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Análise de indicadores</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <FileText className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Departamento Fiscal</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Gestão completa de obrigações fiscais e tributárias</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Apuração de impostos</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Declarações obrigatórias</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Planejamento tributário</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Users className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Departamento Pessoal</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Folha de pagamento e gestão de recursos humanos</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Folha de pagamento</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Admissões e demissões</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Benefícios e encargos</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Award className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Abertura de Empresas</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Processo completo de constituição empresarial</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Registro na Junta Comercial</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Inscrições municipais</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Licenças e alvarás</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <TrendingUp className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Consultoria</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Orientação estratégica para crescimento do negócio</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Análise financeira</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Planejamento estratégico</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Otimização de processos</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Shield className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Imposto de Renda</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Declaração completa para pessoas físicas e jurídicas</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Pessoa física e jurídica</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Restituição máxima</li>
-                <li className="flex items-center"><span className="w-1.5 h-1.5 bg-primary-500 rounded-full mr-2"></span>Regularização pendências</li>
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 to-primary-500">
-        <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6 text-balance">
-            Pronto para Transformar sua Contabilidade?
+      {/* CTA Final - Impact Overhaul */}
+      <section className="py-32 bg-amber-electric relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-10 mono-label text-obsidian/30 select-none">SYSTEM_READY // INITIALIZE_ONBOARDING</div>
+        <div className="container-custom text-center relative z-10">
+          <h2 className="text-obsidian mb-8 text-reveal active">
+            PRONTO PARA O <br />
+            <span className="italic">PRÓXIMO NÍVEL?</span>
           </h2>
-          <p className="text-lg text-neutral-800 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Entre em contato conosco e descubra como podemos ajudar seu negócio a crescer com soluções contábeis personalizadas
+          <p className="text-xl text-obsidian/80 mb-12 max-w-2xl mx-auto font-mono uppercase tracking-tight">
+            INFRAESTRUTURA CONTÁBIL DE ALTA PERFORMANCE PARA QUEM NÃO ACEITA O BÁSICO.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
             <a
               href="https://wa.me/5567996011356"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-neutral-900 text-primary-400 px-8 py-4 rounded-xl font-semibold hover:bg-neutral-800 transition-all duration-300 flex items-center justify-center w-full sm:w-auto shadow-lg hover:shadow-xl"
+              className="bg-obsidian text-amber-electric px-12 py-5 font-mono font-bold tracking-widest hover:scale-105 transition-all duration-300 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]"
             >
-              <Phone className="w-5 h-5 mr-2" />
-              Falar com Especialista
+              FALAR_COM_ESPECIALISTA.EXE
             </a>
             <a
               href="/contato"
-              className="border-2 border-neutral-900 text-neutral-900 px-8 py-4 rounded-xl font-semibold hover:bg-neutral-900 hover:text-primary-400 transition-all duration-300 flex items-center justify-center w-full sm:w-auto"
+              className="border-2 border-obsidian text-obsidian px-12 py-5 font-mono font-bold tracking-widest hover:bg-obsidian hover:text-amber-electric transition-all duration-300"
             >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              Solicitar Orçamento
+              SOLICITAR_ORÇAMENTO
             </a>
           </div>
         </div>
       </section>
 
-      {/* Contato */}
-      <section id="contato" className="py-16 bg-neutral-800/50">
+      {/* Contato - Technical Layout */}
+      <section id="contato" className="py-24 bg-obsidian">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gradient mb-4">
-              Entre em Contato
-            </h2>
-            <p className="text-xl text-neutral-300 leading-relaxed">
-              Estamos prontos para atender você
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <div className="bg-success-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Phone className="w-8 h-8 text-success-400" />
-              </div>
-              <h3 className="text-xl font-bold text-success-400 mb-4">WhatsApp</h3>
-              <div className="space-y-2 text-neutral-300">
-                <p>(67) 99601-1356</p>
+          <div className="grid md:grid-cols-2 gap-16 items-start">
+            <div>
+              <div className="mono-label mb-4">PONTOS_DE_CONTATO</div>
+              <h2 className="mb-8 text-reveal active">CONECTE-SE AO <br />NOSSO <span className="text-amber-electric">NÚCLEO</span>.</h2>
+              <p className="text-neutral-400 text-lg mb-12 font-sans">Sua segurança contábil começa com uma conversa direta e transparente.</p>
+
+              <div className="space-y-8">
+                <div className="flex items-start gap-6 group">
+                  <div className="p-4 bg-neutral-900 border border-neutral-800 text-amber-electric group-hover:bg-amber-electric group-hover:text-obsidian transition-colors">
+                    <Phone size={24} />
+                  </div>
+                  <div>
+                    <div className="mono-label !text-[10px] mb-1">LINHA_DIRETA</div>
+                    <p className="text-xl font-display font-bold text-neutral-50">(67) 99601-1356</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-6 group">
+                  <div className="p-4 bg-neutral-900 border border-neutral-800 text-amber-electric group-hover:bg-amber-electric group-hover:text-obsidian transition-colors">
+                    <Mail size={24} />
+                  </div>
+                  <div>
+                    <div className="mono-label !text-[10px] mb-1">COMUNICAÇÃO_ASSÍNCRONA</div>
+                    <p className="text-xl font-display font-bold text-neutral-50">adm@brandaocontador.com.br</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-6 group">
+                  <div className="p-4 bg-neutral-900 border border-neutral-800 text-amber-electric group-hover:bg-amber-electric group-hover:text-obsidian transition-colors">
+                    <MapPin size={24} />
+                  </div>
+                  <div>
+                    <div className="mono-label !text-[10px] mb-1">LOCALIZAÇÃO_FÍSICA</div>
+                    <p className="text-xl font-display font-bold text-neutral-50">RUA SANTA CATARINA, 1010 // CENTRO // SIDROLÂNDIA - MS</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="card text-center">
-              <div className="bg-primary-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Mail className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-bold text-primary-400 mb-4">E-mail</h3>
-              <p className="text-neutral-300">adm@brandaocontador.com.br</p>
-            </div>
-            <div className="card text-center">
-              <div className="bg-warning-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MapPin className="w-8 h-8 text-warning-400" />
-              </div>
-              <h3 className="text-xl font-bold text-warning-400 mb-4">Endereço</h3>
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Sidrolândia+MS"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-neutral-300 hover:text-primary-400 transition-colors block"
-              >
-                Rua Santa Catarina, 1010<br />
-                Centro - Sidrolândia - MS
-              </a>
+
+            <div className="bg-neutral-900/10 border border-neutral-800 p-1 relative h-full min-h-[400px]">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3731.332306917637!2d-54.96576628461081!3d-20.939174586048123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9480373e7f466983%3A0xe7a5656565656565!2zUi4gU2FudGEgQ2F0YXJpbmEsIDEwMTAsIFNpZHJvbMOibmRpYSAtIE1TLCA3OTExMC0wMDA!5e0!3m2!1spt-BR!2sbr!4v1655555555555!5m2!1spt-BR!2sbr"
+                className="w-full h-full grayscale invert opacity-50 contrast-125"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+              ></iframe>
+              <div className="absolute top-4 left-4 bg-obsidian border border-neutral-800 p-2 mono-label !text-[8px]">MAP_VIEW // COORDINATES_LOCKED</div>
             </div>
           </div>
         </div>

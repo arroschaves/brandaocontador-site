@@ -1,10 +1,24 @@
 import { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import ClientWrapper from './components/ClientWrapper'
+import ScrollReveal from './components/ScrollReveal'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+})
+
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+})
 
 export const metadata: Metadata = {
   title: 'Brandão Contabilidade | Soluções Contábeis em Sidrolândia - MS',
@@ -35,9 +49,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="pt-BR" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}>
+      <body className="font-sans antialiased bg-obsidian text-neutral-200">
         <SpeedInsights />
+        <ScrollReveal />
         <ClientWrapper>
           {children}
         </ClientWrapper>

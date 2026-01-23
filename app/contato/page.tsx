@@ -9,200 +9,138 @@ export const metadata: Metadata = {
 export default function ContatoPage() {
 
   return (
-    <div className="bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 text-neutral-100 min-h-screen">
+    <div className="bg-obsidian text-neutral-100 min-h-screen pt-24">
       {/* Hero Section */}
-      <section className="py-20">
-        <div className="container-custom text-center">
-          <div className="inline-flex items-center bg-primary-500/20 text-primary-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Entre em Contato
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-balance">
-            Fale <span className="text-gradient">Conosco</span>
+      <section className="py-20 border-b border-neutral-800">
+        <div className="container-custom">
+          <div className="mono-label mb-6">PROTOCOLO_DE_CONTATO // NÚCLEO_OPERACIONAL</div>
+          <h1 className="mb-6 text-reveal active">
+            FALE <span className="text-amber-electric italic">CONOSCO</span>
           </h1>
-          <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Estamos prontos para atender você e sua empresa.
-            Entre em contato e solicite um orçamento personalizado.
+          <p className="text-xl text-neutral-400 max-w-3xl mb-8 leading-relaxed font-sans">
+            Infraestrutura de atendimento preparada para sua empresa.
+            Conecte-se aos nossos especialistas através dos canais oficiais bloqueados.
           </p>
         </div>
       </section>
 
       {/* Contato e Formulário */}
-      <section className="py-20">
-        <div className="container-custom grid lg:grid-cols-2 gap-12">
+      <section className="py-24">
+        <div className="container-custom grid lg:grid-cols-2 gap-20">
 
           {/* Informações de Contato */}
-          <div className="space-y-8">
+          <div className="space-y-12">
             <div>
-              <h2 className="text-3xl font-bold text-gradient mb-6">
-                Informações de Contato
+              <div className="mono-label mb-4">CANAL_DIRETO</div>
+              <h2 className="mb-6 text-reveal active">
+                NOSSOS <span className="text-amber-electric italic">VETORES</span>.
               </h2>
-              <p className="text-neutral-300 mb-8 leading-relaxed">
-                Nossa equipe está sempre disponível para esclarecer suas dúvidas
-                e oferecer as melhores soluções contábeis para seu negócio.
+              <p className="text-neutral-400 mb-8 leading-relaxed font-sans">
+                Nossa equipe está disponível para processar suas demandas com a solidez de 30 anos e a agilidade da era digital.
               </p>
             </div>
 
             <div className="space-y-6">
-              <div className="card flex items-start gap-4">
-                <div className="p-3 bg-primary-500/20 rounded-xl">
-                  <Phone className="w-6 h-6 text-primary-400" />
+              {[
+                { icon: Phone, title: "TELEFONES", data: ["(67) 3272-1356", "(67) 99601-1356"], label: "VOZ_E_DADOS" },
+                { icon: Mail, title: "E-MAIL", data: ["adm@brandaocontador.com.br"], label: "COMMS_ASSÍNC_ENCRYPT" },
+                { icon: MapPin, title: "ENDEREÇO", data: ["RUA SANTA CATARINA, 1010", "CENTRO - SIDROLÂNDIA/MS"], label: "COORDENADAS_FÍSICAS" },
+                { icon: Clock, title: "DISPONIBILIDADE", data: ["SEG A SEX: 8H ÀS 18H", "SÁB: 8H ÀS 12H"], label: "UPTIME_SCHEDULE" },
+              ].map((item, i) => (
+                <div key={i} className="brutalist-card flex items-start gap-6 border-transparent border-l-amber-electric/20 hover:border-l-amber-electric">
+                  <div className="p-4 bg-amber-electric/5 border border-amber-electric/10 text-amber-electric">
+                    <item.icon size={24} />
+                  </div>
+                  <div>
+                    <div className="mono-label !text-[10px] mb-1">{item.label}</div>
+                    <h3 className="font-display font-bold text-neutral-100 mb-2 uppercase text-lg">{item.title}</h3>
+                    {item.data.map(line => <p key={line} className="text-neutral-400 font-mono text-sm">{line}</p>)}
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-100 mb-2">Telefones</h3>
-                  <p className="text-neutral-300">(67) 3272-1356</p>
-                  <p className="text-neutral-300">(67) 99601-1356</p>
-                </div>
-              </div>
-
-              <div className="card flex items-start gap-4">
-                <div className="p-3 bg-primary-500/20 rounded-xl">
-                  <Mail className="w-6 h-6 text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-100 mb-2">E-mail</h3>
-                  <p className="text-neutral-300">adm@brandaocontador.com.br</p>
-                </div>
-              </div>
-
-              <div className="card flex items-start gap-4">
-                <div className="p-3 bg-primary-500/20 rounded-xl">
-                  <MapPin className="w-6 h-6 text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-100 mb-2">Endereço</h3>
-                  <a
-                    href="https://www.google.com/maps/search/?api=1&query=Rua+Santa+Catarina+1010+Centro+Sidrolândia+MS"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neutral-300 hover:text-primary-400 transition-colors cursor-pointer"
-                  >
-                    Rua Santa Catarina, 1010<br />
-                    Centro - Sidrolândia/MS<br />
-                    CEP: 79170-000
-                  </a>
-                  <p className="text-sm text-primary-400 mt-2">
-                    📍 Clique para ver no Google Maps
-                  </p>
-                </div>
-              </div>
-
-              <div className="card flex items-start gap-4">
-                <div className="p-3 bg-primary-500/20 rounded-xl">
-                  <Clock className="w-6 h-6 text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-neutral-100 mb-2">Horário de Funcionamento</h3>
-                  <p className="text-neutral-300">
-                    Segunda a Sexta: 8h às 18h<br />
-                    Sábado: 8h às 12h
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* CTA WhatsApp */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-success-600 to-success-700 rounded-xl">
-              <h3 className="text-xl font-bold text-white mb-3">
-                Precisa de atendimento imediato?
+            <div className="p-10 bg-amber-electric border border-amber-electric">
+              <h3 className="text-2xl font-display font-bold text-obsidian mb-4 uppercase">
+                ATENDIMENTO_IMEDIATO.EXE
               </h3>
-              <p className="text-success-100 mb-4 leading-relaxed">
-                Fale conosco pelo WhatsApp e receba atendimento personalizado.
+              <p className="text-obsidian/80 mb-8 font-mono text-sm">
+                RECEBA SUPORTE EM TEMPO REAL VIA PROTOCOLO WHATSAPP.
               </p>
               <a
                 href="https://wa.me/5567996011356"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-success-600 px-6 py-3 rounded-lg font-semibold hover:bg-success-50 transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center gap-2 bg-obsidian text-amber-electric px-8 py-4 font-mono font-bold tracking-widest hover:scale-105 transition-all shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)]"
               >
                 <MessageCircle className="w-5 h-5" />
-                Falar no WhatsApp
+                CONECTAR_AGORA
               </a>
             </div>
           </div>
 
           {/* Formulário de Contato */}
-          <div className="card">
-            <h2 className="text-2xl font-bold text-neutral-100 mb-6 font-primary">
-              Envie sua Mensagem
-            </h2>
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+          <div className="brutalist-card bg-neutral-900/40">
+            <div className="mono-label mb-4">MENSAGEM_INICIAL</div>
+            <h2 className="text-3xl mb-12 font-display uppercase italic">Terminal de Envio</h2>
+            <form className="space-y-8">
+              <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-2">
-                    Nome Completo
-                  </label>
+                  <label htmlFor="name" className="mono-label !text-[10px] mb-2 block">ID_USUÁRIO</label>
                   <input
                     id="name"
                     type="text"
-                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
-                    placeholder="Seu nome completo"
+                    className="w-full px-4 py-4 bg-obsidian border border-neutral-800 text-neutral-100 placeholder-neutral-700 focus:outline-none focus:border-amber-electric transition-all font-mono text-sm"
+                    placeholder="DIGITE SEU NOME"
                     required
                   />
                 </div>
                 <div>
-                  <label htmlFor="email_contato" className="block text-sm font-medium text-neutral-300 mb-2">
-                    E-mail
-                  </label>
+                  <label htmlFor="email_contato" className="mono-label !text-[10px] mb-2 block">PONTO_DE_RETORNO</label>
                   <input
                     id="email_contato"
                     type="email"
-                    className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
-                    placeholder="seu@email.com"
+                    className="w-full px-4 py-4 bg-obsidian border border-neutral-800 text-neutral-100 placeholder-neutral-700 focus:outline-none focus:border-amber-electric transition-all font-mono text-sm"
+                    placeholder="EMAIL_DE_CONTATO"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-2">
-                  Telefone
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
-                  placeholder="(67) 99999-9999"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-neutral-300 mb-2">
-                  Assunto
-                </label>
+                <label htmlFor="subject" className="mono-label !text-[10px] mb-2 block">TIPO_DE_SOLICITAÇÃO</label>
                 <select
                   id="subject"
-                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all font-body"
+                  className="w-full px-4 py-4 bg-obsidian border border-neutral-800 text-neutral-100 focus:outline-none focus:border-amber-electric transition-all font-mono text-sm appearance-none"
                   required
                 >
-                  <option value="">Selecione um assunto</option>
-                  <option value="contabilidade">Serviços Contábeis</option>
-                  <option value="fiscal">Questões Fiscais</option>
-                  <option value="trabalhista">Questões Trabalhistas</option>
-                  <option value="consultoria">Consultoria</option>
-                  <option value="outros">Outros</option>
+                  <option value="">SELECIONE UM VETOR</option>
+                  <option value="contabilidade">SERVIÇOS_CONTÁBEIS</option>
+                  <option value="fiscal">INTELIGÊNCIA_FISCAL</option>
+                  <option value="trabalhista">RECURSOS_HUMANOS</option>
+                  <option value="consultoria">ESTRATÉGIA_E_DADOS</option>
+                  <option value="outros">OUTROS_PROTOCOLOS</option>
                 </select>
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-neutral-300 mb-2">
-                  Mensagem
-                </label>
+                <label htmlFor="message" className="mono-label !text-[10px] mb-2 block">PACOTE_DE_DADOS</label>
                 <textarea
                   id="message"
-                  rows={5}
-                  className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 rounded-lg text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-all font-body"
-                  placeholder="Descreva como podemos ajudá-lo..."
+                  rows={6}
+                  className="w-full px-4 py-4 bg-obsidian border border-neutral-800 text-neutral-100 placeholder-neutral-700 focus:outline-none focus:border-amber-electric resize-none transition-all font-mono text-sm"
+                  placeholder="DESCREVA SUA DEMANDA..."
                   required
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="btn-primary w-full py-4 text-lg shadow-primary-500/20 shadow-lg"
+                className="btn-brutal w-full py-5 text-lg group"
               >
-                <Send className="w-5 h-5 mr-2" />
-                Enviar Mensagem
+                <Send className="w-5 h-5 mr-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                TRANSMITIR_DADOS.EXE
               </button>
             </form>
           </div>
