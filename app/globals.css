@@ -30,13 +30,26 @@
     background-blend-mode: overlay;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display font-bold text-neutral-50 tracking-tighter leading-[0.9];
   }
 
-  h1 { font-size: clamp(3.5rem, 10vw, 8rem); }
-  h2 { font-size: clamp(2.5rem, 8vw, 5rem); }
-  h3 { font-size: clamp(1.8rem, 5vw, 3rem); }
+  h1 {
+    font-size: clamp(3.5rem, 8vw, 6rem);
+  }
+
+  h2 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  h3 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+  }
 }
 
 @layer components {
@@ -86,7 +99,7 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   .container-custom {
     @apply max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-20;
   }
@@ -98,7 +111,7 @@
   .glow-amber {
     box-shadow: 0 0 40px -10px rgba(255, 176, 0, 0.3);
   }
-  
+
   .bg-noise {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
