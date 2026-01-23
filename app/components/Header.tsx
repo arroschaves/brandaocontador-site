@@ -12,17 +12,18 @@ function Header() {
       <div className="container-custom">
         <div className="flex justify-between items-center h-24">
           {/* Logo e Nome */}
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center group gap-4">
-              <div className="relative">
-                <img src="/logocirculo.png" alt="Brandão Contabilidade Logo" className="w-12 h-12 grayscale group-hover:grayscale-0 transition-all duration-500" />
-                <div className="absolute inset-0 border border-amber-electric/20 group-hover:border-amber-electric transition-colors"></div>
+          <div className="flex-shrink-0 flex items-center h-full">
+            <Link href="/" className="flex items-center group h-full py-4 gap-6">
+              <div className="relative h-full aspect-[4/3] flex items-center">
+                <img
+                  src="/logo-full.jpg"
+                  alt="Brandão Contabilidade Logo"
+                  className="h-full w-auto grayscale contrast-125 brightness-110 group-hover:grayscale-0 transition-all duration-700 object-contain"
+                />
               </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-display font-bold text-neutral-50 tracking-tight group-hover:text-amber-electric transition-colors">
-                  BRANDÃO
-                </span>
-                <span className="mono-label !text-[10px]">EST. 1993 // DIGITAL ERA</span>
+              <div className="hidden sm:flex flex-col border-l border-neutral-800 pl-6 h-10 justify-center">
+                <span className="mono-label !text-[10px] !text-amber-electric animate-pulse">TERMINAL // ONLINE</span>
+                <span className="mono-label !text-[10px] !text-neutral-600">SIDROLÂNDIA_MS // EST. 1993</span>
               </div>
             </Link>
           </div>

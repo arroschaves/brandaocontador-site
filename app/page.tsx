@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Phone, Mail, MapPin, Users, Shield, Clock, Award, Calculator, FileText, TrendingUp, MessageSquare } from 'lucide-react';
+import { Phone, Mail, MapPin, Users, Shield, Award, Calculator, FileText, TrendingUp, MessageSquare } from 'lucide-react';
+import TerminalInformativo from './components/TerminalInformativo';
 
 export default function Home() {
   return (
@@ -12,14 +13,14 @@ export default function Home() {
 
         <div className="container-custom relative z-10 w-full">
           <div className="flex flex-col lg:flex-row gap-16 items-start">
-            <div className="lg:w-2/3">
+            <div className="lg:w-1/2">
               <div className="mono-label mb-6 flex items-center gap-4">
                 <span className="w-12 h-[1px] bg-amber-electric"></span>
                 CONFIANÇA DESDE 1993
               </div>
               <h1 className="mb-10 text-reveal active">
                 CONTABILIDADE <br />
-                <span className="text-amber-electric italic">ESTRATÉGICA</span> <br />
+                <span className="text-amber-electric italic uppercase font-display">ESTRATÉGICA</span> <br />
                 PARA A NOVA ERA.
               </h1>
               <p className="text-xl md:text-2xl text-neutral-400 mb-12 max-w-2xl leading-relaxed font-sans">
@@ -35,30 +36,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="lg:w-1/3 flex flex-col justify-end items-end h-full">
-              <div className="p-8 border border-neutral-800 bg-obsidian/50 backdrop-blur-sm self-stretch lg:self-end">
-                <div className="mono-label mb-4">STATUS_SISTEMA</div>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-neutral-500">DISPONIBILIDADE</span>
-                    <span className="text-amber-electric">99.9%</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-neutral-500">CLIENTES_ATIVOS</span>
-                    <span className="text-amber-electric">+200</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-neutral-500">RESPOSTA_MÉDIA</span>
-                    <span className="text-amber-electric">&lt; 15MIN</span>
-                  </div>
-                </div>
-                <div className="mt-8 pt-8 border-t border-neutral-800">
-                  <Shield className="w-12 h-12 text-amber-electric mb-4" />
-                  <p className="text-xs text-neutral-500 font-mono italic">
-                    "A evolução do rústico para o digital seguro."
-                  </p>
-                </div>
-              </div>
+            <div className="lg:w-1/2 w-full flex flex-col justify-end items-end h-full">
+              <TerminalInformativo />
             </div>
           </div>
         </div>
@@ -141,6 +120,47 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Heritage Identity - Using Provided Banners */}
+      <section className="py-24 bg-neutral-900/20 border-t border-neutral-800">
+        <div className="container-custom">
+          <div className="mono-label mb-8 text-center">ARQUIVO_HISTÓRICO // BRANDING_HERITAGE</div>
+          <div className="brutalist-card p-0 border-amber-electric/20 overflow-hidden relative group">
+            <img
+              src="/card-1.jpg"
+              alt="Brandão Heritage Banner"
+              className="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-1000 contrast-125 opacity-70 group-hover:opacity-100"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent opacity-60"></div>
+            <div className="absolute bottom-6 left-6 mono-label !text-amber-electric">DOC_REF: 1993_ORIGINAL_VALUES</div>
+          </div>
+
+          <div className="mt-12 grid md:grid-cols-2 gap-12 items-start">
+            <div className="max-w-prose">
+              <h3 className="text-2xl font-display mb-6 uppercase italic">NOSSA_HISTÓRIA.LOG</h3>
+              <p className="text-neutral-400 leading-relaxed font-sans mb-6">
+                Desde 1993, a <strong className="text-neutral-100">Brandão Contabilidade</strong> tem sido o pilar de segurança para empresas em Sidrolândia e região. O que começou como um escritório tradicional evoluiu para um ecossistema digital de alta performance.
+              </p>
+              <p className="text-neutral-400 leading-relaxed font-sans">
+                Nossa missão é unir a <span className="text-amber-electric italic">confiança do rústico</span> — aquele aperto de mão que vale um contrato — com a <span className="text-amber-electric italic">precisão do digital</span>. Transformamos a complexidade burocrática em vantagem estratégica para o seu negócio.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="mono-label !text-[10px] mb-2 uppercase tracking-widest text-neutral-500">VALORES_CHAVE // CORE_VALUES</div>
+              {[
+                { label: "INTEGRIDADE_ABSOLUTA", value: "30+ ANOS DE REPUTAÇÃO ILIBADA" },
+                { label: "AGILIDADE_PROCESSUAL", value: "FLUXOS DIGITAIS OTIMIZADOS" },
+                { label: "FOCO_NO_RESULTADO", value: "MAIS QUE CONTABILIDADE, ESTRATÉGIA" },
+              ].map((v, i) => (
+                <div key={i} className="border-l-2 border-amber-electric/30 pl-4 py-2 hover:border-amber-electric transition-colors">
+                  <div className="mono-label !text-[9px] !text-amber-electric/60">{v.label}</div>
+                  <div className="text-sm font-mono text-neutral-300">{v.value}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
