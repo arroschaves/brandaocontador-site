@@ -22,8 +22,8 @@ function Header() {
                 />
               </div>
               <div className="hidden sm:flex flex-col border-l border-neutral-800 pl-6 h-10 justify-center">
-                <span className="mono-label !text-[10px] !text-amber-electric animate-pulse">TERMINAL // ONLINE</span>
-                <span className="mono-label !text-[10px] !text-neutral-600">SIDROLÂNDIA_MS // EST. 1993</span>
+                <span className="text-[10px] font-mono text-amber-electric tracking-[0.2em] uppercase">Evoluindo a Tradição</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">Sidrolândia - MS // Est. 1993</span>
               </div>
             </Link>
           </div>

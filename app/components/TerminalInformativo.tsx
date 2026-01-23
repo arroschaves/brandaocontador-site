@@ -35,40 +35,40 @@ export default function TerminalInformativo() {
             <div className="flex border-b border-neutral-800 bg-neutral-900/50">
                 <button
                     onClick={() => setActiveTab('agro')}
-                    className={`flex-1 py-4 font-mono text-[10px] tracking-widest transition-all ${activeTab === 'agro' ? 'bg-amber-electric text-obsidian font-bold' : 'text-neutral-500 hover:text-amber-electric'}`}
+                    className={`flex-1 py-4 font-sans text-xs font-bold tracking-wider transition-all border-r border-neutral-800/50 ${activeTab === 'agro' ? 'bg-amber-electric text-obsidian' : 'text-neutral-500 hover:text-amber-electric'}`}
                 >
-                    MERCADO_AGRO
+                    MERCADO AGRO
                 </button>
                 <button
                     onClick={() => setActiveTab('noticias')}
-                    className={`flex-1 py-4 font-mono text-[10px] tracking-widest transition-all ${activeTab === 'noticias' ? 'bg-amber-electric text-obsidian font-bold' : 'text-neutral-500 hover:text-amber-electric'}`}
+                    className={`flex-1 py-4 font-sans text-xs font-bold tracking-wider transition-all border-r border-neutral-800/50 ${activeTab === 'noticias' ? 'bg-amber-electric text-obsidian' : 'text-neutral-500 hover:text-amber-electric'}`}
                 >
-                    NOTICIAS_DATA
+                    NOTÍCIAS
                 </button>
                 <button
                     onClick={() => setActiveTab('links')}
-                    className={`flex-1 py-4 font-mono text-[10px] tracking-widest transition-all ${activeTab === 'links' ? 'bg-amber-electric text-obsidian font-bold' : 'text-neutral-500 hover:text-amber-electric'}`}
+                    className={`flex-1 py-4 font-sans text-xs font-bold tracking-wider transition-all ${activeTab === 'links' ? 'bg-amber-electric text-obsidian' : 'text-neutral-500 hover:text-amber-electric'}`}
                 >
-                    LINKS_FERRAMENTAS
+                    LINKS ÚTEIS
                 </button>
             </div>
 
             <div className="p-6 min-h-[300px]">
                 {activeTab === 'agro' && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="mono-label text-[10px] mb-6 flex items-center justify-between">
-                            <span>INDICADORES_BOVMES_v1</span>
-                            <span className="text-amber-electric/50">REF: SIDROLÂNDIA/MS</span>
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-[10px] font-mono text-amber-electric/50 uppercase tracking-widest">Indicadores de Mercado</span>
+                            <span className="text-[10px] font-mono text-neutral-600 italic">Ref: Sidrolândia/MS</span>
                         </div>
                         <div className="space-y-4">
                             {COTACOES.map((c, i) => (
                                 <div key={i} className="flex justify-between items-center border-b border-neutral-800/50 pb-3 group">
                                     <div>
-                                        <div className="text-[10px] text-neutral-500 font-mono mb-1">{c.item}</div>
+                                        <div className="text-[10px] text-neutral-500 font-mono mb-1 uppercase">{c.item}</div>
                                         <div className="text-xl font-display font-bold group-hover:text-amber-electric transition-colors">{c.price}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className={`text-[10px] font-mono ${c.trend.startsWith('+') ? 'text-green-500' : c.trend.startsWith('-') ? 'text-red-500' : 'text-neutral-500'}`}>
+                                        <div className={`text-[10px] font-mono font-bold ${c.trend.startsWith('+') ? 'text-green-500' : c.trend.startsWith('-') ? 'text-red-500' : 'text-neutral-500'}`}>
                                             {c.trend}
                                         </div>
                                         <div className="text-[9px] text-neutral-600 font-mono italic">{c.location}</div>
@@ -81,13 +81,13 @@ export default function TerminalInformativo() {
 
                 {activeTab === 'noticias' && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="mono-label text-[10px] mb-6 flex items-center gap-2">
+                        <div className="flex items-center gap-2 mb-6 text-[10px] font-mono text-amber-electric/50 uppercase tracking-widest">
                             <Newspaper size={12} className="text-amber-electric" />
-                            ULTIMAS_ATUALIZAÇÕES
+                            Últimas Atualizações Fiscais
                         </div>
                         <div className="space-y-6">
                             {NOTICIAS.map((n, i) => (
-                                <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="block group">
+                                <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="block group border-l border-neutral-800 pl-4 hover:border-amber-electric transition-colors">
                                     <div className="flex justify-between items-start mb-1">
                                         <span className="text-[9px] text-amber-electric/60 font-mono">[{n.date}]</span>
                                         <ExternalLink size={10} className="text-neutral-700 group-hover:text-amber-electric transition-colors" />
@@ -103,7 +103,7 @@ export default function TerminalInformativo() {
 
                 {activeTab === 'links' && (
                     <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="mono-label text-[10px] mb-6">PORTAIS_E_FERRAMENTAS</div>
+                        <div className="text-[10px] font-mono text-amber-electric/50 uppercase tracking-widest mb-6">Portais e Ferramentas</div>
                         <div className="grid grid-cols-1 gap-2">
                             {LINKS_UTEIS.map((l, i) => (
                                 <a
@@ -113,7 +113,7 @@ export default function TerminalInformativo() {
                                     rel="noopener noreferrer"
                                     className="p-4 border border-neutral-800 hover:border-amber-electric/30 bg-neutral-900/30 hover:bg-amber-electric/5 transition-all flex justify-between items-center group"
                                 >
-                                    <span className="font-mono text-xs text-neutral-400 group-hover:text-neutral-100">{l.name}</span>
+                                    <span className="font-mono text-xs text-neutral-400 group-hover:text-neutral-100 uppercase tracking-tight">{l.name}</span>
                                     <LinkIcon size={14} className="text-neutral-700 group-hover:text-amber-electric" />
                                 </a>
                             ))}
@@ -123,10 +123,10 @@ export default function TerminalInformativo() {
             </div>
 
             <div className="bg-neutral-900 px-6 py-2 flex justify-between items-center border-t border-neutral-800">
-                <span className="font-mono text-[8px] text-neutral-600 italic">SYSTEM_TIME: {new Date().toLocaleTimeString()}</span>
-                <div className="flex gap-2">
-                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="font-mono text-[8px] text-green-500/50 uppercase">LIVE_LINK</span>
+                <span className="font-mono text-[8px] text-neutral-600 italic">Atualizado em: {new Date().toLocaleDateString()}</span>
+                <div className="flex gap-2 items-center">
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+                    <span className="font-mono text-[8px] text-green-500/50 uppercase tracking-tighter text-glow">Feed Ativo</span>
                 </div>
             </div>
         </div>
