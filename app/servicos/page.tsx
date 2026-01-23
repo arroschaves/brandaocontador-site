@@ -1,23 +1,18 @@
 import { Metadata } from 'next';
-import { Calculator, Building, Users, FileText, TrendingUp, Leaf, Shield, Clock, Award } from 'lucide-react';
+import { Calculator, Building, Users, FileText, TrendingUp, Leaf, Award, Shield, MessageSquare, Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Serviços Contábeis | Brandão Contabilidade',
-  description: 'Conheça nossos serviços especializados: Escrituração Fiscal, Abertura de Empresas, Gestão Trabalhista, Imposto de Renda e Consultoria Empresarial em Sidrolândia - MS.',
-  openGraph: {
-    title: 'Serviços Especializados | Brandão Contabilidade',
-    description: 'Soluções completas para produtores rurais e empresas. Tradição e inovação em contabilidade.',
-  }
+  title: 'Serviços | Brandão Contabilidade',
+  description: 'Soluções contábeis de alta performance para empresas e produtores rurais. Tradição, segurança e precisão digital.',
 }
 
 export default function ServicosPage() {
   const servicos = [
-    // ... existing services code
     {
-      title: "Escrituração Fiscal",
-      description: "Escrituração completa e atualizada conforme legislação vigente",
+      title: "CONTABILIDADE ESTRATÉGICA",
+      description: "Escrituração completa e balanços com visão de crescimento exponencial.",
       icon: <Calculator className="w-8 h-8" />,
-      color: "yellow",
+      tag: "CORE_BUSINESS",
       detalhes: [
         "Apuração de impostos (ICMS, IPI, PIS, COFINS)",
         "Escrituração Fiscal Digital (EFD)",
@@ -27,140 +22,119 @@ export default function ServicosPage() {
       ]
     },
     {
-      title: "Abertura de Empresas",
-      description: "Processo completo de abertura, alteração e baixa de empresas",
+      title: "SOLUÇÕES SOCIETÁRIAS",
+      description: "Processo completo de abertura, estruturação e legalização de empresas.",
       icon: <Building className="w-8 h-8" />,
-      color: "blue",
+      tag: "GOVERNANCE",
       detalhes: [
-        "Consulta de viabilidade",
-        "Registro na Junta Comercial",
+        "Consulta de viabilidade e registro",
         "Inscrições municipais e estaduais",
-        "Alterações contratuais",
-        "Baixa de empresas"
+        "Alterações contratuais complexas",
+        "Baixa e regularização",
+        "Holding e proteção patrimonial"
       ]
     },
     {
-      title: "Área Trabalhista",
-      description: "Folha de pagamento, eSocial, admissões e demissões",
+      title: "ECOSISTEMA TRABALHISTA",
+      description: "Gestão completa de RH, eSocial e conformidade trabalhista digital.",
       icon: <Users className="w-8 h-8" />,
-      color: "green",
+      tag: "HUMAN_RESOURCES",
       detalhes: [
-        "Folha de pagamento completa",
+        "Folha de pagamento robusta",
         "eSocial e DCTFWeb",
-        "Admissões e demissões",
-        "Férias e 13º salário",
-        "Rescisões trabalhistas"
+        "Gestão de admissões e férias",
+        "Consultoria preventiva",
+        "Relatórios de custos previdenciários"
       ]
     },
     {
-      title: "Imposto de Renda",
-      description: "Declaração completa para pessoas físicas e jurídicas",
+      title: "INTELIGÊNCIA FISCAL & IRPF",
+      description: "Declarações e planejamento tributário para alta renda e ativos complexos.",
       icon: <FileText className="w-8 h-8" />,
-      color: "purple",
+      tag: "TAX_ADVISORY",
       detalhes: [
-        "Declaração de Pessoa Física",
-        "Declaração de Pessoa Jurídica",
-        "Planejamento tributário",
-        "Restituição e parcelamento",
-        "Retificação de declarações"
+        "IRPF para investidores",
+        "Planejamento tributário anual",
+        "Restituições e malha fina",
+        "Declarações de Capitais no Exterior",
+        "Ganho de Capital em ativos digitais"
       ]
     },
     {
-      title: "Gestão Empresarial",
-      description: "Consultoria e planejamento estratégico para seu negócio",
+      title: "CONSULTORIA DATA-DRIVEN",
+      description: "Decisões baseadas em dados reais para sua empresa subir de nível.",
       icon: <TrendingUp className="w-8 h-8" />,
-      color: "orange",
+      tag: "STRATEGY",
       detalhes: [
         "Análise de viabilidade econômica",
-        "Planejamento tributário",
-        "Consultoria empresarial",
-        "Controle de custos",
-        "Relatórios gerenciais"
+        "Fluxo de caixa projetado",
+        "Controle de custos industriais",
+        "Relatórios gerenciais (BI)",
+        "Valuation de empresas"
       ]
     },
     {
-      title: "Contabilidade Rural",
-      description: "Especialização em agronegócio e atividades rurais",
+      title: "AGRONEGÓCIO DE PRECISÃO",
+      description: "Especialização em ITR, LCDPR e contabilidade rural de alta performance.",
       icon: <Leaf className="w-8 h-8" />,
-      color: "emerald",
+      tag: "AGRO_SPECIALIST",
       detalhes: [
-        "ITR - Imposto Territorial Rural",
-        "Contabilidade de safras",
-        "Certificação de imóveis rurais",
+        "LCDPR - Livro Caixa Digital",
+        "ITR e ADA",
+        "Contabilidade de safras e custos",
         "Benefícios previdenciários rurais",
-        "Controle de produção agrícola"
+        "Gestão de contratos de parceria"
       ]
     }
   ];
 
-  const colorClasses = {
-    yellow: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
-    blue: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
-    green: "from-success-500/20 to-success-600/20 border-success-500/30 text-success-400",
-    purple: "from-primary-500/20 to-primary-600/20 border-primary-500/30 text-primary-400",
-    orange: "from-warning-500/20 to-warning-600/20 border-warning-500/30 text-warning-400",
-    emerald: "from-success-500/20 to-success-600/20 border-success-500/30 text-success-400"
-  };
-
   return (
-    <div className="bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 text-white min-h-screen">
-
-      {/* Hero Section */}
-      <section className="py-20">
-        <div className="container-custom text-center">
-          <div className="inline-flex items-center bg-primary-500/20 text-primary-400 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Award className="w-4 h-4 mr-2" />
-            Serviços Especializados
+    <div className="bg-obsidian text-neutral-100 min-h-screen pt-24">
+      {/* Header Section */}
+      <section className="py-20 border-b border-neutral-800 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-electric/10 blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+        <div className="container-custom relative z-10">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="w-12 h-[1px] bg-amber-electric"></span>
+            <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Nosso Portfólio</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Nossos <span className="text-gradient">Serviços</span>
+          <h1 className="mb-6 text-reveal active leading-tight">
+            INFRAESTRUTURA DE <br />
+            <span className="text-amber-electric italic font-display">SERVIÇOS</span>
           </h1>
-          <p className="text-xl text-neutral-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Oferecemos soluções completas e personalizadas para empresários,
-            produtores rurais e pessoas físicas em Sidrolândia-MS
+          <p className="text-xl text-neutral-400 max-w-3xl mb-8 leading-relaxed font-sans">
+            Unimos a tradição de Sidrolândia com tecnologias de ponta para oferecer a solução contábil definitiva para o seu negócio.
           </p>
-          <div className="flex items-center justify-center gap-8 text-sm text-neutral-400">
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-success-400" />
-              Certificado Digital
-            </div>
-            <div className="flex items-center">
-              <Clock className="w-4 h-4 mr-2 text-primary-400" />
-              Atendimento Rápido
-            </div>
-            <div className="flex items-center">
-              <Award className="w-4 h-4 mr-2 text-primary-400" />
-              32+ Anos de Tradição
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Serviços Detalhados */}
-      <section className="py-20">
+      {/* Grid de Serviços */}
+      <section className="py-24">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {servicos.map((servico, idx) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-neutral-800 border border-neutral-800 shadow-2xl">
+            {servicos.map((s, idx) => (
               <div
                 key={idx}
-                className={`card bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]} border backdrop-blur-sm hover:transform hover:scale-105 transition-all duration-300`}
+                className="bg-neutral-900/40 p-12 group hover:bg-neutral-900 transition-all duration-700 relative overflow-hidden flex flex-col h-full"
               >
-                <div className="flex items-start gap-4 mb-6">
-                  <div className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses[servico.color as keyof typeof colorClasses]}`}>
-                    {servico.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-neutral-100 mb-2">{servico.title}</h3>
-                    <p className="text-neutral-300 leading-relaxed">{servico.description}</p>
-                  </div>
+                <div className="absolute top-0 left-0 w-1 h-0 bg-amber-electric group-hover:h-full transition-all duration-700"></div>
+                <div className="text-amber-electric mb-8 group-hover:scale-110 transition-transform duration-500">
+                  {s.icon}
                 </div>
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-neutral-100">O que inclui:</h4>
-                  <ul className="space-y-2">
-                    {servico.detalhes.map((detalhe, detIdx) => (
-                      <li key={detIdx} className="flex items-start gap-2 text-neutral-300">
-                        <span className="text-primary-400 mt-1">•</span>
-                        <span className="text-sm">{detalhe}</span>
+                <div className="text-[10px] font-mono text-amber-electric/50 mb-2 tracking-widest uppercase">{s.tag}</div>
+                <h3 className="text-xl font-display font-bold text-neutral-50 mb-6 group-hover:text-amber-electric transition-colors leading-none uppercase">
+                  {s.title}
+                </h3>
+                <p className="text-neutral-500 font-sans text-sm mb-10 leading-relaxed flex-grow">
+                  {s.description}
+                </p>
+                <div className="mt-auto pt-8 border-t border-neutral-800/50">
+                  <h4 className="text-[10px] font-mono text-neutral-600 mb-6 uppercase tracking-[0.2em]">O que processamos:</h4>
+                  <ul className="space-y-3">
+                    {s.detalhes.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <span className="text-amber-electric text-[10px] mt-1 opacity-50">•</span>
+                        <span className="text-xs text-neutral-400 font-sans uppercase font-medium">{item}</span>
                       </li>
                     ))}
                   </ul>
@@ -171,34 +145,38 @@ export default function ServicosPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-neutral-800/50">
-        <div className="container-custom max-w-4xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gradient mb-6">
-            Precisa de Algum Desses Serviços?
-          </h2>
-          <p className="text-xl text-neutral-300 mb-8 leading-relaxed">
-            Entre em contato conosco e solicite um orçamento personalizado
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://wa.me/5567996011356"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary flex items-center justify-center"
-            >
-              Solicitar Orçamento
-            </a>
-            <a
-              href="/contato"
-              className="btn-secondary"
-            >
-              Fale Conosco
-            </a>
+      {/* CTA Final */}
+      <section className="py-24 bg-neutral-900/20 border-t border-neutral-800">
+        <div className="container-custom">
+          <div className="brutalist-card bg-amber-electric p-12 lg:p-20 text-center relative overflow-hidden border-none group">
+            <div className="absolute top-0 left-0 w-full h-full bg-obsidian opacity-0 group-hover:opacity-[0.02] transition-opacity"></div>
+            <h2 className="text-obsidian mb-8 text-4xl lg:text-6xl font-display uppercase italic leading-[0.85] tracking-tighter">
+              A melhor defesa <br />é uma contabilidade <br />bem <span className="underline decoration-4 underline-offset-8">estruturada</span>.
+            </h2>
+            <p className="text-obsidian/70 text-lg mb-12 max-w-xl mx-auto font-sans font-medium uppercase tracking-tight">
+              30 anos de Sidrolândia. 100% Digital. Solidez inegociável.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <a
+                href="https://wa.me/5567996011356"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-obsidian text-amber-electric px-12 py-5 font-mono font-bold tracking-widest hover:scale-105 transition-all shadow-2xl"
+              >
+                <Phone size={20} />
+                FALAR COM UM VETOR
+              </a>
+              <a
+                href="/contato"
+                className="inline-flex items-center gap-3 border-2 border-obsidian text-obsidian px-12 py-5 font-mono font-bold tracking-widest hover:bg-obsidian hover:text-amber-electric transition-all"
+              >
+                <MessageSquare size={20} />
+                SOLICITAR PLANO
+              </a>
+            </div>
           </div>
         </div>
       </section>
     </div>
   );
 }
-

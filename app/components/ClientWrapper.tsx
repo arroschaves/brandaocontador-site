@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Header from './Header';
+import Footer from './Footer';
 
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -11,8 +12,11 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
         <>
             {!isAdmin && <Header />}
             <main className={!isAdmin ? "pt-16" : ""}>
-                {children}
+                <div key={pathname} className="page-transition">
+                    {children}
+                </div>
             </main>
+            {!isAdmin && <Footer />}
         </>
     );
 }
