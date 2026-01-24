@@ -2,13 +2,20 @@
 
 import { useEffect, useState, use } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2 } from 'lucide-react'
+import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 
+/**
+ * Interface rigorosa para parâmetros assíncronos do Next.js 15
+ */
 interface ClientPageProps {
     params: Promise<{ id: string }>
 }
 
+/**
+ * Página de Detalhes do Cliente (Admin)
+ * Reconstrução total para estabilidade funcional e visual
+ */
 export default function ClientDetailsPage({ params }: ClientPageProps) {
     const { id } = use(params)
     const [client, setClient] = useState<any>(null)
@@ -17,87 +24,111 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
 
     useEffect(() => {
         async function getClient() {
-            const { data, error } = await supabase
-                .from('clientes')
-                .select('*')
-                .eq('id', id)
-                .single()
+            try {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .eq('id', id)
+                    .single()
 
-            if (data) setClient(data)
-            setLoading(false)
+                if (data) setClient(data)
+            } catch (err) {
+                console.error('Erro na carga do cliente:', err)
+            } finally {
+                setLoading(false)
+            }
         }
         getClient()
     }, [id, supabase])
 
     if (loading) {
         return (
-            <div className="flex h-[80vh] items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+            <div className="flex h-[80vh] flex-col items-center justify-center gap-4 text-amber-electric animate-pulse">
+                <Loader2 className="w-12 h-12 animate-spin-slow" />
+                <span className="font-mono text-xs uppercase tracking-[0.3em]">Sincronizando Dados...</span>
             </div>
         )
     }
 
     if (!client) {
         return (
-            <div className="p-8 text-center text-neutral-400">
-                <p>Cliente não encontrado.</p>
-                <Link href="/admin/clientes" className="text-primary-500 hover:underline mt-4 inline-block">
-                    Voltar para lista
-                </Link>
+            <div className="flex flex-col items-center justify-center h-[70vh] p-8 text-center space-y-6">
+                <ShieldAlert className="w-16 h-16 text-red-500 mb-2" />
+                <h2 className="text-2xl font-black italic uppercase text-neutral-100">CLIENTE NÃO LOCALIZADO</h2>
+                <p className="text-neutral-500 max-w-sm">A identificação `{id}` não corresponde a nenhum registro ativo em nosso banco de dados seguro.</p>
+                <Link href="/admin/clientes" className="btn-brutal px-10">VOLTAR À BASE</Link>
             </div>
         )
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Header com Botão Voltar */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Link href="/admin/clientes" className="p-2 hover:bg-neutral-800 rounded-full transition-colors">
-                        <ArrowLeft className="w-5 h-5 text-neutral-400" />
+        <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
+            {/* Header: Ação e Título */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-neutral-800 pb-8">
+                <div className="space-y-4">
+                    <Link href="/admin/clientes" className="inline-flex items-center gap-2 text-neutral-500 hover:text-amber-electric transition-colors group">
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span className="font-mono text-[10px] font-black uppercase tracking-widest">Lista Geral</span>
                     </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold text-neutral-100 italic">{client.razao_social || client.nome}</h1>
-                        <p className="text-neutral-500 text-sm font-mono mt-1">ID: {id}</p>
+                    <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter uppercase leading-none">
+                        {client.razao_social || client.nome}
+                    </h1>
+                    <div className="flex items-center gap-4 text-neutral-500 font-mono text-[11px] uppercase tracking-wider">
+                        <span className="bg-neutral-900 border border-neutral-800 px-3 py-1 text-neutral-300">CNPJ: {client.cnpj_cpf}</span>
+                        <span className="opacity-50">REGIME: {client.regime_tributario || 'N/A'}</span>
                     </div>
                 </div>
-                <button className="btn-brutal">Editar Perfil</button>
+                <div className="flex gap-4">
+                    <button className="btn-brutal text-xs px-8">EDITAR PERFIL</button>
+                    <button className="btn-brutal-outline text-xs px-8">ABRIR DRIVE</button>
+                </div>
             </div>
 
-            {/* Grid de Informações */}
-            <div className="grid gap-6 md:grid-cols-3">
-                {/* Card Dados Cadastrais */}
-                <div className="brutalist-card">
-                    <div className="flex items-center gap-2 mb-6 border-b border-neutral-800 pb-4">
-                        <User className="w-5 h-5 text-primary-500" />
-                        <h2 className="text-lg font-bold text-neutral-200">Dados Cadastrais</h2>
+            {/* Grid de Informações Brutalistas */}
+            <div className="grid gap-8 lg:grid-cols-3">
+                {/* Coluna 1: Dados Vitais */}
+                <div className="brutalist-card space-y-8">
+                    <div className="pb-4 border-b border-neutral-800">
+                        <h2 className="font-black italic text-amber-electric tracking-widest uppercase">DADOS VITAIS</h2>
                     </div>
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3 text-neutral-400">
-                            <Mail className="w-4 h-4" />
-                            <span className="text-sm">{client.email || 'E-mail não informado'}</span>
+                    <div className="space-y-6">
+                        <div className="group">
+                            <label className="text-[10px] font-black text-neutral-600 uppercase mb-2 block">Canais de Contato</label>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 text-neutral-300">
+                                    <Mail className="w-4 h-4 text-amber-electric" />
+                                    <span className="text-sm font-bold">{client.email || 'E-MAIL NÃO CADASTRADO'}</span>
+                                </div>
+                                <div className="flex items-center gap-3 text-neutral-300">
+                                    <Phone className="w-4 h-4 text-amber-electric" />
+                                    <span className="text-sm font-bold">{client.telefone_whatsapp || 'WHATSAPP NÃO INFORMADO'}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 text-neutral-400">
-                            <Phone className="w-4 h-4" />
-                            <span className="text-sm">{client.telefone_whatsapp || 'WhatsApp não informado'}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-neutral-400">
-                            <MapPin className="w-4 h-4" />
-                            <span className="text-sm">{client.cidade || 'Sidrolândia - MS'}</span>
+                        <div className="group">
+                            <label className="text-[10px] font-black text-neutral-600 uppercase mb-2 block">Localização Fiscal</label>
+                            <div className="flex items-center gap-3 text-neutral-300">
+                                <MapPin className="w-4 h-4 text-amber-electric" />
+                                <span className="text-sm font-bold">{client.cidade || 'SIDROLÂNDIA'} - {client.estado || 'MS'}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Card Atividades */}
-                <div className="md:col-span-2 brutalist-card">
-                    <div className="flex items-center gap-2 mb-6 border-b border-neutral-800 pb-4">
-                        <Clock className="w-5 h-5 text-primary-500" />
-                        <h2 className="text-lg font-bold text-neutral-200">Atividades e Histórico</h2>
+                {/* Coluna 2: Status Contábil */}
+                <div className="lg:col-span-2 brutalist-card relative overflow-hidden group">
+                    <div className="pb-4 border-b border-neutral-800 flex items-center justify-between">
+                        <h2 className="font-black italic text-amber-electric tracking-widest uppercase">HISTÓRICO & PERFORMANCE</h2>
+                        <Clock className="w-5 h-5 text-neutral-700" />
                     </div>
-                    <div className="flex items-center justify-center py-12">
-                        <p className="text-neutral-500 italic text-sm text-center">
-                            Nenhuma atividade recente registrada no sistema CRM para este cliente.
-                        </p>
+                    <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+                        <Calendar className="w-12 h-12 text-neutral-800 mb-2" />
+                        <p className="text-neutral-500 font-bold uppercase text-xs tracking-[0.2em]">Sem atividades registradas recentemente</p>
+                        <p className="text-neutral-700 text-[10px] max-w-xs">O monitoramento de obrigações fiscais aparecerá neste quadrante após o próximo fechamento mensal.</p>
+                    </div>
+                    {/* Background decorativo discreto */}
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <FileCheck className="w-48 h-48" />
                     </div>
                 </div>
             </div>

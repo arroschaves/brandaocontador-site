@@ -1,6 +1,10 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+/**
+ * Atualiza a sessão do Supabase no Middleware
+ * Garante que cookies sejam propagados corretamente
+ */
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,
@@ -14,7 +18,7 @@ export async function updateSession(request: NextRequest) {
                 getAll() {
                     return request.cookies.getAll()
                 },
-                setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+                setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
                     cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
                     supabaseResponse = NextResponse.next({
                         request,
@@ -27,12 +31,10 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // Verifica usuário de forma segura
+    // Verifica usuário e protege rotas /admin
     const { data: { user } } = await supabase.auth.getUser()
-
     const url = request.nextUrl.clone()
 
-    // Lógica de Proteção de Rotas
     if (url.pathname.startsWith('/admin') && !user) {
         url.pathname = '/login'
         return NextResponse.redirect(url)
