@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 interface ClientPageProps {
     params: Promise<{ id: string }>
 }

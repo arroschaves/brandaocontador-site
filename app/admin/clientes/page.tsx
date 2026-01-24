@@ -23,6 +23,8 @@ import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();
 
+export const dynamic = 'force-dynamic'
+
 export default function ClientesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [clientes, setClientes] = useState<any[]>([]);
