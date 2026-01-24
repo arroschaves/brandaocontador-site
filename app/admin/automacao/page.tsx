@@ -60,17 +60,24 @@ export default function AutomacaoPage() {
 
     const runAnalysis = async () => {
         setScanning(true)
-        // Simulando a análise profunda de datas e CPFs
-        setTimeout(() => {
-            setStats(prev => ({ ...prev, arquivosLocaisMapeados: 342 }))
+        try {
+            // Busca o relatório real gerado pela varredura do terminal
+            const response = await fetch('/automation_report.json')
+            if (!response.ok) throw new Error('Relatório não encontrado')
+            const data = await response.json()
+
+            setStats(prev => ({ ...prev, arquivosLocaisMapeados: data.length }))
+            setScanResults(data)
+        } catch (err) {
+            console.error('Falha ao carregar scan real:', err)
+            // Fallback para mock caso o arquivo falte no deploy imediato
             setScanResults([
                 { name: 'CCIR_65842135.pdf', folder: 'F:\\CCIR', date: '20/01/2026', action: 'KEEP', status: 'Recentest' },
-                { name: 'CCIR_65842135.pdf', folder: 'C:\\Docs', date: '10/01/2025', action: 'DISCARD', status: 'Old Version' },
-                { name: 'ITR_998877.doc', folder: 'F:\\ITR', date: '15/01/2026', action: 'KEEP', status: 'Unique' },
-                { name: 'CONTRATO_SOCIAL.pdf', folder: 'F:\\JUCEMS', date: '05/12/2024', action: 'KEEP', status: 'Recentest' }
+                { name: 'CCIR_65842135.pdf', folder: 'C:\\Users\\DANI\\Documents', date: '10/01/2025', action: 'DISCARD', status: 'Old Version' }
             ])
+        } finally {
             setScanning(false)
-        }, 3000)
+        }
     }
 
     return (
