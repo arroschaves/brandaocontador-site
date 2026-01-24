@@ -2,9 +2,7 @@
 
 import { useEffect, useState, use } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { User, Phone, Mail, MapPin, Calendar, Clock, ArrowLeft } from 'lucide-react'
+import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface ClientPageProps {
@@ -32,64 +30,76 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
     }, [id, supabase])
 
     if (loading) {
-        return <div className="p-8 flex items-center justify-center min-h-screen">Carregando dados...</div>
+        return (
+            <div className="flex h-[80vh] items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+            </div>
+        )
     }
 
     if (!client) {
-        return <div className="p-8 text-center min-h-screen">Cliente não encontrado.</div>
+        return (
+            <div className="p-8 text-center text-neutral-400">
+                <p>Cliente não encontrado.</p>
+                <Link href="/admin/clientes" className="text-primary-500 hover:underline mt-4 inline-block">
+                    Voltar para lista
+                </Link>
+            </div>
+        )
     }
 
     return (
-        <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50/50 min-h-screen">
-            <div className="flex items-center space-x-4">
-                <Link href="/admin/clientes">
-                    <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900">
-                        <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para lista
-                    </Button>
-                </Link>
-            </div>
-
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header com Botão Voltar */}
             <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900">{client.razao_social || client.nome}</h2>
-                    <p className="text-slate-500">ID: {id}</p>
+                <div className="flex items-center gap-4">
+                    <Link href="/admin/clientes" className="p-2 hover:bg-neutral-800 rounded-full transition-colors">
+                        <ArrowLeft className="w-5 h-5 text-neutral-400" />
+                    </Link>
+                    <div>
+                        <h1 className="text-3xl font-bold text-neutral-100 italic">{client.razao_social || client.nome}</h1>
+                        <p className="text-neutral-500 text-sm font-mono mt-1">ID: {id}</p>
+                    </div>
                 </div>
-                <div className="flex space-x-3">
-                    <Button className="bg-slate-900 text-white">Editar Perfil</Button>
-                </div>
+                <button className="btn-brutal">Editar Perfil</button>
             </div>
 
+            {/* Grid de Informações */}
             <div className="grid gap-6 md:grid-cols-3">
-                <Card className="col-span-1 border-none shadow-sm bg-white">
-                    <CardHeader className="border-b border-slate-100 flex flex-row items-center space-x-2">
-                        <User className="h-5 w-5 text-slate-400" />
-                        <CardTitle className="text-lg">Informações Pessoais</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6 space-y-4">
-                        <div className="flex items-center text-sm">
-                            <Mail className="h-4 w-4 mr-3 text-slate-400" />
-                            <span className="text-slate-600">{client.email || 'Não informado'}</span>
+                {/* Card Dados Cadastrais */}
+                <div className="brutalist-card">
+                    <div className="flex items-center gap-2 mb-6 border-b border-neutral-800 pb-4">
+                        <User className="w-5 h-5 text-primary-500" />
+                        <h2 className="text-lg font-bold text-neutral-200">Dados Cadastrais</h2>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 text-neutral-400">
+                            <Mail className="w-4 h-4" />
+                            <span className="text-sm">{client.email || 'E-mail não informado'}</span>
                         </div>
-                        <div className="flex items-center text-sm">
-                            <Phone className="h-4 w-4 mr-3 text-slate-400" />
-                            <span className="text-slate-600">{client.telefone || 'Não informado'}</span>
+                        <div className="flex items-center gap-3 text-neutral-400">
+                            <Phone className="w-4 h-4" />
+                            <span className="text-sm">{client.telefone_whatsapp || 'WhatsApp não informado'}</span>
                         </div>
-                        <div className="flex items-center text-sm">
-                            <MapPin className="h-4 w-4 mr-3 text-slate-400" />
-                            <span className="text-slate-600">{client.cidade || 'Localização não cadastrada'}</span>
+                        <div className="flex items-center gap-3 text-neutral-400">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{client.cidade || 'Sidrolândia - MS'}</span>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
-                <Card className="col-span-2 border-none shadow-sm bg-white">
-                    <CardHeader className="border-b border-slate-100 flex flex-row items-center space-x-2">
-                        <Clock className="h-5 w-5 text-slate-400" />
-                        <CardTitle className="text-lg">Atividades Recentes</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <p className="text-sm text-slate-500 italic">Sem atividades registradas recentemente.</p>
-                    </CardContent>
-                </Card>
+                {/* Card Atividades */}
+                <div className="md:col-span-2 brutalist-card">
+                    <div className="flex items-center gap-2 mb-6 border-b border-neutral-800 pb-4">
+                        <Clock className="w-5 h-5 text-primary-500" />
+                        <h2 className="text-lg font-bold text-neutral-200">Atividades e Histórico</h2>
+                    </div>
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-neutral-500 italic text-sm text-center">
+                            Nenhuma atividade recente registrada no sistema CRM para este cliente.
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     )

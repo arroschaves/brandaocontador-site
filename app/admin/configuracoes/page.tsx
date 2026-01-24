@@ -1,85 +1,100 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Settings, User, Mail, Building, Bell, Shield } from 'lucide-react'
+import React from 'react'
+import { Settings, User, Mail, Building, Bell, Shield, Save } from 'lucide-react'
 
 export default function SettingsPage() {
-    const [loading, setLoading] = useState(false)
-
     return (
-        <div className="flex-1 space-y-8 p-8 pt-6 bg-slate-50/50 min-h-screen">
-            <div className="flex items-center justify-between space-y-2">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900">Configurações</h2>
-                    <p className="text-slate-500">
-                        Gerencie as informações do seu escritório e preferências da conta.
-                    </p>
-                </div>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-neutral-100 italic">Configurações</h1>
+                <p className="text-neutral-400 mt-1">
+                    Gerencie as informações do seu escritório e preferências de acesso.
+                </p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4 border-none shadow-md bg-white">
-                    <CardHeader className="border-b border-slate-100 flex flex-row items-center space-x-2">
-                        <Building className="h-5 w-5 text-slate-400" />
-                        <CardTitle className="text-xl">Dados do Escritório</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <form className="space-y-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="org-name">Nome da Organização</Label>
-                                    <Input id="org-name" placeholder="Brandão Contabilidade" defaultValue="Brandão Contabilidade" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="cnpj">CNPJ</Label>
-                                    <Input id="cnpj" placeholder="00.000.000/0001-00" defaultValue="00.000.000/0001-00" />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="address">Endereço</Label>
-                                <Input id="address" placeholder="Av. Principal, 1000" />
-                            </div>
-                            <div className="flex justify-end pt-4">
-                                <Button className="bg-slate-900 text-white hover:bg-slate-800 px-8">
-                                    Salvar Alterações
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+            <div className="grid gap-8 lg:grid-cols-2">
+                {/* Dados do Escritório */}
+                <div className="brutalist-card">
+                    <div className="flex items-center gap-3 mb-8 border-b border-neutral-800 pb-4">
+                        <Building className="w-5 h-5 text-primary-500" />
+                        <h2 className="text-xl font-bold text-neutral-200">Dados do Escritório</h2>
+                    </div>
 
-                <Card className="col-span-3 border-none shadow-md bg-white h-fit">
-                    <CardHeader className="border-b border-slate-100 flex flex-row items-center space-x-2">
-                        <Shield className="h-5 w-5 text-slate-400" />
-                        <CardTitle className="text-xl">Segurança & Acesso</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6 space-y-6">
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 border border-slate-100">
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium text-slate-900">Autenticação em Dois Fatores</p>
-                                <p className="text-xs text-slate-500">Adicione uma camada extra de segurança.</p>
-                            </div>
-                            <Button variant="outline" size="sm">Ativar</Button>
-                        </div>
-                        <div className="space-y-4 pt-2">
+                    <form className="space-y-6">
+                        <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
-                                <Label htmlFor="current-pass">Senha Atual</Label>
-                                <Input id="current-pass" type="password" />
+                                <label className="text-xs font-bold text-neutral-500 uppercase">Nome da Organização</label>
+                                <input
+                                    type="text"
+                                    defaultValue="Brandão Contabilidade"
+                                    className="w-full bg-neutral-800 border-neutral-700 rounded-none p-3 text-neutral-200 focus:border-primary-500 outline-none transition-colors"
+                                />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-pass">Nova Senha</Label>
-                                <Input id="new-pass" type="password" />
+                                <label className="text-xs font-bold text-neutral-500 uppercase">CNPJ</label>
+                                <input
+                                    type="text"
+                                    defaultValue="00.000.000/0001-00"
+                                    className="w-full bg-neutral-800 border-neutral-700 rounded-none p-3 text-neutral-200 focus:border-primary-500 outline-none transition-colors ml-0"
+                                />
                             </div>
-                            <Button className="w-full bg-slate-100 text-slate-900 hover:bg-slate-200 border-none shadow-none">
-                                Atualizar Senha
-                            </Button>
                         </div>
-                    </CardContent>
-                </Card>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-neutral-500 uppercase">E-mail de Contato</label>
+                            <input
+                                type="email"
+                                placeholder="contato@brandaocontador.com.br"
+                                className="w-full bg-neutral-800 border-neutral-700 rounded-none p-3 text-neutral-200 focus:border-primary-500 outline-none transition-colors"
+                            />
+                        </div>
+
+                        <div className="pt-4">
+                            <button type="button" className="btn-brutal w-full md:w-auto px-8 flex items-center justify-center gap-2">
+                                <Save className="w-4 h-4" /> Salvar Dados
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Segurança */}
+                <div className="brutalist-card">
+                    <div className="flex items-center gap-3 mb-8 border-b border-neutral-800 pb-4">
+                        <Shield className="w-5 h-5 text-primary-500" />
+                        <h2 className="text-xl font-bold text-neutral-200">Segurança & Acesso</h2>
+                    </div>
+
+                    <div className="space-y-8">
+                        <div className="p-4 bg-primary-500/5 border border-primary-500/20">
+                            <p className="text-sm font-bold text-primary-500 mb-1">Acesso Administrativo</p>
+                            <p className="text-xs text-neutral-500">
+                                Sua conta tem privilégios totais. Tenha cuidado ao alterar credenciais.
+                            </p>
+                        </div>
+
+                        <form className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-neutral-500 uppercase">Senha Atual</label>
+                                <input
+                                    type="password"
+                                    className="w-full bg-neutral-800 border-neutral-700 rounded-none p-3 text-neutral-200 focus:border-primary-500 outline-none"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-neutral-500 uppercase">Nova Senha</label>
+                                <input
+                                    type="password"
+                                    className="w-full bg-neutral-800 border-neutral-700 rounded-none p-3 text-neutral-200 focus:border-primary-500 outline-none"
+                                />
+                            </div>
+                            <button type="button" className="w-full bg-neutral-700 hover:bg-neutral-600 text-white font-bold py-3 transition-colors px-0">
+                                Atualizar Senha de Acesso
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     )
