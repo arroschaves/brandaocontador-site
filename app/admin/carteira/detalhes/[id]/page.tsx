@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert, AlertTriangle } from 'lucide-react'
+import { Mail, Phone, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -13,7 +13,7 @@ interface ClientPageProps {
 
 /**
  * Página de Detalhes do Cliente (Admin)
- * Localizada em /perfil/[id] para estabilidade de rotas no Next.js 15
+ * Endereço resetado para /admin/carteira/detalhes/[id]
  */
 export default function ClientDetailsPage({ params }: ClientPageProps) {
     const { id } = use(params)
@@ -72,7 +72,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
                 <AlertTriangle className="w-16 h-16 text-amber-500 mb-2" />
                 <h2 className="text-2xl font-black italic uppercase text-neutral-100">CONFLITO DE DADOS</h2>
                 <p className="text-neutral-500 max-w-sm font-mono text-xs opacity-70">ERRO: {fetchError}</p>
-                <Link href="/admin/clientes" className="btn-brutal px-10">REINSTALAR CONEXÃO</Link>
+                <Link href="/admin/carteira" className="btn-brutal px-10">REINSTALAR CONEXÃO</Link>
             </div>
         )
     }
@@ -83,7 +83,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
                 <ShieldAlert className="w-16 h-16 text-red-500 mb-2" />
                 <h2 className="text-2xl font-black italic uppercase text-neutral-100">CLIENTE NÃO LOCALIZADO</h2>
                 <p className="text-neutral-500 max-w-sm">A identificação <span className="text-white font-mono">{id}</span> não foi encontrada.</p>
-                <Link href="/admin/clientes" className="btn-brutal px-10">VOLTAR À BASE</Link>
+                <Link href="/admin/carteira" className="btn-brutal px-10">VOLTAR À BASE</Link>
             </div>
         )
     }
@@ -93,7 +93,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
             {/* Header: Ação e Título */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-neutral-800 pb-8">
                 <div className="space-y-4">
-                    <Link href="/admin/clientes" className="inline-flex items-center gap-2 text-neutral-500 hover:text-amber-electric transition-colors group">
+                    <Link href="/admin/carteira" className="inline-flex items-center gap-2 text-neutral-500 hover:text-amber-electric transition-colors group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="font-mono text-[10px] font-black uppercase tracking-widest">Lista Geral</span>
                     </Link>

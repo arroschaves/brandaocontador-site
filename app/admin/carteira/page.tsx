@@ -176,7 +176,7 @@ export default function ClientesPage() {
                                         <td className="px-4 py-4">
                                             <div className="flex flex-col">
                                                 <div className="font-semibold text-neutral-200 flex items-center gap-2">
-                                                    <Link href={`/admin/clientes/perfil/${String(c.id).trim()}`} className="hover:text-primary-400 hover:underline transition-colors decoration-2 underline-offset-4">
+                                                    <Link href={`/admin/carteira/detalhes/${String(c.id).trim()}`} className="hover:text-primary-400 hover:underline transition-colors decoration-2 underline-offset-4">
                                                         {c.razao_social || c.nome}
                                                     </Link>
                                                     {c.status_rfb === 'ATIVA' && (

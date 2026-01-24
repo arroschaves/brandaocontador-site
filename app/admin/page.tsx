@@ -76,7 +76,7 @@ export default function AdminDashboard() {
     }, []);
 
     const cards = [
-        { name: 'Total de Clientes', value: stats.totalClientes.toString(), icon: Users, color: 'text-primary-400', bg: 'bg-primary-500/10', href: '/admin/clientes' },
+        { name: 'Total de Clientes', value: stats.totalClientes.toString(), icon: Users, color: 'text-primary-400', bg: 'bg-primary-500/10', href: '/admin/carteira' },
         { name: 'Prazos para Hoje', value: stats.prazosHoje.toString(), icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10', href: '/admin/cronograma' },
         { name: 'Concluídos (Mês)', value: stats.concluidosMes.toString(), icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-500/10', href: '/admin/cronograma?status=concluido' },
         { name: 'Atendimentos Pendentes', value: stats.pedidosZap.toString(), icon: MessageSquare, color: 'text-yellow-400', bg: 'bg-yellow-500/10', href: '/admin/atendimento' },
