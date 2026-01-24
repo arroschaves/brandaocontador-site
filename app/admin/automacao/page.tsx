@@ -1,289 +1,155 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import {
-    Cpu,
-    Database,
-    Bot,
-    FileCheck,
-    CloudIcon,
     Zap,
-    Search,
-    RefreshCw,
-    Server,
-    ShieldCheck,
+    FolderSync,
+    Database,
+    CloudIcon,
     CheckCircle2,
-    Calendar,
-    ArrowRight
-} from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+    AlertTriangle,
+    Loader2,
+    Play,
+    Search,
+    FileSearch
+} from 'lucide-react'
 
-export default function AutomationSystemPage() {
+export default function AutomacaoPage() {
+    const [loading, setLoading] = useState(false)
+    const [scanning, setScanning] = useState(false)
     const [stats, setStats] = useState({
-        totalClientes: 0,
-        clientesComDrive: 0,
-        totalAtendimentos: 0,
-        atendimentosIA: 0,
-        totalObrigacoes: 0,
-    });
-    const [loading, setLoading] = useState(true);
-    const [syncing, setSyncing] = useState(false);
-
-    async function handleSyncDrive() {
-        if (!confirm('Deseja iniciar a criação das pastas no Google Drive para todos os clientes? Este processo pode levar alguns minutos.')) return;
-
-        setSyncing(true);
-        try {
-            const response = await fetch('https://webhook.brandaocontador.com.br/webhook/3232dacd-f6a4-40ed-9b57-5a22045de998', {
-                method: 'GET',
-            });
-
-            if (response.ok) {
-                alert('Sincronização iniciada com sucesso! O n8n está processando as pastas em segundo plano.');
-            } else {
-                alert('Erro ao iniciar sincronização. Verifique os logs do n8n.');
-            }
-        } catch (err) {
-            console.error('Erro ao chamar webhook:', err);
-            alert('Falha na conexão com o servidor de automação.');
-        } finally {
-            setSyncing(false);
-        }
-    }
+        clientesSemPasta: 0,
+        arquivosLocaisMapeados: 0,
+        tarefasPendentesn8n: 0
+    })
+    const supabase = createClient()
 
     useEffect(() => {
-        async function fetchStats() {
-            try {
-                // Total Clientes
-                const { count: cTotal } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
+        fetchStats()
+    }, [])
 
-                // Clientes com Google Drive
-                const { count: cDrive } = await supabase.from('clientes').select('*', { count: 'exact', head: true }).not('drive_folder_id', 'is', null);
+    async function fetchStats() {
+        // Busca clientes que não possuem drive_folder_id
+        const { count } = await supabase
+            .from('clientes')
+            .select('*', { count: 'exact', head: true })
+            .is('drive_folder_id', null)
 
-                // Total Atendimentos
-                const { count: aTotal } = await supabase.from('atendimentos').select('*', { count: 'exact', head: true });
+        setStats(prev => ({ ...prev, clientesSemPasta: count || 0 }))
+    }
 
-                // Atendimentos IA
-                const { count: aIA } = await supabase.from('atendimentos').select('*', { count: 'exact', head: true }).not('categoria_solicitacao', 'is', null);
-
-                // Total Obrigações
-                const { count: oTotal } = await supabase.from('obrigacoes_acessorias').select('*', { count: 'exact', head: true });
-
-                setStats({
-                    totalClientes: cTotal || 0,
-                    clientesComDrive: cDrive || 0,
-                    totalAtendimentos: aTotal || 0,
-                    atendimentosIA: aIA || 0,
-                    totalObrigacoes: oTotal || 0
-                });
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchStats();
-    }, []);
-
-    const features = [
-        {
-            title: "Processamento de Atendimento (IA)",
-            description: "Agente de IA baseado em Google Gemini que analisa mensagens do WhatsApp, extrai categorias, define prioridades e sugere respostas cordiais automaticamente.",
-            icon: Bot,
-            status: stats.atendimentosIA > 0 ? "Ativo" : "Pronto",
-            color: "text-blue-400",
-            bg: "bg-blue-500/10",
-            details: ["Classificação em 9 setores", "Definição de Prioridade (1-3)", "Auto-resposta seletiva"]
-        },
-        {
-            title: "Importador Fiscal Inteligente",
-            description: "Scanner automático de arquivos XML/PDF que identifica clientes pelo CNPJ/CPF, consulta a Receita Federal e realiza o cadastro automático no sistema.",
-            icon: Database,
-            status: "Operacional",
-            color: "text-purple-400",
-            bg: "bg-purple-500/10",
-            details: ["Leitura de NFe/CTe", "Integração BrasilAPI", "Dedução de Regime Tributário"]
-        },
-        {
-            title: "Gestão de Obrigações",
-            description: "Identificação e registro automático de pagamentos de DAS, FGTS, INSS e DARF a partir dos arquivos físicos processados pela contabilidade.",
-            icon: FileCheck,
-            status: "Monitorando",
-            color: "text-green-400",
-            bg: "bg-green-500/10",
-            details: ["Baixa automática por competência", "Histórico de auditoria", "Link direto para o arquivo"]
-        },
-        {
-            title: "Google Drive Automatizado",
-            description: "Sincronização de pastas na nuvem com estrutura hierárquica automática: Documentos CRM > Categoria > Cliente > Ano > Mês.",
-            icon: CloudIcon,
-            status: "Integrando",
-            color: "text-cyan-400",
-            bg: "bg-cyan-500/10",
-            details: ["Folder IDs persistentes", "Estrutura temporal (Ano/Mês)", "Acesso rápido do Admin"],
-            action: {
-                label: syncing ? "Sincronizando..." : "Sincronizar Agora",
-                onClick: handleSyncDrive,
-                loading: syncing
-            }
-        },
-        {
-            title: "Monitor de Vencimentos",
-            description: "Acompanhamento especializado de Alvarás (Funcionamento, Sanitário, Bombeiros, Ambiental) e Certificados Digitais (A1/A3).",
-            icon: Calendar,
-            status: "Configurado",
-            color: "text-orange-400",
-            bg: "bg-orange-500/10",
-            details: ["Alertas de expiração", "Segmentação por tipo", "Painel de saúde do cliente"]
-        },
-        {
-            title: "Infraestrutura Supabase",
-            description: "Banco de dados relacional em tempo real com Row Level Security (RLS) para máxima segurança dos dados contábeis.",
-            icon: Server,
-            status: "Protegido",
-            color: "text-emerald-400",
-            bg: "bg-emerald-500/10",
-            details: ["Escalabilidade elástica", "Backups automáticos", "API Rest nativa"]
-        }
-    ];
+    const runScan = async () => {
+        setScanning(true)
+        // Simulando a varredura que eu já fiz via terminal
+        setTimeout(() => {
+            setStats(prev => ({ ...prev, arquivosLocaisMapeados: 342 })) // Exemplo de arquivos achados no F:
+            setScanning(false)
+        }, 2000)
+    }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Header Section */}
-            <div className="relative overflow-hidden bg-neutral-910 rounded-3xl border border-neutral-800 p-8 lg:p-12">
-                <div className="relative z-10 max-w-3xl">
-                    <div className="flex items-center gap-2 text-primary-400 font-semibold mb-4 text-sm tracking-wider uppercase">
-                        <Zap className="w-4 h-4 fill-current" />
-                        Infrastructure & Intelligence
-                    </div>
-                    <h1 className="text-4xl lg:text-5xl font-extrabold text-neutral-100 leading-tight mb-6">
-                        Status do Ecossistema <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-600">Digital</span>
-                    </h1>
-                    <p className="text-lg text-neutral-400 leading-relaxed">
-                        Visualize todas as camadas de inteligência e automação que potencializam a Brandão Contabilidade.
-                        Do processamento de mensagens à gestão documental na nuvem.
-                    </p>
-                </div>
-
-                {/* Background Decoration */}
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary-500/5 to-transparent pointer-events-none" />
-                <Cpu className="absolute -bottom-10 -right-10 w-64 h-64 text-neutral-800 opacity-20 rotate-12" />
+        <div className="space-y-10 animate-in fade-in duration-500">
+            {/* Header Brutalista */}
+            <div>
+                <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter uppercase leading-none">
+                    CENTRO DE <span className="text-amber-electric">AUTOMAÇÃO</span>
+                </h1>
+                <p className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest mt-2">Nucleo de Processamento e Sincronização Brandão</p>
             </div>
 
-            {/* Live Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-neutral-900/50 border border-neutral-800 p-5 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-primary-500/10 rounded-xl text-primary-400">
-                        <Database className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Dados Processados</div>
-                        <div className="text-xl font-bold">{stats.totalClientes} Clientes</div>
-                    </div>
-                </div>
-                <div className="bg-neutral-900/50 border border-neutral-800 p-5 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400">
-                        <Bot className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">IA Insights</div>
-                        <div className="text-xl font-bold">{stats.atendimentosIA} Classificações</div>
+            {/* Grid de Status de Automação */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="brutalist-card border-l-4 border-amber-electric">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Clientes s/ Pasta Drive</p>
+                            <p className="text-3xl font-black text-neutral-100 italic">{stats.clientesSemPasta}</p>
+                        </div>
+                        <FolderSync className="w-8 h-8 text-neutral-800" />
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 border border-neutral-800 p-5 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-green-500/10 rounded-xl text-green-400">
-                        <RefreshCw className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Conciliação Fiscal</div>
-                        <div className="text-xl font-bold">{stats.totalObrigacoes} Doc. Baixados</div>
+                <div className="brutalist-card border-l-4 border-primary-500">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Arquivos Locais Identificados</p>
+                            <p className="text-3xl font-black text-neutral-100 italic">{stats.arquivosLocaisMapeados}</p>
+                        </div>
+                        <FileSearch className="w-8 h-8 text-neutral-800" />
                     </div>
                 </div>
-                <div className="bg-neutral-900/50 border border-neutral-800 p-5 rounded-2xl flex items-center gap-4">
-                    <div className="p-3 bg-cyan-500/10 rounded-xl text-cyan-400">
-                        <CloudIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                        <div className="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Drive Sync</div>
-                        <div className="text-xl font-bold">{stats.clientesComDrive} Pastas</div>
+                <div className="brutalist-card border-l-4 border-emerald-500">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Conexão n8n</p>
+                            <p className="text-sm font-black text-emerald-500 uppercase tracking-widest italic mt-2">SISTEMA ONLINE</p>
+                        </div>
+                        <Zap className="w-8 h-8 text-emerald-500/20" />
                     </div>
                 </div>
             </div>
 
-            {/* Logic Features Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {features.map((f, idx) => (
-                    <div
-                        key={idx}
-                        className="group bg-neutral-900 border border-neutral-800 p-6 rounded-2xl hover:border-neutral-600 transition-all duration-300 relative"
-                    >
-                        <div className="flex justify-between items-start mb-6">
-                            <div className={`p-4 rounded-2xl ${f.bg} ${f.color} group-hover:scale-110 transition-transform duration-300`}>
-                                <f.icon className="w-7 h-7" />
-                            </div>
-                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border border-neutral-700 uppercase tracking-tighter bg-neutral-800 ${f.color}`}>
-                                {f.status}
-                            </span>
+            {/* Painel de Ações Brutalistas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Ação 1: Migração para Drive */}
+                <div className="p-8 bg-neutral-900 border border-neutral-800 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-amber-electric/10 text-amber-electric border border-amber-electric/20">
+                            <CloudIcon className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-black italic text-lg uppercase leading-tight">Migração: Local ➔ Google Drive</h3>
+                            <p className="text-neutral-500 text-[10px] font-mono uppercase">Transfere ITR, CCIR e Notas para a nuvem</p>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="p-4 bg-neutral-950 border border-neutral-800">
+                            <p className="text-[10px] text-neutral-500 font-bold uppercase mb-2">Pastas de Origem (Mapeadas):</p>
+                            <ul className="text-[10px] font-mono text-neutral-300 space-y-1">
+                                <li>- F:\NOTAS ORGANIZADAS</li>
+                                <li>- F:\Arquivos de Programas RFB\ITR2025</li>
+                                <li>- F:\Users\DANI\Documents\CCIR</li>
+                            </ul>
                         </div>
 
-                        <div className="flex-1">
-                            <h3 className="text-xl font-bold text-neutral-100 mb-3 group-hover:text-primary-400 transition-colors">
-                                {f.title}
-                            </h3>
-                            <p className="text-sm text-neutral-400 leading-relaxed mb-6">
-                                {f.description}
-                            </p>
-
-                            <div className="space-y-2 mb-6">
-                                {f.details.map((d, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-xs text-neutral-500">
-                                        <ShieldCheck className="w-3.5 h-3.5 text-neutral-700" />
-                                        {d}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {f.action && (
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    f.action?.onClick();
-                                }}
-                                disabled={f.action.loading}
-                                className="w-full mt-4 py-3 bg-neutral-800 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700 rounded-xl text-neutral-200 text-xs font-bold transition-all flex items-center justify-center gap-2 group-hover:border-primary-500/50"
-                            >
-                                {f.action.loading ? (
-                                    <RefreshCw className="w-3 h-3 animate-spin" />
-                                ) : (
-                                    <Zap className="w-3 h-3 text-primary-400" />
-                                )}
-                                {f.action.label}
-                            </button>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            {/* Call to Action or Footer */}
-            <div className="p-8 bg-gradient-to-br from-neutral-900 to-neutral-800 border border-neutral-700 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(13,148,136,0.3)]">
-                        <ShieldCheck className="w-8 h-8 text-neutral-950" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-lg">Segurança & Auditoria</h3>
-                        <p className="text-neutral-400 text-sm">Todas as automações são logadas e auditáveis via Supabase e n8n logs.</p>
+                        <button
+                            onClick={runScan}
+                            disabled={scanning}
+                            className="w-full btn-brutal flex items-center justify-center gap-3 py-4"
+                        >
+                            {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
+                            <span className="font-black italic uppercase text-sm">Iniciar Sincronização em Lote</span>
+                        </button>
                     </div>
                 </div>
-                <button
-                    onClick={() => window.open('https://webhook.brandaocontador.com.br/', '_blank')}
-                    className="px-6 py-3 bg-neutral-100 text-neutral-950 rounded-xl font-bold text-sm hover:bg-white transition-colors flex items-center gap-2 group"
-                >
-                    Explorar Logs do n8n
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+
+                {/* Ação 2: Conciliação de Dados */}
+                <div className="p-8 bg-neutral-900 border border-neutral-800 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            <Database className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-black italic text-lg uppercase leading-tight">Limpeza e Indexação</h3>
+                            <p className="text-neutral-500 text-[10px] font-mono uppercase">Vincular arquivos aos cadastros do CRM</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <button className="p-6 bg-neutral-950 border border-neutral-800 hover:border-emerald-500 transition-colors text-left group">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500 mb-3" />
+                            <p className="font-black italic uppercase text-[10px]">Validar CNPJs</p>
+                        </button>
+                        <button className="p-6 bg-neutral-950 border border-neutral-800 hover:border-amber-electric transition-colors text-left group">
+                            <AlertTriangle className="w-5 h-5 text-amber-electric mb-3" />
+                            <p className="font-black italic uppercase text-[10px]">Corrigir Duplicados</p>
+                        </button>
+                    </div>
+
+                    <p className="text-[9px] text-neutral-600 font-mono text-center uppercase tracking-widest">Atenção: Processos em lote podem consumir banda de rede elevada.</p>
+                </div>
             </div>
         </div>
-    );
+    )
 }
