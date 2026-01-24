@@ -23,16 +23,26 @@ export default function AutomacaoPage() {
         arquivosLocaisMapeados: 0,
         tarefasPendentesn8n: 0
     })
-    const [selectedFolders, setSelectedFolders] = useState<string[]>([])
+    const [selectedFolders, setSelectedFolders] = useState<string[]>([
+        'F:\\ITR 2025',
+        'F:\\CCIR',
+        'F:\\NOTAS'
+    ])
+    const [customPath, setCustomPath] = useState('')
     const [scanResults, setScanResults] = useState<any[]>([])
 
-    const sourceFolders = [
-        { id: 'f-notas', path: 'F:\\NOTAS ORGANIZADAS', label: 'Notas Organizadas (F:)' },
-        { id: 'f-itr', path: 'F:\\Arquivos de Programas RFB\\ITR2025', label: 'ITR 2025 (F:)' },
-        { id: 'f-ccir', path: 'F:\\Users\\DANI\\Documents\\CCIR', label: 'CCIR (F:)' },
-        { id: 'c-docs', path: 'C:\\Users\\DANI\\Documents', label: 'Documentos Usuário (C:)' }
-    ]
     const supabase = createClient()
+
+    const addPath = () => {
+        if (customPath && !selectedFolders.includes(customPath)) {
+            setSelectedFolders([...selectedFolders, customPath])
+            setCustomPath('')
+        }
+    }
+
+    const removePath = (path: string) => {
+        setSelectedFolders(selectedFolders.filter(p => p !== path))
+    }
 
     useEffect(() => {
         fetchStats()
@@ -48,20 +58,16 @@ export default function AutomacaoPage() {
         setStats(prev => ({ ...prev, clientesSemPasta: count || 0 }))
     }
 
-    const toggleFolder = (path: string) => {
-        setSelectedFolders(prev =>
-            prev.includes(path) ? prev.filter(f => f !== path) : [...prev, path]
-        )
-    }
-
     const runAnalysis = async () => {
         setScanning(true)
-        // Simulando a análise de duplicados e datas
+        // Simulando a análise profunda de datas e CPFs
         setTimeout(() => {
             setStats(prev => ({ ...prev, arquivosLocaisMapeados: 342 }))
             setScanResults([
-                { name: 'CCIR_CLIENTE_X.pdf', source: 'F:', date: '20/01/2026', action: 'KEEP (NEWER)' },
-                { name: 'ITR_CLIENTE_Y.doc', source: 'C:', date: '15/01/2026', action: 'DELETE (OLDER)' }
+                { name: 'CCIR_65842135.pdf', folder: 'F:\\CCIR', date: '20/01/2026', action: 'KEEP', status: 'Recentest' },
+                { name: 'CCIR_65842135.pdf', folder: 'C:\\Docs', date: '10/01/2025', action: 'DISCARD', status: 'Old Version' },
+                { name: 'ITR_998877.doc', folder: 'F:\\ITR', date: '15/01/2026', action: 'KEEP', status: 'Unique' },
+                { name: 'CONTRATO_SOCIAL.pdf', folder: 'F:\\JUCEMS', date: '05/12/2024', action: 'KEEP', status: 'Recentest' }
             ])
             setScanning(false)
         }, 3000)
@@ -91,7 +97,7 @@ export default function AutomacaoPage() {
                 <div className="brutalist-card border-l-4 border-primary-500">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Arquivos Locais Identificados</p>
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Arquivos em Análise</p>
                             <p className="text-3xl font-black text-neutral-100 italic">{stats.arquivosLocaisMapeados}</p>
                         </div>
                         <FileSearch className="w-8 h-8 text-neutral-800" />
@@ -100,72 +106,109 @@ export default function AutomacaoPage() {
                 <div className="brutalist-card border-l-4 border-emerald-500">
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Conexão n8n</p>
-                            <p className="text-sm font-black text-emerald-500 uppercase tracking-widest italic mt-2">SISTEMA ONLINE</p>
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Conexão Rede Local</p>
+                            <p className="text-sm font-black text-emerald-500 uppercase tracking-widest italic mt-2">ESTAÇÃO ATIVA</p>
                         </div>
                         <Zap className="w-8 h-8 text-emerald-500/20" />
                     </div>
                 </div>
             </div>
 
-            {/* Painel de Ações Brutalistas */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Ação 1: Migração para Drive */}
-                <div className="p-8 bg-neutral-900 border border-neutral-800 space-y-6">
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-amber-electric/10 text-amber-electric border border-amber-electric/20">
-                            <CloudIcon className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="font-black italic text-lg uppercase leading-tight">Limpeza e Sincronização: Local ➔ Drive</h3>
-                            <p className="text-neutral-500 text-[10px] font-mono uppercase">Detecta duplicados e mantém os mais recentes</p>
-                        </div>
+            {/* Configuração de Varredura */}
+            <div className="p-8 bg-neutral-900 border border-neutral-800 space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-amber-electric/10 text-amber-electric border border-amber-electric/20">
+                        <Search className="w-6 h-6" />
                     </div>
-
-                    <div className="space-y-4">
-                        <div className="p-4 bg-neutral-950 border border-neutral-800">
-                            <p className="text-[10px] text-neutral-500 font-bold uppercase mb-4">Selecione as pastas para processar:</p>
-                            <div className="space-y-3">
-                                {sourceFolders.map(folder => (
-                                    <div
-                                        key={folder.id}
-                                        className={`p-3 border flex items-center justify-between cursor-pointer transition-colors ${selectedFolders.includes(folder.path) ? 'border-amber-electric bg-amber-electric/5' : 'border-neutral-800 hover:border-neutral-700'}`}
-                                        onClick={() => toggleFolder(folder.path)}
-                                    >
-                                        <span className="font-mono text-[10px] text-neutral-300">{folder.label}</span>
-                                        {selectedFolders.includes(folder.path) && <CheckCircle2 className="w-4 h-4 text-amber-electric" />}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <button
-                            onClick={runAnalysis}
-                            disabled={scanning || selectedFolders.length === 0}
-                            className="w-full btn-brutal flex items-center justify-center gap-3 py-4 disabled:opacity-50"
-                        >
-                            {scanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Play className="w-5 h-5 fill-current" />}
-                            <span className="font-black italic uppercase text-sm">Analisar e Resolver Conflitos</span>
-                        </button>
+                    <div>
+                        <h3 className="font-black italic text-lg uppercase leading-tight">Mapeador de Arquivos (C:, F:, Drive)</h3>
+                        <p className="text-neutral-500 text-[10px] font-mono uppercase">Defina os caminhos para análise de duplicados e versão</p>
                     </div>
-
-                    {scanResults.length > 0 && (
-                        <div className="mt-6 border-t border-neutral-800 pt-6 animate-in slide-in-from-top duration-500">
-                            <p className="text-[10px] font-black text-amber-electric uppercase mb-3">CONFLITOS DETECTADOS (AMOSTRA):</p>
-                            <div className="space-y-2">
-                                {scanResults.map((res, i) => (
-                                    <div key={i} className="flex justify-between items-center bg-neutral-950 p-2 border border-neutral-800 font-mono text-[9px]">
-                                        <span className="text-neutral-300">{res.name}</span>
-                                        <span className="text-neutral-500">{res.date}</span>
-                                        <span className="text-emerald-500 font-black italic">{res.action}</span>
-                                    </div>
-                                ))}
-                            </div>
-                            <button className="w-full mt-4 bg-emerald-500 text-neutral-950 font-black italic uppercase text-xs py-3 hover:bg-emerald-400 transition-colors">Confirmar e Subir pro Drive</button>
-                        </div>
-                    )}
                 </div>
 
+                <div className="flex gap-4">
+                    <input
+                        type="text"
+                        value={customPath}
+                        onChange={(e) => setCustomPath(e.target.value)}
+                        placeholder="EX: F:\ARQUIVOS DE PROGRAMAS RFB\ITR2025"
+                        className="flex-1 bg-neutral-950 border border-neutral-800 p-4 text-xs font-mono text-neutral-300 focus:border-amber-electric outline-none"
+                    />
+                    <button
+                        onClick={addPath}
+                        className="btn-brutal px-8 text-xs"
+                    >ADICIONAR DIRETÓRIO</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {selectedFolders.map((path, idx) => (
+                        <div key={idx} className="bg-neutral-950 p-4 border border-neutral-800 flex justify-between items-center group">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] font-black text-neutral-600 uppercase tracking-widest">Caminho Ativo</span>
+                                <span className="text-[11px] font-mono text-neutral-300 truncate max-w-[200px]">{path}</span>
+                            </div>
+                            <button onClick={() => removePath(path)} className="text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <AlertTriangle className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                <button
+                    onClick={runAnalysis}
+                    disabled={scanning || selectedFolders.length === 0}
+                    className="w-full btn-brutal py-5 flex items-center justify-center gap-4 disabled:opacity-50"
+                >
+                    {scanning ? <Loader2 className="w-6 h-6 animate-spin" /> : <Play className="w-6 h-6 fill-current" />}
+                    <span className="text-lg font-black italic uppercase">Iniciar Análise de Conflitos e Data</span>
+                </button>
+            </div>
+
+            {/* Resultados da Análise */}
+            {scanResults.length > 0 && (
+                <div className="brutalist-card border-t-8 border-emerald-500 animate-in slide-in-from-bottom duration-700">
+                    <h2 className="font-black italic text-xl uppercase mb-6 text-neutral-100">Relatório de Inteligência Contábil</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="text-[10px] font-black text-neutral-600 uppercase tracking-widest text-left border-b border-neutral-800">
+                                    <th className="pb-4">Documento</th>
+                                    <th className="pb-4">Localização</th>
+                                    <th className="pb-4">Data Modificação</th>
+                                    <th className="pb-4 text-center">Status Versão</th>
+                                    <th className="pb-4 text-right">Veredito</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-800">
+                                {scanResults.map((item, i) => (
+                                    <tr key={i} className={`group ${item.action === 'DISCARD' ? 'opacity-40 grayscale' : ''}`}>
+                                        <td className="py-4 font-mono text-xs text-neutral-200">{item.name}</td>
+                                        <td className="py-4 font-mono text-[10px] text-neutral-500">{item.folder}</td>
+                                        <td className="py-4 font-mono text-[10px] text-neutral-400">{item.date}</td>
+                                        <td className="py-4 text-center">
+                                            <span className={`text-[9px] px-2 py-1 font-black uppercase ${item.status === 'Recentest' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                                                {item.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-4 text-right">
+                                            <span className={`font-black italic uppercase text-xs ${item.action === 'KEEP' ? 'text-emerald-400' : 'text-red-500'}`}>
+                                                {item.action === 'KEEP' ? 'MANTENDO ➔ DRIVE' : 'DESCARTADO (ANTIGO)'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-8 flex justify-end gap-4">
+                        <button className="btn-brutal-outline px-10">REVISAR MANUALMENTE</button>
+                        <button className="btn-brutal px-12 py-4 bg-emerald-500 text-neutral-950">CONFIRMAR E SINCRONIZAR COM n8n</button>
+                    </div>
+                </div>
+            )}
+
+            {/* Painel de Ações Brutalistas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Ação 2: Conciliação de Dados */}
                 <div className="p-8 bg-neutral-900 border border-neutral-800 space-y-6">
                     <div className="flex items-center gap-4">
