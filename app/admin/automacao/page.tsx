@@ -23,30 +23,61 @@ export default function AutomacaoPage() {
         arquivosLocaisMapeados: 0,
         tarefasPendentesn8n: 0
     })
-    const [selectedFolders, setSelectedFolders] = useState<string[]>([
-        'F:\\ITR 2025',
-        'F:\\CCIR',
-        'F:\\NOTAS'
-    ])
+    const [selectedFolders, setSelectedFolders] = useState<string[]>([])
     const [customPath, setCustomPath] = useState('')
     const [scanResults, setScanResults] = useState<any[]>([])
-
     const supabase = createClient()
-
-    const addPath = () => {
-        if (customPath && !selectedFolders.includes(customPath)) {
-            setSelectedFolders([...selectedFolders, customPath])
-            setCustomPath('')
-        }
-    }
-
-    const removePath = (path: string) => {
-        setSelectedFolders(selectedFolders.filter(p => p !== path))
-    }
 
     useEffect(() => {
         fetchStats()
+        loadSavedConfig()
     }, [])
+
+    async function loadSavedConfig() {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data } = await supabase
+            .from('admin_settings')
+            .select('value')
+            .eq('key', 'automation_folders')
+            .single()
+
+        if (data?.value) {
+            setSelectedFolders(data.value)
+        } else {
+            // Default inicial se nunca salvou nada
+            setSelectedFolders(['F:\\ITR 2025', 'F:\\CCIR', 'F:\\NOTAS'])
+        }
+    }
+
+    async function saveConfig(folders: string[]) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        await supabase
+            .from('admin_settings')
+            .upsert({
+                key: 'automation_folders',
+                value: folders,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'key' })
+    }
+
+    const addPath = async () => {
+        if (customPath && !selectedFolders.includes(customPath)) {
+            const newFolders = [...selectedFolders, customPath]
+            setSelectedFolders(newFolders)
+            setCustomPath('')
+            await saveConfig(newFolders)
+        }
+    }
+
+    const removePath = async (path: string) => {
+        const newFolders = selectedFolders.filter(p => p !== path)
+        setSelectedFolders(newFolders)
+        await saveConfig(newFolders)
+    }
 
     async function fetchStats() {
         // Busca clientes que não possuem drive_folder_id
