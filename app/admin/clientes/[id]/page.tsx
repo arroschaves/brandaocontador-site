@@ -2,50 +2,76 @@
 
 import { useEffect, useState, use } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert } from 'lucide-react'
+import { User, Phone, Mail, MapPin, Clock, ArrowLeft, Loader2, Calendar, FileCheck, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 
-/**
- * Interface rigorosa para parâmetros assíncronos do Next.js 15
- */
 interface ClientPageProps {
     params: Promise<{ id: string }>
 }
 
 /**
  * Página de Detalhes do Cliente (Admin)
- * Reconstrução total para estabilidade funcional e visual
+ * Estabilizada para Next.js 15 + Supabase Singleton
  */
 export default function ClientDetailsPage({ params }: ClientPageProps) {
     const { id } = use(params)
     const [client, setClient] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+    const [fetchError, setFetchError] = useState<string | null>(null)
     const supabase = createClient()
 
     useEffect(() => {
+        let isMounted = true;
+
         async function getClient() {
             try {
+                setLoading(true)
                 const { data, error } = await supabase
                     .from('clientes')
                     .select('*')
                     .eq('id', id)
-                    .single()
+                    .maybeSingle() // Usar maybeSingle em vez de single para evitar erro brutal se não achar
 
-                if (data) setClient(data)
-            } catch (err) {
+                if (error) throw error;
+
+                if (isMounted) {
+                    setClient(data)
+                }
+            } catch (err: any) {
                 console.error('Erro na carga do cliente:', err)
+                if (isMounted) {
+                    setFetchError(err.message || 'Falha na comunicação com o servidor de dados.')
+                }
             } finally {
-                setLoading(false)
+                if (isMounted) {
+                    setLoading(false)
+                }
             }
         }
-        getClient()
-    }, [id, supabase])
+
+        if (id) {
+            getClient()
+        }
+
+        return () => { isMounted = false };
+    }, [id]) // Removido 'supabase' das dependências pois agora é um singleton estável
 
     if (loading) {
         return (
             <div className="flex h-[80vh] flex-col items-center justify-center gap-4 text-amber-electric animate-pulse">
-                <Loader2 className="w-12 h-12 animate-spin-slow" />
-                <span className="font-mono text-xs uppercase tracking-[0.3em]">Sincronizando Dados...</span>
+                <Loader2 className="w-12 h-12 animate-spin" />
+                <span className="font-mono text-xs uppercase tracking-[0.3em]">Sincronizando Núcleo...</span>
+            </div>
+        )
+    }
+
+    if (fetchError) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[70vh] p-8 text-center space-y-6">
+                <AlertTriangle className="w-16 h-16 text-amber-500 mb-2" />
+                <h2 className="text-2xl font-black italic uppercase text-neutral-100">CONFLITO DE DADOS</h2>
+                <p className="text-neutral-500 max-w-sm font-mono text-xs opacity-70">ERRO: {fetchError}</p>
+                <Link href="/admin/clientes" className="btn-brutal px-10">REINSTALAR CONEXÃO</Link>
             </div>
         )
     }
@@ -55,7 +81,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
             <div className="flex flex-col items-center justify-center h-[70vh] p-8 text-center space-y-6">
                 <ShieldAlert className="w-16 h-16 text-red-500 mb-2" />
                 <h2 className="text-2xl font-black italic uppercase text-neutral-100">CLIENTE NÃO LOCALIZADO</h2>
-                <p className="text-neutral-500 max-w-sm">A identificação `{id}` não corresponde a nenhum registro ativo em nosso banco de dados seguro.</p>
+                <p className="text-neutral-500 max-w-sm">A identificação <span className="text-white font-mono">{id}</span> não foi encontrada no registro.</p>
                 <Link href="/admin/clientes" className="btn-brutal px-10">VOLTAR À BASE</Link>
             </div>
         )
@@ -126,7 +152,6 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
                         <p className="text-neutral-500 font-bold uppercase text-xs tracking-[0.2em]">Sem atividades registradas recentemente</p>
                         <p className="text-neutral-700 text-[10px] max-w-xs">O monitoramento de obrigações fiscais aparecerá neste quadrante após o próximo fechamento mensal.</p>
                     </div>
-                    {/* Background decorativo discreto */}
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
                         <FileCheck className="w-48 h-48" />
                     </div>

@@ -19,7 +19,9 @@ import {
     FolderX
 } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
 
 export default function ClientesPage() {
     const [searchTerm, setSearchTerm] = useState('');
