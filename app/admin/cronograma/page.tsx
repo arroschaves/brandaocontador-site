@@ -12,7 +12,8 @@ import {
     Search,
     ChevronLeft,
     ChevronRight,
-    UploadCloud
+    UploadCloud,
+    Loader2
 } from 'lucide-react';
 
 export default function CronogramaPage() {
