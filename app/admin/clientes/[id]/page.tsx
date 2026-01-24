@@ -8,15 +8,15 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 interface ClientPageProps {
-    params: Promise<{ clientId: string }>
+    params: Promise<{ id: string }>
 }
 
 /**
  * Página de Detalhes do Cliente (Admin)
- * Recalibrada com novo parâmetro de rota para evitar 404 de cache na Vercel
+ * Estabilizada para Next.js 15
  */
 export default function ClientDetailsPage({ params }: ClientPageProps) {
-    const { clientId } = use(params)
+    const { id } = use(params)
     const [client, setClient] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [fetchError, setFetchError] = useState<string | null>(null)
@@ -26,14 +26,14 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
         let isMounted = true;
 
         async function getClient() {
-            if (!clientId) return;
+            if (!id) return;
 
             try {
                 setLoading(true)
                 const { data, error } = await supabase
                     .from('clientes')
                     .select('*')
-                    .eq('id', clientId)
+                    .eq('id', id)
                     .maybeSingle()
 
                 if (error) throw error;
@@ -55,7 +55,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
 
         getClient()
         return () => { isMounted = false };
-    }, [clientId])
+    }, [id])
 
     if (loading) {
         return (
@@ -82,7 +82,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
             <div className="flex flex-col items-center justify-center h-[70vh] p-8 text-center space-y-6">
                 <ShieldAlert className="w-16 h-16 text-red-500 mb-2" />
                 <h2 className="text-2xl font-black italic uppercase text-neutral-100">CLIENTE NÃO LOCALIZADO</h2>
-                <p className="text-neutral-500 max-w-sm">A identificação <span className="text-white font-mono">{clientId}</span> não foi encontrada.</p>
+                <p className="text-neutral-500 max-w-sm">A identificação <span className="text-white font-mono">{id}</span> não foi encontrada.</p>
                 <Link href="/admin/clientes" className="btn-brutal px-10">VOLTAR À BASE</Link>
             </div>
         )
