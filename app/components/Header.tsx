@@ -18,7 +18,7 @@ function Header() {
                 <img
                   src="/logo-full.jpg"
                   alt="Brandão Contabilidade Logo"
-                  className="h-full w-auto grayscale contrast-125 brightness-110 group-hover:grayscale-0 transition-all duration-700 object-contain"
+                  className="h-full w-auto contrast-125 brightness-110 group-hover:scale-105 transition-all duration-700 object-contain"
                 />
               </div>
               <div className="hidden sm:flex flex-col border-l border-neutral-800 pl-6 h-10 justify-center">

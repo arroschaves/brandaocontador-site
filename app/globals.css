@@ -23,11 +23,6 @@
   body {
     @apply font-sans antialiased bg-obsidian text-neutral-200 overflow-x-hidden;
     line-height: 1.6;
-    /* Noise texture overlay */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 200px;
-    background-blend-mode: overlay;
   }
 
   h1,
@@ -40,90 +35,72 @@
   }
 
   h1 {
-    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-size: clamp(3.5rem, 8vw, 6.5rem);
   }
 
   h2 {
-    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
   }
 
   h3 {
-    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-size: clamp(1.8rem, 4vw, 3rem);
   }
 }
 
 @layer components {
   .brutalist-card {
-    @apply bg-neutral-900 border border-neutral-800 p-8 transition-all duration-300 relative overflow-hidden;
+    @apply bg-neutral-900 border border-neutral-800 p-8 transition-all duration-500 relative overflow-hidden;
     border-radius: 0 !important;
   }
 
-  .brutalist-card::before {
-    content: '';
-    @apply absolute top-0 left-0 w-full h-1 bg-amber-electric transform scale-x-0 origin-left transition-transform duration-500;
-  }
-
-  .brutalist-card:hover::before {
-    @apply scale-x-100;
+  .brutalist-card:hover {
+    @apply border-amber-electric/30 bg-neutral-800/80;
+    box-shadow: 12px 12px 0px 0px rgba(255, 176, 0, 0.05);
   }
 
   .btn-brutal {
-    @apply inline-flex items-center justify-center px-8 py-4 bg-amber-electric text-obsidian font-mono font-bold uppercase tracking-widest border border-amber-electric transition-all duration-300 relative z-10;
+    @apply inline-flex items-center justify-center px-10 py-5 bg-amber-electric text-obsidian font-mono font-black uppercase tracking-widest border-2 border-amber-electric transition-all duration-300 relative z-10;
     border-radius: 0 !important;
   }
 
   .btn-brutal:hover {
-    @apply bg-obsidian text-amber-electric;
-    box-shadow: 8px 8px 0px 0px #FFB000;
+    @apply bg-obsidian text-amber-electric scale-[1.02];
+    box-shadow: 10px 10px 0px 0px #FFB000;
   }
 
   .btn-brutal-outline {
-    @apply inline-flex items-center justify-center px-8 py-4 bg-transparent text-amber-electric font-mono font-bold uppercase tracking-widest border border-amber-electric transition-all duration-300;
+    @apply inline-flex items-center justify-center px-10 py-5 bg-transparent text-amber-electric font-mono font-black uppercase tracking-widest border-2 border-amber-electric transition-all duration-300;
     border-radius: 0 !important;
   }
 
   .btn-brutal-outline:hover {
-    @apply bg-amber-electric text-obsidian;
+    @apply bg-amber-electric text-obsidian scale-[1.02];
+    box-shadow: 10px 10px 0px 0px #0A0A0B;
   }
 
-  .text-reveal {
-    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
-  }
-
-  .text-reveal.active {
-    @apply opacity-100 translate-y-0;
+  .container-custom {
+    @apply max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-24;
   }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .container-custom {
-    @apply max-w-[1400px] mx-auto px-6 sm:px-12 lg:px-20;
-  }
-
-  .mono-label {
-    @apply font-mono text-xs uppercase tracking-[0.3em] text-amber-electric/70;
-  }
-
-  .glow-amber {
-    box-shadow: 0 0 40px -10px rgba(255, 176, 0, 0.3);
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 176, 0, 0.4);
   }
 
   .bg-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
   }
 
   .page-transition {
-    animation: fadeInSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeInSlideUp 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
   }
 
   @keyframes fadeInSlideUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
 
     to {
@@ -131,17 +108,50 @@
       transform: translateY(0);
     }
   }
+
+  .animate-shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+  }
+
+  @keyframes shake {
+
+    10%,
+    90% {
+      transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+      transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+      transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+      transform: translate3d(4px, 0, 0);
+    }
+  }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar Premium */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-obsidian;
+  background: var(--obsidian);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-neutral-800 hover:bg-amber-electric transition-colors;
+  background: #1A1A1B;
+  border: 3px solid var(--obsidian);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--amber-electric);
 }
