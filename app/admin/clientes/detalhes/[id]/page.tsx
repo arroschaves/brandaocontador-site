@@ -93,7 +93,7 @@ export default function ClientDetailsPage({ params }: ClientPageProps) {
             {/* Header: Ação e Título */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-neutral-800 pb-8">
                 <div className="space-y-4">
-                    <Link href="/admin/carteira" className="inline-flex items-center gap-2 text-neutral-500 hover:text-amber-electric transition-colors group">
+                    <Link href="/admin/clientes" className="inline-flex items-center gap-2 text-neutral-500 hover:text-amber-electric transition-colors group">
                         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                         <span className="font-mono text-[10px] font-black uppercase tracking-widest">Lista Geral</span>
                     </Link>
