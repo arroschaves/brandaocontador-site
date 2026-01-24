@@ -1,25 +1,19 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-    // 1. Ignorar explicitamente rotas de arquivos estáticos e de sistema do Next.js
-    if (
-        request.nextUrl.pathname.startsWith('/_next') ||
-        request.nextUrl.pathname.includes('/api/') ||
-        request.nextUrl.pathname.includes('.')
-    ) {
-        return NextResponse.next()
-    }
-
     return await updateSession(request)
 }
 
 export const config = {
     matcher: [
         /*
-         * Aplicar apenas em rotas de páginas
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder
          */
-        '/admin/:path*',
-        '/login',
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
