@@ -161,6 +161,7 @@ export default function ClientesPage() {
                                     <th className="px-4 pb-4">Documento</th>
                                     <th className="px-4 pb-4">Regime Tributário</th>
                                     <th className="px-4 pb-4">Google Drive</th>
+                                    <th className="px-4 pb-4">Situação Fiscal</th>
                                     <th className="px-4 pb-4">Contato</th>
                                     <th className="px-4 pb-4 text-right">Ações</th>
                                 </tr>
@@ -219,6 +220,20 @@ export default function ClientesPage() {
                                                     <span className="text-xs">Sem pasta</span>
                                                 </div>
                                             )}
+                                        </td>
+                                        <td className="px-4 py-4">
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex gap-2">
+                                                    <span title="Federal" className={`w-3 h-3 rounded-full ${c.situacao_federal === 'REGULAR' ? 'bg-green-500' : c.situacao_federal === 'PENDENTE' ? 'bg-red-500' : 'bg-neutral-600'}`}></span>
+                                                    <span title="Estadual" className={`w-3 h-3 rounded-full ${c.situacao_estadual === 'REGULAR' ? 'bg-green-500' : c.situacao_estadual === 'PENDENTE' ? 'bg-red-500' : 'bg-neutral-600'}`}></span>
+                                                    <span title="Municipal" className={`w-3 h-3 rounded-full ${c.situacao_municipal === 'REGULAR' ? 'bg-green-500' : c.situacao_municipal === 'PENDENTE' ? 'bg-red-500' : 'bg-neutral-600'}`}></span>
+                                                </div>
+                                                {c.data_ultima_consulta_fiscal && (
+                                                    <span className="text-[9px] text-neutral-500">
+                                                        {new Date(c.data_ultima_consulta_fiscal).toLocaleDateString('pt-BR')}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-4 text-xs text-neutral-400">
                                             <div>{c.telefone_whatsapp}</div>
