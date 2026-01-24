@@ -170,13 +170,20 @@ export default function ClientesPage() {
                                 {filteredClientes.map((c) => (
                                     <tr key={c.id} className="hover:bg-neutral-800/20 group">
                                         <td className="px-4 py-4">
-                                            <div className="font-semibold text-neutral-200 flex items-center gap-2">
-                                                <Link href={`/admin/clientes/${c.id}`} className="hover:text-primary-400 hover:underline transition-colors decoration-2 underline-offset-4">
-                                                    {c.nome}
-                                                </Link>
-                                                {c.status_rfb === 'ATIVA' && (
-                                                    <div className="text-green-500 p-1 bg-green-500/10 rounded-full" title="Status Receita: ATIVA">
-                                                        <CheckCircle2 className="w-3 h-3" />
+                                            <div className="flex flex-col">
+                                                <div className="font-semibold text-neutral-200 flex items-center gap-2">
+                                                    <Link href={`/admin/clientes/${c.id}`} className="hover:text-primary-400 hover:underline transition-colors decoration-2 underline-offset-4">
+                                                        {c.razao_social || c.nome}
+                                                    </Link>
+                                                    {c.status_rfb === 'ATIVA' && (
+                                                        <div className="text-green-500 p-1 bg-green-500/10 rounded-full" title="Status Receita: ATIVA">
+                                                            <CheckCircle2 className="w-3 h-3" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {c.razao_social && c.razao_social !== c.nome && (
+                                                    <div className="text-[10px] text-neutral-400 font-medium">
+                                                        Apelido: {c.nome}
                                                     </div>
                                                 )}
                                             </div>

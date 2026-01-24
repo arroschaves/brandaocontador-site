@@ -150,27 +150,82 @@ export default function ClientDetailsPage({ params }: { params: { id: string } }
                 {/* ABA 3: DADOS */}
                 {activeTab === 'dados' && (
                     <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
-                        <h2 className="text-xl font-bold text-neutral-200 mb-4">Informações da Receita</h2>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-xs text-neutral-500">Razão Social</label>
-                                <p className="text-neutral-200">{cliente.nome}</p>
+                        <h2 className="text-xl font-bold text-neutral-200 mb-6 flex justify-between items-center">
+                            Informações Cadastrais
+                            {cliente.drive_folder_id && (
+                                <a
+                                    href={`https://drive.google.com/drive/folders/${cliente.drive_folder_id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs flex items-center gap-2 bg-green-500/10 text-green-400 px-3 py-1.5 rounded-full border border-green-500/20 hover:bg-green-500/20 transition-colors"
+                                >
+                                    <Download className="w-3 h-3" /> Ver no Google Drive
+                                </a>
+                            )}
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="md:col-span-2 lg:col-span-3">
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Razão Social Completa</label>
+                                <p className="text-neutral-100 text-lg font-medium">{cliente.razao_social || cliente.nome}</p>
                             </div>
+
                             <div>
-                                <label className="text-xs text-neutral-500">CNPJ/CPF</label>
-                                <p className="text-neutral-200">{cliente.cnpj_cpf}</p>
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">CNPJ / CPF</label>
+                                <p className="text-neutral-200 font-mono">{cliente.cnpj_cpf}</p>
                             </div>
+
                             <div>
-                                <label className="text-xs text-neutral-500">CNAE Principal</label>
-                                <p className="text-neutral-200">{cliente.cnae_principal || 'N/A'}</p>
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Status RFB</label>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <div className={`w-2 h-2 rounded-full ${cliente.status_rfb === 'ATIVA' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <p className="text-neutral-200">{cliente.status_rfb || 'ATIVO'}</p>
+                                </div>
                             </div>
+
                             <div>
-                                <label className="text-xs text-neutral-500">Status RFB</label>
-                                <p className="text-neutral-200">{cliente.status_rfb || 'Ativo'}</p>
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Natureza Jurídica</label>
+                                <p className="text-neutral-200">{cliente.natureza_juridica || 'N/D'}</p>
                             </div>
-                            <div className="col-span-2">
-                                <label className="text-xs text-neutral-500">Observações do Sistema</label>
-                                <p className="text-neutral-400 text-sm">{cliente.observacoes || 'Sem observações.'}</p>
+
+                            <div className="lg:col-span-2">
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">CNAE Principal</label>
+                                <p className="text-neutral-200 text-sm">{cliente.cnae_principal || 'N/D'}</p>
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-bold text-neutral-500 uppercase tracking-wider">Data de Abertura</label>
+                                <p className="text-neutral-200">
+                                    {cliente.data_abertura ? new Date(cliente.data_abertura).toLocaleDateString('pt-BR') : 'N/D'}
+                                </p>
+                            </div>
+
+                            <div className="md:col-span-2 lg:col-span-3 pt-4 border-t border-neutral-800">
+                                <h3 className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4">Endereço Fiscal</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="lg:col-span-2">
+                                        <label className="text-xs font-bold text-neutral-500 uppercase">Logradouro / Rua</label>
+                                        <p className="text-neutral-200">{cliente.logradouro || 'N/D'}, {cliente.numero}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-neutral-500 uppercase">Bairro</label>
+                                        <p className="text-neutral-200">{cliente.bairro || 'N/D'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-neutral-500 uppercase">CEP</label>
+                                        <p className="text-neutral-200">{cliente.cep || 'N/D'}</p>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-bold text-neutral-500 uppercase">Cidade / UF</label>
+                                        <p className="text-neutral-200">{cliente.cidade || 'Sidrolândia'} - {cliente.estado || 'MS'}</p>
+                                    </div>
+                                    {cliente.complemento && (
+                                        <div className="lg:col-span-4">
+                                            <label className="text-xs font-bold text-neutral-500 uppercase">Complemento</label>
+                                            <p className="text-neutral-200">{cliente.complemento}</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
