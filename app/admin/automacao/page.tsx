@@ -92,19 +92,42 @@ export default function AutomacaoPage() {
     const runAnalysis = async () => {
         setScanning(true)
         try {
-            // Busca o relatório real gerado pela varredura do terminal
             const response = await fetch('/automation_report.json')
             if (!response.ok) throw new Error('Relatório não encontrado')
-            const data = await response.json()
+            const rawData = await response.json()
 
-            setStats(prev => ({ ...prev, arquivosLocaisMapeados: data.length }))
-            setScanResults(data)
+            // Lógica de Veredito 'Padrão Brandão'
+            const processedData = rawData.map((item: any) => {
+                const year = parseInt(item.date.split('/')[2])
+                const isRecent = year >= 2025
+                const isUnique = item.status === 'Unique'
+
+                let action = 'DISCARD'
+                let status = item.status
+
+                if (isRecent) {
+                    action = item.status === 'Recentest' || isUnique ? 'KEEP' : 'DISCARD'
+                } else if (isUnique) {
+                    // Preserva documentos únicos mesmo antigos (RG, CPF, Contratos)
+                    action = 'KEEP'
+                    status = 'Historical Unique'
+                }
+
+                return { ...item, action, status }
+            })
+
+            // Filtra os descartados da contagem para mostrar o que realmente vai subir
+            const keepCount = processedData.filter((i: any) => i.action === 'KEEP').length
+
+            setStats(prev => ({ ...prev, arquivosLocaisMapeados: keepCount }))
+            setScanResults(processedData)
         } catch (err) {
             console.error('Falha ao carregar scan real:', err)
-            // Fallback para mock caso o arquivo falte no deploy imediato
+            // Fallback mock atualizado com as novas regras
             setScanResults([
                 { name: 'CCIR_65842135.pdf', folder: 'F:\\CCIR', date: '20/01/2026', action: 'KEEP', status: 'Recentest' },
-                { name: 'CCIR_65842135.pdf', folder: 'C:\\Users\\DANI\\Documents', date: '10/01/2025', action: 'DISCARD', status: 'Old Version' }
+                { name: 'RG_ALESSANDRO.pdf', folder: 'C:\\Docs', date: '10/01/2019', action: 'KEEP', status: 'Historical Unique' },
+                { name: 'ITR_ANTIGO.doc', folder: 'F:\\ITR', date: '15/01/2022', action: 'DISCARD', status: 'Obsolete' }
             ])
         } finally {
             setScanning(false)
