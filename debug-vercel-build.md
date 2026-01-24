@@ -6,7 +6,8 @@
 - **Observação:** O usuário enviou logs de um commit antigo (`1bb1408`), mas afirma que o erro persiste. É necessário validar o estado atual do repositório remoto e local.
 
 ## 2. Planejamento (Task Breakdown)
-- [ ] Validar se ainda existem imports de `@/components/ui/` no projeto.
+- [x] Validar se ainda existem imports de `@/components/ui/` no projeto. (Limpo)
+- [x] Remover `@supabase/auth-helpers-nextjs` (causou erro de versão no build).
 - [ ] Ajustar o `package.json` para resolver conflitos de `peerDependencies` (usar `--force` ou sincronizar versões).
 - [ ] Executar build local (`npm run build`) para garantir que o erro de compilação foi resolvido antes do push.
 - [ ] Verificar se o `tsconfig.json` possui os aliases corretos.
