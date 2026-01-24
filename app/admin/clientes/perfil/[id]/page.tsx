@@ -13,7 +13,7 @@ interface ClientPageProps {
 
 /**
  * Página de Detalhes do Cliente (Admin)
- * Estabilizada para Next.js 15
+ * Localizada em /perfil/[id] para estabilidade de rotas no Next.js 15
  */
 export default function ClientDetailsPage({ params }: ClientPageProps) {
     const { id } = use(params)
