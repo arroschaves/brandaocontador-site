@@ -34,19 +34,13 @@ export default function AutomacaoPage() {
     }, [])
 
     async function loadSavedConfig() {
-        // Tenta primeiro o localStorage (mais rápido e garantido localmente)
         const localData = localStorage.getItem('brandao_automation_folders')
         if (localData) {
             setSelectedFolders(JSON.parse(localData))
-            return
         }
 
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            // Se não houver login, usa o default
-            setSelectedFolders(['F:\\ITR 2025', 'F:\\CCIR', 'F:\\NOTAS'])
-            return
-        }
+        if (!user) return
 
         const { data } = await supabase
             .from('admin_settings')
@@ -57,8 +51,6 @@ export default function AutomacaoPage() {
         if (data?.value) {
             setSelectedFolders(data.value)
             localStorage.setItem('brandao_automation_folders', JSON.stringify(data.value))
-        } else {
-            setSelectedFolders(['F:\\ITR 2025', 'F:\\CCIR', 'F:\\NOTAS'])
         }
     }
 
