@@ -34,8 +34,19 @@ export default function AutomacaoPage() {
     }, [])
 
     async function loadSavedConfig() {
+        // Tenta primeiro o localStorage (mais rápido e garantido localmente)
+        const localData = localStorage.getItem('brandao_automation_folders')
+        if (localData) {
+            setSelectedFolders(JSON.parse(localData))
+            return
+        }
+
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+        if (!user) {
+            // Se não houver login, usa o default
+            setSelectedFolders(['F:\\ITR 2025', 'F:\\CCIR', 'F:\\NOTAS'])
+            return
+        }
 
         const { data } = await supabase
             .from('admin_settings')
@@ -45,23 +56,30 @@ export default function AutomacaoPage() {
 
         if (data?.value) {
             setSelectedFolders(data.value)
+            localStorage.setItem('brandao_automation_folders', JSON.stringify(data.value))
         } else {
-            // Default inicial se nunca salvou nada
             setSelectedFolders(['F:\\ITR 2025', 'F:\\CCIR', 'F:\\NOTAS'])
         }
     }
 
     async function saveConfig(folders: string[]) {
+        // Salva localmente primeiro
+        localStorage.setItem('brandao_automation_folders', JSON.stringify(folders))
+
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        await supabase
-            .from('admin_settings')
-            .upsert({
-                key: 'automation_folders',
-                value: folders,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'key' })
+        try {
+            await supabase
+                .from('admin_settings')
+                .upsert({
+                    key: 'automation_folders',
+                    value: folders,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'key' })
+        } catch (e) {
+            console.error('Erro ao salvar no banco, mas persistindo localmente:', e)
+        }
     }
 
     const addPath = async () => {
