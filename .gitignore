@@ -25,6 +25,10 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# Google Drive credentials
+credentials.json
+token.pickle
+
 # vercel
 .vercel
 

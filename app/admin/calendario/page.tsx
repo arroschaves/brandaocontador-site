@@ -47,7 +47,7 @@ export default function CalendarioPage() {
             if (error) throw error;
 
             // Mapear para o formato do calendário
-            const mapped = (data || []).map(d => ({
+            const mapped = (data || []).map((d: any) => ({
                 day: new Date(d.competencia).getUTCDate(), // Assumindo que queremos mostrar no dia da competência ou similar
                 type: d.tipo,
                 title: d.tipo,
@@ -174,8 +174,8 @@ export default function CalendarioPage() {
                     </div>
 
                     <div className="grid grid-cols-7 border-b border-neutral-800 bg-neutral-950/30 text-center py-4">
-                        {daysArr.map(day => (
-                            <div key={day} className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">{day}</div>
+                        {daysArr.map((d: any) => (
+                            <div key={d} className="text-[10px] font-black uppercase tracking-[0.2em] text-neutral-500">{d}</div>
                         ))}
                     </div>
 

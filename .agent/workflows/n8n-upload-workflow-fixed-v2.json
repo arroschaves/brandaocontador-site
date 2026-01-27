@@ -1,0 +1,120 @@
+{
+    "name": "Upload Brandao - FIXED v2",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "upload-brandao",
+                "options": {
+                    "rawBody": false
+                },
+                "responseMode": "onReceived"
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                300
+            ],
+            "name": "Webhook",
+            "webhookId": "upload-brandao-v2"
+        },
+        {
+            "parameters": {
+                "resource": "file",
+                "operation": "upload",
+                "name": "={{ $json.body.file_name }}",
+                "inputDataFieldName": "data",
+                "driveId": {
+                    "__rl": true,
+                    "value": "My Drive",
+                    "mode": "list"
+                },
+                "folderId": {
+                    "__rl": true,
+                    "value": "={{ $json.body.drive_folder_id }}",
+                    "mode": "id"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                460,
+                300
+            ],
+            "name": "Upload to Drive",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "clientes",
+                "filterType": "manual",
+                "matchingColumns": [
+                    "id"
+                ],
+                "dataMode": "defineBelow",
+                "valuesToSend": {
+                    "values": [
+                        {
+                            "column": "id",
+                            "value": "={{ $node['Webhook'].json.body.client_id }}"
+                        },
+                        {
+                            "column": "last_sync",
+                            "value": "={{ $now.toISO() }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                680,
+                300
+            ],
+            "name": "Update Client",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "tvymDvbKT2vFr50N",
+                    "name": "Supabase account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Upload to Drive",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload to Drive": {
+            "main": [
+                [
+                    {
+                        "node": "Update Client",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

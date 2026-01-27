@@ -20,6 +20,7 @@ import {
   Cpu,
   Zap
 } from 'lucide-react';
+import WhatsAppRadar from '../components/WhatsAppRadar';
 
 export default function AdminLayout({
   children,
@@ -127,19 +128,22 @@ export default function AdminLayout({
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <button className="p-2 relative text-neutral-400 hover:text-neutral-100 transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error-500 rounded-full border-2 border-neutral-950" />
-            </button>
-            <div className="h-8 w-px bg-neutral-800 mx-2" />
-            <div className="flex items-center space-x-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-neutral-100">Alessandro</p>
-                <p className="text-xs text-neutral-500">Administrador</p>
-              </div>
-              <div className="w-9 h-9 bg-neutral-800 rounded-full border border-neutral-700 flex items-center justify-center">
-                <UserIcon className="w-5 h-5 text-neutral-400" />
+          <div className="flex items-center space-x-6">
+            <WhatsAppRadar />
+            <div className="flex items-center space-x-4">
+              <button className="p-2 relative text-neutral-400 hover:text-neutral-100 transition-colors">
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-error-500 rounded-full border-2 border-neutral-950" />
+              </button>
+              <div className="h-8 w-px bg-neutral-800 mx-2" />
+              <div className="flex items-center space-x-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-neutral-100">Alessandro</p>
+                  <p className="text-xs text-neutral-500">Administrador</p>
+                </div>
+                <div className="w-9 h-9 bg-neutral-800 rounded-full border border-neutral-700 flex items-center justify-center">
+                  <UserIcon className="w-5 h-5 text-neutral-400" />
+                </div>
               </div>
             </div>
           </div>
@@ -150,6 +154,6 @@ export default function AdminLayout({
           {children}
         </div>
       </main>
-    </div>
+    </div >
   );
 }

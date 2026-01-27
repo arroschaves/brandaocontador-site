@@ -1,0 +1,306 @@
+{
+    "name": "Upload Brandao - FINAL CORRIGIDO",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "upload-brandao",
+                "options": {
+                    "rawBody": false
+                },
+                "responseMode": "onReceived"
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                100,
+                300
+            ],
+            "name": "Webhook",
+            "webhookId": "upload-brandao-final-v2"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $headers['x-api-key'] }}",
+                            "value2": "BRANDAO_SYNC_2026_SECURE_KEY"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                300,
+                300
+            ],
+            "name": "Check API Key"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Extrai ano e tipo de documento do path enviado pelo Python\nconst path = $json.body.path;\nconst docType = $json.body.doc_type;\nconst driveFolderId = $json.body.drive_folder_id;\n\n// Exemplo de path: \"MG PETS/2025/DOCUMENTOS_PERMANENTES/JUNTA_COMERCIAL\"\n// Vamos extrair o ano (2025)\nconst pathParts = path.split('/');\nconst year = pathParts.find(p => /^\\d{4}$/.test(p)) || new Date().getFullYear().toString();\n\n// CRÍTICO: Preservar o arquivo binário!\nreturn {\n  json: {\n    year: year,\n    doc_type: docType,\n    root_folder_id: driveFolderId,\n    file_name: $json.body.file_name,\n    client_id: $json.body.client_id\n  },\n  binary: $binary  // ← PASSA O BINÁRIO ADIANTE\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ],
+            "name": "Extract Metadata"
+        },
+        {
+            "parameters": {
+                "resource": "folder",
+                "operation": "create",
+                "name": "={{ $json.year }}",
+                "driveId": {
+                    "__rl": true,
+                    "value": "My Drive",
+                    "mode": "list"
+                },
+                "folderId": {
+                    "__rl": true,
+                    "value": "={{ $json.root_folder_id }}",
+                    "mode": "id"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                680,
+                300
+            ],
+            "name": "Create Year Folder",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Preserva os dados do nó Extract Metadata + ID da pasta Year\nconst metadata = $node['Extract Metadata'].json;\n\nreturn {\n  json: {\n    ...metadata,\n    year_folder_id: $json.id  // ID da pasta do ano\n  },\n  binary: $node['Extract Metadata'].binary  // ← RECUPERA O BINÁRIO\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ],
+            "name": "Merge Year Folder"
+        },
+        {
+            "parameters": {
+                "resource": "folder",
+                "operation": "create",
+                "name": "={{ $json.doc_type }}",
+                "driveId": {
+                    "__rl": true,
+                    "value": "My Drive",
+                    "mode": "list"
+                },
+                "folderId": {
+                    "__rl": true,
+                    "value": "={{ $json.year_folder_id }}",
+                    "mode": "id"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                1120,
+                300
+            ],
+            "name": "Create Doc Type Folder",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Preserva os metadados + ID da pasta do tipo de documento\nconst metadata = $node['Merge Year Folder'].json;\n\nreturn {\n  json: {\n    ...metadata,\n    doc_type_folder_id: $json.id  // ID da pasta do tipo\n  },\n  binary: $node['Merge Year Folder'].binary  // ← RECUPERA O BINÁRIO NOVAMENTE\n};"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1340,
+                300
+            ],
+            "name": "Merge Doc Type Folder"
+        },
+        {
+            "parameters": {
+                "resource": "file",
+                "operation": "upload",
+                "name": "={{ $json.file_name }}",
+                "inputDataFieldName": "data",
+                "driveId": {
+                    "__rl": true,
+                    "value": "My Drive",
+                    "mode": "list"
+                },
+                "folderId": {
+                    "__rl": true,
+                    "value": "={{ $json.doc_type_folder_id }}",
+                    "mode": "id"
+                },
+                "options": {}
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 3,
+            "position": [
+                1560,
+                300
+            ],
+            "name": "Upload File",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "operation": "update",
+                "tableId": "clientes",
+                "filterType": "manual",
+                "filters": {
+                    "conditions": [
+                        {
+                            "keyName": "id",
+                            "condition": "eq",
+                            "keyValue": "={{ $node['Merge Doc Type Folder'].json.client_id }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "queryName": "data"
+                },
+                "fieldsUi": {
+                    "fieldValues": [
+                        {
+                            "fieldId": "last_sync",
+                            "fieldValue": "={{ $now.toISO() }}"
+                        }
+                    ]
+                }
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                1780,
+                300
+            ],
+            "name": "Update Client",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "tvymDvbKT2vFr50N",
+                    "name": "Supabase account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Check API Key",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check API Key": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Metadata",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Metadata": {
+            "main": [
+                [
+                    {
+                        "node": "Create Year Folder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Year Folder": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Year Folder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge Year Folder": {
+            "main": [
+                [
+                    {
+                        "node": "Create Doc Type Folder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Doc Type Folder": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Doc Type Folder",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge Doc Type Folder": {
+            "main": [
+                [
+                    {
+                        "node": "Upload File",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload File": {
+            "main": [
+                [
+                    {
+                        "node": "Update Client",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {
+        "executionOrder": "v1"
+    }
+}

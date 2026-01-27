@@ -37,7 +37,7 @@ export default function AtendimentoPage() {
 
         const channel = supabase
             .channel('atendimentos_realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, (payload) => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, (payload: any) => {
                 console.log('Change received!', payload);
                 fetchTickets();
             })

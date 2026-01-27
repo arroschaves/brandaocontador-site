@@ -43,7 +43,7 @@ export default function VencimentosPage() {
 
             // Transformar em lista de eventos de vencimento
             const events: any[] = [];
-            data?.forEach(c => {
+            data?.forEach((c: any) => {
                 const mapeamento = [
                     { field: 'vencimento_alvara_funcionamento', label: 'Alvará Funcionamento' },
                     { field: 'vencimento_alvara_sanitario', label: 'Alvará Sanitário' },
