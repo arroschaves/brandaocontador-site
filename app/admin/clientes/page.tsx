@@ -34,13 +34,52 @@ export default function ClientesPage() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingClient, setEditingClient] = useState<any>(null);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<any>({
         nome: '',
         cnpj_cpf: '',
         telefone_whatsapp: '',
         email: '',
         cidade: 'Sidrolândia'
     });
+    const [consulting, setConsulting] = useState(false);
+
+    // Função para consultar CNPJ via API pública (OpenCNPJ)
+    async function handleConsultarCNPJ() {
+        const cnpj = formData.cnpj_cpf.replace(/\D/g, '');
+        if (cnpj.length !== 14) {
+            alert('Digite um CNPJ válido com 14 dígitos para consultar.');
+            return;
+        }
+
+        setConsulting(true);
+        try {
+            const response = await fetch(`https://open.cnpja.com/office/${cnpj}`);
+            if (!response.ok) throw new Error('CNPJ não encontrado ou limite de consultas atingido.');
+
+            const data = await response.json();
+
+            // Preenchimento Automático do Formulário
+            setFormData((prev: any) => ({
+                ...prev,
+                nome: data.name || data.alias || prev.nome,
+                email: data.emails?.[0]?.address || prev.email,
+                razao_social: data.name,
+                cnae_principal: data.mainActivity ? `${data.mainActivity.code} - ${data.mainActivity.text}` : null,
+                status_rfb: data.status?.text || 'ATIVA',
+                logradouro: data.address?.street,
+                numero: data.address?.number,
+                bairro: data.address?.district,
+                cep: data.address?.zip
+            }));
+
+            alert('Dados da Receita Federal importados! Confira e salve os dados.');
+        } catch (err: any) {
+            console.error(err);
+            alert('Falha na consulta: ' + err.message);
+        } finally {
+            setConsulting(false);
+        }
+    }
 
     useEffect(() => {
         fetchClientes();
@@ -89,7 +128,7 @@ export default function ClientesPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
-            // Remover o campo 'cidade' que não existe na tabela
+            // Unificando os dados para salvar
             const { cidade, ...dataToSave } = formData;
 
             if (editingClient) {
@@ -273,28 +312,48 @@ export default function ClientesPage() {
                             <button onClick={() => setIsModalOpen(false)} className="text-neutral-500 hover:text-white"><X className="w-6 h-6" /></button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div className="flex gap-2 items-end">
+                                <div className="flex-1">
+                                    <label className="text-xs font-bold text-neutral-500 uppercase">CNPJ / CPF</label>
+                                    <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none font-mono"
+                                        placeholder="00.000.000/0000-00"
+                                        value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
+                                </div>
+                                {formData.cnpj_cpf.replace(/\D/g, '').length === 14 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleConsultarCNPJ}
+                                        disabled={consulting}
+                                        className="mb-0.5 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-lg text-xs font-bold text-primary-400 flex items-center gap-2 transition-all disabled:opacity-50"
+                                    >
+                                        {consulting ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>🔍 Consultar</span>}
+                                    </button>
+                                )}
+                            </div>
+
                             <div>
                                 <label className="text-xs font-bold text-neutral-500 uppercase">Nome / Razão Social</label>
                                 <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                    value={formData.nome} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
+                                    value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-bold text-neutral-500 uppercase">CNPJ / CPF</label>
-                                    <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                        value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
-                                </div>
                                 <div>
                                     <label className="text-xs font-bold text-neutral-500 uppercase">WhatsApp</label>
                                     <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                        value={formData.telefone_whatsapp} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                        value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-neutral-500 uppercase">E-mail</label>
+                                    <input type="email" className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
+                                        value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                                 </div>
                             </div>
-                            <div>
-                                <label className="text-xs font-bold text-neutral-500 uppercase">E-mail</label>
-                                <input type="email" className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                    value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+
+                            <div className="bg-neutral-800/50 p-3 rounded-lg border border-neutral-800 text-center">
+                                <p className="text-[10px] text-neutral-500 font-mono uppercase">Dados de endereço e CNAE são salvos automaticamente ao consultar CNPJ.</p>
                             </div>
+
                             <button type="submit" className="btn-primary w-full py-3 mt-4 text-neutral-950 font-bold uppercase tracking-wider">
                                 {editingClient ? 'Salvar Alterações' : 'Cadastrar Cliente'}
                             </button>

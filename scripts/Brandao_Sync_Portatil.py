@@ -20,7 +20,7 @@ from datetime import datetime
 # ==========================================
 # No notebook real, você deve preencher essas variáveis ou usar um arquivo .env
 SUPABASE_URL = "https://escritoriobrandao-supabase.3ow2vi.easypanel.host"
-SUPABASE_KEY = "" # Precisa ser preenchida no notebook (Annon Key)
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE
 
 WEBHOOK_URL = "https://webhook.brandaocontador.com.br/webhook/upload-brandao"
 API_KEY = "BRANDAO_SYNC_2026_SECURE_KEY"
