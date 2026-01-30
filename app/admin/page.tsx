@@ -17,100 +17,114 @@ import { supabase } from '@/lib/supabase';
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
         totalClientes: 0,
-        prazosHoje: 12, // Mock por enquanto
-        concluidosMes: 85, // Mock por enquanto
+        prazosHoje: 0,
+        concluidosMes: 0,
+        pendentesMes: 0,
         pedidosZap: 0
     });
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+
+    async function fetchStats() {
+        try {
+            setLoading(true);
+            const { count: countClientes } = await supabase
+                .from('clientes')
+                .select('*', { count: 'exact', head: true });
+
+            const agora = new Date();
+            const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
+            const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString();
+
+            const { data: obrMes } = await supabase
+                .from('obrigacoes_acessorias')
+                .select('status')
+                .gte('competencia', inicioMes)
+                .lte('competencia', fimMes);
+
+            const concluidos = obrMes?.filter(o => o.status === 'concluido').length || 0;
+            const pendentes = obrMes?.filter(o => o.status !== 'concluido').length || 0;
+
+            const { count: countPedidos } = await supabase
+                .from('atendimentos')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'Pendente');
+
+            setStats({
+                totalClientes: countClientes || 0,
+                pedidosZap: countPedidos || 0,
+                prazosHoje: pendentes,
+                concluidosMes: concluidos,
+                pendentesMes: pendentes
+            });
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     useEffect(() => {
-        async function fetchStats() {
-            try {
-                // Total de Clientes
-                const { count: countClientes, error: errorClientes } = await supabase
-                    .from('clientes')
-                    .select('*', { count: 'exact', head: true })
-                    .not('nome', 'is', null)
-                    .not('cnpj_cpf', 'is', null);
-
-                // Prazos para Hoje
-                const hoje = new Date().toISOString().split('T')[0];
-                const { count: countPrazos } = await supabase
-                    .from('obrigacoes_acessorias')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('vencimento', hoje)
-                    .neq('status', 'concluido'); // Conta tudo que vence hoje e não está concluído
-
-                // Concluídos (Mês Atual)
-                const inicioMes = new Date();
-                inicioMes.setDate(1); // Primeiro dia do mês atual
-                const inicioMesStr = inicioMes.toISOString().split('T')[0];
-
-                const { count: countConcluidos } = await supabase
-                    .from('obrigacoes_acessorias')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('status', 'concluido')
-                    .gte('created_at', inicioMesStr); // Assumindo created_at ou data_conclusao se tiver
-
-                // Pedidos WhatsApp (Atendimentos Pendentes)
-                const { count: countPedidos, error: errorPedidos } = await supabase
-                    .from('atendimentos')
-                    .select('*', { count: 'exact', head: true })
-                    .ilike('status', '%pendente%'); // Tenta pegar qualquer coisa que tenha pendente
-
-                setStats(prev => ({
-                    ...prev,
-                    totalClientes: countClientes || 0,
-                    pedidosZap: countPedidos || 0,
-                    prazosHoje: countPrazos || 0,
-                    concluidosMes: countConcluidos || 0
-                }));
-
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        }
         fetchStats();
     }, []);
 
+    const handleManualSync = async () => {
+        setSyncing(true);
+        try {
+            const res = await fetch('/api/automation/sync', { method: 'POST' });
+            if (res.ok) {
+                alert('Auditoria Brandão 2026 iniciada! Em alguns minutos o painel será atualizado.');
+            }
+        } catch (err) {
+            alert('Falha ao iniciar auditoria');
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     const cards = [
-        { name: 'Total de Clientes', value: stats.totalClientes.toString(), icon: Users, color: 'text-primary-400', bg: 'bg-primary-500/10', href: '/admin/clientes' },
-        { name: 'Prazos para Hoje', value: stats.prazosHoje.toString(), icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10', href: '/admin/cronograma' },
-        { name: 'Concluídos (Mês)', value: stats.concluidosMes.toString(), icon: CheckCircle2, color: 'text-green-400', bg: 'bg-green-500/10', href: '/admin/cronograma?status=concluido' },
-        { name: 'Atendimentos Pendentes', value: stats.pedidosZap.toString(), icon: MessageSquare, color: 'text-yellow-400', bg: 'bg-yellow-500/10', href: '/admin/atendimento' },
+        { name: 'Clientes Ativos', value: stats.totalClientes.toString(), icon: Users, color: 'text-primary-400', bg: 'bg-primary-500/10', href: '/admin/clientes' },
+        { name: 'Documentos em Pasta', value: stats.concluidosMes.toString(), icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', href: '/admin/cronograma' },
+        { name: 'Transmissões Pendentes', value: stats.pendentesMes.toString(), icon: AlertCircle, color: 'text-amber-400', bg: 'bg-amber-500/10', href: '/admin/cronograma' },
+        { name: 'Pedidos WhatsApp', value: stats.pedidosZap.toString(), icon: MessageSquare, color: 'text-primary-400', bg: 'bg-primary-500/10', href: '/admin/atendimento' },
     ];
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            {/* Header */}
-            <div className="flex justify-between items-center bg-neutral-900/50 p-6 rounded-2xl border border-neutral-800 backdrop-blur-sm">
+            <div className="flex justify-between items-center bg-neutral-900/50 p-6 rounded-3xl border border-neutral-800 backdrop-blur-sm">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-100">Visão Geral</h1>
-                    <p className="text-neutral-400 mt-1">Bem-vindo ao centro de comando da Brandão Contabilidade.</p>
+                    <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter uppercase">Painel <span className="text-primary-500">Brandão</span></h1>
+                    <p className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest mt-1">Sincronização 2026 em tempo real</p>
                 </div>
+                <button
+                    onClick={handleManualSync}
+                    disabled={syncing}
+                    className="flex items-center gap-3 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-black uppercase rounded-xl border border-neutral-700 transition-all disabled:opacity-50"
+                >
+                    {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <DatabaseIcon className="w-4 h-4 text-primary-500" />}
+                    Sincronizar Cloud
+                </button>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {cards.map((stat) => (
                     <Link
                         key={stat.name}
                         href={stat.href}
-                        className={`bg-neutral-900/50 backdrop-blur-sm p-6 rounded-2xl border border-neutral-800 hover:border-neutral-600 transition-all group cursor-pointer hover:transform hover:-translate-y-1`}
+                        className={`bg-neutral-900/50 backdrop-blur-sm p-8 rounded-3xl border border-neutral-800 hover:border-primary-500/50 transition-all group cursor-pointer shadow-xl`}
                     >
                         <div className="flex justify-between items-start">
-                            <div className={`p-3 rounded-xl ${stat.bg} group-hover:scale-110 transition-transform`}>
+                            <div className={`p-4 rounded-2xl ${stat.bg} group-hover:scale-110 transition-transform`}>
                                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
                             </div>
+                            <ArrowUpRight className="w-5 h-5 text-neutral-700 group-hover:text-primary-500 transition-colors" />
                         </div>
-                        <div className="mt-4">
-                            <p className="text-sm font-medium text-neutral-400">{stat.name}</p>
-                            {loading && (stat.name === 'Total de Clientes' || stat.name === 'Atendimentos Pendentes') ? (
-                                <Loader2 className="w-6 h-6 animate-spin text-neutral-600 mt-1" />
+                        <div className="mt-6">
+                            <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{stat.name}</p>
+                            {loading ? (
+                                <div className="h-8 w-16 bg-neutral-800 animate-pulse rounded mt-2" />
                             ) : (
-                                <p className="text-2xl font-bold text-neutral-100 mt-1">{stat.value}</p>
+                                <p className="text-4xl font-black text-neutral-100 mt-1 italic">{stat.value}</p>
                             )}
                         </div>
                     </Link>
@@ -118,28 +132,44 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="p-6 bg-neutral-900 border border-neutral-800 rounded-2xl">
-                    <h2 className="text-xl font-bold mb-4">Ações Rápidas</h2>
+                <div className="p-8 bg-neutral-900 border border-neutral-800 rounded-[32px] space-y-6">
+                    <h2 className="text-xl font-black italic uppercase text-neutral-100">Ações Rápidas</h2>
                     <div className="grid grid-cols-2 gap-4">
-                        <button className="p-4 bg-neutral-800 rounded-xl hover:bg-neutral-700 transition-colors text-left border border-neutral-700">
-                            <Plus className="w-5 h-5 text-primary-400 mb-2" />
-                            <div className="font-bold text-sm">Novo Cliente</div>
-                        </button>
-                        <button className="p-4 bg-neutral-800 rounded-xl hover:bg-neutral-700 transition-colors text-left border border-neutral-700">
-                            <Calendar className="w-5 h-5 text-success-400 mb-2" />
-                            <div className="font-bold text-sm">Lançar Prazo</div>
-                        </button>
+                        <Link href="/admin/clientes" className="p-6 bg-neutral-800 hover:bg-primary-500 hover:text-neutral-950 rounded-2xl transition-all text-left border border-neutral-700 group">
+                            <Plus className="w-6 h-6 mb-3 group-hover:scale-110 transition-transform" />
+                            <div className="font-black uppercase text-xs">Novo Cliente</div>
+                        </Link>
+                        <Link href="/admin/cronograma" className="p-6 bg-neutral-800 hover:bg-emerald-500 hover:text-neutral-950 rounded-2xl transition-all text-left border border-neutral-700 group">
+                            <Calendar className="w-6 h-6 mb-3 group-hover:scale-110 transition-transform" />
+                            <div className="font-black uppercase text-xs">Cronograma</div>
+                        </Link>
                     </div>
                 </div>
 
-                <div className="p-6 bg-neutral-900 border border-neutral-800 rounded-2xl flex flex-col justify-center items-center text-center">
-                    <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mb-4">
-                        <MessageSquare className="w-8 h-8 text-primary-400" />
+                <div className="p-8 bg-neutral-900 border border-neutral-800 rounded-[32px] flex flex-col justify-center items-center text-center space-y-4">
+                    <div className="w-20 h-20 bg-primary-500/10 rounded-full flex items-center justify-center">
+                        <MessageSquare className="w-10 h-10 text-primary-500" />
                     </div>
-                    <h2 className="text-xl font-bold">Assistente de IA</h2>
-                    <p className="text-neutral-400 text-sm max-w-xs mt-2">Em breve: Analise seus dados e gere relatórios usando inteligência artificial.</p>
+                    <div>
+                        <h2 className="text-2xl font-black italic uppercase text-neutral-100">WhatsApp CRM</h2>
+                        <p className="text-neutral-500 text-[10px] uppercase font-mono tracking-widest mt-1">Conectado via Evolution API</p>
+                    </div>
+                    <Link href="/admin/atendimento" className="px-8 py-3 bg-primary-500 text-neutral-950 font-black uppercase text-xs rounded-xl hover:bg-primary-400 transition-colors">
+                        Ver Atendimentos
+                    </Link>
                 </div>
             </div>
         </div>
     );
 }
+
+function DatabaseIcon({ className }: { className?: string }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+        </svg>
+    )
+}
+
