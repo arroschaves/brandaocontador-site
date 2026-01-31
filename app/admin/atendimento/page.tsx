@@ -100,8 +100,8 @@ export default function AtendimentoPage() {
             const { data, error } = await supabase
                 .from('atendimentos')
                 .update({
-                    categoria: editForm.categoria_solicitacao,
-                    prioridade: editForm.prioridade, // Manter como TEXT (CRITICA, ALTA, NORMAL)
+                    categoria_solicitacao: editForm.categoria_solicitacao,
+                    prioridade: editForm.prioridade,
                     atendimento_automatico: editForm.atendimento_automatico === 'true'
                 })
                 .eq('id', id)

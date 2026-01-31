@@ -280,7 +280,7 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                                 value={editedClient?.razao_social || ''} onChange={e => setEditedClient({ ...editedClient, razao_social: e.target.value })} />
                                                         </div>
                                                         <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Nome Fantasia / Apelido</label>
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Apelido / Fantasia</label>
                                                             <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
                                                                 value={editedClient?.nome || ''} onChange={e => setEditedClient({ ...editedClient, nome: e.target.value })} />
                                                         </div>
@@ -297,14 +297,31 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                                 value={editedClient?.email || ''} onChange={e => setEditedClient({ ...editedClient, email: e.target.value })} />
                                                         </div>
                                                     </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Inscrição Estadual</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient?.inscricao_estadual || ''} onChange={e => setEditedClient({ ...editedClient, inscricao_estadual: e.target.value })} />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">CEP</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient?.cep || ''} onChange={e => setEditedClient({ ...editedClient, cep: e.target.value })} />
+                                                        </div>
+                                                    </div>
                                                     <div className="pt-2">
                                                         <button onClick={async () => {
-                                                            const { error } = await supabase.from('clientes').update(editedClient).eq('id', clientId);
+                                                            // Limpar campos que podem não existir no banco
+                                                            const { inscricao_municipal, ...cleanUpdate } = editedClient;
+
+                                                            const { error } = await supabase.from('clientes').update(cleanUpdate).eq('id', clientId);
                                                             if (!error) {
                                                                 setIsEditing(false);
                                                                 getFullClientData();
+                                                            } else {
+                                                                alert('Erro ao salvar: ' + error.message);
                                                             }
-                                                        }} className="w-full py-2 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase">Salvar Alterações</button>
+                                                        }} className="w-full py-2 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase">Confirmar Alterações</button>
                                                     </div>
                                                 </div>
                                             ) : (

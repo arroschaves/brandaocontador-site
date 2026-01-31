@@ -134,7 +134,6 @@ function ClientesContent() {
                 cidade: client.cidade || 'Sidrolândia',
                 estado: client.estado || 'MS',
                 inscricao_estadual: client.inscricao_estadual || '',
-                inscricao_municipal: client.inscricao_municipal || '',
                 status_rfb: client.status_rfb || 'ATIVA',
                 drive_folder_id: client.drive_folder_id || ''
             });
@@ -145,7 +144,7 @@ function ClientesContent() {
                 razao_social: '', regime_tributario: '', cnae_principal: '',
                 logradouro: '', numero: '', bairro: '', cep: '',
                 cidade: 'Sidrolândia', estado: 'MS',
-                inscricao_estadual: '', inscricao_municipal: '',
+                inscricao_estadual: '',
                 status_rfb: 'ATIVA', drive_folder_id: ''
             });
         }
@@ -163,17 +162,23 @@ function ClientesContent() {
             const response = await fetch(`https://open.cnpja.com/office/${cnpj}`);
             if (!response.ok) throw new Error('Falha na consulta.');
             const data = await response.json();
+
+            // Log do resultado para debug
+            console.log('[CNPJ Consult]', data);
+
             setFormData((prev: any) => ({
                 ...prev,
-                nome: data.name || data.alias || prev.nome,
+                nome: data.alias || data.name || prev.nome,
+                razao_social: data.name || prev.razao_social,
                 email: data.emails?.[0]?.address || prev.email,
-                razao_social: data.name,
-                cnae_principal: data.mainActivity ? `${data.mainActivity.code} - ${data.mainActivity.text}` : null,
+                cnae_principal: data.mainActivity ? `${data.mainActivity.code} - ${data.mainActivity.text}` : prev.cnae_principal,
                 status_rfb: data.status?.text || 'ATIVA',
-                logradouro: data.address?.street,
-                numero: data.address?.number,
-                bairro: data.address?.district,
-                cep: data.address?.zip
+                logradouro: data.address?.street || prev.logradouro,
+                numero: data.address?.number || prev.numero,
+                bairro: data.address?.district || prev.bairro,
+                cep: data.address?.zip || prev.cep,
+                cidade: data.address?.city || prev.cidade,
+                estado: data.address?.state || prev.estado
             }));
         } catch (err: any) {
             alert('Erro: ' + err.message);
@@ -371,89 +376,87 @@ function ClientesContent() {
                             </div>
                             <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-neutral-800 rounded transition-colors text-neutral-600"><X className="w-5 h-5" /></button>
                         </div>
-                        <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6 overflow-y-auto no-scrollbar pb-24">
+                        <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-4 overflow-y-auto no-scrollbar pb-24">
                             {/* CNPJ Consult Section */}
-                            <div className="p-4 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-3">
-                                <label className="text-[10px] font-bold text-neutral-600 uppercase flex items-center gap-2 tracking-widest">
-                                    <ShieldAlert className="w-3 h-3 text-emerald-500" /> Documento (CNPJ/CPF)
+                            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg space-y-2">
+                                <label className="text-[9px] font-black text-emerald-500 uppercase flex items-center gap-2 tracking-[0.2em]">
+                                    <ShieldAlert className="w-3 h-3" /> Identificação Fiscal
                                 </label>
                                 <div className="flex gap-2">
-                                    <input required className="flex-1 bg-neutral-950 border border-neutral-800 p-3 text-sm font-mono outline-none focus:border-emerald-500 text-neutral-100 rounded"
-                                        placeholder="00.000.000/0000-00"
+                                    <input required className="flex-1 bg-neutral-900 border border-neutral-800 p-2 text-xs font-mono outline-none focus:border-emerald-500 text-neutral-100 rounded"
+                                        placeholder="CNPJ ou CPF"
                                         value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
                                     {formData.cnpj_cpf?.replace(/\D/g, '').length === 14 && (
-                                        <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="px-4 bg-neutral-100 text-neutral-950 font-bold uppercase text-[10px] hover:bg-emerald-500 transition-all disabled:opacity-50 rounded">
-                                            {consulting ? <Loader2 className="animate-spin w-3.5 h-3.5" /> : 'Consultar'}
+                                        <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="px-4 bg-emerald-500 text-neutral-950 font-black uppercase text-[9px] hover:bg-emerald-400 transition-all disabled:opacity-50 rounded">
+                                            {consulting ? <Loader2 className="animate-spin w-3 h-3" /> : 'Consultar'}
                                         </button>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="space-y-5">
-                                <h3 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-800 pb-2">Núcleo do Registro</h3>
-                                <div className="grid gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-tight">Razão Social Oficial</label>
-                                        <input required className="w-full bg-neutral-900 border border-neutral-800 p-3 text-[11px] font-bold uppercase text-neutral-300 focus:border-emerald-500 outline-none rounded"
-                                            value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-neutral-600 uppercase tracking-tight">Nome Fantasia (Apelido)</label>
-                                        <input required className="w-full bg-neutral-950 border border-neutral-800 p-3 text-[11px] font-bold uppercase text-emerald-500 outline-none rounded"
-                                            value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-neutral-600 uppercase">Regime Fiscal</label>
-                                            <select className="w-full bg-neutral-900 border border-neutral-800 p-3 text-[11px] font-bold uppercase text-neutral-400 outline-none rounded"
-                                                value={formData.regime_tributario || ''} onChange={e => setFormData({ ...formData, regime_tributario: e.target.value })}>
-                                                <option value="">SELECIONE...</option>
-                                                <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
-                                                <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
-                                                <option value="LUCRO_REAL">LUCRO REAL</option>
-                                                <option value="PF_FAZENDA">PF (FAZENDA)</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-neutral-600 uppercase">Situação RFB</label>
-                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-3 text-[11px] font-bold uppercase text-emerald-500 outline-none rounded"
-                                                value={formData.status_rfb || ''} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
-                                        </div>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1 col-span-2">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Razão Social</label>
+                                    <input required className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-bold uppercase text-neutral-300 focus:border-emerald-500 outline-none rounded"
+                                        value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
                                 </div>
-                            </div>
-
-                            <div className="space-y-5 pt-2">
-                                <h3 className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-800 pb-2">Comunicação e Drive</h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-neutral-600 uppercase">WhatsApp</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-3 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            placeholder="5567999999999"
-                                            value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-neutral-600 uppercase">E-mail</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-3 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            placeholder="contato@empresa.com"
-                                            value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                                    </div>
+                                <div className="space-y-1 col-span-2">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Nome Fantasia / Apelido</label>
+                                    <input required className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-bold uppercase text-emerald-500 outline-none rounded"
+                                        value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-neutral-600 uppercase">Google Drive Folder ID</label>
-                                    <input className="w-full bg-neutral-950 border border-neutral-800 p-3 text-[10px] font-mono text-neutral-700 outline-none rounded"
-                                        placeholder="Ex: 1A2B3C4D5E..."
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Regime Fiscal</label>
+                                    <select className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[10px] font-bold uppercase text-neutral-400 outline-none rounded"
+                                        value={formData.regime_tributario || ''} onChange={e => setFormData({ ...formData, regime_tributario: e.target.value })}>
+                                        <option value="">SELECIONE...</option>
+                                        <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
+                                        <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
+                                        <option value="LUCRO_REAL">LUCRO REAL</option>
+                                        <option value="PF_FAZENDA">PF (FAZENDA)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Situação RFB</label>
+                                    <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[10px] font-bold uppercase text-emerald-500 outline-none rounded"
+                                        value={formData.status_rfb || ''} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">WhatsApp</label>
+                                    <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
+                                        placeholder="5567..."
+                                        value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">E-mail</label>
+                                    <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
+                                        placeholder="contato@..."
+                                        value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Inscrição Estadual</label>
+                                    <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
+                                        value={formData.inscricao_estadual || ''} onChange={e => setFormData({ ...formData, inscricao_estadual: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">CEP</label>
+                                    <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
+                                        value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
+                                </div>
+                                <div className="space-y-1 col-span-2">
+                                    <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Pasta Google Drive (ID)</label>
+                                    <input className="w-full bg-neutral-950 border border-neutral-800 p-2 text-[10px] font-mono text-neutral-700 outline-none rounded"
                                         value={formData.drive_folder_id || ''} onChange={e => setFormData({ ...formData, drive_folder_id: e.target.value })} />
                                 </div>
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3 pt-6 border-t border-neutral-900">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 text-[11px] font-bold uppercase text-neutral-600 hover:text-neutral-400 transition-colors">Cancelar</button>
-                                <button type="submit" disabled={syncing} className={`flex-[2] py-3 rounded ${syncing ? 'bg-neutral-800 text-neutral-700' : 'bg-emerald-500 text-neutral-950 hover:bg-emerald-400'} font-bold uppercase text-[11px] tracking-widest transition-all active:scale-95`}>
+                            <div className="flex gap-3 pt-6 border-t border-neutral-900 sticky bottom-0 bg-neutral-950 pb-6">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 text-[10px] font-black uppercase text-neutral-600 hover:text-neutral-401 transition-colors">Cancelar</button>
+                                <button type="submit" disabled={syncing} className={`flex-[2] py-3 rounded ${syncing ? 'bg-neutral-800 text-neutral-700' : 'bg- emerald-500 text-neutral-950 hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} font-black uppercase text-[10px] tracking-widest transition-all active:scale-95`}>
                                     {syncing ? (
                                         <span className="flex items-center justify-center gap-2">
-                                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Processando...
+                                            <Loader2 className="w-3 h-3 animate-spin" /> Processando...
                                         </span>
                                     ) : (
                                         editingClient ? 'Salvar Alterações' : 'Confirmar Cadastro'
