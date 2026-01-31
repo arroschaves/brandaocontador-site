@@ -51,20 +51,25 @@ export async function sendWhatsAppMessage(number: string, text: string) {
             })
         });
 
-        const result = await response.json();
-
-        if (!response.ok) {
-            console.error(`[Evolution API] sendWhatsAppMessage: Erro HTTP ${response.status} ao enviar mensagem para ${target}:`, result);
-            return { error: true, message: `Erro ao enviar mensagem: ${result.message || 'Erro desconhecido'}`, details: result };
-        } else {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const result = await response.json();
+            if (!response.ok) {
+                console.error(`[Evolution API] Erro HTTP ${response.status}:`, result);
+                return { error: true, message: result.message || `Erro ${response.status}` };
+            }
             console.log(`[Evolution API] sendWhatsAppMessage: Mensagem enviada com sucesso para ${target}`);
             return result;
+        } else {
+            const textError = await response.text();
+            console.error(`[Evolution API] Resposta não-JSON recebida (${response.status}):`, textError.substring(0, 100));
+            return { error: true, message: `O servidor retornou um erro (Status ${response.status}). Verifique o Cloudflare/Proxy.` };
         }
     } catch (error: any) {
         console.error(`[Evolution API] sendWhatsAppMessage: Falha crítica na requisição para ${target}:`, error);
         return {
             error: true,
-            message: `Falha na conexão: ${error.message === 'getaddrinfo EBUSY' ? 'DNS Ocupado/Bloqueado' : error.message}`
+            message: `Falha na conexão: ${error.message.includes('EBUSY') ? 'Servidor instável' : error.message}`
         };
     }
 }

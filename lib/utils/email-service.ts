@@ -63,8 +63,8 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
     } catch (error: any) {
         console.error(`[Email Service] sendProfessionalEmail: Falha crítica na requisição para ${to}:`, error);
         return {
-            error: true,
-            message: `Falha na conexão: ${error.message === 'getaddrinfo EBUSY' ? 'DNS Ocupado/Bloqueado' : error.message}`
+            success: false,
+            error: `Falha na conexão: ${error.message.includes('EBUSY') ? 'Servidor SMTP instável (EBUSY)' : error.message}`
         };
     }
 }
