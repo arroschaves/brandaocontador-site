@@ -41,14 +41,13 @@ export async function POST(request: Request) {
                 .from('atendimentos')
                 .insert({
                     cliente_id: cliente?.id || null,
-                    numero_whatsapp: phone,
-                    pushName: pushName,
+                    telefone_whatsapp: phone,
                     mensagem: content,
-                    resumo_ia: aiAnalysis.resumo_contador,
                     categoria_solicitacao: aiAnalysis.categoria,
                     prioridade: aiAnalysis.prioridade,
                     status: 'pendente',
                     atendimento_automatico: true,
+                    resposta_automatica: aiAnalysis.resposta_cliente,
                     created_at: new Date().toISOString()
                 })
 
