@@ -22,7 +22,8 @@ import {
     UserCircle,
     Edit3,
     Save,
-    X
+    X,
+    Loader2
 } from 'lucide-react';
 
 export default function AtendimentoPage() {
@@ -162,22 +163,18 @@ export default function AtendimentoPage() {
         return labels[cat] || cat || 'Sem Categoria';
     };
 
-    const getPriorityColor = (prio: number) => {
-        switch (prio) {
-            case 1: return 'bg-red-500/20 text-red-500 border-red-500/30';
-            case 2: return 'bg-orange-500/20 text-orange-500 border-orange-500/30';
-            case 3: return 'bg-blue-500/20 text-blue-500 border-blue-500/30';
-            default: return 'bg-neutral-800 text-neutral-400 border-neutral-700';
-        }
+    const getPriorityColor = (prio: any) => {
+        if (prio === 1 || prio === 'CRITICA' || prio === 'ALTA') return 'bg-red-500/20 text-red-500 border-red-500/30';
+        if (prio === 2 || prio === 'ATENCOSA') return 'bg-orange-500/20 text-orange-500 border-orange-500/30';
+        if (prio === 3 || prio === 'NORMAL') return 'bg-blue-500/20 text-blue-500 border-blue-500/30';
+        return 'bg-neutral-800 text-neutral-400 border-neutral-700';
     };
 
-    const getPriorityLabel = (prio: number) => {
-        switch (prio) {
-            case 1: return 'Urgente';
-            case 2: return 'Alta';
-            case 3: return 'Normal';
-            default: return 'Não definida';
-        }
+    const getPriorityLabel = (prio: any) => {
+        if (prio === 1 || prio === 'CRITICA' || prio === 'ALTA') return 'Urgente';
+        if (prio === 2 || prio === 'ATENCOSA') return 'Alta';
+        if (prio === 3 || prio === 'NORMAL') return 'Normal';
+        return 'Não definida';
     };
 
     const getMediaIcon = (tipo: string) => {
@@ -201,34 +198,34 @@ export default function AtendimentoPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center px-2">
                 <div>
-                    <h1 className="text-3xl font-bold text-neutral-100 italic">Central de Atendimento</h1>
-                    <p className="text-neutral-400 mt-1">Gerencie as solicitações recebidas via WhatsApp com IA.</p>
+                    <h1 className="text-xl font-bold text-neutral-100 tracking-tight">Central de Atendimento</h1>
+                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">Gestão de solicitações via WhatsApp & IA</p>
                 </div>
             </div>
 
             {/* Filtros e Busca */}
-            <div className="flex gap-4 items-center bg-neutral-900/50 p-4 rounded-xl border border-neutral-800">
+            <div className="flex gap-4 items-center bg-neutral-900/30 p-3 rounded-xl border border-neutral-800">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-600" />
                     <input
                         type="text"
-                        placeholder="Buscar por nome, telefone ou mensagem..."
-                        className="w-full bg-neutral-800 border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary-500"
+                        placeholder="Pesquisar..."
+                        className="w-full bg-neutral-950/50 border border-neutral-800 rounded-lg pl-9 pr-4 py-1.5 text-xs focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
                     />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                     {['todos', 'pendente', 'em_atendimento', 'concluido'].map((s) => (
                         <button
                             key={s}
                             onClick={() => setFilter(s)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${filter === s
-                                ? 'bg-primary-500 text-neutral-950'
-                                : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700'
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${filter === s
+                                ? 'bg-emerald-500 text-neutral-950 shadow-lg shadow-emerald-500/20'
+                                : 'bg-neutral-800 text-neutral-500 hover:bg-neutral-700'
                                 }`}
                         >
-                            {s === 'todos' ? 'Todos' : getStatusLabel(s)}
+                            {s === 'todos' ? 'Ver Todos' : getStatusLabel(s)}
                         </button>
                     ))}
                 </div>
@@ -237,34 +234,39 @@ export default function AtendimentoPage() {
             {/* Lista de Atendimentos */}
             <div className="grid gap-4">
                 {loading ? (
-                    <div className="text-center py-20 text-neutral-500">Carregando atendimentos...</div>
+                    <div className="text-center py-20 text-neutral-500">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-500" />
+                        <span className="text-[10px] uppercase font-bold tracking-widest">Carregando Fluxos...</span>
+                    </div>
                 ) : filteredTickets.length === 0 ? (
                     <div className="text-center py-20 bg-neutral-900/50 rounded-2xl border border-neutral-800">
-                        <MessageSquare className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-neutral-300">Nenhum atendimento encontrado</h3>
-                        <p className="text-neutral-500">Nenhuma mensagem com esse status no momento.</p>
+                        <MessageSquare className="w-12 h-12 text-neutral-800 mx-auto mb-4" />
+                        <h3 className="text-xs font-bold text-neutral-500 uppercase">Silêncio no Radar</h3>
+                        <p className="text-[10px] text-neutral-700 uppercase mt-1">Nenhuma mensagem neste filtro.</p>
                     </div>
                 ) : (
                     filteredTickets.map((ticket) => (
-                        <div key={ticket.id} className="bg-neutral-900/50 backdrop-blur-sm p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition-all group">
+                        <div key={ticket.id} className="bg-neutral-950 border border-neutral-800 p-5 rounded-2xl hover:border-neutral-700 transition-all group relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex gap-4 flex-1">
-                                    <div className="w-12 h-12 rounded-full bg-neutral-800 flex items-center justify-center text-primary-500 font-bold text-lg shrink-0 overflow-hidden ring-2 ring-neutral-800 group-hover:ring-primary-500/50 transition-all">
+                                    <div className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-500 font-bold text-base shrink-0 overflow-hidden group-hover:border-emerald-500/50 transition-all">
                                         {ticket.clientes?.nome ? (
                                             ticket.clientes.nome.charAt(0)
                                         ) : (
-                                            <User className="w-6 h-6 text-neutral-500" />
+                                            <User className="w-5 h-5 text-neutral-700" />
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                                            <h3 className="text-lg font-bold text-neutral-200">
+                                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                                            <h3 className="text-sm font-bold text-neutral-200 tracking-tight">
                                                 {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
                                             </h3>
 
                                             {/* Badge de Tipo de Mídia */}
                                             {ticket.tipo_midia && ticket.tipo_midia !== 'texto' && (
-                                                <span className="text-[10px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20 flex items-center gap-1 font-medium">
+                                                <span className="text-[9px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20 flex items-center gap-1 font-medium uppercase">
                                                     {getMediaIcon(ticket.tipo_midia)} {ticket.tipo_midia}
                                                 </span>
                                             )}

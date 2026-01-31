@@ -15,7 +15,8 @@ import {
     RefreshCw,
     ShieldCheck,
     FileSearch,
-    Activity
+    Activity,
+    PieChart
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import AlertasGaps from './components/AlertasGaps';
@@ -101,13 +102,13 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-6 animate-in fade-in duration-700 pb-10">
             {/* Header Técnico */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-neutral-900 border border-neutral-800 p-6 rounded-lg">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-neutral-900 border border-neutral-800 p-5 rounded-lg">
                 <div>
                     <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                        <h1 className="text-xl font-black text-neutral-100 uppercase tracking-tighter italic">Centro de Inteligência Contábil</h1>
+                        <ShieldCheck className="w-4 h-4 text-emerald-500/80" />
+                        <h1 className="text-lg font-bold text-neutral-100 tracking-tight">Centro de Inteligência Contábil</h1>
                     </div>
-                    <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mt-1">Brandão v2.0 // Auditoria de Nuvem Ativa</p>
+                    <p className="text-[9px] font-mono text-neutral-600 uppercase tracking-[0.2em] mt-1">Brandão v2.0 // Monitoramento de Nuvem</p>
                 </div>
                 <div className="flex gap-2">
                     <button
@@ -125,48 +126,45 @@ export default function AdminDashboard() {
             </div>
 
             {/* Grid de Auditoria (Compacto) */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-lg group">
-                    <div className="flex justify-between items-center mb-4">
-                        <Users className="w-4 h-4 text-neutral-600 group-hover:text-emerald-500 transition-colors" />
-                        <span className="text-[9px] font-black text-neutral-700 uppercase">Clientes</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2 group hover:border-emerald-500/30 transition-all">
+                    <div className="flex items-center gap-2 opacity-50">
+                        <Users className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Carteira</span>
                     </div>
-                    <p className="text-2xl font-black text-neutral-100 tabular-nums">{stats.totalClientes}</p>
-                    <div className="w-full h-1 bg-neutral-900 mt-3 overflow-hidden">
-                        <div className="h-full bg-emerald-500 w-full opacity-30" />
-                    </div>
+                    <p className="text-xl font-bold text-neutral-100 tabular-nums">{stats.totalClientes}</p>
                 </div>
 
-                <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-lg group">
-                    <div className="flex justify-between items-center mb-4">
-                        <Activity className="w-4 h-4 text-neutral-600 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-[9px] font-black text-neutral-700 uppercase">Taxa de Auditoria</span>
+                <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2 group hover:border-emerald-500/30 transition-all">
+                    <div className="flex items-center gap-2 opacity-50">
+                        <MessageSquare className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Atendimento</span>
                     </div>
-                    <div className="flex items-end gap-2">
-                        <p className="text-2xl font-black text-neutral-100 tabular-nums">{stats.auditRate}%</p>
-                        <span className="text-[10px] text-emerald-500 font-bold mb-1">Global</span>
-                    </div>
-                    <div className="w-full h-1 bg-neutral-900 mt-3 overflow-hidden">
-                        <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${stats.auditRate}%` }} />
-                    </div>
+                    <p className="text-xl font-bold text-neutral-100 tabular-nums">{stats.pedidosZap}</p>
                 </div>
 
-                <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-lg group text-emerald-500">
-                    <div className="flex justify-between items-center mb-4 text-neutral-600">
-                        <CheckCircle2 className="w-4 h-4 group-hover:text-emerald-500" />
-                        <span className="text-[9px] font-black uppercase">Documentados</span>
+                <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2 group hover:border-emerald-500/30 transition-all">
+                    <div className="flex items-center gap-2 opacity-50">
+                        <PieChart className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Concluídos</span>
                     </div>
-                    <p className="text-2xl font-black tabular-nums">{stats.concluidosMes}</p>
-                    <p className="text-[9px] font-bold uppercase mt-1 opacity-60 italic">Arquivos validados no Drive</p>
+                    <p className="text-xl font-bold text-neutral-100 tabular-nums">{stats.concluidosMes}</p>
                 </div>
 
-                <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-lg group text-rose-500">
-                    <div className="flex justify-between items-center mb-4 text-neutral-600">
-                        <AlertCircle className="w-4 h-4 group-hover:text-rose-500" />
-                        <span className="text-[9px] font-black uppercase">Pendências</span>
+                <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2 group hover:border-amber-500/30 transition-all">
+                    <div className="flex items-center gap-2 opacity-50">
+                        <AlertCircle className="w-4 h-4 text-amber-500" />
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Pendentes</span>
                     </div>
-                    <p className="text-2xl font-black tabular-nums">{stats.pendentesMes}</p>
-                    <p className="text-[9px] font-bold uppercase mt-1 opacity-60 italic">Transmissões não localizadas</p>
+                    <p className="text-xl font-bold text-amber-500 tabular-nums">{stats.pendentesMes}</p>
+                </div>
+
+                <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-2 group hover:border-emerald-500/30 transition-all">
+                    <div className="flex items-center gap-2 opacity-50">
+                        <Activity className="w-4 h-4 text-emerald-500" />
+                        <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Eficiência</span>
+                    </div>
+                    <p className="text-xl font-bold text-neutral-100 tabular-nums">{stats.auditRate}%</p>
                 </div>
             </div>
 

@@ -10,9 +10,15 @@ const INSTANCE = process.env.EVOLUTION_INSTANCE || 'Brandao';
 
 export async function sendWhatsAppMessage(number: string, text: string) {
     if (!API_URL || !API_KEY) {
-        console.error('Evolution API credentials missing');
+        console.error('[Evolution API] Credentials missing');
         return null;
     }
+
+    // Limpar o número: manter apenas dígitos e garantir o sufixo @s.whatsapp.net se não for grupo
+    const cleanNumber = number.replace(/\D/g, '');
+    const jid = cleanNumber.includes('@') ? cleanNumber : `${cleanNumber}@s.whatsapp.net`;
+
+    console.log(`[Evolution API] Enviando para: ${jid} | Instância: ${INSTANCE}`);
 
     try {
         const response = await fetch(`${API_URL}/message/sendText/${INSTANCE}`, {
@@ -22,16 +28,18 @@ export async function sendWhatsAppMessage(number: string, text: string) {
                 'apikey': API_KEY
             },
             body: JSON.stringify({
-                number: number,
+                number: jid,
                 text: text,
-                delay: 1200,
+                delay: 1000,
                 linkPreview: true
             })
         });
 
-        return await response.json();
+        const result = await response.json();
+        console.log(`[Evolution API] Resultado do envio:`, result);
+        return result;
     } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
+        console.error('[Evolution API] Erro fatal no envio:', error);
         return null;
     }
 }
