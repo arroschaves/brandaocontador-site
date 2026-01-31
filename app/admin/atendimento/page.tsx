@@ -31,7 +31,10 @@ export default function AtendimentoPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('todos');
     const [editingTicket, setEditingTicket] = useState<string | null>(null);
+    const [respondingTicket, setRespondingTicket] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<any>({});
+    const [responseForm, setResponseForm] = useState<any>({ type: 'whatsapp', message: '', subject: 'Atendimento Brandão Contabilidade' });
+    const [sending, setSending] = useState(false);
 
     useEffect(() => {
         fetchTickets();
@@ -176,6 +179,50 @@ export default function AtendimentoPage() {
         if (prio === 3 || prio === 'NORMAL') return 'Normal';
         return 'Não definida';
     };
+
+    async function sendResponse(ticket: any) {
+        if (!responseForm.message) return;
+        setSending(true);
+        try {
+            const url = responseForm.type === 'whatsapp'
+                ? '/api/atendimento/responder/whatsapp'
+                : '/api/atendimento/responder/email';
+
+            const body = responseForm.type === 'whatsapp'
+                ? { ticketId: ticket.id, number: ticket.telefone_whatsapp, message: responseForm.message }
+                : {
+                    ticketId: ticket.id,
+                    to: ticket.clientes?.email || '',
+                    subject: responseForm.subject,
+                    message: responseForm.message,
+                    fromAccount: 'ADM'
+                };
+
+            if (responseForm.type === 'email' && !ticket.clientes?.email) {
+                alert('Este cliente não possui e-mail cadastrado.');
+                return;
+            }
+
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Falha ao enviar resposta');
+
+            alert('Resposta enviada com sucesso!');
+            setRespondingTicket(null);
+            setResponseForm({ type: 'whatsapp', message: '', subject: 'Atendimento Brandão Contabilidade' });
+            fetchTickets();
+        } catch (err: any) {
+            console.error(err);
+            alert(`Erro: ${err.message}`);
+        } finally {
+            setSending(false);
+        }
+    }
 
     const getMediaIcon = (tipo: string) => {
         switch (tipo) {
@@ -399,32 +446,95 @@ export default function AtendimentoPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {!editingTicket && (
-                                        <button
-                                            onClick={() => startEditing(ticket)}
-                                            className="px-3 py-1.5 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 rounded-lg text-xs font-bold uppercase transition-colors flex items-center gap-1"
-                                        >
-                                            <Edit3 className="w-3 h-3" /> Classificar
-                                        </button>
-                                    )}
-                                    {ticket.status === 'pendente' && (
-                                        <button
-                                            onClick={() => updateStatus(ticket.id, 'em_atendimento')}
-                                            className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
-                                        >
-                                            Atender
-                                        </button>
-                                    )}
-                                    {ticket.status !== 'concluido' && (
-                                        <button
-                                            onClick={() => updateStatus(ticket.id, 'concluido')}
-                                            className="px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
-                                        >
-                                            Concluir
-                                        </button>
+                                <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t border-neutral-900">
+                                    {!editingTicket && !respondingTicket && (
+                                        <>
+                                            <button
+                                                onClick={() => setRespondingTicket(ticket.id)}
+                                                className="px-3 py-1.5 bg-emerald-500 text-neutral-950 hover:bg-emerald-400 rounded-lg text-xs font-bold uppercase transition-colors flex items-center gap-1"
+                                            >
+                                                <MessageSquare className="w-3 h-3" /> Responder
+                                            </button>
+                                            <button
+                                                onClick={() => startEditing(ticket)}
+                                                className="px-3 py-1.5 bg-neutral-800 text-neutral-300 hover:bg-neutral-700 rounded-lg text-xs font-bold uppercase transition-colors flex items-center gap-1"
+                                            >
+                                                <Edit3 className="w-3 h-3" /> Classificar
+                                            </button>
+                                            {ticket.status === 'pendente' && (
+                                                <button
+                                                    onClick={() => updateStatus(ticket.id, 'em_atendimento')}
+                                                    className="px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
+                                                >
+                                                    Atender
+                                                </button>
+                                            )}
+                                            {ticket.status !== 'concluido' && (
+                                                <button
+                                                    onClick={() => updateStatus(ticket.id, 'concluido')}
+                                                    className="px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-lg text-xs font-bold uppercase transition-colors"
+                                                >
+                                                    Concluir
+                                                </button>
+                                            )}
+                                        </>
                                     )}
                                 </div>
+
+                                {/* Área de Resposta */}
+                                {respondingTicket === ticket.id && (
+                                    <div className="mt-4 bg-neutral-900 border border-neutral-800 rounded-lg p-4 space-y-4 animate-in slide-in-from-top-2 duration-300">
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setResponseForm({ ...responseForm, type: 'whatsapp' })}
+                                                className={`flex-1 py-2 text-[10px] font-black uppercase rounded border transition-all ${responseForm.type === 'whatsapp' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-neutral-800 border-neutral-700 text-neutral-500'}`}
+                                            >
+                                                WhatsApp
+                                            </button>
+                                            <button
+                                                onClick={() => setResponseForm({ ...responseForm, type: 'email' })}
+                                                className={`flex-1 py-2 text-[10px] font-black uppercase rounded border transition-all ${responseForm.type === 'email' ? 'bg-blue-500/10 border-blue-500 text-blue-500' : 'bg-neutral-800 border-neutral-700 text-neutral-500'}`}
+                                            >
+                                                E-mail
+                                            </button>
+                                        </div>
+
+                                        {responseForm.type === 'email' && (
+                                            <input
+                                                type="text"
+                                                value={responseForm.subject}
+                                                onChange={(e) => setResponseForm({ ...responseForm, subject: e.target.value })}
+                                                placeholder="Assunto do E-mail"
+                                                className="w-full bg-neutral-950 border border-neutral-800 rounded p-2 text-xs text-neutral-300 outline-none focus:border-blue-500"
+                                            />
+                                        )}
+
+                                        <textarea
+                                            value={responseForm.message}
+                                            onChange={(e) => setResponseForm({ ...responseForm, message: e.target.value })}
+                                            placeholder={responseForm.type === 'whatsapp' ? "Digite sua mensagem de WhatsApp..." : "Digite o corpo do e-mail..."}
+                                            rows={4}
+                                            className="w-full bg-neutral-950 border border-neutral-800 rounded p-3 text-xs text-neutral-300 outline-none focus:border-emerald-500 resize-none font-sans"
+                                        />
+
+                                        <div className="flex gap-2">
+                                            <button
+                                                disabled={sending || !responseForm.message}
+                                                onClick={() => sendResponse(ticket)}
+                                                className="flex-1 py-2 bg-emerald-500 text-neutral-950 rounded font-black text-[10px] uppercase hover:bg-emerald-400 disabled:opacity-50 flex items-center justify-center gap-2"
+                                            >
+                                                {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                                Enviar {responseForm.type === 'whatsapp' ? 'WhatsApp' : 'E-mail'}
+                                            </button>
+                                            <button
+                                                onClick={() => setRespondingTicket(null)}
+                                                className="px-4 py-2 bg-neutral-800 text-neutral-400 rounded font-black text-[10px] uppercase hover:text-neutral-200"
+                                            >
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))
