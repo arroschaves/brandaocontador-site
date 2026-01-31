@@ -39,7 +39,19 @@ export default function ClientesPage() {
         cnpj_cpf: '',
         telefone_whatsapp: '',
         email: '',
-        cidade: 'Sidrolândia'
+        razao_social: '',
+        regime_tributario: '',
+        cnae_principal: '',
+        logradouro: '',
+        numero: '',
+        bairro: '',
+        cep: '',
+        cidade: 'Sidrolândia',
+        estado: 'MS',
+        inscricao_estadual: '',
+        inscricao_municipal: '',
+        status_rfb: 'ATIVA',
+        drive_folder_id: ''
     });
     const [consulting, setConsulting] = useState(false);
 
@@ -112,15 +124,34 @@ export default function ClientesPage() {
         if (client) {
             setEditingClient(client);
             setFormData({
-                nome: client.nome,
+                nome: client.nome || '',
                 cnpj_cpf: client.cnpj_cpf?.toString() || '',
                 telefone_whatsapp: client.telefone_whatsapp || '',
                 email: client.email || '',
-                cidade: client.cidade || 'Sidrolândia'
+                razao_social: client.razao_social || '',
+                regime_tributario: client.regime_tributario || '',
+                cnae_principal: client.cnae_principal || '',
+                logradouro: client.logradouro || '',
+                numero: client.numero || '',
+                bairro: client.bairro || '',
+                cep: client.cep || '',
+                cidade: client.cidade || 'Sidrolândia',
+                estado: client.estado || 'MS',
+                inscricao_estadual: client.inscricao_estadual || '',
+                inscricao_municipal: client.inscricao_municipal || '',
+                status_rfb: client.status_rfb || 'ATIVA',
+                drive_folder_id: client.drive_folder_id || ''
             });
         } else {
             setEditingClient(null);
-            setFormData({ nome: '', cnpj_cpf: '', telefone_whatsapp: '', email: '', cidade: 'Sidrolândia' });
+            setFormData({
+                nome: '', cnpj_cpf: '', telefone_whatsapp: '', email: '',
+                razao_social: '', regime_tributario: '', cnae_principal: '',
+                logradouro: '', numero: '', bairro: '', cep: '',
+                cidade: 'Sidrolândia', estado: 'MS',
+                inscricao_estadual: '', inscricao_municipal: '',
+                status_rfb: 'ATIVA', drive_folder_id: ''
+            });
         }
         setIsModalOpen(true);
     };
@@ -128,19 +159,16 @@ export default function ClientesPage() {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
-            // Unificando os dados para salvar
-            const { cidade, ...dataToSave } = formData;
-
             if (editingClient) {
                 const { error } = await supabase
                     .from('clientes')
-                    .update(dataToSave)
+                    .update(formData)
                     .eq('id', editingClient.id);
                 if (error) throw error;
             } else {
                 const { error } = await supabase
                     .from('clientes')
-                    .insert([dataToSave]);
+                    .insert([formData]);
                 if (error) throw error;
             }
             setIsModalOpen(false);
@@ -311,51 +339,134 @@ export default function ClientesPage() {
                             <h2 className="text-xl font-bold">{editingClient ? 'Editar Cliente' : 'Novo Cliente'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-neutral-500 hover:text-white"><X className="w-6 h-6" /></button>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div className="flex gap-2 items-end">
-                                <div className="flex-1">
-                                    <label className="text-xs font-bold text-neutral-500 uppercase">CNPJ / CPF</label>
-                                    <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none font-mono"
-                                        placeholder="00.000.000/0000-00"
-                                        value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
+                        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            {/* DADOS BÁSICOS */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] font-black text-primary-500 uppercase tracking-widest border-b border-primary-500/20 pb-2">Identificação</h3>
+                                <div className="flex gap-2 items-end">
+                                    <div className="flex-1">
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">CNPJ / CPF</label>
+                                        <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none font-mono"
+                                            placeholder="00.000.000/0000-00"
+                                            value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
+                                    </div>
+                                    {formData.cnpj_cpf.replace(/\D/g, '').length === 14 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleConsultarCNPJ}
+                                            disabled={consulting}
+                                            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-lg text-xs font-bold text-primary-400 flex items-center gap-2 transition-all disabled:opacity-50 h-[38px]"
+                                        >
+                                            {consulting ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>🔍 Consultar</span>}
+                                        </button>
+                                    )}
                                 </div>
-                                {formData.cnpj_cpf.replace(/\D/g, '').length === 14 && (
-                                    <button
-                                        type="button"
-                                        onClick={handleConsultarCNPJ}
-                                        disabled={consulting}
-                                        className="mb-0.5 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-lg text-xs font-bold text-primary-400 flex items-center gap-2 transition-all disabled:opacity-50"
-                                    >
-                                        {consulting ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>🔍 Consultar</span>}
-                                    </button>
-                                )}
-                            </div>
 
-                            <div>
-                                <label className="text-xs font-bold text-neutral-500 uppercase">Nome / Razão Social</label>
-                                <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                    value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-bold text-neutral-500 uppercase">WhatsApp</label>
-                                    <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                        value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                    <label className="text-[10px] font-black text-neutral-500 uppercase">Nome Comercial / Apelido</label>
+                                    <input required className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none uppercase font-bold italic"
+                                        value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
                                 </div>
+
                                 <div>
-                                    <label className="text-xs font-bold text-neutral-500 uppercase">E-mail</label>
-                                    <input type="email" className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 focus:border-primary-500 outline-none"
-                                        value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                    <label className="text-[10px] font-black text-neutral-500 uppercase">Razão Social</label>
+                                    <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none uppercase"
+                                        value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Regime Tributário</label>
+                                        <select className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.regime_tributario || ''} onChange={e => setFormData({ ...formData, regime_tributario: e.target.value })}>
+                                            <option value="">Selecione...</option>
+                                            <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
+                                            <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
+                                            <option value="LUCRO_REAL">LUCRO REAL</option>
+                                            <option value="MEI">MEI</option>
+                                            <option value="PF_FAZENDA">PF (FAZENDA)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Status RFB</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none italic font-bold text-green-500"
+                                            value={formData.status_rfb || 'ATIVA'} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="bg-neutral-800/50 p-3 rounded-lg border border-neutral-800 text-center">
-                                <p className="text-[10px] text-neutral-500 font-mono uppercase">Dados de endereço e CNAE são salvos automaticamente ao consultar CNPJ.</p>
+                            {/* CONTATO */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] font-black text-primary-500 uppercase tracking-widest border-b border-primary-500/20 pb-2">Contato</h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">WhatsApp</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">E-mail</label>
+                                        <input type="email" className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                    </div>
+                                </div>
                             </div>
 
-                            <button type="submit" className="btn-primary w-full py-3 mt-4 text-neutral-950 font-bold uppercase tracking-wider">
-                                {editingClient ? 'Salvar Alterações' : 'Cadastrar Cliente'}
+                            {/* ENDEREÇO */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] font-black text-primary-500 uppercase tracking-widest border-b border-primary-500/20 pb-2">Localização</h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <div className="col-span-2">
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Logradouro</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.logradouro || ''} onChange={e => setFormData({ ...formData, logradouro: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Número</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.numero || ''} onChange={e => setFormData({ ...formData, numero: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Bairro</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.bairro || ''} onChange={e => setFormData({ ...formData, bairro: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">CEP</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Cidade</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none"
+                                            value={formData.cidade || 'Sidrolândia'} onChange={e => setFormData({ ...formData, cidade: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-neutral-500 uppercase">Estado</label>
+                                        <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-sm focus:border-primary-500 outline-none uppercase"
+                                            maxLength={2}
+                                            value={formData.estado || 'MS'} onChange={e => setFormData({ ...formData, estado: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* DRIVE CONFIG */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] font-black text-primary-500 uppercase tracking-widest border-b border-primary-500/20 pb-2">Sistema / Nuvem</h3>
+                                <div>
+                                    <label className="text-[10px] font-black text-neutral-500 uppercase">Google Drive Folder ID</label>
+                                    <input className="w-full bg-neutral-800 border-neutral-700 rounded-lg mt-1 p-2 text-[10px] font-mono focus:border-primary-500 outline-none text-neutral-400"
+                                        placeholder="ID da pasta raiz no Drive"
+                                        value={formData.drive_folder_id || ''} onChange={e => setFormData({ ...formData, drive_folder_id: e.target.value })} />
+                                </div>
+                            </div>
+
+                            <button type="submit" className="w-full py-4 bg-primary-500 hover:bg-primary-400 text-neutral-950 font-black uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                                {editingClient ? 'Salvar Registro' : 'Efetuar Cadastro'}
                             </button>
                         </form>
                     </div>
