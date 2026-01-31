@@ -2,20 +2,26 @@
  * Utilitários de formatação para padrões brasileiros.
  */
 
-export function formatCNPJ(cnpj: string): string {
-    const clean = cnpj.replace(/\D/g, '');
-    if (clean.length !== 14) return cnpj;
+export function formatCNPJ(cnpj: string | null | undefined): string {
+    if (!cnpj) return '';
+    const str = String(cnpj);
+    const clean = str.replace(/\D/g, '');
+    if (clean.length !== 14) return str;
     return clean.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
 }
 
-export function formatCPF(cpf: string): string {
-    const clean = cpf.replace(/\D/g, '');
-    if (clean.length !== 11) return cpf;
+export function formatCPF(cpf: string | null | undefined): string {
+    if (!cpf) return '';
+    const str = String(cpf);
+    const clean = str.replace(/\D/g, '');
+    if (clean.length !== 11) return str;
     return clean.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
-export function formatPhone(phone: string): string {
-    const clean = phone.replace(/\D/g, '');
+export function formatPhone(phone: string | null | undefined): string {
+    if (!phone) return '';
+    const str = String(phone);
+    const clean = str.replace(/\D/g, '');
     // Remove 55 if present
     const noDDI = clean.startsWith('55') ? clean.substring(2) : clean;
 
@@ -24,5 +30,5 @@ export function formatPhone(phone: string): string {
     } else if (noDDI.length === 10) {
         return noDDI.replace(/^(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
     }
-    return phone;
+    return str;
 }

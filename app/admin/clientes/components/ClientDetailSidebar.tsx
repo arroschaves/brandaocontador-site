@@ -277,24 +277,24 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-bold text-neutral-500 uppercase">Razão Social</label>
                                                             <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient.razao_social || ''} onChange={e => setEditedClient({ ...editedClient, razao_social: e.target.value })} />
+                                                                value={editedClient?.razao_social || ''} onChange={e => setEditedClient({ ...editedClient, razao_social: e.target.value })} />
                                                         </div>
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-bold text-neutral-500 uppercase">Nome Fantasia / Apelido</label>
                                                             <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient.nome || ''} onChange={e => setEditedClient({ ...editedClient, nome: e.target.value })} />
+                                                                value={editedClient?.nome || ''} onChange={e => setEditedClient({ ...editedClient, nome: e.target.value })} />
                                                         </div>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-3">
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-bold text-neutral-500 uppercase">WhatsApp</label>
                                                             <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient.telefone_whatsapp || ''} onChange={e => setEditedClient({ ...editedClient, telefone_whatsapp: e.target.value })} />
+                                                                value={editedClient?.telefone_whatsapp || ''} onChange={e => setEditedClient({ ...editedClient, telefone_whatsapp: e.target.value })} />
                                                         </div>
                                                         <div className="space-y-1">
                                                             <label className="text-[9px] font-bold text-neutral-500 uppercase">E-mail</label>
                                                             <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient.email || ''} onChange={e => setEditedClient({ ...editedClient, email: e.target.value })} />
+                                                                value={editedClient?.email || ''} onChange={e => setEditedClient({ ...editedClient, email: e.target.value })} />
                                                         </div>
                                                     </div>
                                                     <div className="pt-2">
@@ -309,12 +309,12 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                 </div>
                                             ) : (
                                                 [
-                                                    { label: 'Razão Social', value: client.razao_social, icon: Building2 },
-                                                    { label: 'Identificação Fiscal', value: formatCNPJ(client.cnpj_cpf), icon: ShieldAlert },
-                                                    { label: 'E-mail Corporativo', value: client.email, icon: Mail },
-                                                    { label: 'Telefone/WhatsApp', value: formatPhone(client.telefone_whatsapp), icon: Phone },
-                                                    { label: 'Regime Tributário', value: client.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
-                                                    { label: 'CNAE Principal', value: client.cnae_principal, icon: Briefcase }
+                                                    { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
+                                                    { label: 'Identificação Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
+                                                    { label: 'E-mail Corporativo', value: client?.email, icon: Mail },
+                                                    { label: 'Telefone/WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
+                                                    { label: 'Regime Tributário', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
+                                                    { label: 'CNAE Principal', value: client?.cnae_principal, icon: Briefcase }
                                                 ].map((info, idx) => (
                                                     <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-3 border border-neutral-900 rounded-lg group">
                                                         <info.icon className="w-3.5 h-3.5 text-neutral-700 group-hover:text-emerald-500 transition-colors" />

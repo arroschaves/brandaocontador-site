@@ -313,7 +313,7 @@ function ClientesContent() {
                                         <td className="p-4">
                                             {c.regime_tributario ? (
                                                 <span className={`text-[9px] font-black px-2 py-0.5 bg-neutral-900 border ${c.regime_tributario.includes('SIMPLES') ? 'text-emerald-500 border-emerald-500/10' : 'text-blue-500 border-blue-500/10'} uppercase`}>
-                                                    {c.regime_tributario.replace(/_/g, ' ')}
+                                                    {c.regime_tributario?.replace(/_/g, ' ')}
                                                 </span>
                                             ) : (
                                                 <span className="text-[9px] font-bold text-neutral-800 uppercase">Não Defino</span>
