@@ -4,14 +4,19 @@
  * Gerencia o disparo de mensagens e arquivos via WhatsApp.
  */
 
-const API_URL = process.env.EVOLUTION_API_URL;
-const API_KEY = process.env.EVOLUTION_API_KEY;
-const INSTANCE = process.env.EVOLUTION_INSTANCE || 'Brandao';
 
 export async function sendWhatsAppMessage(number: string, text: string) {
-    if (!API_URL || !API_KEY) {
-        console.error('[Evolution API] Credentials missing');
-        return null;
+    const API_URL = process.env.EVOLUTION_API_URL;
+    const API_KEY = process.env.EVOLUTION_API_KEY;
+    const INSTANCE = process.env.EVOLUTION_INSTANCE;
+
+    if (!API_URL || !API_KEY || !INSTANCE) {
+        console.error('[Evolution API] Configurações ausentes no .env:', {
+            hasUrl: !!API_URL,
+            hasKey: !!API_KEY,
+            hasInstance: !!INSTANCE
+        });
+        return { error: true, message: 'Configuração da API ausente no servidor' };
     }
 
     // Sanitizar URL (remover barra final se houver)
@@ -49,13 +54,14 @@ export async function sendWhatsAppMessage(number: string, text: string) {
         const result = await response.json();
 
         if (!response.ok) {
-            console.error(`[Evolution API] Erro HTTP ${response.status}:`, result);
+            console.error(`[Evolution API] sendWhatsAppMessage: Erro HTTP ${response.status} ao enviar mensagem para ${target}:`, result);
+            return { error: true, message: `Erro ao enviar mensagem: ${result.message || 'Erro desconhecido'}`, details: result };
         } else {
-            console.log(`[Evolution API] Mensagem enviada com sucesso para ${target}`);
+            console.log(`[Evolution API] sendWhatsAppMessage: Mensagem enviada com sucesso para ${target}`);
+            return result;
         }
-        return result;
     } catch (error) {
-        console.error('[Evolution API] Falha crítica na requisição:', error);
+        console.error(`[Evolution API] sendWhatsAppMessage: Falha crítica na requisição para ${target}:`, error);
         return { error: true, message: 'Falha na conexão com a Evolution API' };
     }
 }
@@ -68,7 +74,14 @@ export async function sendWhatsAppMessage(number: string, text: string) {
  * @param caption Mensagem que acompanha o arquivo
  */
 export async function sendWhatsAppMedia(number: string, base64: string, fileName: string, caption: string) {
-    if (!API_URL || !API_KEY) return null;
+    const API_URL = process.env.EVOLUTION_API_URL;
+    const API_KEY = process.env.EVOLUTION_API_KEY;
+    const INSTANCE = process.env.EVOLUTION_INSTANCE;
+
+    if (!API_URL || !API_KEY || !INSTANCE) {
+        console.error('[Evolution API] sendWhatsAppMedia: Configurações ausentes');
+        return null;
+    }
 
     try {
         const response = await fetch(`${API_URL}/message/sendMedia/${INSTANCE}`, {

@@ -17,24 +17,25 @@ interface EmailOptions {
 const ACCOUNTS = {
     RH: {
         user: 'rh@brandaocontador.com.br',
-        pass: process.env.ZOHO_PASS_RH,
     },
     ADM: {
         user: 'adm@brandaocontador.com.br',
-        pass: process.env.ZOHO_PASS_ADM,
     },
     COMERCIAL: {
         user: 'cjbrandao@brandaocontador.com.br',
-        pass: process.env.ZOHO_PASS_CJ,
     }
 };
 
 export async function sendProfessionalEmail({ from, to, subject, text, html, attachments }: EmailOptions) {
+    const pass = from === 'RH' ? process.env.ZOHO_PASS_RH :
+        from === 'ADM' ? process.env.ZOHO_PASS_ADM :
+            process.env.ZOHO_PASS_CJ;
+
     const account = ACCOUNTS[from];
 
-    if (!account.pass) {
-        console.error(`Senha de app não configurada para a conta ${from}`);
-        return { success: false, error: 'Configuração ausente' };
+    if (!pass) {
+        console.error(`Senha de app não configurada para a conta ${from} no .env`);
+        return { success: false, error: `Configuração de senha (${from}) ausente` };
     }
 
     const transporter = nodemailer.createTransport({
@@ -43,7 +44,7 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
         secure: true,
         auth: {
             user: account.user,
-            pass: account.pass,
+            pass: pass,
         },
     });
 
