@@ -39,15 +39,19 @@ export default function AtendimentoPage() {
     useEffect(() => {
         fetchTickets();
 
+        // Polling de segurança (atualiza a cada 30s caso o realtime falhe)
+        const interval = setInterval(fetchTickets, 30000);
+
         const channel = supabase
             .channel('atendimentos_realtime')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, (payload: any) => {
-                console.log('Change received!', payload);
+                console.log('Nova atualização via Realtime:', payload);
                 fetchTickets();
             })
             .subscribe();
 
         return () => {
+            clearInterval(interval);
             supabase.removeChannel(channel);
         };
     }, []);
@@ -250,6 +254,16 @@ export default function AtendimentoPage() {
                     <h1 className="text-lg font-bold text-neutral-100 tracking-tight">Fluxos de Atendimento</h1>
                     <p className="text-[10px] text-neutral-600 uppercase tracking-[0.2em] font-mono mt-1">Intelligence Module // v2.0</p>
                 </div>
+                <button
+                    onClick={() => {
+                        setLoading(true);
+                        fetchTickets();
+                    }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-md text-[10px] font-bold text-neutral-400 hover:text-emerald-500 hover:border-emerald-500/30 transition-all"
+                >
+                    <Loader2 className={`w-3 h-3 ${loading ? 'animate-spin text-emerald-500' : ''}`} />
+                    SINCRONIZAR RADAR
+                </button>
             </div>
 
             {/* Filtros e Busca */}
