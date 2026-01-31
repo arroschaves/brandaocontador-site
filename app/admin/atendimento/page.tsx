@@ -288,7 +288,7 @@ export default function AtendimentoPage() {
                                         <div className="flex items-center gap-3 text-[10px] text-neutral-600 font-medium">
                                             <span className="flex items-center gap-1 font-mono">
                                                 <Phone className="w-3 h-3" />
-                                                {ticket.numero_whatsapp}
+                                                {ticket.telefone_whatsapp}
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Clock className="w-3 h-3" />

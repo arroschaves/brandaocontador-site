@@ -413,7 +413,7 @@ function ClientesContent() {
                                         <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
                                         <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
                                         <option value="LUCRO_REAL">LUCRO REAL</option>
-                                        <option value="PF_FAZENDA">PF (FAZENDA)</option>
+                                        <option value="PESSOA_FISICA">PF (FAZENDA)</option>
                                     </select>
                                 </div>
                                 <div className="space-y-1">

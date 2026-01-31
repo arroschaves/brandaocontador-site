@@ -41,7 +41,7 @@ export async function POST(request: Request) {
                 .from('atendimentos')
                 .insert({
                     cliente_id: client?.id || null,
-                    numero_whatsapp: senderNumber, // Usar numero_whatsapp para bater com a UI
+                    telefone_whatsapp: senderNumber, // Usar telefone_whatsapp (nome real no BD)
                     mensagem: messageBody,
                     categoria_solicitacao: aiAnalysis.categoria,
                     prioridade: aiAnalysis.prioridade,
@@ -49,7 +49,6 @@ export async function POST(request: Request) {
                     atendimento_automatico: true,
                     resposta_automatica: aiAnalysis.resposta_cliente,
                     created_at: new Date().toISOString(),
-                    pushName: client?.nome || pushName,
                     tipo_midia: data.messageType === 'audioMessage' ? 'audio' : 'texto'
                 });
 
