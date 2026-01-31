@@ -98,11 +98,18 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
             const hasConfirmed = confirm(`Deseja enviar a guia de ${routineName} via WhatsApp agora?`)
             if (!hasConfirmed) return
 
+            const routineData = cronograma.find(o => o.tipo === routineName);
+            if (!routineData?.arquivo_url) {
+                alert('Documento não encontrado para esta obrigação.');
+                return;
+            }
+
             setSyncing(true)
             const res = await fetch('/api/whatsapp/send-pdf', {
                 method: 'POST',
                 body: JSON.stringify({
                     clientId,
+                    fileId: routineData.arquivo_url,
                     fileName: `${routineName}_${client.nome}.pdf`,
                     caption: `Olá ${client.nome}, aqui está sua guia de ${routineName} referente ao mês atual.`
                 })

@@ -23,7 +23,15 @@ export async function POST(request: Request) {
             throw new Error('Cliente sem telefone cadastrado')
         }
 
-        // 2. Configurar Google Drive para buscar o arquivo
+        // 2. Extrair ID do arquivo se for uma URL do Drive
+        let actualFileId = fileId;
+        if (fileId.includes('id=')) {
+            actualFileId = fileId.split('id=')[1].split('&')[0];
+        } else if (fileId.includes('/d/')) {
+            actualFileId = fileId.split('/d/')[1].split('/')[0];
+        }
+
+        // 3. Configurar Google Drive para buscar o arquivo
         const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON!);
         const auth = new google.auth.GoogleAuth({
             credentials,
@@ -31,19 +39,19 @@ export async function POST(request: Request) {
         });
         const drive = google.drive({ version: 'v3', auth });
 
-        // 3. Baixar o arquivo do Drive
+        // 4. Baixar o arquivo do Drive
         const fileRes = await drive.files.get(
-            { fileId: fileId, alt: 'media' },
+            { fileId: actualFileId, alt: 'media' },
             { responseType: 'arraybuffer' }
         );
 
-        // 4. Converter para Base64
+        // 5. Converter para Base64
         const buffer = Buffer.from(fileRes.data as ArrayBuffer);
         const base64 = buffer.toString('base64');
 
-        // 5. Enviar via Evolution API
+        // 6. Enviar via Evolution API
         const whatsappRes = await sendWhatsAppMedia(
-            cliente.telefone_whatsapp,
+            cliente.telefone_whatsapp, // Aqui a Evolution API ja espera o JID ou numero limpo
             base64,
             fileName || 'Documento.pdf',
             caption || `Olá ${cliente.nome}, segue sua guia de contabilidade.`
@@ -53,7 +61,7 @@ export async function POST(request: Request) {
             throw new Error(whatsappRes.message || 'Erro no envio do WhatsApp')
         }
 
-        // 6. Registrar Log de Envio no Supabase
+        // 7. Registrar Log de Envio no Supabase
         await supabase.from('atendimentos').insert({
             cliente_id: clientId,
             telefone_whatsapp: cliente.telefone_whatsapp,
