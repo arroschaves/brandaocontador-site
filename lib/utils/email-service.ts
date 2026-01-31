@@ -39,7 +39,7 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
     }
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.zoho.com.br',
+        host: 'smtp.zoho.com',
         port: 465,
         secure: true,
         auth: {
@@ -61,7 +61,10 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
         console.log(`E-mail enviado via ${from}: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
     } catch (error: any) {
-        console.error(`Erro ao enviar e-mail via ${from}:`, error);
-        return { success: false, error: error.message };
+        console.error(`[Email Service] sendProfessionalEmail: Falha crítica na requisição para ${to}:`, error);
+        return {
+            error: true,
+            message: `Falha na conexão: ${error.message === 'getaddrinfo EBUSY' ? 'DNS Ocupado/Bloqueado' : error.message}`
+        };
     }
 }

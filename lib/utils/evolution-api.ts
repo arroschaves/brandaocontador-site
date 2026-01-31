@@ -60,9 +60,12 @@ export async function sendWhatsAppMessage(number: string, text: string) {
             console.log(`[Evolution API] sendWhatsAppMessage: Mensagem enviada com sucesso para ${target}`);
             return result;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(`[Evolution API] sendWhatsAppMessage: Falha crítica na requisição para ${target}:`, error);
-        return { error: true, message: 'Falha na conexão com a Evolution API' };
+        return {
+            error: true,
+            message: `Falha na conexão: ${error.message === 'getaddrinfo EBUSY' ? 'DNS Ocupado/Bloqueado' : error.message}`
+        };
     }
 }
 
