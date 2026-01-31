@@ -10,57 +10,58 @@ export async function POST(request: Request) {
 
         if (body.event === 'messages.upsert') {
             const data = body.data
-            const message = data.message
-            const pushName = data.pushName
             const key = data.key
             const fromMe = key.fromMe
             const remoteJid = key.remoteJid
 
             if (fromMe) return NextResponse.json({ skipped: true })
 
-            const phone = remoteJid.split('@')[0]
+            // Detectar o remetente (removendo sufixo JID se houver)
+            const senderNumber = remoteJid.split('@')[0].replace(/\D/g, '');
+            const pushName = data.pushName || 'Usuário WhatsApp';
+            const messageBody = data.message?.conversation ||
+                data.message?.extendedTextMessage?.text ||
+                (data.messageType === 'audioMessage' ? '[Áudio]' : '[Mídia]');
 
-            // Extrair conteúdo da mensagem
-            let content = ''
-            if (message.conversation) content = message.conversation
-            else if (message.extendedTextMessage) content = message.extendedTextMessage.text
-            else return NextResponse.json({ skipped: true, detail: 'Not a text message' })
+            console.log(`[Webhook] Mensagem de ${senderNumber} (${pushName}): ${messageBody.substring(0, 50)}...`);
 
-            // 1. Analisar com IA
-            const aiAnalysis = await analyzeClientMessage(content)
-
-            // 2. Localizar Cliente (Busca robusta pelos últimos 8 dígitos)
-            const cleanPhone = phone.replace(/\D/g, '');
-            const lastDigits = cleanPhone.slice(-8);
-
-            const { data: cliente } = await supabase
+            // Tentar identificar o cliente no banco usando os últimos 8 dígitos
+            const last8 = senderNumber.slice(-8);
+            const { data: client } = await supabase
                 .from('clientes')
                 .select('id, nome')
-                .filter('telefone_whatsapp', 'ilike', `%${lastDigits}%`)
-                .maybeSingle()
+                .ilike('telefone_whatsapp', `%${last8}`)
+                .maybeSingle();
 
-            // 3. Salvar no CRM
-            const { error: insertError } = await supabase
+            // 1. Analisar com IA
+            const aiAnalysis = await analyzeClientMessage(messageBody)
+
+            // 2. Criar o Atendimento (Ticket)
+            const { error: ticketError } = await supabase
                 .from('atendimentos')
                 .insert({
-                    cliente_id: cliente?.id || null,
-                    telefone_whatsapp: phone,
-                    mensagem: content,
+                    cliente_id: client?.id || null,
+                    telefone_whatsapp: senderNumber,
+                    mensagem: messageBody,
                     categoria_solicitacao: aiAnalysis.categoria,
                     prioridade: aiAnalysis.prioridade,
                     status: 'pendente',
                     atendimento_automatico: true,
                     resposta_automatica: aiAnalysis.resposta_cliente,
-                    created_at: new Date().toISOString()
-                })
+                    created_at: new Date().toISOString(),
+                    pushName: client?.nome || pushName, // Usamos o nome oficial se houver
+                    tipo_midia: data.messageType === 'audioMessage' ? 'audio' : 'texto'
+                });
 
-            if (insertError) throw insertError
+            if (ticketError) {
+                console.error('[Webhook] Erro ao salvar atendimento:', ticketError);
+            }
 
-            // 4. Responder ao Cliente via Evolution API
-            const whatsappRes = await sendWhatsAppMessage(phone, aiAnalysis.resposta_cliente)
-            console.log(`[Webhook] Resposta enviada para ${phone}. Resultado:`, whatsappRes)
+            // 3. Responder ao Cliente via Evolution API
+            const whatsappRes = await sendWhatsAppMessage(senderNumber, aiAnalysis.resposta_cliente)
+            console.log(`[Webhook] Resposta enviada. Resultado:`, whatsappRes)
 
-            return NextResponse.json({ success: true, analysis: aiAnalysis.intencao, whatsappDetail: whatsappRes })
+            return NextResponse.json({ success: true, analysis: aiAnalysis.categoria, whatsappDetail: whatsappRes })
         }
 
         return NextResponse.json({ message: 'Event ignored' })

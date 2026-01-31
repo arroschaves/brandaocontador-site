@@ -9,6 +9,7 @@ import {
     FileText, Briefcase, Download, History, FolderOpen, RefreshCw, Calculator, FileSearch, MessageSquare
 } from 'lucide-react'
 import { getRoutinesByClientType } from '@/lib/utils/accounting-intelligence'
+import { formatCNPJ, formatPhone } from '@/lib/utils/format'
 
 interface ClientDetailSidebarProps {
     clientId: string | null
@@ -199,8 +200,8 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                 {activeTab === 'fiscal' && (
                                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 italic tracking-widest">Obrigações Exigíveis (Out/2026)</h3>
-                                            <span className="text-[9px] font-bold text-neutral-700 uppercase">Padrão Digital 2026</span>
+                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Obrigações Exigíveis ({new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(new Date())})</h3>
+                                            <span className="text-[9px] font-bold text-neutral-700 uppercase">Brandão Intelligence {new Date().getFullYear()}</span>
                                         </div>
                                         <div className="grid gap-2">
                                             {expectedRoutines.map((rout, i) => {
@@ -227,7 +228,7 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                                     <MessageSquare className="w-3.5 h-3.5" />
                                                                 </button>
                                                             )}
-                                                            <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950 font-black' : 'bg-neutral-800 text-neutral-500 shadow-inner'}`}>
+                                                            <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950' : 'bg-neutral-800 text-neutral-500'}`}>
                                                                 {isConcluido ? 'AUDITADO OK' : 'PENDENTE'}
                                                             </span>
                                                         </div>
@@ -239,23 +240,23 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                 )}
 
                                 {activeTab === 'unidades' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 italic tracking-widest">Ativos Mobiliários / Fazendas</h3>
-                                            <button onClick={() => setIsUnitModalOpen(true)} className="text-[9px] font-black text-emerald-500 border border-emerald-500/20 px-2 py-1 hover:bg-emerald-500/5 transition-all">+ CADASTRAR</button>
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 text-[11px]">
+                                        <div className="flex justify-between items-center text-[10px]">
+                                            <h3 className="font-black uppercase text-neutral-500 tracking-widest">Ativos Mobiliários / Fazendas</h3>
+                                            <button onClick={() => setIsUnitModalOpen(true)} className="font-black text-emerald-500 border border-emerald-500/20 px-2 py-1 hover:bg-emerald-500/5 transition-all">+ CADASTRAR</button>
                                         </div>
                                         <div className="grid gap-3">
                                             {unidades.length === 0 ? (
                                                 <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-30">
-                                                    <p className="text-[10px] font-bold uppercase">Sem registros detectados.</p>
+                                                    <p className="font-bold uppercase">Sem registros detectados.</p>
                                                 </div>
                                             ) : unidades.map(u => (
                                                 <div key={u.id} className="p-4 bg-neutral-900/40 border border-neutral-800 rounded flex justify-between items-center">
                                                     <div>
-                                                        <p className="text-[10px] font-black text-neutral-300 uppercase italic">{u.nome_identificador}</p>
-                                                        <p className="text-[9px] font-mono text-neutral-600 uppercase">IE: {u.inscricao_estadual || 'N/A'}</p>
+                                                        <p className="font-black text-neutral-300 uppercase italic">{u.nome_identificador}</p>
+                                                        <p className="font-mono text-neutral-600 uppercase">IE: {u.inscricao_estadual || 'N/A'}</p>
                                                     </div>
-                                                    <span className="text-[8px] font-black p-1 bg-neutral-900 border border-neutral-800 text-neutral-600 uppercase">{u.tipo_unidade}</span>
+                                                    <span className="p-1 bg-neutral-900 border border-neutral-800 text-neutral-600 uppercase">{u.tipo_unidade}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -264,23 +265,66 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
 
                                 {activeTab === 'dados' && (
                                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <h3 className="text-[10px] font-black uppercase text-neutral-500 italic tracking-widest">Detalhamento Cadastral</h3>
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Detalhamento Cadastral</h3>
+                                            <button onClick={() => setIsEditing(!isEditing)} className="text-[10px] font-bold text-emerald-500">{isEditing ? 'Visualizar' : 'Editar'}</button>
+                                        </div>
+
                                         <div className="grid gap-3">
-                                            {[
-                                                { label: 'Identificação', value: client.cnpj_cpf, icon: ShieldAlert },
-                                                { label: 'E-mail Corporativo', value: client.email, icon: Mail },
-                                                { label: 'Telefone/WhatsApp', value: client.telefone_whatsapp, icon: Phone },
-                                                { label: 'Regime Tributário', value: client.regime_tributario, icon: Building2 },
-                                                { label: 'Atividade (CNAE)', value: client.cnae_principal, icon: Briefcase }
-                                            ].map((info, idx) => (
-                                                <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-4 border border-neutral-900 rounded-lg group">
-                                                    <info.icon className="w-4 h-4 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="text-[8px] font-black text-neutral-700 uppercase">{info.label}</p>
-                                                        <p className="text-[10px] font-bold text-neutral-400 font-mono uppercase truncate">{info.value || 'NÃO CADASTRADO'}</p>
+                                            {isEditing ? (
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Razão Social</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient.razao_social || ''} onChange={e => setEditedClient({ ...editedClient, razao_social: e.target.value })} />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Nome Fantasia / Apelido</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient.nome || ''} onChange={e => setEditedClient({ ...editedClient, nome: e.target.value })} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">WhatsApp</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient.telefone_whatsapp || ''} onChange={e => setEditedClient({ ...editedClient, telefone_whatsapp: e.target.value })} />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">E-mail</label>
+                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
+                                                                value={editedClient.email || ''} onChange={e => setEditedClient({ ...editedClient, email: e.target.value })} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="pt-2">
+                                                        <button onClick={async () => {
+                                                            const { error } = await supabase.from('clientes').update(editedClient).eq('id', clientId);
+                                                            if (!error) {
+                                                                setIsEditing(false);
+                                                                getFullClientData();
+                                                            }
+                                                        }} className="w-full py-2 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase">Salvar Alterações</button>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            ) : (
+                                                [
+                                                    { label: 'Razão Social', value: client.razao_social, icon: Building2 },
+                                                    { label: 'Identificação Fiscal', value: formatCNPJ(client.cnpj_cpf), icon: ShieldAlert },
+                                                    { label: 'E-mail Corporativo', value: client.email, icon: Mail },
+                                                    { label: 'Telefone/WhatsApp', value: formatPhone(client.telefone_whatsapp), icon: Phone },
+                                                    { label: 'Regime Tributário', value: client.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
+                                                    { label: 'CNAE Principal', value: client.cnae_principal, icon: Briefcase }
+                                                ].map((info, idx) => (
+                                                    <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-3 border border-neutral-900 rounded-lg group">
+                                                        <info.icon className="w-3.5 h-3.5 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
+                                                        <div className="flex-1 overflow-hidden">
+                                                            <p className="text-[8px] font-black text-neutral-700 uppercase">{info.label}</p>
+                                                            <p className="text-[11px] font-bold text-neutral-400 uppercase truncate">{info.value || 'NÃO CADASTRADO'}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -291,10 +335,10 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
 
                 {/* Footer Fixo */}
                 <div className="absolute bottom-0 left-0 w-full p-4 bg-neutral-950 border-t border-neutral-900 flex gap-4">
-                    <button onClick={onClose} className="flex-1 py-3 text-[9px] font-black uppercase text-neutral-600 hover:text-neutral-400 transition-colors">Fechar Vista</button>
+                    <button onClick={onClose} className="flex-1 py-3 text-[10px] font-black uppercase text-neutral-600 hover:text-neutral-400 transition-colors">Fechar Vista</button>
                     {client?.drive_folder_id && (
-                        <a href={`https://drive.google.com/drive/folders/${client.drive_folder_id}`} target="_blank" className="flex-[2] py-3 bg-emerald-500 text-neutral-950 text-[9px] font-black uppercase rounded text-center hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
-                            <FolderOpen className="w-3.5 h-3.5" /> ACESSAR DRIVE
+                        <a href={`https://drive.google.com/drive/folders/${client.drive_folder_id}`} target="_blank" className="flex-[2] py-3 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase rounded text-center hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
+                            <FolderOpen className="w-3.5 h-3.5" /> GOOGLE DRIVE
                         </a>
                     )}
                 </div>

@@ -198,31 +198,31 @@ export default function AtendimentoPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            <div className="flex justify-between items-center px-2">
+            <div className="flex justify-between items-center px-1">
                 <div>
-                    <h1 className="text-xl font-bold text-neutral-100 tracking-tight">Central de Atendimento</h1>
-                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">Gestão de solicitações via WhatsApp & IA</p>
+                    <h1 className="text-lg font-bold text-neutral-100 tracking-tight">Fluxos de Atendimento</h1>
+                    <p className="text-[10px] text-neutral-600 uppercase tracking-[0.2em] font-mono mt-1">Intelligence Module // v2.0</p>
                 </div>
             </div>
 
             {/* Filtros e Busca */}
-            <div className="flex gap-4 items-center bg-neutral-900/30 p-3 rounded-xl border border-neutral-800">
+            <div className="flex gap-4 items-center bg-neutral-900/20 p-2 rounded-lg border border-neutral-800/50">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-600" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-700" />
                     <input
                         type="text"
-                        placeholder="Pesquisar..."
-                        className="w-full bg-neutral-950/50 border border-neutral-800 rounded-lg pl-9 pr-4 py-1.5 text-xs focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
+                        placeholder="Radar de busca..."
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-md pl-9 pr-4 py-1.5 text-[11px] font-medium outline-none focus:border-emerald-500/50 transition-all text-neutral-300"
                     />
                 </div>
-                <div className="flex gap-1.5">
+                <div className="flex gap-1">
                     {['todos', 'pendente', 'em_atendimento', 'concluido'].map((s) => (
                         <button
                             key={s}
                             onClick={() => setFilter(s)}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${filter === s
-                                ? 'bg-emerald-500 text-neutral-950 shadow-lg shadow-emerald-500/20'
-                                : 'bg-neutral-800 text-neutral-500 hover:bg-neutral-700'
+                            className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${filter === s
+                                ? 'bg-neutral-100 text-neutral-950'
+                                : 'text-neutral-500 hover:text-neutral-300'
                                 }`}
                         >
                             {s === 'todos' ? 'Ver Todos' : getStatusLabel(s)}
@@ -232,106 +232,81 @@ export default function AtendimentoPage() {
             </div>
 
             {/* Lista de Atendimentos */}
-            <div className="grid gap-4">
+            <div className="space-y-3">
                 {loading ? (
-                    <div className="text-center py-20 text-neutral-500">
-                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-500" />
-                        <span className="text-[10px] uppercase font-bold tracking-widest">Carregando Fluxos...</span>
+                    <div className="text-center py-20 text-neutral-600">
+                        <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-emerald-500" />
+                        <span className="text-[10px] uppercase font-bold tracking-widest">Sincronizando...</span>
                     </div>
                 ) : filteredTickets.length === 0 ? (
-                    <div className="text-center py-20 bg-neutral-900/50 rounded-2xl border border-neutral-800">
-                        <MessageSquare className="w-12 h-12 text-neutral-800 mx-auto mb-4" />
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase">Silêncio no Radar</h3>
-                        <p className="text-[10px] text-neutral-700 uppercase mt-1">Nenhuma mensagem neste filtro.</p>
+                    <div className="text-center py-20 border-2 border-dashed border-neutral-900 rounded-xl">
+                        <MessageSquare className="w-8 h-8 text-neutral-800 mx-auto mb-3" />
+                        <p className="text-[10px] text-neutral-700 uppercase font-black">Nenhum registro ativo</p>
                     </div>
                 ) : (
                     filteredTickets.map((ticket) => (
-                        <div key={ticket.id} className="bg-neutral-950 border border-neutral-800 p-5 rounded-2xl hover:border-neutral-700 transition-all group relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-
+                        <div key={ticket.id} className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl hover:border-emerald-500/20 transition-all group relative">
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex gap-4 flex-1">
-                                    <div className="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-500 font-bold text-base shrink-0 overflow-hidden group-hover:border-emerald-500/50 transition-all">
+                                    <div className="w-9 h-9 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-500 font-bold text-sm shrink-0 uppercase">
                                         {ticket.clientes?.nome ? (
                                             ticket.clientes.nome.charAt(0)
                                         ) : (
-                                            <User className="w-5 h-5 text-neutral-700" />
+                                            <User className="w-4 h-4 text-neutral-800" />
                                         )}
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                                            <h3 className="text-sm font-bold text-neutral-200 tracking-tight">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                                            <h3 className="text-[12px] font-bold text-neutral-100 truncate">
                                                 {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
                                             </h3>
 
-                                            {/* Badge de Tipo de Mídia */}
-                                            {ticket.tipo_midia && ticket.tipo_midia !== 'texto' && (
-                                                <span className="text-[9px] bg-purple-500/10 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/20 flex items-center gap-1 font-medium uppercase">
-                                                    {getMediaIcon(ticket.tipo_midia)} {ticket.tipo_midia}
-                                                </span>
-                                            )}
+                                            <div className="flex gap-1 items-center ml-1">
+                                                {/* Badge de Identificação */}
+                                                {ticket.clientes ? (
+                                                    <span className="text-[8px] border border-emerald-500/20 text-emerald-500 px-1.5 py-0.5 rounded uppercase font-black">Cliente</span>
+                                                ) : (
+                                                    <span className="text-[8px] border border-neutral-800 text-neutral-600 px-1.5 py-0.5 rounded uppercase font-black">Visitante</span>
+                                                )}
 
-                                            {/* Badge de Categoria */}
-                                            {ticket.categoria_solicitacao && (
-                                                <span className="text-[10px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-full border border-neutral-700 flex items-center gap-1 font-medium">
-                                                    <Tag className="w-3 h-3" /> {getCategoryLabel(ticket.categoria_solicitacao)}
-                                                </span>
-                                            )}
+                                                {/* Badge de Categoria */}
+                                                {ticket.categoria_solicitacao && (
+                                                    <span className="text-[8px] bg-neutral-900 text-neutral-500 px-1.5 py-0.5 rounded border border-neutral-800 uppercase font-bold">
+                                                        {getCategoryLabel(ticket.categoria_solicitacao)}
+                                                    </span>
+                                                )}
 
-                                            {/* Badge de Prioridade */}
-                                            {ticket.prioridade && (
-                                                <span className={`text-[10px] px-2 py-0.5 rounded-full border flex items-center gap-1 font-bold ${getPriorityColor(ticket.prioridade)}`}>
-                                                    <Star className="w-3 h-3 fill-current" /> {getPriorityLabel(ticket.prioridade)}
-                                                </span>
-                                            )}
-
-                                            {/* Badge de Atendimento Automático */}
-                                            {ticket.atendimento_automatico && (
-                                                <span className="text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full border border-green-500/20 flex items-center gap-1 font-medium">
-                                                    <Bot className="w-3 h-3" /> Automático
-                                                </span>
-                                            )}
-
-                                            {/* Badge de Identificação */}
-                                            {ticket.clientes ? (
-                                                <span className="text-[10px] bg-primary-500/10 text-primary-400 px-2 py-0.5 rounded-full border border-primary-500/20 flex items-center gap-1 font-medium">
-                                                    <CheckCircle className="w-3 h-3" /> Cliente
-                                                </span>
-                                            ) : (
-                                                <span className="text-[10px] bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full border border-neutral-700 flex items-center gap-1 font-medium">
-                                                    <User className="w-3 h-3" /> Visitante
-                                                </span>
-                                            )}
+                                                {/* Badge de Prioridade */}
+                                                {ticket.prioridade && (
+                                                    <span className={`text-[8px] px-1.5 py-0.5 rounded border uppercase font-black ${getPriorityColor(ticket.prioridade)}`}>
+                                                        {getPriorityLabel(ticket.prioridade)}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <div className="flex items-center gap-4 text-sm text-neutral-500">
-                                            <span className="flex items-center gap-1">
-                                                <Phone className="w-3.5 h-3.5" />
+                                        <div className="flex items-center gap-3 text-[10px] text-neutral-600 font-medium">
+                                            <span className="flex items-center gap-1 font-mono">
+                                                <Phone className="w-3 h-3" />
                                                 {ticket.numero_whatsapp}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Clock className="w-3.5 h-3.5" />
-                                                {new Date(ticket.created_at).toLocaleString('pt-BR')}
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(ticket.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            {ticket.confianca_classificacao && (
-                                                <span className="flex items-center gap-1">
-                                                    <Bot className="w-3.5 h-3.5" />
-                                                    Confiança: {(ticket.confianca_classificacao * 100).toFixed(0)}%
-                                                </span>
-                                            )}
                                         </div>
 
-                                        {/* Mensagem ou Transcrição */}
-                                        <p className="mt-3 text-neutral-300 bg-neutral-800/30 p-3 rounded-lg border border-neutral-800/50 italic leading-relaxed">
+                                        {/* Mensagem principal - Mais discreta */}
+                                        <div className="mt-2.5 text-[11px] text-neutral-400 leading-relaxed max-w-2xl bg-neutral-900/30 p-2.5 rounded border border-neutral-800/50">
                                             {ticket.transcricao_audio ? (
-                                                <>
-                                                    <span className="text-xs text-neutral-500 block mb-1">Transcrição de áudio:</span>
-                                                    "{ticket.transcricao_audio}"
-                                                </>
+                                                <div className="flex gap-2">
+                                                    <Mic className="w-3 h-3 text-purple-500 mt-0.5" />
+                                                    <p>"{ticket.transcricao_audio}"</p>
+                                                </div>
                                             ) : (
-                                                `"${ticket.mensagem}"`
+                                                <p>"{ticket.mensagem}"</p>
                                             )}
-                                        </p>
+                                        </div>
 
                                         {/* Resposta Automática (se houver) */}
                                         {ticket.resposta_automatica && (

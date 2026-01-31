@@ -14,11 +14,14 @@ export async function sendWhatsAppMessage(number: string, text: string) {
         return null;
     }
 
-    // Limpar o número: manter apenas dígitos e garantir o sufixo @s.whatsapp.net se não for grupo
-    const cleanNumber = number.replace(/\D/g, '');
-    const jid = cleanNumber.includes('@') ? cleanNumber : `${cleanNumber}@s.whatsapp.net`;
+    // Limpar o número: manter apenas dígitos. 
+    // Garante que tenha o prefixo 55 se parecer um número brasileiro sem ele.
+    let cleanNumber = number.replace(/\D/g, '');
+    if (cleanNumber.length === 11 && !cleanNumber.startsWith('55')) {
+        cleanNumber = '55' + cleanNumber;
+    }
 
-    console.log(`[Evolution API] Enviando para: ${jid} | Instância: ${INSTANCE}`);
+    console.log(`[Evolution API] Disparando para: ${cleanNumber} | Instância: ${INSTANCE}`);
 
     try {
         const response = await fetch(`${API_URL}/message/sendText/${INSTANCE}`, {
@@ -28,18 +31,22 @@ export async function sendWhatsAppMessage(number: string, text: string) {
                 'apikey': API_KEY
             },
             body: JSON.stringify({
-                number: jid,
+                number: cleanNumber,
                 text: text,
                 delay: 1000,
-                linkPreview: true
+                linkPreview: false
             })
         });
 
         const result = await response.json();
-        console.log(`[Evolution API] Resultado do envio:`, result);
+        if (!response.ok) {
+            console.error(`[Evolution API] Erro na resposta (${response.status}):`, result);
+        } else {
+            console.log(`[Evolution API] Sucesso:`, result);
+        }
         return result;
     } catch (error) {
-        console.error('[Evolution API] Erro fatal no envio:', error);
+        console.error('[Evolution API] Erro de rede ou parse:', error);
         return null;
     }
 }
