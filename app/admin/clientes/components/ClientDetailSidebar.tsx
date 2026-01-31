@@ -6,7 +6,7 @@ import {
     Mail, Phone, MapPin, Clock, X, Loader2, Calendar,
     FileCheck, ShieldAlert, AlertTriangle, Edit, Trash2, ExternalLink,
     Building2, Landmark, CheckCircle2, XCircle, Plus, Save, Users,
-    FileText, Briefcase, Download, History, FolderOpen, RefreshCw, Calculator, FileSearch
+    FileText, Briefcase, Download, History, FolderOpen, RefreshCw, Calculator, FileSearch, MessageSquare
 } from 'lucide-react'
 import { getRoutinesByClientType } from '@/lib/utils/accounting-intelligence'
 
@@ -86,6 +86,36 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
             }
         } catch (err) {
             console.error(err)
+        } finally {
+            setSyncing(false)
+        }
+    }
+
+    async function handleSendWhatsApp(routineName: string) {
+        if (!clientId) return
+        try {
+            const hasConfirmed = confirm(`Deseja enviar a guia de ${routineName} via WhatsApp agora?`)
+            if (!hasConfirmed) return
+
+            setSyncing(true)
+            const res = await fetch('/api/whatsapp/send-pdf', {
+                method: 'POST',
+                body: JSON.stringify({
+                    clientId,
+                    fileName: `${routineName}_${client.nome}.pdf`,
+                    caption: `Olá ${client.nome}, aqui está sua guia de ${routineName} referente ao mês atual.`
+                })
+            })
+
+            if (res.ok) {
+                alert('Documento enviado com sucesso!')
+            } else {
+                const err = await res.json()
+                alert(`Erro: ${err.error}`)
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Falha na comunicação com o servidor de disparo.')
         } finally {
             setSyncing(false)
         }
@@ -187,7 +217,16 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                                                 <p className="text-[8px] text-neutral-600 uppercase italic">{rout.description}</p>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-2">
+                                                            {isConcluido && (
+                                                                <button
+                                                                    onClick={() => handleSendWhatsApp(rout.name)}
+                                                                    className="p-2 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 hover:bg-emerald-500 hover:text-neutral-950 transition-all"
+                                                                    title="Enviar via WhatsApp"
+                                                                >
+                                                                    <MessageSquare className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            )}
                                                             <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950 font-black' : 'bg-neutral-800 text-neutral-500 shadow-inner'}`}>
                                                                 {isConcluido ? 'AUDITADO OK' : 'PENDENTE'}
                                                             </span>

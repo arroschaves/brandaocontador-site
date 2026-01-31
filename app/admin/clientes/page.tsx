@@ -33,6 +33,7 @@ function ClientesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    const [syncing, setSyncing] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [clientes, setClientes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -182,16 +183,26 @@ function ClientesContent() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setSyncing(true); // Reusar ou criar estado de loading
         try {
             if (editingClient) {
-                await supabase.from('clientes').update(formData).eq('id', editingClient.id);
+                const { error } = await supabase.from('clientes').update(formData).eq('id', editingClient.id);
+                if (error) throw error;
             } else {
-                await supabase.from('clientes').insert([formData]);
+                // Chamada para a API Soberana que cria pastas no Drive
+                const response = await fetch('/api/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                if (!response.ok) throw new Error('Falha na criação soberana');
             }
             setIsModalOpen(false);
             fetchClientes();
         } catch (err: any) {
-            alert('Erro ao salvar.');
+            alert('Erro ao salvar: ' + err.message);
+        } finally {
+            setSyncing(false);
         }
     }
 
@@ -443,8 +454,14 @@ function ClientesContent() {
                             {/* Sticky Footer for Action */}
                             <div className="fixed bottom-0 right-0 w-full max-w-xl p-8 bg-neutral-950 border-t border-neutral-900 flex gap-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 text-xs font-black uppercase text-neutral-600 hover:text-neutral-400 transition-colors">Abortar</button>
-                                <button type="submit" className="flex-[2] py-4 bg-emerald-500 text-neutral-950 font-black uppercase text-xs tracking-[0.2em] shadow-[8px_8px_0px_#064e3b] transition-all active:scale-95 active:shadow-none hover:bg-emerald-400">
-                                    {editingClient ? 'RE-ALISTAR ATIVO' : 'EFETUAR ALISTAMENTO'}
+                                <button type="submit" disabled={syncing} className={`flex-[2] py-4 ${syncing ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed' : 'bg-emerald-500 text-neutral-950 hover:bg-emerald-400 shadow-[8px_8px_0px_#064e3b]'} font-black uppercase text-xs tracking-[0.2em] transition-all active:scale-95 active:shadow-none`}>
+                                    {syncing ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" /> CRIANDO ESTRUTURA DRIVE...
+                                        </span>
+                                    ) : (
+                                        editingClient ? 'RE-ALISTAR ATIVO' : 'EFETUAR ALISTAMENTO'
+                                    )}
                                 </button>
                             </div>
                         </form>

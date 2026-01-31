@@ -18,6 +18,9 @@ import {
     Activity
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import AlertasGaps from './components/AlertasGaps';
+import GestaoValidades from './components/GestaoValidades';
+import WhatsAppRadar from '@/app/components/WhatsAppRadar';
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState({
@@ -49,7 +52,7 @@ export default function AdminDashboard() {
                 .lte('competencia', fimMes);
 
             const total = obrMes?.length || 0;
-            const concluidos = obrMes?.filter(o => o.status === 'concluido').length || 0;
+            const concluidos = obrMes?.filter((o: any) => o.status === 'concluido').length || 0;
             const pendentes = total - concluidos;
 
             setStats({
@@ -159,8 +162,12 @@ export default function AdminDashboard() {
 
             {/* Seções de Trabalho */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Radar de Gaps (Novo Componente de Inteligência) */}
+                <div className="lg:col-span-1">
+                    <AlertasGaps />
+                </div>
 
-                {/* Radar de Obrigações Federais */}
+                {/* Radar de Obrigações Acessórias (Tabela Técnica) */}
                 <div className="lg:col-span-2 bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
                     <div className="p-4 border-b border-neutral-800 bg-neutral-900/50 flex justify-between items-center">
                         <h2 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 italic">Radar de Obrigações Acessórias (Set/2026)</h2>
@@ -200,31 +207,12 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Sidebar de Alertas e Ações */}
+                {/* Calendário de Validades (Certificados/Alvarás) */}
                 <div className="space-y-6">
-                    <div className="bg-neutral-950 border border-neutral-800 p-5 rounded-lg space-y-4">
-                        <h2 className="text-[10px] font-black uppercase text-neutral-500 italic pb-2 border-b border-neutral-900">Ações Rápidas de Gestão</h2>
-                        <div className="grid grid-cols-1 gap-2">
-                            <Link href="/admin/cronograma" className="flex items-center justify-between p-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded transition-all group">
-                                <span className="text-[10px] font-black text-neutral-400 group-hover:text-emerald-500 transition-colors uppercase">Cronograma Geral</span>
-                                <ArrowUpRight className="w-3 h-3 text-neutral-700" />
-                            </Link>
-                            <Link href="/admin/vencimentos" className="flex items-center justify-between p-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded transition-all group">
-                                <span className="text-[10px] font-black text-neutral-400 group-hover:text-amber-500 transition-colors uppercase">Radar de Vencimentos</span>
-                                <ArrowUpRight className="w-3 h-3 text-neutral-700" />
-                            </Link>
-                        </div>
-                    </div>
+                    <GestaoValidades />
 
                     <div className="bg-neutral-900/30 border border-neutral-800 p-5 rounded-lg">
-                        <div className="flex items-center gap-2 mb-4">
-                            <MessageSquare className="w-4 h-4 text-emerald-500" />
-                            <h2 className="text-[10px] font-black uppercase text-neutral-400 italic">WhatsApp CRM</h2>
-                        </div>
-                        <div className="text-center py-4">
-                            <p className="text-[24px] font-black text-neutral-500 italic uppercase opacity-20 tracking-tighter">SEM PEDIDOS</p>
-                            <p className="text-[8px] font-mono text-neutral-700 uppercase mt-2">Nenhum ticket pendente no momento</p>
-                        </div>
+                        <WhatsAppRadar />
                     </div>
                 </div>
 
