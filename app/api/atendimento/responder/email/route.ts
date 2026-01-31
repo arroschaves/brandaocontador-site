@@ -23,7 +23,8 @@ export async function POST(request: Request) {
         })
 
         if (!result.success) {
-            throw new Error(result.error || 'Erro ao enviar e-mail')
+            const errorMessage = typeof result.error === 'string' ? result.error : 'Erro ao enviar e-mail';
+            throw new Error(errorMessage);
         }
 
         // 2. Registrar no banco de dados (se houver ticketId)
