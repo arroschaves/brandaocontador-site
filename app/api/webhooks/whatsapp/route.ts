@@ -6,67 +6,24 @@ import { sendWhatsAppMessage } from '@/lib/utils/evolution-api'
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const supabase = await createClient()
 
-        if (body.event === 'messages.upsert') {
-            const data = body.data
-            const key = data.key
-            const fromMe = key.fromMe
-            const remoteJid = key.remoteJid
+        // URL do seu workflow n8n (o "cérebro" do sistema)
+        const N8N_WEBHOOK_URL = 'https://webhook.brandaocontador.com.br/webhook/whatsapp-message';
 
-            if (fromMe) return NextResponse.json({ skipped: true })
+        console.log(`[Webhook Proxy] Repassando evento ${body.event || 'desconhecido'} para o n8n...`);
 
-            // Detectar o remetente (removendo sufixo JID se houver)
-            const senderNumber = remoteJid.split('@')[0].replace(/\D/g, '');
-            const pushName = data.pushName || 'Usuário WhatsApp';
-            const messageBody = data.message?.conversation ||
-                data.message?.extendedTextMessage?.text ||
-                (data.messageType === 'audioMessage' ? '[Áudio]' : '[Mídia]');
+        // Forward para o n8n de forma assíncrona para não travar a Evolution API
+        fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        }).catch(err => console.error('[Webhook Proxy] Erro ao chamar n8n:', err));
 
-            console.log(`[Webhook] Mensagem de ${senderNumber} (${pushName}): ${messageBody.substring(0, 50)}...`);
+        // Retornamos sucesso imediato para o WhatsApp não ficar reenviando
+        return NextResponse.json({ success: true, proxy: 'n8n' })
 
-            // Tentar identificar o cliente no banco usando os últimos 8 dígitos
-            const last8 = senderNumber.slice(-8);
-            const { data: client } = await supabase
-                .from('clientes')
-                .select('id, nome')
-                .ilike('telefone_whatsapp', `%${last8}`)
-                .maybeSingle();
-
-            // 1. Analisar com IA
-            const aiAnalysis = await analyzeClientMessage(messageBody)
-
-            // 2. Criar o Atendimento (Ticket)
-            const { error: ticketError } = await supabase
-                .from('atendimentos')
-                .insert({
-                    cliente_id: client?.id || null,
-                    telefone_whatsapp: senderNumber, // Usar telefone_whatsapp (nome real no BD)
-                    mensagem: messageBody,
-                    categoria_solicitacao: aiAnalysis.categoria,
-                    prioridade: aiAnalysis.prioridade,
-                    status: 'pendente',
-                    atendimento_automatico: true,
-                    resposta_automatica: aiAnalysis.resposta_cliente,
-                    created_at: new Date().toISOString(),
-                    tipo_midia: data.messageType === 'audioMessage' ? 'audio' : 'texto'
-                });
-
-            if (ticketError) {
-                console.error('[Webhook] Erro ao salvar atendimento:', ticketError);
-            }
-
-            // 3. Responder ao Cliente via Evolution API
-            // Usamos o remoteJid original para garantir a entrega sem erros de formatação
-            const whatsappRes = await sendWhatsAppMessage(remoteJid, aiAnalysis.resposta_cliente)
-            console.log(`[Webhook] Resposta enviada. Resultado:`, whatsappRes)
-
-            return NextResponse.json({ success: true, analysis: aiAnalysis.categoria, whatsappDetail: whatsappRes })
-        }
-
-        return NextResponse.json({ message: 'Event ignored' })
     } catch (error: any) {
-        console.error('Webhook Error:', error)
+        console.error('Webhook Proxy Error:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
