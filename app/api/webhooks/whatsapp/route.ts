@@ -29,11 +29,14 @@ export async function POST(request: Request) {
             // 1. Analisar com IA
             const aiAnalysis = await analyzeClientMessage(content)
 
-            // 2. Localizar Cliente
+            // 2. Localizar Cliente (Busca robusta pelos últimos 8 dígitos)
+            const cleanPhone = phone.replace(/\D/g, '');
+            const lastDigits = cleanPhone.slice(-8);
+
             const { data: cliente } = await supabase
                 .from('clientes')
                 .select('id, nome')
-                .ilike('telefone_whatsapp', `%${phone}%`)
+                .filter('telefone_whatsapp', 'ilike', `%${lastDigits}%`)
                 .maybeSingle()
 
             // 3. Salvar no CRM
@@ -54,9 +57,10 @@ export async function POST(request: Request) {
             if (insertError) throw insertError
 
             // 4. Responder ao Cliente via Evolution API
-            await sendWhatsAppMessage(phone, aiAnalysis.resposta_cliente)
+            const whatsappRes = await sendWhatsAppMessage(phone, aiAnalysis.resposta_cliente)
+            console.log(`[Webhook] Resposta enviada para ${phone}. Resultado:`, whatsappRes)
 
-            return NextResponse.json({ success: true, analysis: aiAnalysis.intencao })
+            return NextResponse.json({ success: true, analysis: aiAnalysis.intencao, whatsappDetail: whatsappRes })
         }
 
         return NextResponse.json({ message: 'Event ignored' })

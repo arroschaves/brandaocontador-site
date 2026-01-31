@@ -26,6 +26,9 @@ export default function AlertasGaps() {
         }
     }
 
+    const mesReferencia = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(new Date())
+    const anoReferencia = new Date().getFullYear()
+
     if (loading) return (
         <div className="p-8 bg-neutral-900/50 rounded-2xl border border-neutral-800 flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-6 h-6 animate-spin text-emerald-500" />
@@ -71,7 +74,7 @@ export default function AlertasGaps() {
                                 <div className="flex items-center gap-3">
                                     <div className="text-right">
                                         <span className="text-[8px] font-black text-amber-500 uppercase block">FALTA GERAR</span>
-                                        <span className="text-[7px] text-neutral-600 uppercase italic">Ref: Out/2026</span>
+                                        <span className="text-[7px] text-neutral-600 uppercase italic">Ref: {mesReferencia}/{anoReferencia}</span>
                                     </div>
                                     <AlertCircle className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform" />
                                 </div>

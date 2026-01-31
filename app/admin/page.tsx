@@ -23,12 +23,13 @@ import GestaoValidades from './components/GestaoValidades';
 import WhatsAppRadar from '@/app/components/WhatsAppRadar';
 
 export default function AdminDashboard() {
-    const [stats, setStats] = useState({
+    const [stats, setStats] = useState<any>({
         totalClientes: 0,
         concluidosMes: 0,
         pendentesMes: 0,
         pedidosZap: 0,
-        auditRate: 0
+        auditRate: 0,
+        obrCounts: {}
     });
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
@@ -55,12 +56,21 @@ export default function AdminDashboard() {
             const concluidos = obrMes?.filter((o: any) => o.status === 'concluido').length || 0;
             const pendentes = total - concluidos;
 
+            // Processar contagem por tipo
+            const obrCounts: any = {};
+            obrMes?.forEach((o: any) => {
+                if (!obrCounts[o.tipo]) obrCounts[o.tipo] = { total: 0, concluido: 0 };
+                obrCounts[o.tipo].total++;
+                if (o.status === 'concluido') obrCounts[o.tipo].concluido++;
+            });
+
             setStats({
                 totalClientes: countClientes || 0,
                 pedidosZap: 0,
                 concluidosMes: concluidos,
                 pendentesMes: pendentes,
-                auditRate: total > 0 ? Math.round((concluidos / total) * 100) : 0
+                auditRate: total > 0 ? Math.round((concluidos / total) * 100) : 0,
+                obrCounts
             });
         } catch (err) {
             console.error(err);
@@ -167,10 +177,10 @@ export default function AdminDashboard() {
                     <AlertasGaps />
                 </div>
 
-                {/* Radar de Obrigações Acessórias (Tabela Técnica) */}
+                {/* Radar de Obrigações Acessórias (Dados Reais) */}
                 <div className="lg:col-span-2 bg-neutral-950 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
                     <div className="p-4 border-b border-neutral-800 bg-neutral-900/50 flex justify-between items-center">
-                        <h2 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 italic">Radar de Obrigações Acessórias (Set/2026)</h2>
+                        <h2 className="text-[10px] font-black uppercase tracking-widest text-neutral-400 italic">Métrica de Processamento ({new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(new Date())}/{new Date().getFullYear()})</h2>
                         <Link href="/admin/cronograma" className="text-[9px] font-black text-emerald-500 hover:underline">VER MAPA COMPLETO</Link>
                     </div>
                     <div className="p-0 flex-1">
@@ -178,32 +188,54 @@ export default function AdminDashboard() {
                             <thead>
                                 <tr className="text-[8px] font-black text-neutral-600 uppercase border-b border-neutral-900 bg-neutral-900/20">
                                     <th className="p-3">Obrigação</th>
-                                    <th className="p-3">Impacto</th>
-                                    <th className="p-3">Prazo Limite</th>
-                                    <th className="p-3 text-right">Status Mural</th>
+                                    <th className="p-3 text-center">Geração</th>
+                                    <th className="p-3 text-center">Auditado</th>
+                                    <th className="p-3 text-right">Status Final</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-neutral-900">
-                                {[
-                                    { name: 'DCTFWeb', impact: 'Geral', date: 'Dia 15', status: 'Em Processamento' },
-                                    { name: 'FGTS Digital', impact: 'RH', date: 'Dia 20', status: 'Auditando' },
-                                    { name: 'PGDAS-D', impact: 'Simples', date: 'Dia 20', status: 'Auditando' },
-                                    { name: 'EFD-Reinf', impact: 'Fiscal', date: 'Dia 15', status: 'Em Processamento' }
-                                ].map((item, i) => (
-                                    <tr key={i} className="hover:bg-neutral-900/30 transition-colors">
-                                        <td className="p-3 text-[10px] font-black text-neutral-300 uppercase italic">{item.name}</td>
-                                        <td className="p-3 text-[9px] font-bold text-neutral-500 uppercase">{item.impact}</td>
-                                        <td className="p-3 text-[9px] font-mono text-neutral-600">{item.date}</td>
-                                        <td className="p-3 text-[8px] text-right">
-                                            <span className="bg-neutral-900 px-2 py-0.5 border border-neutral-800 text-neutral-500 rounded font-black italic">{item.status}</span>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {['DCTFWeb', 'FGTS Digital', 'PGDAS-D', 'EFD-Reinf'].map((tipo) => {
+                                    // Pega os dados filtrados em fetchStats que já buscamos
+                                    // Vamos filtrar do array obrMes que está no escopo de fetchStats ou salvo em um state
+                                    // Como obrMes está dentro de fetchStats, vou extrair essa lógica para o estado global
+
+                                    const totalTipo = stats.obrCounts?.[tipo]?.total || 0;
+                                    const doneTipo = stats.obrCounts?.[tipo]?.concluido || 0;
+                                    const percent = totalTipo > 0 ? Math.round((doneTipo / totalTipo) * 100) : 0;
+
+                                    return (
+                                        <tr key={tipo} className="hover:bg-neutral-900/30 transition-colors">
+                                            <td className="p-3">
+                                                <p className="text-[10px] font-black text-neutral-300 uppercase italic">{tipo}</p>
+                                                <p className="text-[7px] text-neutral-600 uppercase">Impacto Fiscal Global</p>
+                                            </td>
+                                            <td className="p-3 text-center">
+                                                <p className="text-[10px] font-black text-neutral-400 tabular-nums">{totalTipo}</p>
+                                            </td>
+                                            <td className="p-3 text-center text-emerald-500">
+                                                <p className="text-[10px] font-black tabular-nums">{doneTipo}</p>
+                                            </td>
+                                            <td className="p-3 text-right">
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded ${percent === 100 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-neutral-900 text-neutral-500'} uppercase italic border border-neutral-800`}>
+                                                        {percent}% CONCLUÍDO
+                                                    </span>
+                                                    <div className="w-16 h-0.5 bg-neutral-900 overflow-hidden">
+                                                        <div className="h-full bg-emerald-600" style={{ width: `${percent}%` }} />
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
-                    <div className="p-3 bg-neutral-900/20 border-t border-neutral-900">
-                        <p className="text-[8px] text-neutral-700 font-mono italic uppercase">Audit engine v2.4 // Todos os dados são extraídos do cruzamento Supabase x Google Drive API.</p>
+                    <div className="p-3 bg-neutral-900/20 border-t border-neutral-900 flex justify-between items-center">
+                        <p className="text-[8px] text-neutral-700 font-mono italic uppercase">Audit engine v2.4 // Sincronizado com Google Drive API em tempo real.</p>
+                        <button onClick={fetchStats} className="text-[8px] font-black text-neutral-600 hover:text-white uppercase flex items-center gap-1">
+                            <RefreshCw className="w-2 h-2" /> ATUALIZAR MÉTRICAS
+                        </button>
                     </div>
                 </div>
 
