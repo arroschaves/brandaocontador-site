@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { sendWhatsAppMessage } from '@/lib/utils/evolution-api'
 import { createClient } from '@/lib/supabase/server'
+import { logAudit } from '@/lib/utils/audit'
 
 export async function POST(request: Request) {
     try {
@@ -25,14 +26,19 @@ export async function POST(request: Request) {
                 observacoes_internas: `Mensagem enviada via CRM: ${message}`
             }).eq('id', ticketId)
 
-            // Adicionar registro de log na tabela de atendimentos? 
-            // Talvez criar um novo registro representando a resposta
-            await supabase.from('atendimentos').insert({
-                telefone_whatsapp: number,
-                mensagem: `[Resposta CRM]: ${message}`,
-                status: 'em_atendimento',
-                created_at: new Date().toISOString()
-            })
+            // Registrar Auditoria
+            const { data: atendimentoData } = await supabase
+                .from('atendimentos')
+                .select('cliente_id')
+                .eq('id', ticketId)
+                .single();
+
+            await logAudit({
+                cliente_id: atendimentoData?.cliente_id,
+                acao: 'ENVIO_WA',
+                detalhes: `Mensagem enviada para ${number}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
+                request
+            });
         }
 
         return NextResponse.json({ success: true, detail: 'Mensagem enviada com sucesso' })

@@ -1,25 +1,30 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { sendWhatsAppMedia } from '@/lib/utils/evolution-api'
+import { createClient } from '@/lib/supabase/server'
+import { logAudit } from '@/lib/utils/audit'
 
-/**
- * Rota para envio manual de PDF via WhatsApp
- * Busca o arquivo no Drive e dispara pela Evolution API.
- */
 export async function POST(request: Request) {
     try {
         const { clientId, fileId, fileName, caption } = await request.json()
         const supabase = await createClient()
 
-        // 1. Buscar dados do cliente (número de telefone)
-        const { data: cliente, error: clientErr } = await supabase
+        if (!clientId || !fileId) {
+            return NextResponse.json({ error: 'Dados insuficientes' }, { status: 400 })
+        }
+
+        // 1. Buscar dados do cliente
+        const { data: cliente, error: clientError } = await supabase
             .from('clientes')
-            .select('nome, telefone_whatsapp')
+            .select('*')
             .eq('id', clientId)
             .single()
 
-        if (clientErr || !cliente?.telefone_whatsapp) {
+        if (clientError || !cliente) {
+            throw new Error('Cliente não encontrado')
+        }
+
+        if (!cliente.telefone_whatsapp) {
             throw new Error('Cliente sem telefone cadastrado')
         }
 
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
 
         // 6. Enviar via Evolution API
         const whatsappRes = await sendWhatsAppMedia(
-            cliente.telefone_whatsapp, // Aqui a Evolution API ja espera o JID ou numero limpo
+            cliente.telefone_whatsapp,
             base64,
             fileName || 'Documento.pdf',
             caption || `Olá ${cliente.nome}, segue sua guia de contabilidade.`
@@ -61,7 +66,7 @@ export async function POST(request: Request) {
             throw new Error(whatsappRes.message || 'Erro no envio do WhatsApp')
         }
 
-        // 7. Registrar Log de Envio no Supabase
+        // 7. Registrar Log de Atendimento
         await supabase.from('atendimentos').insert({
             cliente_id: clientId,
             telefone_whatsapp: cliente.telefone_whatsapp,
@@ -70,10 +75,18 @@ export async function POST(request: Request) {
             created_at: new Date().toISOString()
         })
 
-        return NextResponse.json({ success: true, detail: 'PDF enviado com sucesso' })
+        // 8. Registrar Auditoria
+        await logAudit({
+            cliente_id: clientId,
+            acao: 'ENVIO_WA',
+            detalhes: `Guia enviada via WhatsApp: ${fileName}`,
+            request
+        });
+
+        return NextResponse.json({ success: true })
 
     } catch (error: any) {
-        console.error('Send PDF Error:', error)
+        console.error('[Send PDF Error]:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }

@@ -1,52 +1,90 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-    Mail, Phone, MapPin, Clock, X, Loader2, Calendar,
-    FileCheck, ShieldAlert, AlertTriangle, Edit, Trash2, ExternalLink,
-    Building2, Landmark, CheckCircle2, XCircle, Plus, Save, Users,
-    FileText, Briefcase, Download, History, FolderOpen, RefreshCw, Calculator, FileSearch, MessageSquare
+    X, Building2, Mail, Phone, Clock, FileText,
+    MessageSquare, RefreshCw, Loader2, Building,
+    Briefcase, ShieldAlert, FolderOpen, Calculator,
+    FileCheck, FileSearch, Landmark, Users, Upload, Monitor, Server
 } from 'lucide-react'
-import { getRoutinesByClientType } from '@/lib/utils/accounting-intelligence'
-import { formatCNPJ, formatPhone } from '@/lib/utils/format'
 
 interface ClientDetailSidebarProps {
-    clientId: string | null
     isOpen: boolean
     onClose: () => void
-    onUpdate: () => void
+    clientId: string | null
 }
 
-export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdate }: ClientDetailSidebarProps) {
+export default function ClientDetailSidebar({ isOpen, onClose, clientId }: ClientDetailSidebarProps) {
     const [client, setClient] = useState<any>(null)
-    const [unidades, setUnidades] = useState<any[]>([])
-    const [validades, setValidades] = useState<any[]>([])
-    const [rhFiles, setRhFiles] = useState<any[]>([])
     const [cronograma, setCronograma] = useState<any[]>([])
-
-    const [loading, setLoading] = useState(false)
-    const [loadingRh, setLoadingRh] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
     const [syncing, setSyncing] = useState(false)
     const [editedClient, setEditedClient] = useState<any>(null)
-    const [activeTab, setActiveTab] = useState<'fiscal' | 'unidades' | 'rh' | 'vencimentos' | 'dados'>('fiscal')
+    const [unidades, setUnidades] = useState<any[]>([])
+    const [historico, setHistorico] = useState<any[]>([])
+    const [activeTab, setActiveTab] = useState<'fiscal' | 'unidades' | 'rh' | 'vencimentos' | 'dados' | 'historico'>('fiscal')
+    const [uploading, setUploading] = useState(false)
 
     const [isUnitModalOpen, setIsUnitModalOpen] = useState(false)
     const [unitFormData, setUnitFormData] = useState({
         nome_identificador: '',
+        tipo_unidade: 'Fazenda',
         inscricao_estadual: '',
-        tipo_unidade: 'PROPRIEDADE_RURAL',
-        documento_id: '',
-        cidade: 'Sidrolândia',
-        estado: 'MS'
+        endereco_completo: '',
+        area_total_ha: ''
     })
 
     const supabase = createClient()
 
+    async function fetchHistorico() {
+        if (!clientId) return;
+        const { data } = await supabase
+            .from('auditoria_crm')
+            .select('*')
+            .eq('cliente_id', clientId)
+            .order('created_at', { ascending: false })
+            .limit(20);
+        setHistorico(data || []);
+    }
+
+    async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, routineName?: string) {
+        const file = e.target.files?.[0];
+        if (!file || !clientId) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('clientId', clientId);
+        if (routineName) formData.append('routineName', routineName);
+
+        try {
+            const res = await fetch('/api/drive/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                alert('Arquivo enviado com sucesso!');
+                getFullClientData();
+                fetchHistorico();
+            } else {
+                const errData = await res.json();
+                alert('Falha ao enviar arquivo: ' + (errData.error || 'Erro desconhecido'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erro no upload.');
+        } finally {
+            setUploading(false);
+        }
+    }
+
     useEffect(() => {
         if (clientId && isOpen) {
             getFullClientData()
+            fetchHistorico()
         }
     }, [clientId, isOpen])
 
@@ -54,41 +92,19 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
         if (!clientId) return
         try {
             setLoading(true)
-            const { data: clientData, error: clientErr } = await supabase
-                .from('clientes')
-                .select('*')
-                .eq('id', clientId)
-                .maybeSingle()
-            if (clientErr) throw clientErr;
+            const { data: cliente } = await supabase.from('clientes').select('*').eq('id', clientId).single()
+            setClient(cliente)
+            setEditedClient(cliente)
 
-            if (!clientData) return
+            const { data: cron } = await supabase.from('obrigacoes_acessorias').select('*').eq('cliente_id', clientId)
+            setCronograma(cron || [])
 
-            const { data: unidadesData } = await supabase.from('unidades_fiscais').select('*').eq('cliente_id', clientId);
-            const { data: cronogramaData } = await supabase.from('obrigacoes_acessorias').select('*').eq('cliente_id', clientId).order('competencia', { ascending: false });
-
-            setClient(clientData);
-            setEditedClient(clientData);
-            setUnidades(unidadesData || []);
-            setCronograma(cronogramaData || []);
-        } catch (err: any) {
-            console.error('Erro na carga profunda:', err)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    async function handleAuditIndividual() {
-        if (!clientId) return
-        setSyncing(true)
-        try {
-            const res = await fetch('/api/sync/audit', { method: 'POST' })
-            if (res.ok) {
-                await getFullClientData()
-            }
+            const { data: units } = await supabase.from('unidades_negocio').select('*').eq('cliente_id', clientId)
+            setUnidades(units || [])
         } catch (err) {
             console.error(err)
         } finally {
-            setSyncing(false)
+            setLoading(false)
         }
     }
 
@@ -98,55 +114,89 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
             const hasConfirmed = confirm(`Deseja enviar a guia de ${routineName} via WhatsApp agora?`)
             if (!hasConfirmed) return
 
-            const routineData = cronograma.find(o => o.tipo === routineName);
-            if (!routineData?.arquivo_url) {
-                alert('Documento não encontrado para esta obrigação.');
-                return;
-            }
-
             setSyncing(true)
             const res = await fetch('/api/whatsapp/send-pdf', {
                 method: 'POST',
                 body: JSON.stringify({
                     clientId,
-                    fileId: routineData.arquivo_url,
-                    fileName: `${routineName}_${client.nome}.pdf`,
+                    fileName: `${routineName}_${client.nome}.pdf`.replace(/\s+/g, '_'),
                     caption: `Olá ${client.nome}, aqui está sua guia de ${routineName} referente ao mês atual.`
                 })
             })
 
             if (res.ok) {
-                alert('Documento enviado com sucesso!')
+                alert('Guia enviada com sucesso via WhatsApp!')
+                getFullClientData()
+                fetchHistorico()
             } else {
-                const err = await res.json()
-                alert(`Erro: ${err.error}`)
+                const errData = await res.json();
+                alert('Falha ao enviar guia: ' + (errData.error || 'Erro desconhecido'))
             }
         } catch (err) {
             console.error(err)
-            alert('Falha na comunicação com o servidor de disparo.')
+            alert('Erro ao enviar via WhatsApp.')
         } finally {
             setSyncing(false)
         }
     }
 
+    async function handleAuditIndividual() {
+        if (!clientId) return
+        setSyncing(true)
+        try {
+            await fetch('https://webhook.brandaocontador.com.br/webhook/audit-client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId })
+            })
+            alert('Sincronização de auditoria disparada!')
+            setTimeout(getFullClientData, 3000)
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setSyncing(false)
+        }
+    }
+
+    const formatCNPJ = (val: string) => {
+        if (!val) return ''
+        const v = val.replace(/\D/g, '')
+        if (v.length === 11) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")
+        return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")
+    }
+
+    const formatPhone = (val: string) => {
+        if (!val) return ''
+        const v = val.replace(/\D/g, '')
+        if (v.startsWith('55')) return '+' + v.replace(/(\d{2})(\d{2})(\d{5})(\d{4})/, "$1 ($2) $3-$4")
+        return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3")
+    }
+
     if (!isOpen) return null
 
-    const expectedRoutines = client ? getRoutinesByClientType(client.regime_tributario, !!client.cnae_principal?.startsWith('01')) : []
+    const expectedRoutines = [
+        { name: 'DAS / SIMPLES', description: 'Imposto Simples Nacional' },
+        { name: 'FGTS', description: 'Fundo de Garantia' },
+        { name: 'INSS', description: 'Previdência Social' },
+        { name: 'ICMS', description: 'Imposto sobre Circulação' },
+        { name: 'IRPF', description: 'Imposto de Renda PF' },
+        { name: 'CCIR / ITR', description: 'Impostos Rurais' }
+    ]
 
     return (
-        <div className="fixed inset-0 z-[100] flex justify-end pointer-events-none">
-            <div className={`absolute inset-0 bg-black/80 backdrop-blur-sm pointer-events-auto transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0'}`} onClick={onClose} />
+        <div className="fixed inset-0 z-50 flex justify-end">
+            <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm" onClick={onClose} />
 
-            <div className={`relative w-full max-w-xl bg-neutral-950 border-l border-neutral-800 shadow-2xl pointer-events-auto transform transition-transform duration-500 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className="relative w-full max-w-xl bg-neutral-950 border-l border-neutral-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
 
-                {/* Header Técnico */}
-                <div className="p-5 border-b border-neutral-800 bg-neutral-900 flex items-center justify-between">
+                {/* Header High-Density */}
+                <div className="flex items-center justify-between p-4 bg-neutral-900/50 border-b border-neutral-900">
                     <div className="flex items-center gap-3">
-                        <button onClick={onClose} className="p-1 hover:bg-neutral-800 rounded transition-colors text-neutral-500">
-                            <X className="w-4 h-4" />
-                        </button>
+                        <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                            <Building2 className="w-5 h-5 text-emerald-500" />
+                        </div>
                         <div>
-                            <h2 className="text-sm font-black italic uppercase text-neutral-100 tracking-tighter">Módulo de Cliente</h2>
+                            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-tighter">Ficha do Cliente</h2>
                             <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">{client?.cnpj_cpf}</p>
                         </div>
                     </div>
@@ -154,8 +204,8 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                         <button onClick={handleAuditIndividual} disabled={syncing} className="p-2 bg-neutral-800 border border-neutral-700 text-emerald-500 hover:bg-neutral-700 rounded transition-all">
                             {syncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
                         </button>
-                        <button onClick={() => setIsEditing(!isEditing)} className="px-3 py-1.5 bg-neutral-800 border border-neutral-700 text-[9px] font-black uppercase text-neutral-300 rounded hover:border-emerald-500 transition-all">
-                            {isEditing ? 'Cancelar' : 'Editar'}
+                        <button onClick={onClose} className="p-2 bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white rounded">
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
@@ -188,6 +238,7 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                     { id: 'unidades', label: 'Propriedades', icon: Landmark },
                                     { id: 'rh', label: 'E-Social/Folha', icon: Users },
                                     { id: 'vencimentos', label: 'Validades', icon: Clock },
+                                    { id: 'historico', label: 'Histórico/Auditoria', icon: ShieldAlert },
                                     { id: 'dados', label: 'Cadastro', icon: Mail }
                                 ].map(tab => (
                                     <button
@@ -206,42 +257,81 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                             <div className="p-6 space-y-8">
                                 {activeTab === 'fiscal' && (
                                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Obrigações Exigíveis ({new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(new Date())})</h3>
-                                            <span className="text-[9px] font-bold text-neutral-700 uppercase">Brandão Intelligence {new Date().getFullYear()}</span>
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
+                                            <h3>Obrigações Exigíveis ({new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(new Date())})</h3>
                                         </div>
                                         <div className="grid gap-2">
                                             {expectedRoutines.map((rout, i) => {
                                                 const history = cronograma.find(o => o.tipo === rout.name);
                                                 const isConcluido = history?.status === 'concluido';
                                                 return (
-                                                    <div key={i} className={`flex items-center justify-between p-3 bg-neutral-900/40 border ${isConcluido ? 'border-emerald-500/20' : 'border-neutral-800'} rounded group`}>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`p-2 rounded ${isConcluido ? 'bg-emerald-500/10 text-emerald-500' : 'bg-neutral-800 text-neutral-600'}`}>
-                                                                {isConcluido ? <FileCheck className="w-3.5 h-3.5" /> : <Calculator className="w-3.5 h-3.5" />}
+                                                    <div key={i} className={`p-3 bg-neutral-900/40 border ${isConcluido ? 'border-emerald-500/20' : 'border-neutral-800'} rounded group space-y-3`}>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`p-2 rounded ${isConcluido ? 'bg-emerald-500/10 text-emerald-500' : 'bg-neutral-800 text-neutral-600'}`}>
+                                                                    {isConcluido ? <FileCheck className="w-3.5 h-3.5" /> : <Calculator className="w-3.5 h-3.5" />}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-[10px] font-black text-neutral-200 uppercase">{rout.name}</p>
+                                                                    <p className="text-[8px] text-neutral-600 uppercase italic">{rout.description}</p>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <p className="text-[10px] font-black text-neutral-200 uppercase">{rout.name}</p>
-                                                                <p className="text-[8px] text-neutral-600 uppercase italic">{rout.description}</p>
+                                                            <div className="flex items-center gap-2">
+                                                                {isConcluido && (
+                                                                    <button
+                                                                        onClick={() => handleSendWhatsApp(rout.name)}
+                                                                        className="p-2 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 hover:bg-emerald-500 hover:text-neutral-950 transition-all"
+                                                                        title="Enviar via WhatsApp"
+                                                                    >
+                                                                        <MessageSquare className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                )}
+                                                                <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950' : 'bg-neutral-800 text-neutral-500'}`}>
+                                                                    {isConcluido ? 'AUDITADO OK' : 'PENDENTE'}
+                                                                </span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {isConcluido && (
-                                                                <button
-                                                                    onClick={() => handleSendWhatsApp(rout.name)}
-                                                                    className="p-2 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 hover:bg-emerald-500 hover:text-neutral-950 transition-all"
-                                                                    title="Enviar via WhatsApp"
-                                                                >
-                                                                    <MessageSquare className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            )}
-                                                            <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950' : 'bg-neutral-800 text-neutral-500'}`}>
-                                                                {isConcluido ? 'AUDITADO OK' : 'PENDENTE'}
-                                                            </span>
-                                                        </div>
+                                                        {!isConcluido && (
+                                                            <div className="flex pt-2 border-t border-neutral-800/50">
+                                                                <label className="flex-1 cursor-pointer">
+                                                                    <input type="file" className="hidden" onChange={e => handleFileUpload(e, rout.name)} disabled={uploading} />
+                                                                    <div className="flex items-center justify-center gap-2 py-1.5 bg-neutral-800 text-[9px] font-bold text-neutral-400 hover:text-emerald-500 transition-all">
+                                                                        <Upload className="w-3 h-3" />
+                                                                        {uploading ? 'SUBINDO...' : 'SUBIR GUIA MANUAL'}
+                                                                    </div>
+                                                                </label>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'historico' && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
+                                            <h3>Auditoria de Acessos e Ações</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            {historico.length === 0 ? (
+                                                <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-20">
+                                                    <p className="text-[10px] font-bold uppercase">Nenhum registro de auditoria.</p>
+                                                </div>
+                                            ) : historico.map(log => (
+                                                <div key={log.id} className="p-3 bg-neutral-900/40 border border-neutral-800 rounded">
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">{log.acao}</span>
+                                                        <span className="text-[8px] text-neutral-600 font-mono">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
+                                                    </div>
+                                                    <p className="text-[10px] text-neutral-300 mb-2">{log.detalhes}</p>
+                                                    <div className="flex gap-4 text-[7px] text-neutral-700 font-bold uppercase border-t border-neutral-900 pt-2">
+                                                        <span className="truncate flex items-center gap-1 max-w-[150px]"><Monitor className="w-2.5 h-2.5" /> {log.user_agent?.substring(0, 30)}...</span>
+                                                        <span className="flex items-center gap-1"><Server className="w-2.5 h-2.5" /> IP: {log.ip_address}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -250,7 +340,6 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
                                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 text-[11px]">
                                         <div className="flex justify-between items-center text-[10px]">
                                             <h3 className="font-black uppercase text-neutral-500 tracking-widest">Ativos Mobiliários / Fazendas</h3>
-                                            <button onClick={() => setIsUnitModalOpen(true)} className="font-black text-emerald-500 border border-emerald-500/20 px-2 py-1 hover:bg-emerald-500/5 transition-all">+ CADASTRAR</button>
                                         </div>
                                         <div className="grid gap-3">
                                             {unidades.length === 0 ? (
@@ -272,83 +361,26 @@ export default function ClientDetailSidebar({ clientId, isOpen, onClose, onUpdat
 
                                 {activeTab === 'dados' && (
                                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Detalhamento Cadastral</h3>
-                                            <button onClick={() => setIsEditing(!isEditing)} className="text-[10px] font-bold text-emerald-500">{isEditing ? 'Visualizar' : 'Editar'}</button>
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
+                                            <h3>Detalhamento Cadastral</h3>
                                         </div>
-
                                         <div className="grid gap-3">
-                                            {isEditing ? (
-                                                <div className="space-y-4">
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Razão Social</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.razao_social || ''} onChange={e => setEditedClient({ ...editedClient, razao_social: e.target.value })} />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Apelido / Fantasia</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.nome || ''} onChange={e => setEditedClient({ ...editedClient, nome: e.target.value })} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">WhatsApp</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.telefone_whatsapp || ''} onChange={e => setEditedClient({ ...editedClient, telefone_whatsapp: e.target.value })} />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">E-mail</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.email || ''} onChange={e => setEditedClient({ ...editedClient, email: e.target.value })} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">Inscrição Estadual</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.inscricao_estadual || ''} onChange={e => setEditedClient({ ...editedClient, inscricao_estadual: e.target.value })} />
-                                                        </div>
-                                                        <div className="space-y-1">
-                                                            <label className="text-[9px] font-bold text-neutral-500 uppercase">CEP</label>
-                                                            <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] text-neutral-200 outline-none focus:border-emerald-500"
-                                                                value={editedClient?.cep || ''} onChange={e => setEditedClient({ ...editedClient, cep: e.target.value })} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="pt-2">
-                                                        <button onClick={async () => {
-                                                            // Limpar campos que podem não existir no banco
-                                                            const { inscricao_municipal, ...cleanUpdate } = editedClient;
-
-                                                            const { error } = await supabase.from('clientes').update(cleanUpdate).eq('id', clientId);
-                                                            if (!error) {
-                                                                setIsEditing(false);
-                                                                getFullClientData();
-                                                            } else {
-                                                                alert('Erro ao salvar: ' + error.message);
-                                                            }
-                                                        }} className="w-full py-2 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase">Confirmar Alterações</button>
+                                            {[
+                                                { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
+                                                { label: 'Identificação Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
+                                                { label: 'E-mail Corporativo', value: client?.email, icon: Mail },
+                                                { label: 'Telefone/WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
+                                                { label: 'Regime Tributário', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
+                                                { label: 'CNAE Principal', value: client?.cnae_principal, icon: Briefcase }
+                                            ].map((info, idx) => (
+                                                <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-3 border border-neutral-900 rounded-lg group">
+                                                    <info.icon className="w-3.5 h-3.5 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
+                                                    <div className="flex-1 overflow-hidden">
+                                                        <p className="text-[8px] font-black text-neutral-700 uppercase">{info.label}</p>
+                                                        <p className="text-[11px] font-bold text-neutral-400 uppercase truncate">{info.value || 'NÃO CADASTRADO'}</p>
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                [
-                                                    { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
-                                                    { label: 'Identificação Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
-                                                    { label: 'E-mail Corporativo', value: client?.email, icon: Mail },
-                                                    { label: 'Telefone/WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
-                                                    { label: 'Regime Tributário', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
-                                                    { label: 'CNAE Principal', value: client?.cnae_principal, icon: Briefcase }
-                                                ].map((info, idx) => (
-                                                    <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-3 border border-neutral-900 rounded-lg group">
-                                                        <info.icon className="w-3.5 h-3.5 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
-                                                        <div className="flex-1 overflow-hidden">
-                                                            <p className="text-[8px] font-black text-neutral-700 uppercase">{info.label}</p>
-                                                            <p className="text-[11px] font-bold text-neutral-400 uppercase truncate">{info.value || 'NÃO CADASTRADO'}</p>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            )}
+                                            ))}
                                         </div>
                                     </div>
                                 )}

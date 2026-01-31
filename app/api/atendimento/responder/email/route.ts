@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { sendProfessionalEmail } from '@/lib/utils/email-service'
 import { createClient } from '@/lib/supabase/server'
+import { logAudit } from '@/lib/utils/audit'
 
 export async function POST(request: Request) {
     try {
@@ -33,6 +34,20 @@ export async function POST(request: Request) {
                 status: 'em_atendimento',
                 observacoes_internas: `E-mail enviado via CRM para ${to}: ${message}`
             }).eq('id', ticketId)
+
+            // Registrar Auditoria
+            const { data: atendimentoData } = await supabase
+                .from('atendimentos')
+                .select('cliente_id')
+                .eq('id', ticketId)
+                .single();
+
+            await logAudit({
+                cliente_id: atendimentoData?.cliente_id,
+                acao: 'ENVIO_EMAIL',
+                detalhes: `E-mail enviado para ${to}: ${subject}`,
+                request
+            });
         }
 
         return NextResponse.json({ success: true, detail: 'E-mail enviado com sucesso' })
