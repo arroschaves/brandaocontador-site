@@ -7,7 +7,7 @@ import {
     Mail, Phone, MapPin, Clock, ArrowLeft, Loader2, Calendar,
     FileCheck, ShieldAlert, AlertTriangle, Edit, Trash2, ExternalLink,
     Building2, Landmark, CheckCircle2, XCircle, Plus, Save, Users,
-    FileText, Briefcase, Download, History
+    FileText, Briefcase, Download, History, FolderOpen
 } from 'lucide-react'
 import Link from 'next/link'
 
