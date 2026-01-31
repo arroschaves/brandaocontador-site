@@ -57,7 +57,8 @@ export async function POST(request: Request) {
             }
 
             // 3. Responder ao Cliente via Evolution API
-            const whatsappRes = await sendWhatsAppMessage(senderNumber, aiAnalysis.resposta_cliente)
+            // Usamos o remoteJid original para garantir a entrega sem erros de formatação
+            const whatsappRes = await sendWhatsAppMessage(remoteJid, aiAnalysis.resposta_cliente)
             console.log(`[Webhook] Resposta enviada. Resultado:`, whatsappRes)
 
             return NextResponse.json({ success: true, analysis: aiAnalysis.categoria, whatsappDetail: whatsappRes })

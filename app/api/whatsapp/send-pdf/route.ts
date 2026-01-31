@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         // 6. Registrar Log de Envio no Supabase
         await supabase.from('atendimentos').insert({
             cliente_id: clientId,
-            numero_whatsapp: cliente.telefone_whatsapp,
+            telefone_whatsapp: cliente.telefone_whatsapp,
             mensagem: `[Documento Enviado: ${fileName}]`,
             status: 'concluido',
             created_at: new Date().toISOString()

@@ -14,40 +14,49 @@ export async function sendWhatsAppMessage(number: string, text: string) {
         return null;
     }
 
-    // Limpar o número: manter apenas dígitos. 
-    // Garante que tenha o prefixo 55 se parecer um número brasileiro sem ele.
-    let cleanNumber = number.replace(/\D/g, '');
-    if (cleanNumber.length === 11 && !cleanNumber.startsWith('55')) {
-        cleanNumber = '55' + cleanNumber;
+    // Sanitizar URL (remover barra final se houver)
+    const sanitizedUrl = API_URL.replace(/\/$/, '');
+
+    // Se já for um JID (@s.whatsapp.net ou @g.us), mantemos como está
+    // Caso contrário, limpamos o número e formatamos
+    let target = number;
+    if (!number.includes('@')) {
+        let cleanNumber = number.replace(/\D/g, '');
+        // Adicionar 55 se parecer número brasileiro sem DDI
+        if ((cleanNumber.length === 10 || cleanNumber.length === 11) && !cleanNumber.startsWith('55')) {
+            cleanNumber = '55' + cleanNumber;
+        }
+        target = cleanNumber;
     }
 
-    console.log(`[Evolution API] Disparando para: ${cleanNumber} | Instância: ${INSTANCE}`);
+    console.log(`[Evolution API] Tentando enviar para ${target} (original: ${number})`);
 
     try {
-        const response = await fetch(`${API_URL}/message/sendText/${INSTANCE}`, {
+        const response = await fetch(`${sanitizedUrl}/message/sendText/${INSTANCE}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'apikey': API_KEY
             },
             body: JSON.stringify({
-                number: cleanNumber,
+                number: target,
                 text: text,
-                delay: 1000,
+                delay: 1200,
                 linkPreview: false
             })
         });
 
         const result = await response.json();
+
         if (!response.ok) {
-            console.error(`[Evolution API] Erro na resposta (${response.status}):`, result);
+            console.error(`[Evolution API] Erro HTTP ${response.status}:`, result);
         } else {
-            console.log(`[Evolution API] Sucesso:`, result);
+            console.log(`[Evolution API] Mensagem enviada com sucesso para ${target}`);
         }
         return result;
     } catch (error) {
-        console.error('[Evolution API] Erro de rede ou parse:', error);
-        return null;
+        console.error('[Evolution API] Falha crítica na requisição:', error);
+        return { error: true, message: 'Falha na conexão com a Evolution API' };
     }
 }
 
