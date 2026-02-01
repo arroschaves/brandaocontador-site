@@ -56,7 +56,11 @@ export async function GET(request: Request) {
                     <h2 style="font-size: 16px; color: #111; border-bottom: 2px solid #f3f4f6; padding-bottom: 10px; margin-top: 30px;">📂 Movimentação de Arquivos</h2>
                     ${arquivos && arquivos.length > 0 ? `
                         <ul style="padding-left: 20px; color: #444;">
-                            ${arquivos.map(arq => `<li><b>${arq.tipo}</b> - ${arq.clientes?.nome || 'Desconhecido'}</li>`).join('')}
+                            ${arquivos.map(arq => {
+            const cliente = Array.isArray(arq.clientes) ? arq.clientes[0] : arq.clientes;
+            const nome = (cliente as any)?.nome || 'Desconhecido';
+            return `<li><b>${arq.tipo}</b> - ${nome}</li>`;
+        }).join('')}
                         </ul>
                     ` : '<p style="color: #999; font-style: italic;">Nenhuma guia processada hoje.</p>'}
                 </div>
