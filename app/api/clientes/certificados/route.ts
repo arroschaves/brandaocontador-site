@@ -35,6 +35,7 @@ export async function POST(request: Request) {
         const password = formData.get('password') as string
         const clientId = formData.get('clientId') as string
         const vencimento = formData.get('vencimento') as string
+        const tipo = formData.get('tipo') as string
 
         if (!file || !password || !clientId) {
             return NextResponse.json({ error: 'Arquivo, Senha e Cliente ID são obrigatórios' }, { status: 400 })
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
         // 3. Salvar no Banco
         const { data, error } = await supabase.from('cliente_certificados').insert({
             cliente_id: clientId,
+            tipo: tipo || 'A1',
             nome_arquivo: file.name,
             data_vencimento: vencimento || null,
             arquivo_dados: encryptedFile.data,

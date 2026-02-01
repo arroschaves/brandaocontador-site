@@ -27,6 +27,8 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     const [historico, setHistorico] = useState<any[]>([])
     const [activeTab, setActiveTab] = useState<'fiscal' | 'unidades' | 'rh' | 'vencimentos' | 'dados' | 'historico'>('fiscal')
     const [uploading, setUploading] = useState(false)
+    const [certificados, setCertificados] = useState<any[]>([])
+    const [loadingCerts, setLoadingCerts] = useState(false)
 
     const [isUnitModalOpen, setIsUnitModalOpen] = useState(false)
     const [unitFormData, setUnitFormData] = useState({
@@ -83,10 +85,25 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
         }
     }
 
+    async function fetchCertificados() {
+        if (!clientId) return
+        try {
+            setLoadingCerts(true)
+            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
+            const data = await res.json()
+            if (res.ok) setCertificados(data)
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoadingCerts(false)
+        }
+    }
+
     useEffect(() => {
         if (clientId && isOpen) {
             getFullClientData()
             fetchHistorico()
+            fetchCertificados()
         }
     }, [clientId, isOpen])
 
@@ -339,25 +356,48 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                     </div>
                                 )}
 
-                                {activeTab === 'unidades' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 text-[11px]">
-                                        <div className="flex justify-between items-center text-[10px]">
-                                            <h3 className="font-black uppercase text-neutral-500 tracking-widest">Ativos Mobiliários / Fazendas</h3>
+                                {activeTab === 'vencimentos' && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
+                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
+                                            <h3>Validade de Certificados Digitais</h3>
                                         </div>
                                         <div className="grid gap-3">
-                                            {unidades.length === 0 ? (
-                                                <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-30">
-                                                    <p className="font-bold uppercase">Sem registros detectados.</p>
+                                            {loadingCerts ? (
+                                                <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-amber-500" /></div>
+                                            ) : certificados.length === 0 ? (
+                                                <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-20 italic text-[10px] uppercase">
+                                                    Nenhum certificado detectado.
                                                 </div>
-                                            ) : unidades.map(u => (
-                                                <div key={u.id} className="p-4 bg-neutral-900/40 border border-neutral-800 rounded flex justify-between items-center">
-                                                    <div>
-                                                        <p className="font-black text-neutral-300 uppercase italic">{u.nome_identificador}</p>
-                                                        <p className="font-mono text-neutral-600 uppercase">IE: {u.inscricao_estadual || 'N/A'}</p>
+                                            ) : certificados.map(cert => {
+                                                const diasRestantes = cert.data_vencimento ? Math.ceil((new Date(cert.data_vencimento).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
+                                                const isExpirado = diasRestantes !== null && diasRestantes <= 0;
+                                                const isAlerta = diasRestantes !== null && diasRestantes <= 30;
+
+                                                return (
+                                                    <div key={cert.id} className={`p-4 bg-neutral-900/40 border ${isExpirado ? 'border-rose-500/30' : isAlerta ? 'border-amber-500/30' : 'border-neutral-800'} rounded-lg flex items-center justify-between`}>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`p-2 rounded ${isExpirado ? 'bg-rose-500/10 text-rose-500' : isAlerta ? 'bg-amber-500/10 text-amber-500 animate-pulse' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                                                                <ShieldAlert className="w-4 h-4" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
+                                                                <div className="flex items-center gap-2 mt-1">
+                                                                    <span className="text-[8px] px-1.5 py-0.5 bg-neutral-900 border border-neutral-800 text-neutral-500 font-bold rounded">{cert.tipo}</span>
+                                                                    <span className={`text-[8px] font-black uppercase ${isExpirado ? 'text-rose-500' : isAlerta ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                                                        {isExpirado ? 'EXPIRADO' : diasRestantes !== null ? `Vence em ${diasRestantes} dias` : 'Data não informada'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setActiveTab('fiscal')} // Atalho para o Mural
+                                                            className="p-2 text-neutral-700 hover:text-white transition-all"
+                                                        >
+                                                            <Monitor className="w-3.5 h-3.5" />
+                                                        </button>
                                                     </div>
-                                                    <span className="p-1 bg-neutral-900 border border-neutral-800 text-neutral-600 uppercase">{u.tipo_unidade}</span>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}

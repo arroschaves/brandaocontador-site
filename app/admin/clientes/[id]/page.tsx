@@ -9,7 +9,7 @@ import {
     Mic, Image as ImageIcon, FileCode, Search,
     ArrowLeft, MoreVertical, Plus, Hash,
     ChevronRight, LayoutDashboard, Settings,
-    FileSearch, Activity, Cpu
+    FileSearch, Activity, Cpu, Trash2, ShieldAlert
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -210,14 +210,16 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             dataVencimento = date.toISOString().split('T')[0]
         }
 
+        const tipo = prompt(`Tipo do Certificado (A1 PJ ou A1 PF)?`, 'A1 PJ')
+
         try {
             const res = await fetch(`/api/clientes/certificados/${certId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password, dataVencimento })
+                body: JSON.stringify({ password, dataVencimento, tipo })
             })
             if (res.ok) {
-                alert('Certificado agora está protegido no Vault!')
+                alert('MAESTRO: Certificado agora está protegido e classificado no Vault!')
                 fetchCertificados()
             } else {
                 const err = await res.json()
@@ -609,13 +611,24 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                             <input type="file" name="file" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
                                         </div>
                                         <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Tipo / Titularidade</label>
+                                            <select name="tipo" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white uppercase font-bold">
+                                                <option value="A1 PJ">A1 PJ (Empresa)</option>
+                                                <option value="A1 PF">A1 PF (Pessoa Física / Fazenda)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
                                             <label className="text-[8px] font-black text-neutral-500 uppercase">Senha</label>
                                             <input type="password" name="password" placeholder="SENHA" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white font-mono" />
                                         </div>
+                                        <div className="flex items-end">
+                                            <button className="w-full bg-amber-500 text-black font-black text-[10px] uppercase p-3 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10">
+                                                PROTEGER NO COFRE
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button className="w-full bg-amber-500 text-black font-black text-[10px] uppercase p-4 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10">
-                                        PROTEGER E SALVAR NO COFRE
-                                    </button>
                                 </form>
                             </div>
 
@@ -627,7 +640,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                 ) : (
                                     <div className="space-y-3">
                                         {certificados.map((cert) => (
-                                            <div key={cert.id} className="p-4 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group">
+                                            <div key={cert.id} className={`p-4 bg-neutral-900/40 border ${cert.senha_dados === 'PENDENTE' ? 'border-amber-500/20' : 'border-neutral-800'} rounded-xl flex items-center justify-between group`}>
                                                 <div className="flex items-center gap-4">
                                                     <div className={`p-2 rounded-lg ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500/10 text-amber-500 animate-pulse' : 'bg-neutral-900 text-amber-500'}`}>
                                                         <FileCode className="w-5 h-5" />
@@ -635,9 +648,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                     <div>
                                                         <div className="flex items-center gap-2">
                                                             <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
-                                                            {cert.senha_dados === 'PENDENTE' && (
-                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded">Drive</span>
-                                                            )}
+                                                            <span className={`text-[7px] ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500' : 'bg-neutral-800'} text-black px-1.5 py-0.5 font-black uppercase rounded`}>
+                                                                {cert.tipo || 'A1'}
+                                                            </span>
                                                         </div>
                                                         <p className="text-[9px] font-mono text-neutral-600">
                                                             {cert.senha_dados === 'PENDENTE' ? 'Aguardando configuração de senha' : `Vence em: ${cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'Não informado'}`}
@@ -648,7 +661,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                     {cert.senha_dados === 'PENDENTE' ? (
                                                         <button
                                                             onClick={() => {
-                                                                const pwd = prompt(`O Maestro localizou este certificado no Drive para Ana Lucia.\nInforme a senha para criptografar agora:`)
+                                                                const pwd = prompt(`O Maestro localizou este certificado no Drive para este cliente.\nInforme a senha para criptografar agora:`)
                                                                 if (pwd) handleUpdateCertPassword(cert.id, pwd)
                                                             }}
                                                             className="px-3 py-1.5 bg-amber-500 text-black text-[8px] font-black uppercase hover:bg-white transition-all"
@@ -665,14 +678,17 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                     )}
                                                     <button
                                                         onClick={async () => {
-                                                            if (confirm('Remover do Vault permanentemente?')) {
-                                                                await fetch(`/api/clientes/certificados/${cert.id}`, { method: 'DELETE' })
-                                                                fetchCertificados()
+                                                            if (confirm('MAESTRO: Remover este certificado do Vault permanentemente?')) {
+                                                                const res = await fetch(`/api/clientes/certificados/${cert.id}`, { method: 'DELETE' })
+                                                                if (res.ok) {
+                                                                    fetchCertificados()
+                                                                    alert('Certificado removido.')
+                                                                }
                                                             }
                                                         }}
                                                         className="p-1.5 text-neutral-800 hover:text-red-500 transition-colors"
                                                     >
-                                                        <AlertTriangle className="w-4 h-4" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </div>

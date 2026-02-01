@@ -112,13 +112,13 @@ export async function POST(request: Request) {
                         for (const pfx of pfxFiles.data.files) {
                             const { data: existing } = await supabase
                                 .from('cliente_certificados')
-                                .select('id')
+                                .select('id, arquivo_dados')
                                 .eq('cliente_id', cliente.id)
                                 .eq('nome_arquivo', pfx.name)
                                 .maybeSingle();
 
                             if (!existing) {
-                                // Se for novo, vamos assumir o vencimento como 1 ano após a criação do arquivo no Drive
+                                // Se não existe, cria como DRIVE_ONLY
                                 let vencimento = null;
                                 if (pfx.createdTime) {
                                     const d = new Date(pfx.createdTime);
