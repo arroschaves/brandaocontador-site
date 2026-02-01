@@ -13,9 +13,10 @@ interface ClientDetailSidebarProps {
     isOpen: boolean
     onClose: () => void
     clientId: string | null
+    onUpdate?: () => void
 }
 
-export default function ClientDetailSidebar({ isOpen, onClose, clientId }: ClientDetailSidebarProps) {
+export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdate }: ClientDetailSidebarProps) {
     const [client, setClient] = useState<any>(null)
     const [cronograma, setCronograma] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -69,6 +70,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId }: Clien
                 alert('Arquivo enviado com sucesso!');
                 getFullClientData();
                 fetchHistorico();
+                if (onUpdate) onUpdate();
             } else {
                 const errData = await res.json();
                 alert('Falha ao enviar arquivo: ' + (errData.error || 'Erro desconhecido'));
@@ -128,6 +130,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId }: Clien
                 alert('Guia enviada com sucesso via WhatsApp!')
                 getFullClientData()
                 fetchHistorico()
+                if (onUpdate) onUpdate()
             } else {
                 const errData = await res.json();
                 alert('Falha ao enviar guia: ' + (errData.error || 'Erro desconhecido'))
