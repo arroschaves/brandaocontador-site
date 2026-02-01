@@ -96,22 +96,16 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ clientId })
             })
-            const text = await res.text()
-            let result;
-            try {
-                result = JSON.parse(text)
-            } catch (e) {
-                throw new Error("Resposta inválida do servidor. Verifique o console da Vercel.")
-            }
 
+            const result = await res.json()
             if (!res.ok) throw new Error(result.error || 'Falha na sincronização')
 
-            alert('Sincronização concluída com sucesso!')
+            alert('MAESTRO: Sincronização concluída com sucesso!')
             await fetchClientData()
             await fetchCertificados()
         } catch (err: any) {
             console.error('Erro ao sincronizar:', err)
-            alert(`Erro: ${err.message}`)
+            alert(`ERRO DE SINCRONIZAÇÃO: ${err.message}`)
         } finally {
             setSyncing(false)
         }
@@ -181,9 +175,13 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         try {
             const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
             const data = await res.json()
-            if (res.ok) setCertificados(data)
+            if (res.ok) {
+                setCertificados(Array.isArray(data) ? data : [])
+            } else {
+                console.error('Erro ao buscar certificados:', data.error)
+            }
         } catch (err) {
-            console.error('Erro ao buscar certificados:', err)
+            console.error('Erro de rede ao buscar certificados:', err)
         } finally {
             setLoadingCerts(false)
         }
@@ -565,17 +563,19 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
                                     try {
                                         const res = await fetch('/api/clientes/certificados', { method: 'POST', body: formData })
+                                        const result = await res.json()
+
                                         if (res.ok) {
-                                            alert('Certificado adicionado com criptografia!')
+                                            alert('MAESTRO: Certificado protegido e salvo com sucesso no cofre!')
                                             form.reset()
                                             fetchCertificados()
                                             fetchClientData()
                                         } else {
-                                            const err = await res.json()
-                                            throw new Error(err.error)
+                                            throw new Error(result.error || 'Erro desconhecido ao salvar certificado.')
                                         }
                                     } catch (err: any) {
-                                        alert(err.message)
+                                        console.error('Erro no Vault:', err)
+                                        alert(`ERRO NO VAULT: ${err.message}`)
                                     }
                                 }}>
                                     <div className="grid grid-cols-2 gap-4">
