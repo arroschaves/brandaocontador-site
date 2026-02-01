@@ -37,7 +37,7 @@ export async function GET(
             request
         })
 
-        // 3. Descriptografar a senha (para exibição rápida no painel)
+        // 4. Descriptografar a senha
         const decryptedPassword = decrypt({
             data: cert.senha_dados,
             iv: cert.senha_iv,
@@ -84,26 +84,30 @@ export async function DELETE(
     }
 }
 
+// PATCH para configurar senha e data de certificados detectados
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { id: certId } = await params
-        const { password } = await request.json()
+        const { password, dataVencimento } = await request.json()
         const supabase = await createClient()
 
         if (!password) return NextResponse.json({ error: 'Senha é obrigatória' }, { status: 400 })
 
+        // 1. Criptografar a senha
         const encryptedPassword = encrypt(password)
 
+        // 2. Atualizar no banco
         const { error } = await supabase
             .from('cliente_certificados')
             .update({
                 senha_dados: encryptedPassword.data,
                 senha_iv: encryptedPassword.iv,
                 senha_tag: encryptedPassword.tag,
-                tipo: 'A1',
+                data_vencimento: dataVencimento || null,
+                tipo: 'A1', // Efetiva como certificado oficial protegido
                 updated_at: new Date().toISOString()
             })
             .eq('id', certId)
@@ -112,6 +116,7 @@ export async function PATCH(
 
         return NextResponse.json({ success: true })
     } catch (error: any) {
+        console.error('[Cert PATCH Error]:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }

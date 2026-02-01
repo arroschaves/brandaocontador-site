@@ -96,11 +96,19 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ clientId })
             })
-            const result = await res.json()
+            const text = await res.text()
+            let result;
+            try {
+                result = JSON.parse(text)
+            } catch (e) {
+                throw new Error("Resposta inválida do servidor. Verifique o console da Vercel.")
+            }
+
             if (!res.ok) throw new Error(result.error || 'Falha na sincronização')
 
             alert('Sincronização concluída com sucesso!')
             await fetchClientData()
+            await fetchCertificados()
         } catch (err: any) {
             console.error('Erro ao sincronizar:', err)
             alert(`Erro: ${err.message}`)
@@ -193,11 +201,22 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     }
 
     async function handleUpdateCertPassword(certId: string, password: string) {
+        // Tenta pegar a data de emissão do usuário para calcular o vencimento
+        const emission = prompt(`Informe a DATA DE EMISSÃO do certificado (DD/MM/AAAA):`)
+        let dataVencimento = null
+
+        if (emission) {
+            const [d, m, y] = emission.split('/')
+            const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d))
+            date.setFullYear(date.getFullYear() + 1)
+            dataVencimento = date.toISOString().split('T')[0]
+        }
+
         try {
             const res = await fetch(`/api/clientes/certificados/${certId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
+                body: JSON.stringify({ password, dataVencimento })
             })
             if (res.ok) {
                 alert('Certificado agora está protegido no Vault!')
@@ -560,13 +579,43 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                     }
                                 }}>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input type="file" name="file" required className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
-                                        <input type="password" name="password" placeholder="SENHA DO CERTIFICADO" required className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white font-mono" />
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Data de Emissão (A1 = +1 Ano)</label>
+                                            <input
+                                                type="date"
+                                                name="emissao"
+                                                required
+                                                className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white"
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    if (val) {
+                                                        const d = new Date(val);
+                                                        d.setFullYear(d.getFullYear() + 1);
+                                                        const venc = d.toISOString().split('T')[0];
+                                                        const vencInput = (e.target.form as HTMLFormElement).elements.namedItem('vencimento') as HTMLInputElement;
+                                                        if (vencInput) vencInput.value = venc;
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Vencimento Calculado</label>
+                                            <input type="date" name="vencimento" readOnly className="w-full bg-neutral-900/50 border border-neutral-800 p-3 rounded text-[10px] text-neutral-500" />
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input type="date" name="vencimento" className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
-                                        <button className="bg-amber-500 text-black font-black text-[10px] uppercase p-3 hover:bg-amber-400 transition-all">SALVAR NO COFRE</button>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Arquivo do Certificado</label>
+                                            <input type="file" name="file" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Senha</label>
+                                            <input type="password" name="password" placeholder="SENHA" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white font-mono" />
+                                        </div>
                                     </div>
+                                    <button className="w-full bg-amber-500 text-black font-black text-[10px] uppercase p-4 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10">
+                                        PROTEGER E SALVAR NO COFRE
+                                    </button>
                                 </form>
                             </div>
 
