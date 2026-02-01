@@ -27,6 +27,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [syncing, setSyncing] = useState(false)
     const [uploading, setUploading] = useState(false)
     const [savingWiki, setSavingWiki] = useState(false)
+    const [certificados, setCertificados] = useState<any[]>([])
+    const [showVault, setShowVault] = useState(false)
+    const [loadingCerts, setLoadingCerts] = useState(false)
     const [competenciaReferencia, setCompetenciaReferencia] = useState('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -35,6 +38,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     useEffect(() => {
         if (clientId) {
             fetchClientData()
+            fetchCertificados()
         }
     }, [clientId])
 
@@ -161,6 +165,30 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             alert(`Erro: ${err.message}`)
         } finally {
             setSavingWiki(false)
+        }
+    }
+
+    async function fetchCertificados() {
+        setLoadingCerts(true)
+        try {
+            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
+            const data = await res.json()
+            if (res.ok) setCertificados(data)
+        } catch (err) {
+            console.error('Erro ao buscar certificados:', err)
+        } finally {
+            setLoadingCerts(false)
+        }
+    }
+
+    async function handleViewPassword(certId: string) {
+        try {
+            const res = await fetch(`/api/clientes/certificados/${certId}`)
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error)
+            alert(`Senha do Certificado: ${data.password}\n(Este acesso foi registrado na auditoria)`)
+        } catch (err: any) {
+            alert(`Erro: ${err.message}`)
         }
     }
 
@@ -427,10 +455,14 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                             <Lock className="w-3.5 h-3.5 text-amber-500" /> Vault Documental
                         </h3>
                         <div className="space-y-4">
-                            <div className="bg-black p-4 rounded-xl border border-neutral-800 flex justify-between items-center group cursor-pointer hover:border-emerald-500 transition-all">
+                            <div
+                                onClick={() => setShowVault(true)}
+                                className="bg-black p-4 rounded-xl border border-neutral-800 flex justify-between items-center group cursor-pointer hover:border-emerald-500 transition-all"
+                            >
                                 <div className="flex items-center gap-3">
                                     <FileCode className="w-4 h-4 text-emerald-500" />
                                     <span className="text-[10px] font-black uppercase text-neutral-400">CERT. A1</span>
+                                    {certificados.length > 0 && <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />}
                                 </div>
                                 <ChevronRight className="w-3 h-3 text-neutral-800" />
                             </div>
@@ -469,6 +501,108 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     </div>
                 </div>
             </div>
+            {/* Modal Vault - Certificados */}
+            {showVault && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+                        <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-amber-500" />
+                                <h2 className="text-white font-black uppercase italic text-sm">Cofre de Certificados - Vault</h2>
+                            </div>
+                            <button onClick={() => setShowVault(false)} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-500 hover:text-white transition-colors">
+                                <ArrowLeft className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="p-8 space-y-8 overflow-y-auto">
+                            {/* Upload Section */}
+                            <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
+                                <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Adicionar Novo Certificado</h3>
+                                <form className="space-y-4" onSubmit={async (e) => {
+                                    e.preventDefault()
+                                    const form = e.target as HTMLFormElement
+                                    const formData = new FormData(form)
+                                    formData.append('clientId', clientId)
+
+                                    try {
+                                        const res = await fetch('/api/clientes/certificados', { method: 'POST', body: formData })
+                                        if (res.ok) {
+                                            alert('Certificado adicionado com criptografia!')
+                                            form.reset()
+                                            fetchCertificados()
+                                            fetchClientData()
+                                        } else {
+                                            const err = await res.json()
+                                            throw new Error(err.error)
+                                        }
+                                    } catch (err: any) {
+                                        alert(err.message)
+                                    }
+                                }}>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input type="file" name="file" required className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
+                                        <input type="password" name="password" placeholder="SENHA DO CERTIFICADO" required className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white font-mono" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input type="date" name="vencimento" className="bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
+                                        <button className="bg-amber-500 text-black font-black text-[10px] uppercase p-3 hover:bg-amber-400 transition-all">SALVAR NO COFRE</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {/* List Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Certificados Armazenados</h3>
+                                {certificados.length === 0 ? (
+                                    <div className="py-10 text-center opacity-20 italic text-[10px] uppercase">Nenhum certificado no cofre.</div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {certificados.map((cert) => (
+                                            <div key={cert.id} className="p-4 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="p-2 bg-neutral-900 rounded-lg text-amber-500">
+                                                        <FileCode className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
+                                                        <p className="text-[9px] font-mono text-neutral-600">Vence em: {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'Não informado'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleViewPassword(cert.id)}
+                                                        className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-[8px] font-black uppercase text-neutral-400 hover:text-white hover:border-emerald-500 transition-all flex items-center gap-2"
+                                                    >
+                                                        <Shield className="w-3 h-3" /> Ver Senha
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Remover do Vault permanentemente?')) {
+                                                                await fetch(`/api/clientes/certificados/${cert.id}`, { method: 'DELETE' })
+                                                                fetchCertificados()
+                                                            }
+                                                        }}
+                                                        className="p-1.5 text-neutral-800 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <AlertTriangle className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-amber-500/5 border-t border-neutral-800 text-center">
+                            <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest leading-relaxed">
+                                Segurança AES-256 GCM Ativa. Todos os acessos são monitorados pelo Maestro.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
