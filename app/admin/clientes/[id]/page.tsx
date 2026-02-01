@@ -21,8 +21,11 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [activeTab, setActiveTab] = useState('timeline')
     const [history, setHistory] = useState<any[]>([])
     const [wiki, setWiki] = useState('')
+    const [obrigacoes, setObrigacoes] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [syncing, setSyncing] = useState(false)
+    const [competenciaReferencia, setCompetenciaReferencia] = useState('')
 
     const supabase = createClient()
 
@@ -41,6 +44,12 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             if (cErr) throw new Error('Cliente não encontrado.')
             setClient(c)
 
+            // Determinar competência (Mês anterior ao atual se for início do mês)
+            const agora = new Date()
+            const refDate = new Date(agora.getFullYear(), agora.getMonth() - (agora.getDate() < 15 ? 1 : 0), 1)
+            const refStr = refDate.toISOString().split('T')[0]
+            setCompetenciaReferencia(refStr)
+
             // 2. Histórico / Auditoria (Safe Join)
             const { data: h } = await supabase
                 .from('auditoria_crm')
@@ -55,11 +64,41 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             const { data: w } = await supabase.from('cliente_wiki').select('conteudo').eq('cliente_id', clientId).single()
             setWiki(w?.conteudo || '')
 
+            // 4. Obrigações do Mês Atual (competência de referência)
+            const { data: obr } = await supabase
+                .from('obrigacoes_acessorias')
+                .select('*')
+                .eq('cliente_id', clientId)
+                .eq('competencia', refStr)
+
+            setObrigacoes(obr || [])
+
         } catch (err: any) {
             console.error('[Hub Maestro Error]:', err)
             setError(err.message)
         } finally {
             setLoading(false)
+        }
+    }
+
+    async function handleSync() {
+        setSyncing(true)
+        try {
+            const res = await fetch('/api/sync/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId })
+            })
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error || 'Falha na sincronização')
+
+            alert('Sincronização concluída com sucesso!')
+            await fetchClientData()
+        } catch (err: any) {
+            console.error('Erro ao sincronizar:', err)
+            alert(`Erro: ${err.message}`)
+        } finally {
+            setSyncing(false)
         }
     }
 
@@ -116,7 +155,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                         </div>
                         <div className="flex flex-wrap gap-4 text-[10px] font-mono text-neutral-500 uppercase">
                             <span className="flex items-center gap-1.5"><Hash className="w-3 h-3" /> {client?.cnpj_cpf}</span>
-                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> Competência: Jan/2026</span>
+                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> Competência: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase()}</span>
                             <span className="flex items-center gap-1.5 text-blue-400"><LayoutDashboard className="w-3 h-3" /> {client?.regime_tributario?.replace('_', ' ')}</span>
                         </div>
                     </div>
@@ -234,33 +273,57 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         </div>
                                     </div>
                                     {client?.drive_folder_id && (
-                                        <button
-                                            onClick={() => window.open(`https://drive.google.com/drive/folders/${client.drive_folder_id}`, '_blank')}
-                                            className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-black uppercase text-white rounded transition-all italic border border-neutral-700"
-                                        >
-                                            <ExternalLink className="w-3 h-3" /> Abrir no Drive
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleSync}
+                                                disabled={syncing}
+                                                className={`flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[9px] font-black uppercase text-emerald-500 rounded transition-all italic border border-emerald-500/20 ${syncing ? 'animate-pulse opacity-50' : ''}`}
+                                            >
+                                                <Activity className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
+                                                {syncing ? 'Sincronizando...' : 'Sincronizar Drive'}
+                                            </button>
+                                            <button
+                                                onClick={() => window.open(`https://drive.google.com/drive/folders/${client.drive_folder_id}`, '_blank')}
+                                                className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-black uppercase text-white rounded transition-all italic border border-neutral-700"
+                                            >
+                                                <ExternalLink className="w-3 h-3" /> Abrir no Drive
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {['DAS', 'FGTS', 'INSS', 'DCTF', 'Folha'].map((tipo) => (
-                                        <div key={tipo} className="p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg text-neutral-600 group-hover:text-emerald-500 transition-colors">
-                                                    <FileText className="w-5 h-5" />
+                                    {['DAS', 'FGTS', 'INSS', 'DCTF', 'Folha'].map((tipo) => {
+                                        const ob = obrigacoes.find(o => o.tipo.toUpperCase().includes(tipo.toUpperCase()));
+                                        const status = ob?.status || 'pendente';
+
+                                        return (
+                                            <div key={tipo} className="p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg ${status === 'concluido' ? 'text-emerald-500' : 'text-neutral-600'} group-hover:text-emerald-500 transition-colors`}>
+                                                        <FileText className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo}</p>
+                                                        <p className="text-[8px] font-mono text-neutral-600 uppercase">Ref: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' })}</p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo}</p>
-                                                    <p className="text-[8px] font-mono text-neutral-600 uppercase">Ref: 01/2026</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded border uppercase italic ${status === 'concluido' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                        status === 'atrasado' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
+                                                            'bg-neutral-900 border-neutral-800 text-neutral-600'
+                                                        }`}>
+                                                        {status === 'concluido' ? 'No Drive' : status === 'atrasado' ? 'Atrasado' : 'Pendente'}
+                                                    </span>
+                                                    {status === 'concluido' ? (
+                                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                                    ) : (
+                                                        <div className="w-4 h-4 rounded-full border border-neutral-800" />
+                                                    )}
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[8px] font-black px-2 py-0.5 bg-neutral-900 border border-neutral-800 text-neutral-600 uppercase rounded italic">Pendente</span>
-                                                <CheckCircle2 className="w-4 h-4 text-neutral-800" />
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
