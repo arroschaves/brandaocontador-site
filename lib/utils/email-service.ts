@@ -49,6 +49,7 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
     });
 
     try {
+        console.log(`[Email Service] Tentando enviar e-mail via ${from} para ${to}...`);
         const info = await transporter.sendMail({
             from: `"${from} - Brandão Contabilidade" <${account.user}>`,
             to,
@@ -58,13 +59,14 @@ export async function sendProfessionalEmail({ from, to, subject, text, html, att
             attachments
         });
 
-        console.log(`E-mail enviado via ${from}: ${info.messageId}`);
+        console.log(`[Email Service] SUCESSO via ${from}: ${info.messageId}`);
+        console.log(`[Email Service] Resposta:`, info.response);
         return { success: true, messageId: info.messageId };
     } catch (error: any) {
-        console.error(`[Email Service] sendProfessionalEmail: Falha crítica na requisição para ${to}:`, error);
+        console.error(`[Email Service] FALHA CRÍTICA via ${from} para ${to}:`, error);
         return {
             success: false,
-            error: `Falha na conexão: ${error.message.includes('EBUSY') ? 'Servidor SMTP instável (EBUSY)' : error.message}`
+            error: `Falha na conexão SMTP: ${error.message}`
         };
     }
 }

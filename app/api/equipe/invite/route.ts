@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://brandaocontador.com.br'}/onboarding?email=${email}`
 
         await sendProfessionalEmail({
-            from: 'RH',
+            from: 'COMERCIAL',
             to: email,
             subject: '🚀 Convite: Acesso ao CRM Maestro Brandão',
             html: `
