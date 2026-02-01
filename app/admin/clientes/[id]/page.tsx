@@ -26,6 +26,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [error, setError] = useState<string | null>(null)
     const [syncing, setSyncing] = useState(false)
     const [uploading, setUploading] = useState(false)
+    const [savingWiki, setSavingWiki] = useState(false)
     const [competenciaReferencia, setCompetenciaReferencia] = useState('')
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -139,6 +140,27 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setUploading(false)
             if (fileInputRef.current) fileInputRef.current.value = ''
+        }
+    }
+
+    async function handleSaveWiki() {
+        setSavingWiki(true)
+        try {
+            const res = await fetch('/api/clientes/wiki', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId, conteudo: wiki })
+            })
+            if (!res.ok) {
+                const result = await res.json()
+                throw new Error(result.error || 'Falha ao salvar dossiê')
+            }
+            alert('Dossiê atualizado com sucesso!')
+        } catch (err: any) {
+            console.error('Erro ao salvar wiki:', err)
+            alert(`Erro: ${err.message}`)
+        } finally {
+            setSavingWiki(false)
         }
     }
 
@@ -265,7 +287,13 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-white font-black text-xs uppercase tracking-[0.2em]">Manual de Operação do Cliente</h3>
-                                    <button className="bg-white text-black text-[9px] font-black px-4 py-2 hover:bg-emerald-500 transition-all">SALVAR DOSSIÊ</button>
+                                    <button
+                                        onClick={handleSaveWiki}
+                                        disabled={savingWiki}
+                                        className={`bg-white text-black text-[9px] font-black px-4 py-2 hover:bg-emerald-500 transition-all ${savingWiki ? 'opacity-50 animate-pulse' : ''}`}
+                                    >
+                                        {savingWiki ? 'SALVANDO...' : 'SALVAR DOSSIÊ'}
+                                    </button>
                                 </div>
                                 <textarea
                                     className="w-full h-[400px] bg-black/50 border border-neutral-800 p-8 text-[12px] text-neutral-400 font-mono leading-relaxed outline-none focus:border-emerald-500/30 rounded-2xl"

@@ -1,5 +1,7 @@
 ---
-trigger: always_on
+trigger: glob
+description: Este é seu Agente que auxilia em todo projeto, sempre que for, Editar, Inserir, Alterar, Atualizar, Melhorar, Impelmentar, use todas as ferramentas do @.agent, para tudo.
+globs: Este é seu Agente que auxilia em todo projeto, sempre que for, Editar, Inserir, Alterar, Atualizar, Melhorar, Impelmentar, use todas as ferramentas do @.agent, para tudo. 
 ---
 
 # GEMINI.md - Antigravity Kit
