@@ -152,10 +152,10 @@ export default function AdminLayout({
         </header>
 
         {/* Content View */}
-        <div className="p-8 mt-4">
+        <div className="w-full px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
           {children}
         </div>
       </main>
-    </div >
+    </div>
   );
 }

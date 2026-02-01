@@ -220,6 +220,50 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                 </div>
                             </div>
                         )}
+
+                        {activeTab === 'docs' && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-500/10 text-blue-500 rounded-lg border border-blue-500/20">
+                                            <FileCode className="w-5 h-5" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white font-black text-sm uppercase italic">Obrigações & Drive</h3>
+                                            <p className="text-[9px] font-mono text-neutral-600 uppercase">Documentos Sincronizados - Jan/2026</p>
+                                        </div>
+                                    </div>
+                                    {client?.drive_folder_id && (
+                                        <button
+                                            onClick={() => window.open(`https://drive.google.com/drive/folders/${client.drive_folder_id}`, '_blank')}
+                                            className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-black uppercase text-white rounded transition-all italic border border-neutral-700"
+                                        >
+                                            <ExternalLink className="w-3 h-3" /> Abrir no Drive
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {['DAS', 'FGTS', 'INSS', 'DCTF', 'Folha'].map((tipo) => (
+                                        <div key={tipo} className="p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg text-neutral-600 group-hover:text-emerald-500 transition-colors">
+                                                    <FileText className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo}</p>
+                                                    <p className="text-[8px] font-mono text-neutral-600 uppercase">Ref: 01/2026</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[8px] font-black px-2 py-0.5 bg-neutral-900 border border-neutral-800 text-neutral-600 uppercase rounded italic">Pendente</span>
+                                                <CheckCircle2 className="w-4 h-4 text-neutral-800" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
