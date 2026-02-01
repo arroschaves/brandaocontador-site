@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     FileText, History, Info, Shield,
@@ -25,7 +25,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [syncing, setSyncing] = useState(false)
+    const [uploading, setUploading] = useState(false)
     const [competenciaReferencia, setCompetenciaReferencia] = useState('')
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const supabase = createClient()
 
@@ -99,6 +101,44 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             alert(`Erro: ${err.message}`)
         } finally {
             setSyncing(false)
+        }
+    }
+
+    async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        setUploading(true)
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('clientId', clientId)
+
+        // Inferência básica de rotina pelo nome do arquivo
+        const fileName = file.name.toUpperCase()
+        let routine = ''
+        if (fileName.includes('DAS')) routine = 'DAS'
+        else if (fileName.includes('FGTS')) routine = 'FGTS'
+        else if (fileName.includes('INSS')) routine = 'INSS'
+        else if (fileName.includes('DCTF')) routine = 'DCTFWeb'
+        else if (fileName.includes('FOLHA')) routine = 'Folha de Pagamento'
+
+        if (routine) formData.append('routineName', routine)
+
+        try {
+            const res = await fetch('/api/drive/upload', {
+                method: 'POST',
+                body: formData
+            })
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error || 'Falha no upload')
+
+            await fetchClientData()
+        } catch (err: any) {
+            console.error('Erro no upload:', err)
+            alert(`Erro: ${err.message}`)
+        } finally {
+            setUploading(false)
+            if (fileInputRef.current) fileInputRef.current.value = ''
         }
     }
 
@@ -293,8 +333,8 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {['DAS', 'FGTS', 'INSS', 'DCTF', 'Folha'].map((tipo) => {
-                                        const ob = obrigacoes.find(o => o.tipo.toUpperCase().includes(tipo.toUpperCase()));
+                                    {['DAS', 'FGTS', 'INSS', 'DCTFWeb', 'Folha de Pagamento'].map((tipo) => {
+                                        const ob = obrigacoes.find(o => o.tipo.toUpperCase() === tipo.toUpperCase());
                                         const status = ob?.status || 'pendente';
 
                                         return (
@@ -304,7 +344,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                         <FileText className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo}</p>
+                                                        <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo === 'Folha de Pagamento' ? 'Folha' : tipo}</p>
                                                         <p className="text-[8px] font-mono text-neutral-600 uppercase">Ref: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' })}</p>
                                                     </div>
                                                 </div>
@@ -324,6 +364,28 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                             </div>
                                         );
                                     })}
+                                </div>
+
+                                {/* Seção de Arquivos Recentes baseada na Auditoria */}
+                                <div className="mt-8 space-y-4">
+                                    <h4 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Uploads Recentes</h4>
+                                    <div className="space-y-2">
+                                        {history.filter(h => h.acao === 'UPLOAD').length === 0 ? (
+                                            <div className="p-4 bg-black/20 border border-dashed border-neutral-800 rounded-xl text-center text-[9px] text-neutral-600 uppercase">
+                                                Nenhum arquivo enviado recentemente via CRM.
+                                            </div>
+                                        ) : (
+                                            history.filter(h => h.acao === 'UPLOAD').slice(0, 5).map((up, idx) => (
+                                                <div key={idx} className="p-3 bg-black border border-neutral-900 rounded-lg flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <FileCode className="w-3.5 h-3.5 text-blue-400" />
+                                                        <span className="text-[10px] text-neutral-400 font-mono truncate max-w-[200px]">{up.detalhes}</span>
+                                                    </div>
+                                                    <span className="text-[8px] text-neutral-700 font-mono">{new Date(up.created_at).toLocaleDateString()}</span>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -361,10 +423,20 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                 <MessageSquare className="w-4 h-4 text-emerald-500" />
                                 <span className="text-[8px] font-black uppercase">Chamar</span>
                             </button>
-                            <button className="flex flex-col items-center gap-2 p-4 bg-black border border-neutral-800 rounded-xl hover:border-emerald-500 transition-all">
-                                <Upload className="w-4 h-4 text-blue-500" />
-                                <span className="text-[8px] font-black uppercase">Subir</span>
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className={`flex flex-col items-center gap-2 p-4 bg-black border border-neutral-800 rounded-xl hover:border-emerald-500 transition-all ${uploading ? 'opacity-50 cursor-wait' : ''}`}
+                            >
+                                <Upload className={`w-4 h-4 text-blue-500 ${uploading ? 'animate-bounce' : ''}`} />
+                                <span className="text-[8px] font-black uppercase">{uploading ? 'Subindo...' : 'Subir'}</span>
                             </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                className="hidden"
+                                onChange={handleUpload}
+                            />
                         </div>
                     </div>
                 </div>
