@@ -41,6 +41,8 @@ export default function AdminLayout({
 
   const menuItems = [
     { name: 'Dashboard', icon: BarChart3, path: '/admin' },
+    { name: 'Master Control', icon: ShieldCheck, path: '/admin/master' },
+    { name: 'Equipe', icon: Users, path: '/admin/equipe' },
     { name: 'Clientes', icon: Users, path: '/admin/clientes' },
     { name: 'Cronograma', icon: ClipboardList, path: '/admin/cronograma' },
     { name: 'Calendário', icon: Calendar, path: '/admin/calendario' },

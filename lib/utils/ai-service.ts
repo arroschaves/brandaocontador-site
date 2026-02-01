@@ -1,52 +1,70 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const SYSTEM_PROMPT = `
-Você é o Assistente Técnico Inteligente da Brandão Contabilidade.
-Sua missão é classificar a intenção do cliente, responder de forma profissional e curta, e alertar o contador se necessário.
+/**
+ * Cérebro Multimídia Brandão - Processamento de Áudio, Imagem e Documentos
+ * Usa Gemini 1.5 Flash para transcrição e análise proativa.
+ */
 
-# INTENÇÕES POSSÍVEIS:
-1. SAUDACAO: "Bom dia", "Boa tarde", "Olá".
-2. PEDIDO_DOCUMENTO: O cliente quer nota fiscal, guia de imposto, holerite, contrato, certidão.
-3. DUVIDA_TECNICA: O cliente tem uma pergunta sobre impostos, prazos ou legislação.
-4. OUTROS: Assuntos variados.
+export async function analyzeMedia(fileBuffer: Buffer, mimeType: string) {
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-# FORMATO DE RESPOSTA (JSON):
-Deve retornar obrigatoriamente um JSON puro no seguinte formato:
-{
-  "intencao": "SAUDACAO | PEDIDO_DOCUMENTO | DUVIDA_TECNICA | OUTROS",
-  "categoria": "FISCAL | RH | SOCIETARIO | OUTROS",
-  "prioridade": "ALTA | NORMAL | BAIXA",
-  "resposta_cliente": "Texto da resposta profissional",
-  "resumo_contador": "Breve nota do que o cliente quer"
+        const part = {
+            inlineData: {
+                data: fileBuffer.toString("base64"),
+                mimeType
+            }
+        };
+
+        const prompt = `
+            Você é o BRAIN MAESTRO, a inteligência central da Brandão Contabilidade. 
+            Analise este arquivo (Áudio, PDF ou Imagem) e forneça um relatório técnico em português brasileiro:
+            
+            1. TÍTULO: Nome curto do documento ou ação.
+            2. TRANSCRIÇÃO/CONTEÚDO: O que está escrito ou sendo dito.
+            3. CLASSIFICAÇÃO: É Contrato, Certidão (CND), Guia (DAS/FGTS), ou Recibo?
+            4. ALERTAS TÉCNICOS:
+               - Prazos de validade ou vencimento detectados.
+               - CNPJ/CPF divergente do esperado.
+               - Erros visíveis no documento.
+            5. AÇÃO SUGERIDA: O que o contador deve fazer agora? (ex: "Enviar para WhatsApp", "Arquivar na pasta Fiscal").
+
+            MANTENHA O TOM PROFISSIONAL E ANALÍTICO.
+        `;
+
+        const result = await model.generateContent([prompt, part]);
+        const response = await result.response;
+        return response.text();
+    } catch (error) {
+        console.error("[AI Media Error]:", error);
+        return "Erro ao processar mídia via IA.";
+    }
 }
 
-# REGRAS:
-- Respostas devem ser empáticas e contábeis.
-- No caso de PEDIDO_DOCUMENTO, avise que o pedido foi encaminhado ao setor responsável e que em breve o documento será enviado.
-- Seja sempre em Português (Brasil).
-`;
-
-export async function analyzeClientMessage(message: string) {
+/**
+ * Classifica a urgência e categoria de um texto de atendimento
+ */
+export async function classifyText(text: string) {
     try {
-        const prompt = `${SYSTEM_PROMPT}\n\nMensagem do Cliente: "${message}"`;
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        const text = response.text();
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `
+            Classifique a seguinte solicitação de cliente contábil em JSON:
+            Texto: "${text}"
+            
+            Campos necessários:
+            {
+                "categoria": "FISCAL" | "RH" | "SOCIETÁRIO" | "GERAL",
+                "prioridade": "BAIXA" | "NORMAL" | "ALTA" | "CRITICA",
+                "resumo": "Breve resumo da solicitação"
+            }
+        `;
 
-        // Limpar o texto caso venha com markdown
-        const jsonStr = text.replace(/```json/g, "").replace(/```/g, "").trim();
-        return JSON.parse(jsonStr);
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return JSON.parse(response.text().replace(/```json|```/g, "").trim());
     } catch (error) {
-        console.error("Erro ao analisar mensagem com Gemini:", error);
-        return {
-            intencao: "OUTROS",
-            categoria: "OUTROS",
-            prioridade: "NORMAL",
-            resposta_cliente: "Olá! Recebi sua mensagem e logo um de nossos especialistas irá te atender.",
-            resumo_contador: message
-        };
+        return { categoria: "GERAL", prioridade: "NORMAL", resumo: text };
     }
 }

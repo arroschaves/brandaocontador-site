@@ -104,10 +104,7 @@ function ClientesContent() {
     );
 
     const handleOpenDetails = (id: string) => {
-        setSelectedClientId(id);
-        setIsSidebarOpen(true);
-        // Update URL without full reload
-        router.push(`/admin/clientes?id=${id}`, { scroll: false });
+        router.push(`/admin/clientes/${id}`);
     };
 
     const handleCloseDetails = () => {
