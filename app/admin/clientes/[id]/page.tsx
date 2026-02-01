@@ -192,6 +192,25 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         }
     }
 
+    async function handleUpdateCertPassword(certId: string, password: string) {
+        try {
+            const res = await fetch(`/api/clientes/certificados/${certId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            })
+            if (res.ok) {
+                alert('Certificado agora está protegido no Vault!')
+                fetchCertificados()
+            } else {
+                const err = await res.json()
+                throw new Error(err.error)
+            }
+        } catch (err: any) {
+            alert(err.message)
+        }
+    }
+
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
             <Activity className="w-10 h-10 text-emerald-500 animate-spin" />
@@ -561,21 +580,40 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         {certificados.map((cert) => (
                                             <div key={cert.id} className="p-4 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="p-2 bg-neutral-900 rounded-lg text-amber-500">
+                                                    <div className={`p-2 rounded-lg ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500/10 text-amber-500 animate-pulse' : 'bg-neutral-900 text-amber-500'}`}>
                                                         <FileCode className="w-5 h-5" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
-                                                        <p className="text-[9px] font-mono text-neutral-600">Vence em: {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'Não informado'}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
+                                                            {cert.senha_dados === 'PENDENTE' && (
+                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded">Drive</span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[9px] font-mono text-neutral-600">
+                                                            {cert.senha_dados === 'PENDENTE' ? 'Aguardando configuração de senha' : `Vence em: ${cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'Não informado'}`}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => handleViewPassword(cert.id)}
-                                                        className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-[8px] font-black uppercase text-neutral-400 hover:text-white hover:border-emerald-500 transition-all flex items-center gap-2"
-                                                    >
-                                                        <Shield className="w-3 h-3" /> Ver Senha
-                                                    </button>
+                                                    {cert.senha_dados === 'PENDENTE' ? (
+                                                        <button
+                                                            onClick={() => {
+                                                                const pwd = prompt(`O Maestro localizou este certificado no Drive para Ana Lucia.\nInforme a senha para criptografar agora:`)
+                                                                if (pwd) handleUpdateCertPassword(cert.id, pwd)
+                                                            }}
+                                                            className="px-3 py-1.5 bg-amber-500 text-black text-[8px] font-black uppercase hover:bg-white transition-all"
+                                                        >
+                                                            Configurar Senha
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleViewPassword(cert.id)}
+                                                            className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-[8px] font-black uppercase text-neutral-400 hover:text-white hover:border-emerald-500 transition-all flex items-center gap-2"
+                                                        >
+                                                            <Shield className="w-3 h-3" /> Ver Senha
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={async () => {
                                                             if (confirm('Remover do Vault permanentemente?')) {

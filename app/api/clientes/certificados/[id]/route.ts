@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { decrypt } from '@/lib/vault'
+import { decrypt, encrypt } from '@/lib/vault'
 import { logAudit } from '@/lib/utils/audit'
 
 export async function GET(
@@ -22,7 +22,14 @@ export async function GET(
             return NextResponse.json({ error: 'Certificado não encontrado' }, { status: 404 })
         }
 
-        // 2. AUDITORIA ZERO-TRUST (Logamos ANTES de descriptografar)
+        // 2. VERIFICAÇÃO DE CONFIGURAÇÃO
+        if (cert.senha_dados === 'PENDENTE') {
+            return NextResponse.json({
+                error: 'Este certificado foi detectado no Google Drive, mas a senha ainda não foi configurada por você no CRM.'
+            }, { status: 400 })
+        }
+
+        // 3. AUDITORIA ZERO-TRUST (Logamos ANTES de descriptografar)
         await logAudit({
             cliente_id: cert.cliente_id,
             acao: 'ACESSO_VAULT',
@@ -70,6 +77,38 @@ export async function DELETE(
                 request
             })
         }
+
+        return NextResponse.json({ success: true })
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
+
+export async function PATCH(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id: certId } = await params
+        const { password } = await request.json()
+        const supabase = await createClient()
+
+        if (!password) return NextResponse.json({ error: 'Senha é obrigatória' }, { status: 400 })
+
+        const encryptedPassword = encrypt(password)
+
+        const { error } = await supabase
+            .from('cliente_certificados')
+            .update({
+                senha_dados: encryptedPassword.data,
+                senha_iv: encryptedPassword.iv,
+                senha_tag: encryptedPassword.tag,
+                tipo: 'A1',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', certId)
+
+        if (error) throw error
 
         return NextResponse.json({ success: true })
     } catch (error: any) {

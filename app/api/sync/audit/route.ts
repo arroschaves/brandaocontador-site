@@ -28,13 +28,12 @@ export async function POST(request: Request) {
         const results = [];
         const agora = new Date();
 
-        // Determina a competência de referência (Jan se estivermos no início de Fev)
+        // Determina a competência de referência
         const refDate = new Date(agora.getFullYear(), agora.getMonth() - (agora.getDate() < 15 ? 1 : 0), 1);
         const mesReferencia = refDate.getMonth() + 1;
         const anoReferencia = refDate.getFullYear();
         const competenciaStr = refDate.toISOString().split('T')[0];
 
-        // Padrões de busca baseados na competência de referência
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
         const mesStr = mesReferencia.toString().padStart(2, '0');
         const monthFolderPatterns = [
@@ -47,9 +46,8 @@ export async function POST(request: Request) {
         for (const cliente of clientes) {
             if (!cliente.drive_folder_id) continue;
 
+            // --- PARTE A: AUDITORIA DE OBRIGAÇÕES (GUIAS) ---
             const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
-
-            // Busca recursiva limitada: primeiro tenta achar a pasta do mês
             let targetFolders = [cliente.drive_folder_id];
 
             for (const pattern of monthFolderPatterns) {
@@ -62,8 +60,6 @@ export async function POST(request: Request) {
 
             for (const rotina of rotinas) {
                 let status = 'pendente';
-
-                // Mapeamento de nomes de arquivos comuns para cada rotina
                 const namePatterns: any = {
                     'DAS': ['DAS', 'PGDAS', 'Apuração'],
                     'FGTS': ['FGTS', 'GFD', 'Guia_FGTS'],
@@ -74,10 +70,8 @@ export async function POST(request: Request) {
 
                 const patterns = namePatterns[rotina.name] || [rotina.name];
 
-                // Busca o arquivo em todas as pastas candidatas (Raiz + Pastas de Mês encontradas)
                 for (const folderId of targetFolders) {
                     if (status === 'concluido') break;
-
                     for (const p of patterns) {
                         const fileQuery = `'${folderId}' in parents and name contains '${p}' and name contains '${mesStr}' and trashed = false`;
                         const files = await drive.files.list({ q: fileQuery, fields: 'files(id, name)' });
@@ -88,7 +82,6 @@ export async function POST(request: Request) {
                     }
                 }
 
-                // Atualizar Supabase
                 await supabase.from('obrigacoes_acessorias').upsert({
                     cliente_id: cliente.id,
                     tipo: rotina.name,
@@ -96,6 +89,48 @@ export async function POST(request: Request) {
                     competencia: competenciaStr
                 }, { onConflict: 'cliente_id, tipo, competencia' });
             }
+
+            // --- PARTE B: DESCOBERTA DE CERTIFICADOS DIGITAIS ---
+            try {
+                const certQuery = `'${cliente.drive_folder_id}' in parents and name contains '04' and name contains 'CERTIFICADO' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+                const certFolders = await drive.files.list({ q: certQuery, fields: 'files(id, name)' });
+
+                if (certFolders.data.files && certFolders.data.files.length > 0) {
+                    const certFolderId = certFolders.data.files[0].id;
+                    const pfxFiles = await drive.files.list({
+                        q: `'${certFolderId}' in parents and (name contains '.pfx' or name contains '.p12') and trashed = false`,
+                        fields: 'files(id, name, createdTime)'
+                    });
+
+                    if (pfxFiles.data.files && pfxFiles.data.files.length > 0) {
+                        for (const pfx of pfxFiles.data.files) {
+                            const { data: existing } = await supabase
+                                .from('cliente_certificados')
+                                .select('id')
+                                .eq('cliente_id', cliente.id)
+                                .eq('nome_arquivo', pfx.name)
+                                .maybeSingle();
+
+                            if (!existing) {
+                                await supabase.from('cliente_certificados').insert({
+                                    cliente_id: cliente.id,
+                                    tipo: 'A1 (Drive)',
+                                    nome_arquivo: pfx.name,
+                                    arquivo_dados: 'DRIVE_ONLY',
+                                    arquivo_iv: 'N/A',
+                                    arquivo_tag: 'N/A',
+                                    senha_dados: 'PENDENTE',
+                                    senha_iv: 'N/A',
+                                    senha_tag: 'N/A'
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (certErr) {
+                console.error(`Erro ao buscar certificados para ${cliente.nome}:`, certErr);
+            }
+
             results.push({ id: cliente.id, nome: cliente.nome, status: 'Audited' });
         }
 

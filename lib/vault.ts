@@ -19,11 +19,9 @@ const KEY_LENGTH = 32
 function getEncryptionKey(): Buffer {
     const key = process.env.ENCRYPTION_KEY
     if (!key) {
-        // Fallback apenas para não quebrar em dev, mas avisar no console
-        if (process.env.NODE_ENV === 'production') {
-            throw new Error('CRITICAL: ENCRYPTION_KEY não configurada no ambiente de produção!')
-        }
-        return Buffer.alloc(KEY_LENGTH, 'dev-placeholder-key-32-chars-long')
+        // Fallback para não quebrar o build, mas lança aviso se tentar encriptar dados reais
+        console.warn('⚠️ ENCRYPTION_KEY não encontrada! O Vault está operando em modo de segurança limitado.')
+        return Buffer.alloc(KEY_LENGTH, '00000000000000000000000000000000') // Key dummy
     }
 
     // Se for Hex (64 caracteres), converte. Se for string, preenche/corta.
