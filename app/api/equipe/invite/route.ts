@@ -7,15 +7,15 @@ export async function POST(request: Request) {
         const { nome, email, cargo } = await request.json()
         const supabase = await createClient()
 
-        // 1. Criar usuário na tabela equipe (status: CONVIDADO)
+        // 1. Upsert usuário na tabela equipe (status: CONVIDADO)
         const { data: funcionario, error: dbError } = await supabase
             .from('equipe')
-            .insert({
+            .upsert({
                 nome,
                 email,
                 cargo,
-                ativo: false // Desativado até criar senha
-            })
+                ativo: false
+            }, { onConflict: 'email' })
             .select()
             .single()
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         // Por agora, enviaremos o link para a página de onboarding/senha.
         const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://brandaocontador.com.br'}/onboarding?email=${email}`
 
-        await sendProfessionalEmail({
+        const emailRes = await sendProfessionalEmail({
             from: 'COMERCIAL',
             to: email,
             subject: '🚀 Convite: Acesso ao CRM Maestro Brandão',
@@ -42,6 +42,10 @@ export async function POST(request: Request) {
                 </div>
             `
         })
+
+        if (!emailRes.success) {
+            throw new Error(emailRes.error || 'Erro desconhecido no servidor de e-mail')
+        }
 
         return NextResponse.json({ success: true, message: 'Convite enviado com sucesso' })
 

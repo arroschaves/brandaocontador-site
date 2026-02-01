@@ -62,12 +62,25 @@ export default function EquipePage() {
                 body: JSON.stringify({ nome, email, cargo })
             })
 
-            if (!res.ok) throw new Error('Falha ao enviar convite')
+            const result = await res.json()
+            if (!res.ok) throw new Error(result.error || 'Falha ao enviar convite')
 
-            alert('Convite enviado com sucesso! O funcionário receberá o e-mail de ativação.')
+            alert('✅ CONVITE ENVIADO: O funcionário receberá as instruções em instantes.')
             fetchEquipe()
         } catch (err: any) {
-            alert('Erro: ' + err.message)
+            alert('❌ ERRO NO PROCESSO: ' + err.message)
+        }
+    }
+
+    async function handleDelete(id: string, nome: string) {
+        if (!confirm(`TEM CERTEZA QUE DESEJA REMOVER ${nome.toUpperCase()}? ESTA AÇÃO É IRREVERSÍVEL NO MAESTRO.`)) return
+
+        try {
+            const { error } = await supabase.from('equipe').delete().eq('id', id)
+            if (error) throw error
+            fetchEquipe()
+        } catch (err: any) {
+            alert('ERRO AO DELETAR: ' + err.message)
         }
     }
 
@@ -193,7 +206,13 @@ export default function EquipePage() {
                                     <td className="p-4 text-right">
                                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button className="p-2 bg-neutral-800 hover:text-emerald-500 transition-colors" title="Editar Permissões"><Lock className="w-4 h-4" /></button>
-                                            <button className="p-2 bg-neutral-800 hover:text-red-500 transition-colors" title="Remover"><Trash2 className="w-4 h-4" /></button>
+                                            <button
+                                                onClick={() => handleDelete(item.id, item.nome)}
+                                                className="p-2 bg-neutral-800 hover:text-red-500 transition-colors"
+                                                title="Remover"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
