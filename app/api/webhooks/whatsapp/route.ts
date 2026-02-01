@@ -1,7 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { analyzeClientMessage } from '@/lib/utils/ai-service'
-import { sendWhatsAppMessage } from '@/lib/utils/evolution-api'
 
 export async function POST(request: Request) {
     try {
