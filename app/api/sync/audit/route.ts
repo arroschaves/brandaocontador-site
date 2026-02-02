@@ -52,35 +52,26 @@ export async function POST(request: Request) {
                 // --- 1. LOCALIZAR PASTAS ALVO (Busca Profunda/Greedy Discovery) ---
                 const targetFolderIds = new Set<string>([cliente.drive_folder_id]);
                 const queue = [{ id: cliente.drive_folder_id, depth: 0 }];
-                const maxDepth = 6;
-                const interestKeywords = [
-                    'PESSOAL', 'FISCAL', 'CONTÁBIL', 'CONTABIL', 'FOLHA', 'RH',
-                    '2025', '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO'
-                ];
+                const maxDepth = 8;
+                const foldersMap = new Map<string, string>(); // ID -> Nome da pasta
+                foldersMap.set(cliente.drive_folder_id, 'RAIZ');
 
                 while (queue.length > 0) {
                     const current = queue.shift()!;
                     if (current.depth >= maxDepth) continue;
 
                     try {
-                        const folderQuery = `'${current.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                        const folders = await drive.files.list({ q: folderQuery, fields: 'files(id, name)' });
+                        const folders = await drive.files.list({
+                            q: `'${current.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+                            fields: 'files(id, name)',
+                            pageSize: 1000
+                        });
 
                         if (folders.data.files) {
                             for (const f of folders.data.files) {
-                                const folderName = f.name!.toUpperCase();
-                                const isMonth = folderName.includes(currentMonthName.toUpperCase()) || folderName.includes(mesStr);
-                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
-
-                                // Se for o mês atual, é um alvo de arquivos
-                                if (isMonth) {
-                                    targetFolderIds.add(f.id!);
-                                }
-
-                                // Se for pasta de interesse ou mês, exploramos mais fundo
-                                if (hasKeyword || isMonth || current.depth < 2) {
-                                    queue.push({ id: f.id!, depth: current.depth + 1 });
-                                }
+                                targetFolderIds.add(f.id!);
+                                foldersMap.set(f.id!, f.name!);
+                                queue.push({ id: f.id!, depth: current.depth + 1 });
                             }
                         }
                     } catch (e) {
@@ -89,37 +80,59 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
-                console.log(`[MAESTRO] Exploradas ${uniqueFolders.length} pastas para ${cliente.nome}`);
+                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas para ${cliente.nome}`);
 
-                // --- 2. FETCH ALL FILES IN TARGET FOLDERS (OTIMIZAÇÃO CRÍTICA) ---
+                // --- 2. FETCH ALL FILES IN ALL DISCOVERED FOLDERS ---
                 const allFiles: any[] = [];
                 for (const fId of uniqueFolders) {
-                    const filesRes = await drive.files.list({
-                        q: `'${fId}' in parents and trashed = false`,
-                        fields: 'files(id, name, mimeType, createdTime)',
-                        pageSize: 1000
-                    });
-                    if (filesRes.data.files) {
-                        allFiles.push(...filesRes.data.files);
+                    try {
+                        const parentName = foldersMap.get(fId) || '';
+                        const filesRes = await drive.files.list({
+                            q: `'${fId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`,
+                            fields: 'files(id, name, mimeType, createdTime)',
+                            pageSize: 1000
+                        });
+                        if (filesRes.data.files) {
+                            const filesWithContext = filesRes.data.files.map(file => ({
+                                ...file,
+                                parentName
+                            }));
+                            allFiles.push(...filesWithContext);
+                        }
+                    } catch (e) {
+                        console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
                     }
                 }
-                console.log(`[MAESTRO] ${allFiles.length} arquivos totais encontrados para ${cliente.nome}`);
+                console.log(`[MAESTRO] ${allFiles.length} arquivos totais encontrados no Drive de ${cliente.nome}`);
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
-                    'DAS': ['DAS', 'PGDAS', 'Apuração'],
-                    'FGTS': ['FGTS', 'GFD', 'Guia_FGTS', 'GRRF'],
-                    'INSS': ['INSS', 'GPS', 'DCTFWeb', 'GuiaPagamento'],
-                    'DCTFWeb': ['DCTFWeb', 'DCTF', 'GuiaPagamento'],
-                    'Folha de Pagamento': ['Folha', 'Recibo', 'Holerite', 'Pagamento', 'S-1200', 'Resumo']
+                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES'],
+                    'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL'],
+                    'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA'],
+                    'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO'],
+                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE']
                 };
+
+                // Filtro adicional: O nome do arquivo deve conter o mês ou o nome do mês para evitar pegar arquivos de anos/meses anteriores
+                const mesRegex = new RegExp(`${mesStr}|${currentMonthName.toUpperCase()}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
-                    const found = allFiles.some((file: any) =>
-                        patterns.some((p: string) => file.name?.toUpperCase().includes(p.toUpperCase()))
-                    );
+
+                    const matchesFound = allFiles.filter((file: any) => {
+                        const fileName = file.name?.toUpperCase() || '';
+                        const parentName = file.parentName?.toUpperCase() || '';
+
+                        const matchesPattern = patterns.some((p: string) => fileName.includes(p.toUpperCase()));
+                        // O mês pode estar no nome do arquivo OU no nome da pasta pai (contexto)
+                        const matchesMonth = mesRegex.test(fileName) || mesRegex.test(parentName);
+
+                        return matchesPattern && matchesMonth;
+                    });
+
+                    const found = matchesFound.length > 0;
 
                     return supabase.from('obrigacoes_acessorias').upsert({
                         cliente_id: cliente.id,
