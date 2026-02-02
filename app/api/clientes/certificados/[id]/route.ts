@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { decrypt, encrypt } from '@/lib/vault'
 import { logAudit } from '@/lib/utils/audit'
+import { isAdmin } from '@/lib/utils/rbac'
 
 export async function GET(
     request: Request,
@@ -10,6 +11,11 @@ export async function GET(
     try {
         const { id: certId } = await params
         const supabase = await createClient()
+
+        // 0. VERIFICAÇÃO DE ROLE (Apenas ADMIN pode ver senhas)
+        if (!(await isAdmin())) {
+            return NextResponse.json({ error: 'ACESSO NEGADO: Apenas administradores podem visualizar senhas de certificados.' }, { status: 403 })
+        }
 
         // 1. Buscar os dados encriptados
         const { data: cert, error } = await supabase
@@ -63,6 +69,11 @@ export async function DELETE(
     try {
         const { id: certId } = await params
         const supabase = await createClient()
+
+        // 0. VERIFICAÇÃO DE ROLE
+        if (!(await isAdmin())) {
+            return NextResponse.json({ error: 'ACESSO NEGADO: Apenas administradores podem remover certificados do Vault.' }, { status: 403 })
+        }
 
         const { data: cert } = await supabase.from('cliente_certificados').select('cliente_id, nome_arquivo').eq('id', certId).single()
 
