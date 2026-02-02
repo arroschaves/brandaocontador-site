@@ -12,7 +12,7 @@ export default function SettingsPage() {
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Título de Autoridade */}
             <div>
-                <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter">CONFIGURAÇÕES</h1>
+                <h1 className="text-4xl font-black text-neutral-100 italic tracking-tight">CONFIGURAÇÕES</h1>
                 <p className="text-neutral-500 font-mono text-sm mt-2 uppercase tracking-widest">Controle total do seu ecossistema CRM</p>
             </div>
 

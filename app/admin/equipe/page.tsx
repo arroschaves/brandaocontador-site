@@ -94,7 +94,7 @@ export default function EquipePage() {
             {/* Header Maestro */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none mb-2">
+                    <h1 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none mb-2">
                         GESTÃO DE EQUIPE <span className="text-emerald-500">MAESTRO</span>
                     </h1>
                     <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em]">

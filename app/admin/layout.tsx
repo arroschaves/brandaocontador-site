@@ -95,7 +95,7 @@ export default function AdminLayout({
                   }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`} />
-                {isSidebarOpen && <span className="ml-4 font-medium">{item.name}</span>}
+                {isSidebarOpen && <span className="ml-4 font-bold uppercase tracking-wide text-[11px]">{item.name}</span>}
                 {isActive && isSidebarOpen && (
                   <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
                 )}

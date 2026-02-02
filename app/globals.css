@@ -31,7 +31,7 @@
   h4,
   h5,
   h6 {
-    @apply font-display font-bold text-neutral-50 tracking-tighter leading-[0.9];
+    @apply font-display font-bold text-neutral-50 tracking-tight leading-[0.9];
   }
 
   h1 {

@@ -165,7 +165,7 @@ export default function AutomacaoPage() {
         <div className="space-y-10 animate-in fade-in duration-500">
             {/* Header Brutalista */}
             <div>
-                <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter uppercase leading-none">
+                <h1 className="text-4xl font-black text-neutral-100 italic tracking-tight uppercase leading-none">
                     CENTRO DE <span className="text-amber-500">AUTOMAÇÃO</span>
                 </h1>
                 <p className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest mt-2">NÚCLEO DE SENTINELAS BRANDÃO 2026</p>

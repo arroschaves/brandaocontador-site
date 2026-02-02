@@ -42,7 +42,7 @@ export default function AlertasGaps() {
                 <div className="flex items-center gap-3">
                     <FileWarning className="w-4 h-4 text-amber-500" />
                     <div>
-                        <h3 className="text-[10px] font-black uppercase text-neutral-100 italic tracking-tighter">Radar de Geração Faltante</h3>
+                        <h3 className="text-[10px] font-black uppercase text-neutral-100 italic tracking-tight">Radar de Geração Faltante</h3>
                         <p className="text-[8px] font-mono text-neutral-500 uppercase">Documentos não localizados no Drive</p>
                     </div>
                 </div>

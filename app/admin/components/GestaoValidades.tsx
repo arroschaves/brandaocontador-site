@@ -44,7 +44,7 @@ export default function GestaoValidades() {
                 <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-primary-500" />
                     <div>
-                        <h3 className="text-[10px] font-black uppercase text-neutral-100 italic tracking-tighter">Gestão de Alvarás & Certificados</h3>
+                        <h3 className="text-[10px] font-black uppercase text-neutral-100 italic tracking-tight">Gestão de Alvarás & Certificados</h3>
                         <p className="text-[8px] font-mono text-neutral-500 uppercase">Monitoramento preventivo de vencimentos</p>
                     </div>
                 </div>

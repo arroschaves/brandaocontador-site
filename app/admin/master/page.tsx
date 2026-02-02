@@ -55,7 +55,7 @@ export default function MasterDashboard() {
             {/* Header Cyberpunk / Master */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b-2 border-emerald-500 pb-4">
                 <div>
-                    <h1 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+                    <h1 className="text-5xl font-black text-white italic uppercase tracking-tight leading-none">
                         MASTER <span className="text-emerald-500">CONTROL</span>
                     </h1>
                     <p className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.4em] mt-2">

@@ -115,7 +115,7 @@ export default function CronogramaPage() {
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-neutral-100 italic tracking-tighter uppercase">
+                    <h1 className="text-4xl font-black text-neutral-100 italic tracking-tight uppercase">
                         CRONOGRAMA <span className="text-amber-500">2026</span>
                     </h1>
                     <p className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest mt-2">Padrão Brandão de Conformidade Fiscal</p>

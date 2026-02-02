@@ -89,18 +89,21 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
+                console.log(`[MAESTRO] Exploradas ${uniqueFolders.length} pastas para ${cliente.nome}`);
 
                 // --- 2. FETCH ALL FILES IN TARGET FOLDERS (OTIMIZAÇÃO CRÍTICA) ---
                 const allFiles: any[] = [];
                 for (const fId of uniqueFolders) {
                     const filesRes = await drive.files.list({
                         q: `'${fId}' in parents and trashed = false`,
-                        fields: 'files(id, name, mimeType, createdTime)'
+                        fields: 'files(id, name, mimeType, createdTime)',
+                        pageSize: 1000
                     });
                     if (filesRes.data.files) {
                         allFiles.push(...filesRes.data.files);
                     }
                 }
+                console.log(`[MAESTRO] ${allFiles.length} arquivos totais encontrados para ${cliente.nome}`);
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));

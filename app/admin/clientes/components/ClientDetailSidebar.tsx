@@ -263,7 +263,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                             <Building2 className="w-5 h-5 text-emerald-500" />
                         </div>
                         <div>
-                            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-tighter">Ficha do Cliente</h2>
+                            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">Ficha do Cliente</h2>
                             <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">{client?.cnpj_cpf}</p>
                         </div>
                     </div>
@@ -287,7 +287,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                         <div className="space-y-0">
                             {/* Banner Informativo */}
                             <div className="p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-b border-neutral-900">
-                                <h1 className="text-2xl font-black text-neutral-100 italic uppercase leading-tight tracking-tighter">{client?.nome}</h1>
+                                <h1 className="text-2xl font-black text-neutral-100 italic uppercase leading-tight tracking-tight">{client?.nome}</h1>
                                 <div className="flex gap-3 mt-4">
                                     <span className="text-[9px] font-black px-2 py-1 bg-neutral-900 border border-emerald-500/20 text-emerald-500 uppercase italic">
                                         {client?.regime_tributario?.replace(/_/g, ' ') || 'REVISÃO NECESSÁRIA'}

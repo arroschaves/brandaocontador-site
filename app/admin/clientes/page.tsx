@@ -310,8 +310,8 @@ function ClientesContent() {
             <div className="space-y-6 px-1">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">Centro de Controle Master</h1>
-                        <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest mt-1">Status Operacional da Carteira - Brandão Contabilidade</p>
+                        <h1 className="text-3xl font-black text-white italic uppercase tracking-tight">Centro de Controle Master</h1>
+                        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] mt-2">Status Operacional da Carteira <span className="text-neutral-600 px-2">//</span> Brandão Contabilidade</p>
                     </div>
 
                     <div className="flex gap-3">
@@ -431,15 +431,15 @@ function ClientesContent() {
                                                     <div className="flex flex-col">
                                                         <Link
                                                             href={`/admin/clientes/${c.id}`}
-                                                            className="text-white font-black hover:text-emerald-500 transition-colors text-[12px] tracking-tighter uppercase italic"
+                                                            className="text-white font-black hover:text-emerald-500 transition-colors text-[13px] tracking-tight uppercase italic leading-tight"
                                                         >
                                                             {c.nome || c.razao_social}
                                                         </Link>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[9px] font-mono text-neutral-700">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <span className="text-[10px] font-bold text-neutral-500 tracking-wider">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
                                                             {c.isCertNearExp && (
-                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded shadow-[0_0_5px_#f59e0b]">
-                                                                    Certificado Vence Logo
+                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded shadow-[0_0_8px_rgba(245,158,11,0.4)]">
+                                                                    Vencimento Próximo
                                                                 </span>
                                                             )}
                                                         </div>

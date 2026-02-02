@@ -50,7 +50,7 @@ export default function AuditoriaMasterPage() {
                                 <ShieldCheck className="w-8 h-8 text-emerald-500" />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black text-white italic uppercase tracking-tighter">Centro de Auditoria Elite</h1>
+                                <h1 className="text-3xl font-black text-white italic uppercase tracking-tight">Centro de Auditoria Elite</h1>
                                 <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-neutral-600">Monitoramento Zero-Trust Brandão Contabilidade</p>
                             </div>
                         </div>
