@@ -52,15 +52,20 @@ export async function POST(request: Request) {
                 // --- 1. LOCALIZAR PASTAS ALVO (Smart Recursive Discovery) ---
                 const targetFolderIds = new Set<string>([cliente.drive_folder_id]);
                 const queue = [{ id: cliente.drive_folder_id, depth: 0 }];
-                const maxDepth = 6; // Profundidade suficiente para 99% dos casos
+                const maxDepth = 7;
                 const foldersMap = new Map<string, string>(); // ID -> Nome da pasta
+                const depthMap = new Map<string, number>(); // ID -> Profundidade
                 foldersMap.set(cliente.drive_folder_id, 'RAIZ');
+                depthMap.set(cliente.drive_folder_id, 0);
 
                 // Palavras que indicam que uma pasta deve ser explorada
                 const interestKeywords = [
                     'PESSOAL', 'FISCAL', 'CONTÁBIL', 'CONTABIL', 'FOLHA', 'RH',
-                    '2025', '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO', 'DCTF'
+                    '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO', 'DCTF'
                 ];
+
+                const currentYear = refDate.getFullYear().toString(); // "2026"
+                const monthAbbr = currentMonthName.substring(0, 3).toUpperCase(); // "JAN"
 
                 while (queue.length > 0) {
                     const current = queue.shift()!;
@@ -70,23 +75,30 @@ export async function POST(request: Request) {
                         const folders = await drive.files.list({
                             q: `'${current.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
                             fields: 'files(id, name)',
-                            pageSize: 100 // Pastas raramente passam de 100 por nível
+                            pageSize: 100
                         });
 
                         if (folders.data.files) {
                             for (const f of folders.data.files) {
                                 const folderName = f.name!.toUpperCase();
-                                const isYear = folderName.includes('2025') || folderName.includes('2026');
-                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
-                                const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName.toUpperCase());
 
-                                // PODA INTELIGENTE: Só entramos em pastas que pareçam úteis para contabilidade
+                                // FILTRO DE ANO: Se a pasta menciona um ano que não é 2026, ignoramos o ramo
+                                const yearsToIgnore = ['2021', '2022', '2023', '2024', '2025'];
+                                const matchesOldYear = yearsToIgnore.some(y => folderName.includes(y));
+                                if (matchesOldYear && !folderName.includes(currentYear)) continue;
+
+                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
+                                const isYear = folderName.includes(currentYear);
+                                const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName.toUpperCase()) || folderName.includes(monthAbbr);
+
+                                // PODA INTELIGENTE: Só entramos em pastas que pareçam úteis ou neutras no topo
                                 if (current.depth < 2 || isYear || hasKeyword || isMonth) {
                                     foldersMap.set(f.id!, f.name!);
+                                    depthMap.set(f.id!, current.depth + 1);
                                     queue.push({ id: f.id!, depth: current.depth + 1 });
 
-                                    // Só marcamos para ler arquivos se for de fato uma pasta final de interesse
-                                    if (hasKeyword || isMonth || current.depth >= 3) {
+                                    // Se tem o mês ou palavras chaves após entrar no ano/departamento, marcamos para scanner de arquivos
+                                    if (isMonth || (hasKeyword && current.depth >= 2)) {
                                         targetFolderIds.add(f.id!);
                                     }
                                 }
@@ -98,22 +110,23 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
-                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo para ${cliente.nome}`);
+                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo (Foco ${currentYear}) para ${cliente.nome}`);
 
                 // --- 2. FETCH ALL FILES IN PARALLEL BATCHES ---
                 const allFiles: any[] = [];
-                const batchSize = 15; // Processamos 15 pastas por vez para velocidade máxima
+                const batchSize = 15;
                 for (let i = 0; i < uniqueFolders.length; i += batchSize) {
                     const batch = uniqueFolders.slice(i, i + batchSize);
                     const batchPromises = batch.map(async (fId) => {
                         try {
                             const parentName = foldersMap.get(fId) || '';
+                            const parentDepth = depthMap.get(fId) || 0;
                             const filesRes = await drive.files.list({
                                 q: `'${fId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`,
-                                fields: 'files(id, name, mimeType, createdTime)',
+                                fields: 'files(id, name, mimeType, createdTime, size)',
                                 pageSize: 1000
                             });
-                            return (filesRes.data.files || []).map(file => ({ ...file, parentName }));
+                            return (filesRes.data.files || []).map(file => ({ ...file, parentName, depth: parentDepth }));
                         } catch (e) {
                             console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
                             return [];
@@ -122,20 +135,19 @@ export async function POST(request: Request) {
                     const results = await Promise.all(batchPromises);
                     results.forEach(files => allFiles.push(...files));
                 }
-                console.log(`[MAESTRO] ${allFiles.length} arquivos totais encontrados no Drive de ${cliente.nome}`);
+                console.log(`[MAESTRO] ${allFiles.length} arquivos encontrados para ${cliente.nome}`);
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
-                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES'],
+                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO'],
                     'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL'],
                     'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA'],
-                    'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO'],
+                    'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO', 'TRANSMISSAO'],
                     'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE']
                 };
 
-                // Filtro adicional: O nome do arquivo deve conter o mês ou o nome do mês para evitar pegar arquivos de anos/meses anteriores
-                const mesRegex = new RegExp(`${mesStr}|${currentMonthName.toUpperCase()}`, 'i');
+                const mesRegex = new RegExp(`\\b${mesStr}\\b|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
@@ -148,7 +160,10 @@ export async function POST(request: Request) {
                         // O mês pode estar no nome do arquivo OU no nome da pasta pai (contexto)
                         const matchesMonth = mesRegex.test(fileName) || mesRegex.test(parentName);
 
-                        return matchesPattern && matchesMonth;
+                        // Proteção extra: O ano 2026 deve ser mencionado se não estivermos já em uma pasta de profundidade 3+
+                        const matchesYear = fileName.includes('2026') || parentName.includes('2026') || file.depth >= 3;
+
+                        return matchesPattern && matchesMonth && matchesYear;
                     });
 
                     const found = matchesFound.length > 0;
