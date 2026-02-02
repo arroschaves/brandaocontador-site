@@ -49,34 +49,46 @@ export async function POST(request: Request) {
             if (!cliente.drive_folder_id) continue;
 
             try {
-                // --- 1. LOCALIZAR PASTAS ALVO (Mês Atual/Departamentos) ---
-                const targetFolderIds = [cliente.drive_folder_id];
+                // --- 1. LOCALIZAR PASTAS ALVO (Busca Profunda/Greedy Discovery) ---
+                const targetFolderIds = new Set<string>([cliente.drive_folder_id]);
+                const queue = [{ id: cliente.drive_folder_id, depth: 0 }];
+                const maxDepth = 6;
+                const interestKeywords = [
+                    'PESSOAL', 'FISCAL', 'CONTÁBIL', 'CONTABIL', 'FOLHA', 'RH',
+                    '2025', '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO'
+                ];
 
-                // Busca inicial de pastas que contenham o mês
-                const folderQuery = `'${cliente.drive_folder_id}' in parents and (name contains '${currentMonthName}' or name contains '${mesStr}') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                const monthFolders = await drive.files.list({ q: folderQuery, fields: 'files(id, name)' });
+                while (queue.length > 0) {
+                    const current = queue.shift()!;
+                    if (current.depth >= maxDepth) continue;
 
-                if (monthFolders.data.files) {
-                    targetFolderIds.push(...monthFolders.data.files.map(f => f.id!));
-                }
+                    try {
+                        const folderQuery = `'${current.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+                        const folders = await drive.files.list({ q: folderQuery, fields: 'files(id, name)' });
 
-                // Busca pastas de departamentos (nível 1)
-                const deptQuery = `'${cliente.drive_folder_id}' in parents and (name contains 'Pessoal' or name contains 'Fiscal' or name contains 'Contábil' or name contains 'Folha') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                const depts = await drive.files.list({ q: deptQuery, fields: 'files(id, name)' });
+                        if (folders.data.files) {
+                            for (const f of folders.data.files) {
+                                const folderName = f.name!.toUpperCase();
+                                const isMonth = folderName.includes(currentMonthName.toUpperCase()) || folderName.includes(mesStr);
+                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
 
-                if (depts.data.files) {
-                    for (const dept of depts.data.files) {
-                        targetFolderIds.push(dept.id!);
-                        // Busca subpastas de mês dentro dos depts
-                        const subQ = `'${dept.id}' in parents and (name contains '${currentMonthName}' or name contains '${mesStr}') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                        const subMonthFolders = await drive.files.list({ q: subQ, fields: 'files(id, name)' });
-                        if (subMonthFolders.data.files) {
-                            targetFolderIds.push(...subMonthFolders.data.files.map(sf => sf.id!));
+                                // Se for o mês atual, é um alvo de arquivos
+                                if (isMonth) {
+                                    targetFolderIds.add(f.id!);
+                                }
+
+                                // Se for pasta de interesse ou mês, exploramos mais fundo
+                                if (hasKeyword || isMonth || current.depth < 2) {
+                                    queue.push({ id: f.id!, depth: current.depth + 1 });
+                                }
+                            }
                         }
+                    } catch (e) {
+                        console.error(`Erro ao explorar pasta ${current.id}:`, e);
                     }
                 }
 
-                const uniqueFolders = [...new Set(targetFolderIds)];
+                const uniqueFolders = Array.from(targetFolderIds);
 
                 // --- 2. FETCH ALL FILES IN TARGET FOLDERS (OTIMIZAÇÃO CRÍTICA) ---
                 const allFiles: any[] = [];
