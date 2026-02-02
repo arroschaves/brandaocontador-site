@@ -29,6 +29,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     const [uploading, setUploading] = useState(false)
     const [certificados, setCertificados] = useState<any[]>([])
     const [loadingCerts, setLoadingCerts] = useState(false)
+    const [userRole, setUserRole] = useState<string>('operador')
 
     const [isUnitModalOpen, setIsUnitModalOpen] = useState(false)
     const [unitFormData, setUnitFormData] = useState({
@@ -99,11 +100,20 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
         }
     }
 
+    async function fetchUserRole() {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+            const { data } = await supabase.from('perfis').select('role').eq('id', user.id).single()
+            if (data) setUserRole(data.role)
+        }
+    }
+
     useEffect(() => {
         if (clientId && isOpen) {
             getFullClientData()
             fetchHistorico()
             fetchCertificados()
+            fetchUserRole()
         }
     }, [clientId, isOpen])
 
@@ -173,6 +183,43 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
             setTimeout(getFullClientData, 3000)
         } catch (err) {
             console.error(err)
+        } finally {
+            setSyncing(false)
+        }
+    }
+
+    async function handleOffboarding() {
+        if (!clientId || !client) return
+
+        const confirmName = prompt(`⚠️ AÇÃO CRÍTICA (LGPD) ⚠️\nO offboarding removerá permanentemente todos os certificados e senhas do cofre para este cliente.\n\nPara confirmar, digite o nome do cliente: "${client.nome}"`)
+
+        if (confirmName !== client.nome) {
+            alert('Confirmação falhou. Operação cancelada.')
+            return
+        }
+
+        const reason = prompt('Informe o motivo do encerramento (opcional):')
+
+        try {
+            setSyncing(true)
+            const res = await fetch('/api/clientes/offboarding', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ clientId, reason })
+            })
+
+            const result = await res.json()
+            if (res.ok) {
+                alert('MAESTRO: Offboarding concluído! Dados sensíveis removidos e cliente inativado.')
+                getFullClientData()
+                fetchCertificados()
+                fetchHistorico()
+            } else {
+                alert('Erro no offboarding: ' + result.error)
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Falha total no processo de offboarding.')
         } finally {
             setSyncing(false)
         }
@@ -425,6 +472,28 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                                 </div>
                                             ))}
                                         </div>
+
+                                        {/* Secao LGPD (Apenas Admin) */}
+                                        {userRole === 'admin' && (
+                                            <div className="mt-10 pt-6 border-t border-rose-500/20 space-y-4">
+                                                <h4 className="text-[10px] font-black uppercase text-rose-500 tracking-widest flex items-center gap-2">
+                                                    <ShieldAlert className="w-4 h-4" /> Gestão de Conformidade (LGPD)
+                                                </h4>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-bold leading-relaxed">
+                                                    Utilize o Offboarding para encerrar o vínculo contratual. Isso removerá permanentemente todos os certificados digitais e senhas do Vault.
+                                                </p>
+                                                <button
+                                                    onClick={handleOffboarding}
+                                                    disabled={syncing || client?.status_hub === 'INATIVO'}
+                                                    className={`w-full py-3 rounded text-[10px] font-black uppercase transition-all ${client?.status_hub === 'INATIVO'
+                                                            ? 'bg-neutral-900 text-neutral-700 cursor-not-allowed border border-neutral-800'
+                                                            : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white'
+                                                        }`}
+                                                >
+                                                    {client?.status_hub === 'INATIVO' ? 'CLIENTE JÁ INATIVADO' : 'INICIAR OFFBOARDING DEFINITIVO'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
