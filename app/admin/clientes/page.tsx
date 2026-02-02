@@ -19,7 +19,11 @@ import {
     FolderX,
     ArrowRight,
     MapPin,
-    ShieldAlert
+    ShieldAlert,
+    Users,
+    ShieldCheck,
+    Building2,
+    Lock
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -40,6 +44,13 @@ function ClientesContent() {
     const [clientes, setClientes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [stats, setStats] = useState({
+        total: 0,
+        pendentes: 0,
+        certVencendo: 0,
+        auditadosOk: 0
+    });
+    const [globalSyncing, setGlobalSyncing] = useState(false);
 
     // Sidebar State
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,16 +94,66 @@ function ClientesContent() {
     async function fetchClientes() {
         try {
             setLoading(true);
-            const { data, error } = await supabase
+            // 1. Buscar Clientes
+            const { data: clientsData, error: clientErr } = await supabase
                 .from('clientes')
                 .select('*')
+                .eq('status_hub', 'ATIVO') // Apenas ativos no dashboard principal
                 .order('nome', { ascending: true });
 
-            if (error) throw error;
-            setClientes(data || []);
+            if (clientErr) throw clientErr;
+
+            // 2. Buscar Status de Obrigações (Mês Atual)
+            const hoje = new Date();
+            const refDate = new Date(hoje.getFullYear(), hoje.getMonth() - (hoje.getDate() < 15 ? 1 : 0), 1);
+            const competencia = refDate.toISOString().split('T')[0];
+
+            const { data: obrs } = await supabase
+                .from('obrigacoes_acessorias')
+                .select('*')
+                .eq('competencia', competencia);
+
+            // 3. Buscar Certificados (para alertas de vencimento)
+            const { data: certs } = await supabase
+                .from('cliente_certificados')
+                .select('id, cliente_id, data_vencimento');
+
+            // 4. Cruzar Dados
+            let pendenciasTotal = 0;
+            let certsVencendo = 0;
+
+            const enriched = (clientsData || []).map(c => {
+                const clientObrs = (obrs || []).filter(o => o.cliente_id === c.id);
+                const hasPending = clientObrs.some(o => o.status === 'pendente');
+                if (hasPending) pendenciasTotal++;
+
+                const clientCerts = (certs || []).filter(ct => ct.cliente_id === c.id);
+                const isNearExp = clientCerts.some(ct => {
+                    if (!ct.data_vencimento) return false;
+                    const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+                    return diff <= 30;
+                });
+                if (isNearExp) certsVencendo++;
+
+                return {
+                    ...c,
+                    obrigacoes: clientObrs,
+                    hasPending,
+                    isCertNearExp: isNearExp
+                };
+            });
+
+            setClientes(enriched);
+            setStats({
+                total: enriched.length,
+                pendentes: enriched.filter(e => e.hasPending).length,
+                certVencendo: certsVencendo,
+                auditadosOk: enriched.filter(e => !e.hasPending && e.obrigacoes.length > 0).length
+            });
+
         } catch (err: any) {
             console.error(err);
-            setError('Erro ao carregar dados.');
+            setError('Erro ao carregar dados do Centro de Controle.');
         } finally {
             setLoading(false);
         }
@@ -107,7 +168,29 @@ function ClientesContent() {
     const handleOpenDetails = (id: string) => {
         router.push(`/admin/clientes/${id}`);
     };
+    async function handleGlobalSync() {
+        if (!confirm('MAESTRO: Deseja rodar o radar global em toda a carteira de clientes ativos? Isso pode levar alguns segundos.')) return;
 
+        try {
+            setGlobalSyncing(true);
+            const res = await fetch('/api/sync/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}) // Sem clientId = Sincroniza todos
+            });
+
+            if (res.ok) {
+                alert('MAESTRO: Radar Global finalizado! Atualizando painéis...');
+                fetchClientes();
+            } else {
+                throw new Error('Falha na sincronização global');
+            }
+        } catch (err: any) {
+            alert('Erro no Radar Global: ' + err.message);
+        } finally {
+            setGlobalSyncing(false);
+        }
+    }
     const handleCloseDetails = () => {
         setIsSidebarOpen(false);
         setSelectedClientId(null);
@@ -222,26 +305,52 @@ function ClientesContent() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            {/* Header Pro Max */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
-                <div>
-                    <h1 className="text-xl font-bold text-neutral-100 tracking-tight">Gestão de Carteira</h1>
-                    <div className="flex items-center gap-3 mt-1.5">
-                        <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
-                            {clientes.length} Operações Ativas
-                        </p>
-                        <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_5px_#10b981]" />
-                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-tight">Cloud Autopilot On</span>
-                        </div>
+            {/* Header Pro Max com Dash de Operações */}
+            <div className="space-y-6 px-1">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h1 className="text-2xl font-black text-white italic uppercase tracking-tighter">Centro de Controle Master</h1>
+                        <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest mt-1">Status Operacional da Carteira - Brandão Contabilidade</p>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleGlobalSync}
+                            disabled={globalSyncing}
+                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'} border border-current font-black uppercase text-[10px] tracking-widest hover:bg-current hover:text-black transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
+                        >
+                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5 shadow-none" />}
+                            {globalSyncing ? 'MAESTRO EM CAMPO...' : 'RADAR GLOBAL'}
+                        </button>
+                        <button
+                            onClick={() => handleOpenModal()}
+                            className="px-6 py-2.5 bg-white text-black font-black uppercase text-[10px] tracking-widest hover:bg-neutral-200 transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl"
+                        >
+                            <Plus className="w-3.5 h-3.5" /> Novo Cliente Agro
+                        </button>
                     </div>
                 </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="px-6 py-2.5 bg-neutral-100 text-neutral-950 font-bold uppercase text-[10px] tracking-widest hover:bg-emerald-500 transition-all active:scale-95 flex items-center gap-2 rounded shadow-[4px_4px_0px_rgba(0,0,0,0.5)]"
-                >
-                    <Plus className="w-3.5 h-3.5" /> Novo Cliente Agro
-                </button>
+
+                {/* Cards de Inteligência */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {[
+                        { label: 'Clientes Ativos', value: stats.total, color: 'neutral', icon: Users },
+                        { label: 'Pendências de Auditoria', value: stats.pendentes, color: 'rose', icon: AlertCircle },
+                        { label: 'Certificados Vencendo', value: stats.certVencendo, color: 'amber', icon: ShieldCheck },
+                        { label: 'Auditados OK (Mês)', value: stats.auditadosOk, color: 'emerald', icon: CheckCircle2 }
+                    ].map((stat, i) => {
+                        const Icon = stat.icon as any;
+                        return (
+                            <div key={i} className={`p-4 bg-neutral-900/40 border-l-4 border-l-${stat.color === 'rose' ? 'rose-500' : stat.color === 'amber' ? 'amber-500' : stat.color === 'emerald' ? 'emerald-500' : 'neutral-700'} border border-neutral-900 rounded-xl space-y-1`}>
+                                <div className="flex justify-between items-center">
+                                    <p className="text-[9px] font-black uppercase text-neutral-500 tracking-widest">{stat.label}</p>
+                                    <Icon className={`w-3.5 h-3.5 text-neutral-700`} />
+                                </div>
+                                <p className="text-xl font-black text-white italic">{stat.value}</p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* Filtros e Busca Brutalista */}
@@ -269,18 +378,19 @@ function ClientesContent() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-neutral-900/40 text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500">
-                                <th className="p-4 border-b border-neutral-900">Identificação / Status</th>
-                                <th className="p-4 border-b border-neutral-900">Documento</th>
-                                <th className="p-4 border-b border-neutral-900">Modelo Fiscal</th>
-                                <th className="p-4 border-b border-neutral-900">G-Drive</th>
-                                <th className="p-4 border-b border-neutral-900">Radar Fiscal</th>
-                                <th className="p-4 border-b border-neutral-900 text-right">Ações</th>
+                                <th className="p-4 pl-6 border-b border-neutral-900">Cliente Alpha</th>
+                                <th className="p-4 border-b border-neutral-900 text-center">DAS / SN</th>
+                                <th className="p-4 border-b border-neutral-900 text-center">FGTS</th>
+                                <th className="p-4 border-b border-neutral-900 text-center">INSS</th>
+                                <th className="p-4 border-b border-neutral-900 text-center">Folha</th>
+                                <th className="p-4 border-b border-neutral-900 text-center">Vault</th>
+                                <th className="p-4 border-b border-neutral-900 text-right pr-6">Ação</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-neutral-900">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="py-20 text-center">
+                                    <td colSpan={7} className="py-20 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
                                             <span className="text-[10px] font-bold text-neutral-700 uppercase tracking-widest">Sincronizando...</span>
@@ -289,71 +399,77 @@ function ClientesContent() {
                                 </tr>
                             ) : filteredClientes.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="py-20 text-center italic text-neutral-700 uppercase font-black tracking-widest">
+                                    <td colSpan={7} className="py-20 text-center italic text-neutral-700 uppercase font-black tracking-widest">
                                         Nenhum registro encontrado.
                                     </td>
                                 </tr>
                             ) : (
-                                filteredClientes.map((c) => (
-                                    <tr key={c.id} className="group hover:bg-neutral-900/30 transition-all">
-                                        <td className="p-4">
-                                            <div className="flex flex-col gap-0.5">
-                                                <Link
-                                                    href={`/admin/clientes/${c.id}`}
-                                                    className="inline-flex items-center gap-2 text-neutral-200 font-bold hover:text-emerald-400 transition-colors text-[13px] tracking-tight"
-                                                >
-                                                    {c.razao_social || c.nome}
-                                                    {c.status_rfb === 'ATIVA' && <CheckCircle2 className="w-3 h-3 text-emerald-500/80" />}
-                                                </Link>
-                                                {c.nome && c.nome !== c.razao_social && (
-                                                    <span className="text-[9px] font-mono text-neutral-600 uppercase">APELIDO: {c.nome}</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="p-4">
-                                            <span className="text-[11px] font-mono text-neutral-500">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
-                                        </td>
-                                        <td className="p-4">
-                                            {c.regime_tributario ? (
-                                                <span className={`text-[9px] font-black px-2 py-0.5 bg-neutral-900 border ${c.regime_tributario.includes('SIMPLES') ? 'text-emerald-500 border-emerald-500/10' : 'text-blue-500 border-blue-500/10'} uppercase`}>
-                                                    {c.regime_tributario?.replace(/_/g, ' ')}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[9px] font-bold text-neutral-800 uppercase">Não Defino</span>
-                                            )}
-                                        </td>
-                                        <td className="p-4">
-                                            {c.drive_folder_id ? (
-                                                <a href={`https://drive.google.com/drive/folders/${c.drive_folder_id}`} target="_blank" className="flex items-center gap-1.5 text-emerald-600 hover:text-emerald-400 font-bold text-[10px] uppercase transition-all">
-                                                    <FolderOpen className="w-3.5 h-3.5" /> PASTA OK
-                                                </a>
-                                            ) : (
-                                                <div className="flex items-center gap-1.5 text-neutral-800 font-bold text-[10px] uppercase">
-                                                    <FolderX className="w-3.5 h-3.5" /> SEM DRIVE
+                                filteredClientes.map((c) => {
+                                    const getObrStatus = (name: string) => c.obrigacoes?.find((o: any) => o.tipo === name)?.status;
+
+                                    const StatusBadge = ({ name }: { name: string }) => {
+                                        const status = getObrStatus(name);
+                                        if (!status) return <div className="w-1.5 h-1.5 rounded-full bg-neutral-900 mx-auto" />;
+                                        return (
+                                            <div className="flex justify-center group/tip relative">
+                                                <div className={`w-3.5 h-3.5 rounded-full border-2 border-black ${status === 'concluido' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-rose-500 shadow-[0_0_10px_#f43f5e] animate-pulse'} `} />
+                                                <div className="absolute bottom-full mb-2 hidden group-hover/tip:block bg-neutral-900 text-[8px] font-black uppercase text-white px-2 py-1 rounded border border-neutral-800 whitespace-nowrap z-50">
+                                                    {name}: {status.toUpperCase()}
                                                 </div>
-                                            )}
-                                        </td>
-                                        <td className="p-4">
-                                            <div className="flex gap-1">
-                                                <div className={`w-1.5 h-1.5 ${c.situacao_federal === 'REGULAR' ? 'bg-emerald-500' : 'bg-neutral-800'}`} title="Federal" />
-                                                <div className={`w-1.5 h-1.5 ${c.situacao_estadual === 'REGULAR' ? 'bg-emerald-500' : 'bg-neutral-800'}`} title="Estadual" />
-                                                <div className={`w-1.5 h-1.5 ${c.situacao_municipal === 'REGULAR' ? 'bg-emerald-500' : 'bg-neutral-800'} shadow-[0_0_5px_rgba(0,0,0,0.5)]`} title="Municipal" />
                                             </div>
-                                        </td>
-                                        <td className="p-4 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                                <Link
-                                                    href={`/admin/clientes/${c.id}`}
-                                                    className="p-1.5 text-neutral-600 hover:text-white transition-all"
-                                                >
-                                                    <Eye className="w-3.5 h-3.5" />
-                                                </Link>
-                                                <button onClick={() => handleOpenModal(c)} className="p-1.5 text-neutral-600 hover:text-white transition-all"><Edit className="w-3.5 h-3.5" /></button>
-                                                <button onClick={() => handleDelete(c.id, c.nome)} className="p-1.5 text-neutral-700 hover:text-rose-500 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                        );
+                                    };
+
+                                    return (
+                                        <tr key={c.id} className="group hover:bg-neutral-900/40 transition-all">
+                                            <td className="p-4 pl-6">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-9 h-9 bg-neutral-900 border border-neutral-800 rounded-lg flex items-center justify-center text-neutral-600 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-all">
+                                                        <Building2 className="w-4.5 h-4.5" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <Link
+                                                            href={`/admin/clientes/${c.id}`}
+                                                            className="text-white font-black hover:text-emerald-500 transition-colors text-[12px] tracking-tighter uppercase italic"
+                                                        >
+                                                            {c.nome || c.razao_social}
+                                                        </Link>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[9px] font-mono text-neutral-700">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
+                                                            {c.isCertNearExp && (
+                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded shadow-[0_0_5px_#f59e0b]">
+                                                                    Certificado Vence Logo
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-4"><StatusBadge name="DAS" /></td>
+                                            <td className="p-4"><StatusBadge name="FGTS" /></td>
+                                            <td className="p-4"><StatusBadge name="INSS" /></td>
+                                            <td className="p-4"><StatusBadge name="Folha de Pagamento" /></td>
+                                            <td className="p-4">
+                                                <div className="flex justify-center">
+                                                    <Lock className={`w-3.5 h-3.5 ${c.isCertNearExp ? 'text-amber-500 animate-pulse' : 'text-emerald-500/20'}`} />
+                                                </div>
+                                            </td>
+                                            <td className="p-4 text-right pr-6">
+                                                <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <Link
+                                                        href={`/admin/clientes/${c.id}`}
+                                                        className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-600 hover:text-white transition-all rounded"
+                                                        title="Mural de Operações"
+                                                    >
+                                                        <Eye className="w-3.5 h-3.5" />
+                                                    </Link>
+                                                    <button onClick={() => handleOpenModal(c)} className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-600 hover:text-white transition-all rounded"><Edit className="w-3.5 h-3.5" /></button>
+                                                    <button onClick={() => handleDelete(c.id, c.nome)} className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-700 hover:text-rose-500 transition-all rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

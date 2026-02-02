@@ -10,7 +10,7 @@ export async function POST(request: Request) {
         const supabase = await createClient();
 
         // 1. Buscar cliente(s)
-        let queryBuilder = supabase.from('clientes').select('*');
+        let queryBuilder = supabase.from('clientes').select('*').eq('status_hub', 'ATIVO');
         if (clientId) {
             queryBuilder = queryBuilder.eq('id', clientId);
         }
