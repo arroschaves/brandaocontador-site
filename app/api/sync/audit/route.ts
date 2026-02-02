@@ -140,14 +140,15 @@ export async function POST(request: Request) {
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
-                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO', 'DECLARACAO'],
-                    'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL'],
-                    'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA'],
-                    'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO', 'TRANSMISSAO'],
-                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE']
+                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO', 'DECLARACAO', 'SIMPLES_NACIONAL'],
+                    'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL', 'SEFIP', 'RELAÇÃO_FGTS'],
+                    'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA', 'DARF_PREVIDENCIARIO'],
+                    'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO', 'TRANSMISSAO', 'COMPROVANTE_DCTF'],
+                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE', 'RELAÇÃO', 'RELACAO', 'COMPROVANTE', 'EVENTO', 'FOLHA_DE_PAGAMENTO']
                 };
 
-                const mesRegex = new RegExp(`(?:_|^|[^0-9])${mesStr}(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
+                const monthNumShort = parseInt(mesStr).toString(); // "1" em vez de "01"
+                const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNumShort})(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
@@ -174,9 +175,25 @@ export async function POST(request: Request) {
                         // 4. Contexto de Ano
                         const matchesYear = fileName.includes(currentYear) || parentName.includes(currentYear) || file.depth >= 3;
 
+                        // 5. Contexto de Departamento (RH/Fiscal)
+                        const isRHFolder = parentName.includes('RH') || parentName.includes('PESSOAL') || parentName.includes('FOLHA');
+
                         // DECISÃO DO MAESTRO (SCORE):
-                        // Se bate o padrão E (tem o mês/ano OR foi criado recentemente no contexto de RH/Fiscal)
-                        return matchesPattern && ((matchesMonth && matchesYear) || (isRecentInWindow && file.depth >= 2));
+                        let isMatch = false;
+                        if (matchesPattern) {
+                            if (matchesMonth && matchesYear) isMatch = true;
+                            else if (isRecentInWindow && file.depth >= 3) isMatch = true;
+                        }
+
+                        // Fallback especial para Folha se estiver na pasta certa de 2026/Mês mesmo sem padrão forte
+                        if (!isMatch && rotina.name === 'Folha de Pagamento' && (isRHFolder && matchesMonth && matchesYear)) {
+                            // Se tem pelo menos 5 letras e não é PDF genérico/vazio, aceitamos como folha no contexto RH
+                            if (fileName.length > 5 && !fileName.includes('PASTA') && !fileName.includes('DOCUMENTO')) {
+                                isMatch = true;
+                            }
+                        }
+
+                        return isMatch;
                     });
 
                     const found = matchesFound.length > 0;
