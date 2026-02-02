@@ -140,14 +140,14 @@ export async function POST(request: Request) {
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
-                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO'],
+                    'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO', 'DECLARACAO'],
                     'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL'],
                     'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA'],
                     'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO', 'TRANSMISSAO'],
-                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE']
+                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE']
                 };
 
-                const mesRegex = new RegExp(`\\b${mesStr}\\b|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
+                const mesRegex = new RegExp(`(?:_|^|[^0-9])${mesStr}(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
@@ -156,14 +156,27 @@ export async function POST(request: Request) {
                         const fileName = file.name?.toUpperCase() || '';
                         const parentName = file.parentName?.toUpperCase() || '';
 
+                        // 1. Padrão de Nome (DAS, FOLHA, etc)
                         const matchesPattern = patterns.some((p: string) => fileName.includes(p.toUpperCase()));
-                        // O mês pode estar no nome do arquivo OU no nome da pasta pai (contexto)
+
+                        // 2. Data de Criação (Inteligência sugerida pelo usuário)
+                        // Se o arquivo foi criado em 2026, é um fortíssimo candidato
+                        const fileDate = file.createdTime ? new Date(file.createdTime) : null;
+                        const isCreatedIn2026 = fileDate && fileDate.getFullYear() === refDate.getFullYear();
+                        const isRecentInWindow = isCreatedIn2026 && (
+                            fileDate.getMonth() === refDate.getMonth() || // Criado no mês
+                            fileDate.getMonth() === (refDate.getMonth() + 1) % 12 // Criado no mês seguinte (comum)
+                        );
+
+                        // 3. Contexto de Mês (Nome do arquivo ou pasta pai)
                         const matchesMonth = mesRegex.test(fileName) || mesRegex.test(parentName);
 
-                        // Proteção extra: O ano 2026 deve ser mencionado se não estivermos já em uma pasta de profundidade 3+
-                        const matchesYear = fileName.includes('2026') || parentName.includes('2026') || file.depth >= 3;
+                        // 4. Contexto de Ano
+                        const matchesYear = fileName.includes(currentYear) || parentName.includes(currentYear) || file.depth >= 3;
 
-                        return matchesPattern && matchesMonth && matchesYear;
+                        // DECISÃO DO MAESTRO (SCORE):
+                        // Se bate o padrão E (tem o mês/ano OR foi criado recentemente no contexto de RH/Fiscal)
+                        return matchesPattern && ((matchesMonth && matchesYear) || (isRecentInWindow && file.depth >= 2));
                     });
 
                     const found = matchesFound.length > 0;
