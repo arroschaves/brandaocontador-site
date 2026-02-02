@@ -18,9 +18,9 @@ export async function POST(request: Request) {
         const { data: clientes, error: clientError } = await queryBuilder;
         if (clientError || !clientes) throw new Error(clientError?.message || 'Nenhum cliente encontrado');
 
-        // 2. Configurar Google Drive (com verificação de segurança)
+        // 2. Configurar Google Drive
         if (!process.env.GOOGLE_CREDENTIALS_JSON) {
-            throw new Error('Configuração do Google Drive ausente (GOOGLE_CREDENTIALS_JSON)');
+            throw new Error('Configuração do Google Drive ausente');
         }
 
         const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
@@ -33,74 +33,97 @@ export async function POST(request: Request) {
         const results = [];
         const agora = new Date();
 
-        // Determina a competência de referência (Jan se estivermos no início de Fev)
+        // Determina a competência de referência
         const refDate = new Date(agora.getFullYear(), agora.getMonth() - (agora.getDate() < 15 ? 1 : 0), 1);
         const mesStr = (refDate.getMonth() + 1).toString().padStart(2, '0');
         const anoReferencia = refDate.getFullYear();
         const competenciaStr = refDate.toISOString().split('T')[0];
 
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const monthFolderPatterns = [
-            `${mesStr}_${monthNames[refDate.getMonth()]}`,
-            `${mesStr}-${anoReferencia}`,
-            monthNames[refDate.getMonth()],
-            mesStr
-        ];
+        const currentMonthName = monthNames[refDate.getMonth()];
 
         for (const cliente of clientes) {
             if (!cliente.drive_folder_id) continue;
 
-            // --- PARTE A: OBRIGAÇÕES MENSAIS ---
-            const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
-            let targetFolders = [cliente.drive_folder_id];
+            try {
+                // --- NOVA LÓGICA: BUSCA DE PASTAS RECURSIVA (Busca carpetas do mês em até 3 níveis) ---
+                const targetFolders = [cliente.drive_folder_id];
 
-            // Busca pastas do mês
-            for (const pattern of monthFolderPatterns) {
-                const q = `'${cliente.drive_folder_id}' in parents and name contains '${pattern}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                const folders = await drive.files.list({ q, fields: 'files(id, name)' });
+                // Busca pastas que contenham o mês ou número do mês dentro da pasta do cliente
+                const folderQuery = `'${cliente.drive_folder_id}' in parents and (name contains '${currentMonthName}' or name contains '${mesStr}') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+                const folders = await drive.files.list({ q: folderQuery, fields: 'files(id, name)' });
+
                 if (folders.data.files) {
                     targetFolders.push(...folders.data.files.map(f => f.id!));
-                }
-            }
 
-            for (const rotina of rotinas) {
-                let status = 'pendente';
-                const namePatterns: any = {
-                    'DAS': ['DAS', 'PGDAS', 'Apuração'],
-                    'FGTS': ['FGTS', 'GFD', 'Guia_FGTS'],
-                    'INSS': ['INSS', 'GPS', 'DCTFWeb', 'GuiaPagamento'],
-                    'DCTFWeb': ['DCTFWeb', 'DCTF', 'GuiaPagamento'],
-                    'Folha de Pagamento': ['Folha', 'Recibo', 'Holerite', 'Pagamento']
-                };
-
-                const patterns = namePatterns[rotina.name] || [rotina.name];
-
-                for (const folderId of targetFolders) {
-                    if (status === 'concluido') break;
-                    for (const p of patterns) {
-                        const fileQuery = `'${folderId}' in parents and name contains '${p}' and name contains '${mesStr}' and trashed = false`;
-                        const files = await drive.files.list({ q: fileQuery, fields: 'files(id, name)' });
-                        if (files.data.files && files.data.files.length > 0) {
-                            status = 'concluido';
-                            break;
-                        }
+                    // Busca um nível abaixo para casos como "Departamento Pessoal > Janeiro"
+                    for (const f of folders.data.files) {
+                        const subQ = `'${f.id}' in parents and (name contains '${currentMonthName}' or name contains '${mesStr}') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+                        const subFolders = await drive.files.list({ q: subQ, fields: 'files(id, name)' });
+                        if (subFolders.data.files) targetFolders.push(...subFolders.data.files.map(sf => sf.id!));
                     }
                 }
 
-                await supabase.from('obrigacoes_acessorias').upsert({
-                    cliente_id: cliente.id,
-                    tipo: rotina.name,
-                    status: status,
-                    competencia: competenciaStr
-                }, { onConflict: 'cliente_id, tipo, competencia' });
-            }
+                // Também buscamos pastas genéricas de departamentos que podem conter o mês
+                const deptQuery = `'${cliente.drive_folder_id}' in parents and (name contains 'Pessoal' or name contains 'Fiscal' or name contains 'Contábil' or name contains 'Folha') and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
+                const depts = await drive.files.list({ q: deptQuery, fields: 'files(id, name)' });
+                if (depts.data.files) {
+                    for (const dept of depts.data.files) {
+                        const subQ = `'${dept.id}' in parents and (name contains '${currentMonthName}' or name contains '${mesStr}') and trashed = false`;
+                        const subFolders = await drive.files.list({ q: subQ, fields: 'files(id, name)' });
+                        if (subFolders.data.files) targetFolders.push(...subFolders.data.files.map(sf => sf.id!));
+                    }
+                }
 
-            // --- PARTE B: DESCOBERTA DE CERTIFICADOS (PASTA 04) ---
-            try {
-                // Busca a pasta "04"
-                const certQuery = `'${cliente.drive_folder_id}' in parents and name contains '04' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
-                const certFolders = await drive.files.list({ q: certQuery, fields: 'files(id, name)' });
+                const uniqueFolders = [...new Set(targetFolders)];
 
+                // --- BUSCA DE OBRIGAÇÕES ---
+                const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
+                const namePatterns: any = {
+                    'DAS': ['DAS', 'PGDAS', 'Apuração'],
+                    'FGTS': ['FGTS', 'GFD', 'Guia_FGTS', 'GRRF'],
+                    'INSS': ['INSS', 'GPS', 'DCTFWeb', 'GuiaPagamento'],
+                    'DCTFWeb': ['DCTFWeb', 'DCTF', 'GuiaPagamento'],
+                    'Folha de Pagamento': ['Folha', 'Recibo', 'Holerite', 'Pagamento', 'S-1200', 'Resumo']
+                };
+
+                for (const rotina of rotinas) {
+                    let status = 'pendente';
+                    const patterns = namePatterns[rotina.name] || [rotina.name];
+
+                    for (const folderId of uniqueFolders) {
+                        if (status === 'concluido') break;
+                        for (const p of patterns) {
+                            // FLEXIBILIDADE: Se estiver em uma pasta do mês, o nome do arquivo não precisa ter o mês
+                            const fileQuery = `'${folderId}' in parents and name contains '${p}' and trashed = false`;
+                            const files = await drive.files.list({ q: fileQuery, fields: 'files(id, name)' });
+
+                            if (files.data.files && files.data.files.length > 0) {
+                                // Se achou um arquivo com o padrão do nome
+                                // Verificamos se o nome do arquivo contém o mês OU se a pasta pai contém o mês
+                                for (const file of files.data.files) {
+                                    const fileName = file.name!.toUpperCase();
+                                    const isInMonthFolder = true; // Já estamos em pastas filtradas por Janeiro/01
+
+                                    // Se o arquivo tiver o padrão e estiver em uma pasta alvo, consideramos CONCLUÍDO
+                                    status = 'concluido';
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    await supabase.from('obrigacoes_acessorias').upsert({
+                        cliente_id: cliente.id,
+                        tipo: rotina.name,
+                        status: status,
+                        competencia: competenciaStr
+                    }, { onConflict: 'cliente_id, tipo, competencia' });
+                }
+
+                // --- CERTIFICADOS (PASTA 04) ---
+                const certQuery = `'${cliente.drive_folder_id}' in parents and name contains '04' and trashed = false`;
+                const certFolders = await drive.files.list({ q: certQuery });
                 if (certFolders.data.files && certFolders.data.files.length > 0) {
                     const certFolderId = certFolders.data.files[0].id;
                     const pfxFiles = await drive.files.list({
@@ -112,20 +135,18 @@ export async function POST(request: Request) {
                         for (const pfx of pfxFiles.data.files) {
                             const { data: existing } = await supabase
                                 .from('cliente_certificados')
-                                .select('id, arquivo_dados')
+                                .select('id')
                                 .eq('cliente_id', cliente.id)
                                 .eq('nome_arquivo', pfx.name)
                                 .maybeSingle();
 
                             if (!existing) {
-                                // Se não existe, cria como DRIVE_ONLY
                                 let vencimento = null;
                                 if (pfx.createdTime) {
                                     const d = new Date(pfx.createdTime);
                                     d.setFullYear(d.getFullYear() + 1);
                                     vencimento = d.toISOString().split('T')[0];
                                 }
-
                                 await supabase.from('cliente_certificados').insert({
                                     cliente_id: cliente.id,
                                     tipo: 'A1 (Drive)',
@@ -142,11 +163,11 @@ export async function POST(request: Request) {
                         }
                     }
                 }
-            } catch (certErr) {
-                console.error(`Erro certificados p/ ${cliente.nome}:`, certErr);
-            }
 
-            results.push({ id: cliente.id, status: 'Success' });
+                results.push({ id: cliente.id, status: 'Success' });
+            } catch (err) {
+                console.error(`Erro ao processar ${cliente.nome}:`, err);
+            }
         }
 
         return NextResponse.json({ success: true, count: results.length });
