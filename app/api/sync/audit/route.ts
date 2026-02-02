@@ -49,20 +49,12 @@ export async function POST(request: Request) {
             if (!cliente.drive_folder_id) continue;
 
             try {
-                // --- 1. LOCALIZAR PASTAS ALVO (Smart Recursive Discovery) ---
+                // --- 1. LOCALIZAR PASTAS ALVO (Smart Contextual Discovery) ---
                 const targetFolderIds = new Set<string>([cliente.drive_folder_id]);
-                const queue = [{ id: cliente.drive_folder_id, depth: 0 }];
+                const queue = [{ id: cliente.drive_folder_id, depth: 0, context: 'RAIZ' }];
                 const maxDepth = 7;
-                const foldersMap = new Map<string, string>(); // ID -> Nome da pasta
-                const depthMap = new Map<string, number>(); // ID -> Profundidade
-                foldersMap.set(cliente.drive_folder_id, 'RAIZ');
-                depthMap.set(cliente.drive_folder_id, 0);
-
-                // Palavras que indicam que uma pasta deve ser explorada
-                const interestKeywords = [
-                    'PESSOAL', 'FISCAL', 'CONTÁBIL', 'CONTABIL', 'FOLHA', 'RH',
-                    '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO', 'DCTF'
-                ];
+                const foldersMap = new Map<string, { name: string, context: string, depth: number }>();
+                foldersMap.set(cliente.drive_folder_id, { name: 'RAIZ', context: 'RAIZ', depth: 0 });
 
                 const currentYear = refDate.getFullYear().toString(); // "2026"
                 const monthAbbr = currentMonthName.substring(0, 3).toUpperCase(); // "JAN"
@@ -82,25 +74,25 @@ export async function POST(request: Request) {
                             for (const f of folders.data.files) {
                                 const folderName = f.name!.toUpperCase();
 
-                                // FILTRO DE ANO: Se a pasta menciona um ano que não é 2026, ignoramos o ramo
+                                // Filtro de Ano: Ignorar anos passados
                                 const yearsToIgnore = ['2021', '2022', '2023', '2024', '2025'];
-                                const matchesOldYear = yearsToIgnore.some(y => folderName.includes(y));
-                                if (matchesOldYear && !folderName.includes(currentYear)) continue;
+                                if (yearsToIgnore.some(y => folderName.includes(y)) && !folderName.includes(currentYear)) continue;
 
-                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
+                                // Identificar Contexto (RH ou Fiscal) de forma hereditária
+                                let nextContext = current.context;
+                                if (folderName.includes('RH') || folderName.includes('PESSOAL') || folderName.includes('FOLHA')) nextContext = 'RH';
+                                else if (folderName.includes('FISCAL') || folderName.includes('IMPOSTO') || folderName.includes('DAS')) nextContext = 'FISCAL';
+
                                 const isYear = folderName.includes(currentYear);
                                 const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName.toUpperCase()) || folderName.includes(monthAbbr);
 
-                                // PODA INTELIGENTE: Só entramos em pastas que pareçam úteis ou neutras no topo
-                                if (current.depth < 2 || isYear || hasKeyword || isMonth) {
-                                    foldersMap.set(f.id!, f.name!);
-                                    depthMap.set(f.id!, current.depth + 1);
-                                    queue.push({ id: f.id!, depth: current.depth + 1 });
+                                // Adicionar à fila se for uma pasta que mantém o fluxo contábil
+                                foldersMap.set(f.id!, { name: f.name!, context: nextContext, depth: current.depth + 1 });
+                                queue.push({ id: f.id!, depth: current.depth + 1, context: nextContext });
 
-                                    // Se tem o mês ou palavras chaves após entrar no ano/departamento, marcamos para scanner de arquivos
-                                    if (isMonth || (hasKeyword && current.depth >= 2)) {
-                                        targetFolderIds.add(f.id!);
-                                    }
+                                // Se a pasta em si já indica o mês, ela é um alvo prioritário de scan de arquivos
+                                if (isMonth || isYear || current.depth < 2) {
+                                    targetFolderIds.add(f.id!);
                                 }
                             }
                         }
@@ -110,7 +102,7 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
-                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo (Foco ${currentYear}) para ${cliente.nome}`);
+                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo (Foco Contextual) para ${cliente.nome}`);
 
                 // --- 2. FETCH ALL FILES IN PARALLEL BATCHES ---
                 const allFiles: any[] = [];
@@ -119,14 +111,18 @@ export async function POST(request: Request) {
                     const batch = uniqueFolders.slice(i, i + batchSize);
                     const batchPromises = batch.map(async (fId) => {
                         try {
-                            const parentName = foldersMap.get(fId) || '';
-                            const parentDepth = depthMap.get(fId) || 0;
+                            const folderInfo = foldersMap.get(fId);
                             const filesRes = await drive.files.list({
                                 q: `'${fId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`,
                                 fields: 'files(id, name, mimeType, createdTime, size)',
                                 pageSize: 1000
                             });
-                            return (filesRes.data.files || []).map(file => ({ ...file, parentName, depth: parentDepth }));
+                            return (filesRes.data.files || []).map(file => ({
+                                ...file,
+                                parentName: folderInfo?.name || '',
+                                context: folderInfo?.context || 'RAIZ',
+                                depth: folderInfo?.depth || 0
+                            }));
                         } catch (e) {
                             console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
                             return [];
@@ -135,7 +131,7 @@ export async function POST(request: Request) {
                     const results = await Promise.all(batchPromises);
                     results.forEach(files => allFiles.push(...files));
                 }
-                console.log(`[MAESTRO] ${allFiles.length} arquivos encontrados para ${cliente.nome}`);
+                console.log(`[MAESTRO] ${allFiles.length} arquivos analisados para ${cliente.nome}`);
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
@@ -147,8 +143,9 @@ export async function POST(request: Request) {
                     'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE', 'RELAÇÃO', 'RELACAO', 'COMPROVANTE', 'EVENTO', 'FOLHA_DE_PAGAMENTO']
                 };
 
-                const monthNumShort = parseInt(mesStr).toString(); // "1" em vez de "01"
-                const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNumShort})(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
+                // Regex super flexível para o mês (ex: 01, 1, _01_, -01-, Janeiro, Jan)
+                const monthNum = parseInt(mesStr).toString();
+                const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNum})(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
@@ -175,8 +172,9 @@ export async function POST(request: Request) {
                         // 4. Contexto de Ano
                         const matchesYear = fileName.includes(currentYear) || parentName.includes(currentYear) || file.depth >= 3;
 
-                        // 5. Contexto de Departamento (RH/Fiscal)
-                        const isRHFolder = parentName.includes('RH') || parentName.includes('PESSOAL') || parentName.includes('FOLHA');
+                        // 5. Contexto de Departamento (Hereditário)
+                        const isRHContext = file.context === 'RH';
+                        const isFiscalContext = file.context === 'FISCAL';
 
                         // DECISÃO DO MAESTRO (SCORE):
                         let isMatch = false;
@@ -185,12 +183,11 @@ export async function POST(request: Request) {
                             else if (isRecentInWindow && file.depth >= 3) isMatch = true;
                         }
 
-                        // Fallback especial para Folha se estiver na pasta certa de 2026/Mês mesmo sem padrão forte
-                        if (!isMatch && rotina.name === 'Folha de Pagamento' && (isRHFolder && matchesMonth && matchesYear)) {
-                            // Se tem pelo menos 5 letras e não é PDF genérico/vazio, aceitamos como folha no contexto RH
-                            if (fileName.length > 5 && !fileName.includes('PASTA') && !fileName.includes('DOCUMENTO')) {
-                                isMatch = true;
-                            }
+                        // Fallback: Se o arquivo está no contexto correto (RH para folha, Fiscal para DAS)
+                        // e o nome da pasta pai ou o arquivo indicam o mês/ano, aceitamos com confiança alta
+                        if (!isMatch && matchesMonth && matchesYear) {
+                            if (rotina.name === 'Folha de Pagamento' && isRHContext) isMatch = true;
+                            if (rotina.name === 'DAS' && isFiscalContext) isMatch = true;
                         }
 
                         return isMatch;
