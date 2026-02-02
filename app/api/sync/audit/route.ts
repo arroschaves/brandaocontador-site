@@ -101,9 +101,9 @@ export async function POST(request: Request) {
                 };
 
                 const upsertPromises = rotinas.map(rotina => {
-                    const patterns = namePatterns[rotina.name] || [rotina.name];
-                    const found = allFiles.some(file =>
-                        patterns.some(p => file.name.toUpperCase().includes(p.toUpperCase()))
+                    const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
+                    const found = allFiles.some((file: any) =>
+                        patterns.some((p: string) => file.name?.toUpperCase().includes(p.toUpperCase()))
                     );
 
                     return supabase.from('obrigacoes_acessorias').upsert({
@@ -120,7 +120,7 @@ export async function POST(request: Request) {
                 // Otimização: Se já lemos a pasta 04 no allFiles (provavelmente não, pois ela não costuma ter 'Pessoal' no nome)
                 // Vamos buscar especificamente a '04' se ela não estiver nos uniqueFolders
                 const folder04 = allFiles.find(f => f.mimeType === 'application/vnd.google-apps.folder' && f.name.includes('04'));
-                let certFiles = [];
+                let certFiles: any[] = [];
 
                 if (folder04) {
                     const res04 = await drive.files.list({
