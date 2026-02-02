@@ -54,7 +54,6 @@ export async function POST(request: Request) {
         const { error: clientUpdateError } = await supabase
             .from('clientes')
             .update({
-                status_hub: 'INATIVO',
                 updated_at: new Date().toISOString()
             })
             .eq('id', clientId)

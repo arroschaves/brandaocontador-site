@@ -484,13 +484,10 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                                 </p>
                                                 <button
                                                     onClick={handleOffboarding}
-                                                    disabled={syncing || client?.status_hub === 'INATIVO'}
-                                                    className={`w-full py-3 rounded text-[10px] font-black uppercase transition-all ${client?.status_hub === 'INATIVO'
-                                                            ? 'bg-neutral-900 text-neutral-700 cursor-not-allowed border border-neutral-800'
-                                                            : 'bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white'
-                                                        }`}
+                                                    disabled={syncing}
+                                                    className="w-full py-3 rounded text-[10px] font-black uppercase transition-all bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white"
                                                 >
-                                                    {client?.status_hub === 'INATIVO' ? 'CLIENTE JÁ INATIVADO' : 'INICIAR OFFBOARDING DEFINITIVO'}
+                                                    INICIAR OFFBOARDING DEFINITIVO
                                                 </button>
                                             </div>
                                         )}
