@@ -98,7 +98,6 @@ function ClientesContent() {
             const { data: clientsData, error: clientErr } = await supabase
                 .from('clientes')
                 .select('*')
-                .eq('status_hub', 'ATIVO') // Apenas ativos no dashboard principal
                 .order('nome', { ascending: true });
 
             if (clientErr) throw clientErr;
@@ -169,23 +168,25 @@ function ClientesContent() {
         router.push(`/admin/clientes/${id}`);
     };
     async function handleGlobalSync() {
-        if (!confirm('MAESTRO: Deseja rodar o radar global em toda a carteira de clientes ativos? Isso pode levar alguns segundos.')) return;
+        if (!confirm('MAESTRO: Deseja rodar o radar global em toda a carteira? Isso será feito individualmente para evitar sobrecarga.')) return;
 
         try {
             setGlobalSyncing(true);
-            const res = await fetch('/api/sync/audit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}) // Sem clientId = Sincroniza todos
-            });
+            const activeClients = clientes; // Todos os clientes carregados
 
-            if (res.ok) {
-                alert('MAESTRO: Radar Global finalizado! Atualizando painéis...');
-                fetchClientes();
-            } else {
-                throw new Error('Falha na sincronização global');
+            for (const client of activeClients) {
+                console.log(`[MAESTRO] Sincronizando: ${client.nome}`);
+                await fetch('/api/sync/audit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId: client.id })
+                });
             }
+
+            alert('MAESTRO: Radar Global finalizado com sucesso!');
+            fetchClientes();
         } catch (err: any) {
+            console.error(err);
             alert('Erro no Radar Global: ' + err.message);
         } finally {
             setGlobalSyncing(false);
@@ -317,10 +318,10 @@ function ClientesContent() {
                         <button
                             onClick={handleGlobalSync}
                             disabled={globalSyncing}
-                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'} border border-current font-black uppercase text-[10px] tracking-widest hover:bg-current hover:text-black transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
+                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'} border border-current font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
                         >
-                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5 shadow-none" />}
-                            {globalSyncing ? 'MAESTRO EM CAMPO...' : 'RADAR GLOBAL'}
+                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                            {globalSyncing ? 'SINCRONIZANDO CARTEIRA...' : 'RADAR GLOBAL'}
                         </button>
                         <button
                             onClick={() => handleOpenModal()}
