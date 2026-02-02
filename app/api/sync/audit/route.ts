@@ -1,3 +1,4 @@
+
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
@@ -7,15 +8,13 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
         const clientId = body.clientId;
+        const isDebug = body.debug === true;
         const supabase = await createClient();
 
         // 1. Buscar cliente(s)
         let queryBuilder = supabase.from('clientes').select('*');
         if (clientId) {
             queryBuilder = queryBuilder.eq('id', clientId);
-        } else {
-            // Se não houver ID, por segurança no Radar Global do Backend, buscamos todos
-            // Mas agora o frontend orquestra um por um.
         }
 
         const { data: clientes, error: clientError } = await queryBuilder;
@@ -35,7 +34,7 @@ export async function POST(request: Request) {
         });
         const drive = google.drive({ version: 'v3', auth });
 
-        const results = [];
+        const syncResults: any[] = [];
         const agora = new Date();
 
         // Determina a competência de referência
@@ -43,10 +42,13 @@ export async function POST(request: Request) {
         const mesStr = (refDate.getMonth() + 1).toString().padStart(2, '0');
         const competenciaStr = refDate.toISOString().split('T')[0];
         const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-        const currentMonthName = monthNames[refDate.getMonth()];
+        const currentMonthName = monthNames[refDate.getMonth()].toUpperCase();
 
         for (const cliente of clientes) {
             if (!cliente.drive_folder_id) continue;
+
+            const maestroLogs: string[] = [];
+            const clientDebug: any = { filesFound: [], scannedFolders: [] };
 
             try {
                 // --- 1. LOCALIZAR PASTAS ALVO (Smart Contextual Discovery) ---
@@ -56,8 +58,8 @@ export async function POST(request: Request) {
                 const foldersMap = new Map<string, { name: string, context: string, depth: number }>();
                 foldersMap.set(cliente.drive_folder_id, { name: 'RAIZ', context: 'RAIZ', depth: 0 });
 
-                const currentYear = refDate.getFullYear().toString(); // "2026"
-                const monthAbbr = currentMonthName.substring(0, 3).toUpperCase(); // "JAN"
+                const currentYear = refDate.getFullYear().toString();
+                const monthAbbr = currentMonthName.substring(0, 3).toUpperCase();
 
                 while (queue.length > 0) {
                     const current = queue.shift()!;
@@ -78,19 +80,17 @@ export async function POST(request: Request) {
                                 const yearsToIgnore = ['2021', '2022', '2023', '2024', '2025'];
                                 if (yearsToIgnore.some(y => folderName.includes(y)) && !folderName.includes(currentYear)) continue;
 
-                                // Identificar Contexto (RH ou Fiscal) de forma hereditária
+                                // Identificar Contexto (RH ou Fiscal)
                                 let nextContext = current.context;
                                 if (folderName.includes('RH') || folderName.includes('PESSOAL') || folderName.includes('FOLHA')) nextContext = 'RH';
                                 else if (folderName.includes('FISCAL') || folderName.includes('IMPOSTO') || folderName.includes('DAS')) nextContext = 'FISCAL';
 
                                 const isYear = folderName.includes(currentYear);
-                                const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName.toUpperCase()) || folderName.includes(monthAbbr);
+                                const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName) || folderName.includes(monthAbbr);
 
-                                // Adicionar à fila se for uma pasta que mantém o fluxo contábil
                                 foldersMap.set(f.id!, { name: f.name!, context: nextContext, depth: current.depth + 1 });
                                 queue.push({ id: f.id!, depth: current.depth + 1, context: nextContext });
 
-                                // Se a pasta em si já indica o mês, ela é um alvo prioritário de scan de arquivos
                                 if (isMonth || isYear || current.depth < 2) {
                                     targetFolderIds.add(f.id!);
                                 }
@@ -102,9 +102,9 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
-                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo (Foco Contextual) para ${cliente.nome}`);
+                if (isDebug) clientDebug.scannedFolders = uniqueFolders.map(id => foldersMap.get(id)?.name);
 
-                // --- 2. FETCH ALL FILES IN PARALLEL BATCHES ---
+                // --- 2. FETCH ALL FILES ---
                 const allFiles: any[] = [];
                 const batchSize = 15;
                 for (let i = 0; i < uniqueFolders.length; i += batchSize) {
@@ -124,14 +124,14 @@ export async function POST(request: Request) {
                                 depth: folderInfo?.depth || 0
                             }));
                         } catch (e) {
-                            console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
                             return [];
                         }
                     });
                     const results = await Promise.all(batchPromises);
                     results.forEach(files => allFiles.push(...files));
                 }
-                console.log(`[MAESTRO] ${allFiles.length} arquivos analisados para ${cliente.nome}`);
+
+                if (isDebug) clientDebug.filesFound = allFiles.map(f => ({ name: f.name, parentName: f.parentName, context: f.context }));
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
@@ -143,133 +143,57 @@ export async function POST(request: Request) {
                     'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE', 'RELAÇÃO', 'RELACAO', 'COMPROVANTE', 'EVENTO', 'FOLHA_DE_PAGAMENTO']
                 };
 
-                // Regex super flexível para o mês (ex: 01, 1, _01_, -01-, Janeiro, Jan)
-                const monthNum = parseInt(mesStr).toString();
-                const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNum})(?:_|$|[^0-9])|${currentMonthName.toUpperCase()}|${monthAbbr}`, 'i');
+                const monthNumShort = parseInt(mesStr).toString();
+                const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNumShort})(?:_|$|[^0-9])|${currentMonthName}|${monthAbbr}`, 'i');
 
                 const upsertPromises = rotinas.map(rotina => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
-
                     const matchesFound = allFiles.filter((file: any) => {
                         const fileName = file.name?.toUpperCase() || '';
                         const parentName = file.parentName?.toUpperCase() || '';
-
-                        // 1. Padrão de Nome (DAS, FOLHA, etc)
                         const matchesPattern = patterns.some((p: string) => fileName.includes(p.toUpperCase()));
-
-                        // 2. Data de Criação (Inteligência sugerida pelo usuário)
-                        // Se o arquivo foi criado em 2026, é um fortíssimo candidato
                         const fileDate = file.createdTime ? new Date(file.createdTime) : null;
                         const isCreatedIn2026 = fileDate && fileDate.getFullYear() === refDate.getFullYear();
-                        const isRecentInWindow = isCreatedIn2026 && (
-                            fileDate.getMonth() === refDate.getMonth() || // Criado no mês
-                            fileDate.getMonth() === (refDate.getMonth() + 1) % 12 // Criado no mês seguinte (comum)
-                        );
-
-                        // 3. Contexto de Mês (Nome do arquivo ou pasta pai)
+                        const isRecentInWindow = isCreatedIn2026 && (fileDate.getMonth() === refDate.getMonth() || fileDate.getMonth() === (refDate.getMonth() + 1) % 12);
                         const matchesMonth = mesRegex.test(fileName) || mesRegex.test(parentName);
-
-                        // 4. Contexto de Ano
                         const matchesYear = fileName.includes(currentYear) || parentName.includes(currentYear) || file.depth >= 3;
-
-                        // 5. Contexto de Departamento (Hereditário)
                         const isRHContext = file.context === 'RH';
                         const isFiscalContext = file.context === 'FISCAL';
 
-                        // DECISÃO DO MAESTRO (SCORE):
                         let isMatch = false;
                         if (matchesPattern) {
                             if (matchesMonth && matchesYear) isMatch = true;
                             else if (isRecentInWindow && file.depth >= 3) isMatch = true;
                         }
-
-                        // Fallback: Se o arquivo está no contexto correto (RH para folha, Fiscal para DAS)
-                        // e o nome da pasta pai ou o arquivo indicam o mês/ano, aceitamos com confiança alta
                         if (!isMatch && matchesMonth && matchesYear) {
                             if (rotina.name === 'Folha de Pagamento' && isRHContext) isMatch = true;
                             if (rotina.name === 'DAS' && isFiscalContext) isMatch = true;
                         }
-
                         return isMatch;
                     });
 
                     const found = matchesFound.length > 0;
-
                     return supabase.from('obrigacoes_acessorias').upsert({
                         cliente_id: cliente.id,
                         tipo: rotina.name,
                         status: found ? 'concluido' : 'pendente',
-                        competencia: competenciaStr
+                        competencia: competenciaStr,
                     }, { onConflict: 'cliente_id, tipo, competencia' });
                 });
 
                 await Promise.all(upsertPromises);
+                syncResults.push({ id: cliente.id, success: true, debug: isDebug ? clientDebug : undefined });
 
-                // --- 4. CERTIFICADOS (PASTA 04) ---
-                // Otimização: Se já lemos a pasta 04 no allFiles (provavelmente não, pois ela não costuma ter 'Pessoal' no nome)
-                // Vamos buscar especificamente a '04' se ela não estiver nos uniqueFolders
-                const folder04 = allFiles.find(f => f.mimeType === 'application/vnd.google-apps.folder' && f.name.includes('04'));
-                let certFiles: any[] = [];
-
-                if (folder04) {
-                    const res04 = await drive.files.list({
-                        q: `'${folder04.id}' in parents and (name contains '.pfx' or name contains '.p12') and trashed = false`,
-                        fields: 'files(id, name, createdTime)'
-                    });
-                    certFiles = res04.data.files || [];
-                } else {
-                    // Busca tradicional se não achou no cache inicial
-                    const certSearch = await drive.files.list({
-                        q: `'${cliente.drive_folder_id}' in parents and name contains '04' and trashed = false`,
-                        fields: 'files(id, name)'
-                    });
-                    if (certSearch.data.files && certSearch.data.files.length > 0) {
-                        const res04 = await drive.files.list({
-                            q: `'${certSearch.data.files[0].id}' in parents and (name contains '.pfx' or name contains '.p12') and trashed = false`,
-                            fields: 'files(id, name, createdTime)'
-                        });
-                        certFiles = res04.data.files || [];
-                    }
-                }
-
-                for (const pfx of certFiles) {
-                    const { data: existing } = await supabase
-                        .from('cliente_certificados')
-                        .select('id')
-                        .eq('cliente_id', cliente.id)
-                        .eq('nome_arquivo', pfx.name)
-                        .maybeSingle();
-
-                    if (!existing) {
-                        let vencimento = null;
-                        if (pfx.createdTime) {
-                            const d = new Date(pfx.createdTime);
-                            d.setFullYear(d.getFullYear() + 1);
-                            vencimento = d.toISOString().split('T')[0];
-                        }
-                        await supabase.from('cliente_certificados').insert({
-                            cliente_id: cliente.id,
-                            tipo: 'A1 (Drive)',
-                            nome_arquivo: pfx.name,
-                            data_vencimento: vencimento,
-                            arquivo_dados: 'DRIVE_ONLY',
-                            arquivo_iv: 'N/A', arquivo_tag: 'N/A',
-                            senha_dados: 'PENDENTE',
-                            senha_iv: 'N/A', senha_tag: 'N/A'
-                        });
-                    }
-                }
-
-                results.push({ id: cliente.id, status: 'Success' });
-            } catch (err) {
-                console.error(`Erro ao processar ${cliente.nome}:`, err);
+            } catch (e: any) {
+                console.error(`Erro ao sincronizar cliente ${cliente.id}:`, e);
+                syncResults.push({ id: cliente.id, success: false, error: e.message });
             }
         }
 
-        return NextResponse.json({ success: true, count: results.length });
+        return NextResponse.json({ success: true, results: syncResults });
 
     } catch (error: any) {
-        console.error('Audit Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error('[Sync Error]:', error);
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 }

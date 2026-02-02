@@ -31,6 +31,10 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [showVault, setShowVault] = useState(false)
     const [loadingCerts, setLoadingCerts] = useState(false)
     const [competenciaReferencia, setCompetenciaReferencia] = useState('')
+    const [showMappingModal, setShowMappingModal] = useState(false)
+    const [mappingData, setMappingData] = useState<any>(null)
+    const [mappingLoading, setMappingLoading] = useState(false)
+    const [selectedRoutine, setSelectedRoutine] = useState<any>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const supabase = createClient()
@@ -94,11 +98,16 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             const res = await fetch('/api/sync/audit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ clientId })
+                body: JSON.stringify({ clientId, debug: true })
             })
 
             const result = await res.json()
             if (!res.ok) throw new Error(result.error || 'Falha na sincronização')
+
+            // Salva dados de debug para o mapeamento manual se necessário
+            if (result.results?.[0]?.debug) {
+                setMappingData(result.results[0].debug)
+            }
 
             alert('MAESTRO: Sincronização concluída com sucesso!')
             await fetchClientData()
@@ -108,6 +117,60 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             alert(`ERRO DE SINCRONIZAÇÃO: ${err.message}`)
         } finally {
             setSyncing(false)
+        }
+    }
+
+    async function openMappingDialog(routine: any) {
+        setSelectedRoutine(routine)
+        setShowMappingModal(true)
+
+        // Se ainda não temos dados de mapeamento do último sync, buscamos em modo debug
+        if (!mappingData) {
+            setMappingLoading(true)
+            try {
+                const res = await fetch('/api/sync/audit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId, debug: true })
+                })
+                const result = await res.json()
+                if (result.results?.[0]?.debug) {
+                    setMappingData(result.results[0].debug)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setMappingLoading(false)
+            }
+        }
+    }
+
+    async function handleManualLink(file: any) {
+        setMappingLoading(true)
+        try {
+            const res = await fetch('/api/sync/audit/manual-map', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    clientId,
+                    tipo: selectedRoutine.tipo,
+                    competencia: competenciaReferencia,
+                    fileId: file.id,
+                    fileName: file.name
+                })
+            })
+            const result = await res.json()
+            if (result.success) {
+                setShowMappingModal(false)
+                fetchClientData()
+            } else {
+                alert('Erro ao vincular: ' + result.error)
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Falha crítica ao vincular arquivo.')
+        } finally {
+            setMappingLoading(false)
         }
     }
 
@@ -432,10 +495,14 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         const status = ob?.status || 'pendente';
 
                                         return (
-                                            <div key={tipo} className="p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all">
+                                            <div
+                                                key={tipo}
+                                                onClick={() => status !== 'concluido' && openMappingDialog({ tipo, status })}
+                                                className={`p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all cursor-pointer ${status !== 'concluido' ? 'hover:bg-neutral-900/50' : ''}`}
+                                            >
                                                 <div className="flex items-center gap-4">
                                                     <div className={`w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg ${status === 'concluido' ? 'text-emerald-500' : 'text-neutral-600'} group-hover:text-emerald-500 transition-colors`}>
-                                                        <FileText className="w-5 h-5" />
+                                                        {status === 'concluido' ? <CheckCircle2 className="w-5 h-5" /> : <FileSearch className="w-5 h-5" />}
                                                     </div>
                                                     <div>
                                                         <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo === 'Folha de Pagamento' ? 'Folha' : tipo}</p>
@@ -447,12 +514,12 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                         status === 'atrasado' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
                                                             'bg-neutral-900 border-neutral-800 text-neutral-600'
                                                         }`}>
-                                                        {status === 'concluido' ? 'No Drive' : status === 'atrasado' ? 'Atrasado' : 'Pendente'}
+                                                        {status === 'concluido' ? 'No Drive' : status === 'atrasado' ? 'Atrasado' : 'Mapear Arquivo'}
                                                     </span>
                                                     {status === 'concluido' ? (
                                                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                                                     ) : (
-                                                        <div className="w-4 h-4 rounded-full border border-neutral-800" />
+                                                        <Search className="w-4 h-4 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
                                                     )}
                                                 </div>
                                             </div>
@@ -706,6 +773,86 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     </div>
                 </div>
             )}
+
+            <MappingModal
+                showMappingModal={showMappingModal}
+                setShowMappingModal={setShowMappingModal}
+                mappingLoading={mappingLoading}
+                mappingData={mappingData}
+                client={client}
+                selectedRoutine={selectedRoutine}
+                handleManualLink={handleManualLink}
+            />
         </div>
     )
+}
+
+{/* Modal de Mapeamento Manual Maestro */ }
+function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, mappingData, client, selectedRoutine, handleManualLink }: any) {
+    if (!showMappingModal) return null;
+    return (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+            <div className="w-full max-w-2xl bg-neutral-950 border border-neutral-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+                <div className="p-6 border-b border-neutral-800 flex items-center justify-between bg-black">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500 text-black rounded-lg">
+                            <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-black text-sm uppercase italic">Explorador Maestro: {selectedRoutine?.tipo}</h3>
+                            <p className="text-[9px] font-mono text-neutral-600 uppercase">Vincule o arquivo correto para ensinar a IA</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-0 max-h-[60vh] overflow-y-auto bg-black/50">
+                    {mappingLoading ? (
+                        <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                            <Activity className="w-8 h-8 text-emerald-500 animate-spin" />
+                            <p className="text-[10px] font-black text-neutral-500 uppercase animate-pulse">Consultando Drive de {client?.nome}...</p>
+                        </div>
+                    ) : mappingData?.filesFound?.length > 0 ? (
+                        <div className="divide-y divide-neutral-900 border-b border-neutral-900">
+                            {mappingData.filesFound.map((file: any) => (
+                                <div
+                                    key={file.id}
+                                    onClick={() => handleManualLink(file)}
+                                    className="p-4 flex items-center justify-between hover:bg-emerald-500/5 cursor-pointer transition-all group"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-500 rounded group-hover:text-emerald-500 transition-colors">
+                                            <FileCode className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-neutral-300 group-hover:text-emerald-400">{file.name}</p>
+                                            <p className="text-[8px] font-mono text-neutral-600 uppercase italic">Pasta: {file.parentName} {file.context !== 'RAIZ' && `• Contexto: ${file.context}`}</p>
+                                        </div>
+                                    </div>
+                                    <button className="px-3 py-1 bg-neutral-900 border border-neutral-800 text-[9px] font-black text-neutral-500 group-hover:bg-emerald-500 group-hover:text-black group-hover:border-emerald-500 transition-all uppercase italic rounded">
+                                        Vincular
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-20 text-center space-y-4">
+                            <ShieldAlert className="w-8 h-8 text-red-500 mx-auto" />
+                            <p className="text-[10px] font-black text-neutral-500 uppercase px-12 leading-relaxed">
+                                Nenhum arquivo encontrado nas pastas contábeis do ano de 2026. Verifique se o arquivo está no Drive.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-6 border-t border-neutral-800 bg-black flex justify-end">
+                    <button
+                        onClick={() => setShowMappingModal(false)}
+                        className="px-6 py-2 bg-neutral-900 border border-neutral-800 text-[10px] font-black text-white hover:bg-neutral-800 transition-all uppercase rounded"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 }
