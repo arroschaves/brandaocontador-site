@@ -49,12 +49,18 @@ export async function POST(request: Request) {
             if (!cliente.drive_folder_id) continue;
 
             try {
-                // --- 1. LOCALIZAR PASTAS ALVO (Busca Profunda/Greedy Discovery) ---
+                // --- 1. LOCALIZAR PASTAS ALVO (Smart Recursive Discovery) ---
                 const targetFolderIds = new Set<string>([cliente.drive_folder_id]);
                 const queue = [{ id: cliente.drive_folder_id, depth: 0 }];
-                const maxDepth = 8;
+                const maxDepth = 6; // Profundidade suficiente para 99% dos casos
                 const foldersMap = new Map<string, string>(); // ID -> Nome da pasta
                 foldersMap.set(cliente.drive_folder_id, 'RAIZ');
+
+                // Palavras que indicam que uma pasta deve ser explorada
+                const interestKeywords = [
+                    'PESSOAL', 'FISCAL', 'CONTÁBIL', 'CONTABIL', 'FOLHA', 'RH',
+                    '2025', '2026', 'RECIBO', 'DAS', 'FGTS', 'INSS', 'PGDAS', 'IMPOSTO', 'DCTF'
+                ];
 
                 while (queue.length > 0) {
                     const current = queue.shift()!;
@@ -64,14 +70,26 @@ export async function POST(request: Request) {
                         const folders = await drive.files.list({
                             q: `'${current.id}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
                             fields: 'files(id, name)',
-                            pageSize: 1000
+                            pageSize: 100 // Pastas raramente passam de 100 por nível
                         });
 
                         if (folders.data.files) {
                             for (const f of folders.data.files) {
-                                targetFolderIds.add(f.id!);
-                                foldersMap.set(f.id!, f.name!);
-                                queue.push({ id: f.id!, depth: current.depth + 1 });
+                                const folderName = f.name!.toUpperCase();
+                                const isYear = folderName.includes('2025') || folderName.includes('2026');
+                                const hasKeyword = interestKeywords.some(k => folderName.includes(k));
+                                const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName.toUpperCase());
+
+                                // PODA INTELIGENTE: Só entramos em pastas que pareçam úteis para contabilidade
+                                if (current.depth < 2 || isYear || hasKeyword || isMonth) {
+                                    foldersMap.set(f.id!, f.name!);
+                                    queue.push({ id: f.id!, depth: current.depth + 1 });
+
+                                    // Só marcamos para ler arquivos se for de fato uma pasta final de interesse
+                                    if (hasKeyword || isMonth || current.depth >= 3) {
+                                        targetFolderIds.add(f.id!);
+                                    }
+                                }
                             }
                         }
                     } catch (e) {
@@ -80,28 +98,29 @@ export async function POST(request: Request) {
                 }
 
                 const uniqueFolders = Array.from(targetFolderIds);
-                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas para ${cliente.nome}`);
+                console.log(`[MAESTRO] Escaneando total de ${uniqueFolders.length} pastas alvo para ${cliente.nome}`);
 
-                // --- 2. FETCH ALL FILES IN ALL DISCOVERED FOLDERS ---
+                // --- 2. FETCH ALL FILES IN PARALLEL BATCHES ---
                 const allFiles: any[] = [];
-                for (const fId of uniqueFolders) {
-                    try {
-                        const parentName = foldersMap.get(fId) || '';
-                        const filesRes = await drive.files.list({
-                            q: `'${fId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`,
-                            fields: 'files(id, name, mimeType, createdTime)',
-                            pageSize: 1000
-                        });
-                        if (filesRes.data.files) {
-                            const filesWithContext = filesRes.data.files.map(file => ({
-                                ...file,
-                                parentName
-                            }));
-                            allFiles.push(...filesWithContext);
+                const batchSize = 15; // Processamos 15 pastas por vez para velocidade máxima
+                for (let i = 0; i < uniqueFolders.length; i += batchSize) {
+                    const batch = uniqueFolders.slice(i, i + batchSize);
+                    const batchPromises = batch.map(async (fId) => {
+                        try {
+                            const parentName = foldersMap.get(fId) || '';
+                            const filesRes = await drive.files.list({
+                                q: `'${fId}' in parents and trashed = false and mimeType != 'application/vnd.google-apps.folder'`,
+                                fields: 'files(id, name, mimeType, createdTime)',
+                                pageSize: 1000
+                            });
+                            return (filesRes.data.files || []).map(file => ({ ...file, parentName }));
+                        } catch (e) {
+                            console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
+                            return [];
                         }
-                    } catch (e) {
-                        console.error(`Erro ao listar arquivos da pasta ${fId}:`, e);
-                    }
+                    });
+                    const results = await Promise.all(batchPromises);
+                    results.forEach(files => allFiles.push(...files));
                 }
                 console.log(`[MAESTRO] ${allFiles.length} arquivos totais encontrados no Drive de ${cliente.nome}`);
 
