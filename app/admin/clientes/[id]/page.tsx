@@ -1066,11 +1066,23 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 selectedRoutine={selectedRoutine}
                 handleManualLink={handleManualLink}
             />
+
+            {/* PendenciaModal AGORA NO LUGAR CORRETO (Dentro do ClientHubPage) */}
+            <PendenciaModal
+                isOpen={showPendenciaModal}
+                onClose={() => {
+                    setShowPendenciaModal(false)
+                    setAgendamentoEditando(null)
+                }}
+                onSave={handleSalvarAgendamento}
+                agendamento={agendamentoEditando}
+                clientId={clientId}
+            />
         </div>
     )
 }
 
-{/* Modal de Mapeamento Manual Maestro */ }
+// Modal de Mapeamento Manual Maestro
 function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, mappingData, client, selectedRoutine, handleManualLink }: any) {
     if (!showMappingModal) return null;
     return (
@@ -1137,17 +1149,6 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                 </div>
             </div>
         </div>
-        
-        {/* Modal de Pendência */ }
-    <PendenciaModal
-        isOpen={showPendenciaModal}
-        onClose={() => {
-            setShowPendenciaModal(false)
-            setAgendamentoEditando(null)
-        }}
-        onSave={handleSalvarAgendamento}
-        agendamento={agendamentoEditando}
-        clientId={clientId}
-    />
     );
 }
+
