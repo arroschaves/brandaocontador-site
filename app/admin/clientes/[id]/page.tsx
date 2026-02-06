@@ -1108,26 +1108,35 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                         </div>
                     ) : mappingData?.filesFound?.length > 0 ? (
                         <div className="divide-y divide-neutral-900 border-b border-neutral-900">
-                            {mappingData.filesFound.map((file: any) => (
-                                <div
-                                    key={file.id}
-                                    onClick={() => handleManualLink(file)}
-                                    className="p-4 flex items-center justify-between hover:bg-emerald-500/5 cursor-pointer transition-all group"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-500 rounded group-hover:text-emerald-500 transition-colors">
-                                            <FileCode className="w-4 h-4" />
+                            {mappingData.filesFound
+                                .sort((a: any, b: any) => new Date(b.createdTime || 0).getTime() - new Date(a.createdTime || 0).getTime())
+                                .map((file: any) => (
+                                    <div
+                                        key={file.id}
+                                        onClick={() => handleManualLink(file)}
+                                        className="p-4 flex items-center justify-between hover:bg-emerald-500/5 cursor-pointer transition-all group"
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-500 rounded group-hover:text-emerald-500 transition-colors">
+                                                <FileCode className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-neutral-300 group-hover:text-emerald-400">{file.name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-[8px] font-mono text-neutral-600 uppercase italic">Pasta: {file.parentName}</p>
+                                                    {file.createdTime && (
+                                                        <span className="text-[8px] font-mono text-emerald-500/60 bg-emerald-500/5 px-1 rounded">
+                                                            {new Date(file.createdTime).toLocaleDateString('pt-BR')}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-xs font-black text-neutral-300 group-hover:text-emerald-400">{file.name}</p>
-                                            <p className="text-[8px] font-mono text-neutral-600 uppercase italic">Pasta: {file.parentName} {file.context !== 'RAIZ' && `• Contexto: ${file.context}`}</p>
-                                        </div>
+                                        <button className="px-3 py-1 bg-neutral-900 border border-neutral-800 text-[9px] font-black text-neutral-500 group-hover:bg-emerald-500 group-hover:text-black group-hover:border-emerald-500 transition-all uppercase italic rounded">
+                                            Vincular
+                                        </button>
                                     </div>
-                                    <button className="px-3 py-1 bg-neutral-900 border border-neutral-800 text-[9px] font-black text-neutral-500 group-hover:bg-emerald-500 group-hover:text-black group-hover:border-emerald-500 transition-all uppercase italic rounded">
-                                        Vincular
-                                    </button>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     ) : (
                         <div className="p-20 text-center space-y-4">

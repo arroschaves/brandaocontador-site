@@ -131,7 +131,13 @@ export async function POST(request: Request) {
                     results.forEach(files => allFiles.push(...files));
                 }
 
-                if (isDebug) clientDebug.filesFound = allFiles.map(f => ({ name: f.name, parentName: f.parentName, context: f.context }));
+                if (isDebug) clientDebug.filesFound = allFiles.map(f => ({
+                    id: f.id,
+                    name: f.name,
+                    parentName: f.parentName,
+                    context: f.context,
+                    createdTime: f.createdTime
+                }));
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
