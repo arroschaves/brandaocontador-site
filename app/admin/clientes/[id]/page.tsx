@@ -1137,18 +1137,6 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                 </div>
             </div>
         </div>
-        
-        {/* Modal de Pendência */ }
-    <PendenciaModal
-        isOpen={showPendenciaModal}
-        onClose={() => {
-            setShowPendenciaModal(false)
-            setAgendamentoEditando(null)
-        }}
-        onSave={handleSalvarAgendamento}
-        agendamento={agendamentoEditando}
-        clientId={clientId}
-    />
     </div >
     );
 }
