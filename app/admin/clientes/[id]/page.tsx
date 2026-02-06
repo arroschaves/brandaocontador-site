@@ -1070,7 +1070,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     )
 }
 
-// Modal de Mapeamento Manual Maestro
+{/* Modal de Mapeamento Manual Maestro */ }
 function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, mappingData, client, selectedRoutine, handleManualLink }: any) {
     if (!showMappingModal) return null;
     return (
@@ -1137,6 +1137,17 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                 </div>
             </div>
         </div>
-    </div >
+        
+        {/* Modal de Pendência */ }
+    <PendenciaModal
+        isOpen={showPendenciaModal}
+        onClose={() => {
+            setShowPendenciaModal(false)
+            setAgendamentoEditando(null)
+        }}
+        onSave={handleSalvarAgendamento}
+        agendamento={agendamentoEditando}
+        clientId={clientId}
+    />
     );
 }
