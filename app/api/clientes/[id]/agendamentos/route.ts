@@ -110,7 +110,7 @@ export async function POST(
         // Log de auditoria
         await logAudit({
             cliente_id: clientId,
-            acao: 'AGENDAMENTO_CRIADO',
+            acao: 'SISTEMA',
             detalhes: `Nova pendência criada: ${descricao} (${tipo_pendencia}) - Vence em ${data_vencimento}`,
             request
         })
@@ -158,7 +158,7 @@ export async function PATCH(
         // Log de auditoria
         await logAudit({
             cliente_id: clientId,
-            acao: 'AGENDAMENTO_ATUALIZADO',
+            acao: 'SISTEMA',
             detalhes: `Agendamento ${agendamentoId} atualizado: ${JSON.stringify(updates)}`,
             request
         })
@@ -204,7 +204,7 @@ export async function DELETE(
         // Log de auditoria
         await logAudit({
             cliente_id: clientId,
-            acao: 'AGENDAMENTO_DELETADO',
+            acao: 'SISTEMA',
             detalhes: `Agendamento ${agendamentoId} removido`,
             request
         })
