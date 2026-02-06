@@ -23,7 +23,9 @@ import {
     Users,
     ShieldCheck,
     Building2,
-    Lock
+    Lock,
+    Sparkles,
+    RefreshCw
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -192,6 +194,51 @@ function ClientesContent() {
             setGlobalSyncing(false);
         }
     }
+    async function handleEnrichmentMaster() {
+        if (!confirm('MAESTRO: Deseja iniciar o enriquecimento inteligente de toda a carteira PJ? Os dados serão validados e preenchidos via API CNPJ.ws (SINTEGRA). Tempo estimado: ~21s por cliente.')) return;
+
+        try {
+            setGlobalSyncing(true);
+            const res = await fetch('/api/clientes/enrich-all');
+            const candidates = await res.json();
+
+            if (!res.ok) throw new Error(candidates.error || 'Falha ao identificar candidatos');
+
+            if (candidates.length === 0) {
+                alert('MAESTRO: Todos os clientes PJ já estão com dados enriquecidos!');
+                return;
+            }
+
+            for (let i = 0; i < candidates.length; i++) {
+                const client = candidates[i];
+                console.log(`[MAESTRO] Enriquecendo (${i + 1}/${candidates.length}): ${client.nome}`);
+
+                const enrichRes = await fetch(`/api/clientes/${client.id}/enrich`, { method: 'POST' });
+
+                if (!enrichRes.ok) {
+                    const err = await enrichRes.json();
+                    if (enrichRes.status === 429) {
+                        alert('LIMITE ATINGIDO: A API de consulta atingiu o limite de 3/min. A operação será pausada. Retome em instantes.');
+                        break;
+                    }
+                    console.error(`Falha no cliente ${client.nome}:`, err.error);
+                }
+
+                if (i < candidates.length - 1) {
+                    // Delay para respeitar limite de 3 req/min (20s + buffer)
+                    await new Promise(r => setTimeout(r, 21000));
+                }
+            }
+
+            alert('MAESTRO: Enriquecimento Master concluído!');
+            fetchClientes();
+        } catch (err: any) {
+            console.error(err);
+            alert('Erro no Enriquecimento Master: ' + err.message);
+        } finally {
+            setGlobalSyncing(false);
+        }
+    }
     const handleCloseDetails = () => {
         setIsSidebarOpen(false);
         setSelectedClientId(null);
@@ -322,6 +369,14 @@ function ClientesContent() {
                         >
                             {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5" />}
                             {globalSyncing ? 'SINCRONIZANDO CARTEIRA...' : 'RADAR GLOBAL'}
+                        </button>
+                        <button
+                            onClick={handleEnrichmentMaster}
+                            disabled={globalSyncing}
+                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-neutral-800 text-neutral-700' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'} border border-current font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
+                        >
+                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                            ENRIQUECIMENTO MASTER
                         </button>
                         <button
                             onClick={() => handleOpenModal()}

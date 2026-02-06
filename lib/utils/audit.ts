@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 
 interface AuditOptions {
     cliente_id?: string;
-    acao: 'UPLOAD' | 'ENVIO_WA' | 'ENVIO_EMAIL' | 'EDICAO_CADASTRO' | 'SISTEMA' | 'ACESSO_VAULT' | 'VISUALIZACAO_SENHA' | 'EXCLUSAO_CERTIFICADO' | 'OFFBOARDING_CONCLUIDO';
+    acao: 'UPLOAD' | 'ENVIO_WA' | 'ENVIO_EMAIL' | 'EDICAO_CADASTRO' | 'SISTEMA' | 'ACESSO_VAULT' | 'VISUALIZACAO_SENHA' | 'EXCLUSAO_CERTIFICADO' | 'OFFBOARDING_CONCLUIDO' | 'ENRIQUECIMENTO';
     detalhes: string;
     request?: Request;
 }

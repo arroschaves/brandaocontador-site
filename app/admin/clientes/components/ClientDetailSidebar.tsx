@@ -6,7 +6,8 @@ import {
     X, Building2, Mail, Phone, Clock, FileText,
     MessageSquare, RefreshCw, Loader2, Building,
     Briefcase, ShieldAlert, FolderOpen, Calculator,
-    FileCheck, FileSearch, Landmark, Users, Upload, Monitor, Server
+    FileCheck, FileSearch, Landmark, Users, Upload, Monitor, Server,
+    Sparkles, MapPin, Fingerprint
 } from 'lucide-react'
 
 interface ClientDetailSidebarProps {
@@ -220,6 +221,34 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
         } catch (err) {
             console.error(err)
             alert('Falha total no processo de offboarding.')
+        } finally {
+            setSyncing(false)
+        }
+    }
+
+    async function handleEnrich() {
+        if (!clientId) return
+        try {
+            const hasConfirmed = confirm('Deseja enriquecer os dados deste cliente via API CNPJ.ws (SINTEGRA/Receita)? Esta ação atualizará o endereço, CNAE e Inscrição Estadual automaticamente.')
+            if (!hasConfirmed) return
+
+            setSyncing(true)
+            const res = await fetch(`/api/clientes/${clientId}/enrich`, {
+                method: 'POST'
+            })
+            const result = await res.json()
+
+            if (res.ok) {
+                alert('✨ Dados enriquecidos com sucesso!')
+                getFullClientData()
+                fetchHistorico()
+                if (onUpdate) onUpdate()
+            } else {
+                alert('Erro ao enriquecer dados: ' + (result.error || 'Erro desconhecido'))
+            }
+        } catch (err) {
+            console.error(err)
+            alert('Falha total na comunicação com a API de enriquecimento.')
         } finally {
             setSyncing(false)
         }
@@ -455,11 +484,23 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                             <h3>Detalhamento Cadastral</h3>
                                         </div>
                                         <div className="grid gap-3">
+                                            {/* Botão de Enriquecimento Inteligente */}
+                                            <button
+                                                onClick={handleEnrich}
+                                                disabled={syncing}
+                                                className="w-full py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-lg flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-neutral-950 transition-all text-[11px] font-black uppercase tracking-widest group"
+                                            >
+                                                {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 group-hover:scale-125 transition-transform" />}
+                                                ✨ Enriquecer Dados via IA/Receita
+                                            </button>
+
                                             {[
                                                 { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
                                                 { label: 'Identificação Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
+                                                { label: 'Inscrição Estadual', value: client?.inscricao_estadual, icon: Fingerprint },
                                                 { label: 'E-mail Corporativo', value: client?.email, icon: Mail },
                                                 { label: 'Telefone/WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
+                                                { label: 'Endereço Completo', value: client?.logradouro ? `${client.logradouro}, ${client.numero}${client.complemento ? ' - ' + client.complemento : ''}, ${client.bairro}, ${client.cidade}/${client.estado}` : null, icon: MapPin },
                                                 { label: 'Regime Tributário', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
                                                 { label: 'CNAE Principal', value: client?.cnae_principal, icon: Briefcase }
                                             ].map((info, idx) => (
