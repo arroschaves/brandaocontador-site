@@ -588,49 +588,63 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
                                     {/* Tributação */}
                                     <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
-                                            <LayoutDashboard className="w-3 h-3" />
-                                            Regime Tributário
-                                        </h4>
-                                        <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <Info className="w-4 h-4 text-emerald-500" />
+                                            <h4 className="text-xs font-bold text-white uppercase tracking-wide">Overview Fiscal</h4>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-6">
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Regime</p>
-                                                <p className="text-[11px] text-white font-black uppercase">{client?.regime_tributario?.replace('_', ' ') || '-'}</p>
+                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Situação Cadastral</p>
+                                                <p className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded inline-block">ATIVA</p>
                                             </div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Situação Fiscal</p>
-                                                <p className="text-[11px] text-emerald-500 font-bold">ATIVA</p>
+                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Regime Tributário</p>
+                                                <p className="text-xs text-blue-400 font-bold uppercase">{client?.regime_tributario || 'Não Informado'}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">CNAEs</p>
-                                                <p className="text-[11px] text-white">{client?.cnaes || 'Não cadastrado'}</p>
+                                            <div className="col-span-2">
+                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Atividade Principal (CNAE)</p>
+                                                <p className="text-xs text-neutral-300 leading-relaxed">{client?.cnae_principal ? `${client.cnae_principal} - ${client.cnaes || ''}` : 'Não cadastrado'}</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Certificados */}
                                     <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
-                                            <Shield className="w-3 h-3" />
-                                            Certificados Digitais
-                                        </h4>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Shield className="w-4 h-4 text-amber-500" />
+                                                <h4 className="text-xs font-bold text-white uppercase tracking-wide">Certificados Digitais</h4>
+                                            </div>
+                                            {certificados.length > 3 && (
+                                                <button onClick={() => setShowVault(true)} className="text-[10px] text-amber-500 hover:text-amber-400 font-bold uppercase">
+                                                    Ver Todos
+                                                </button>
+                                            )}
+                                        </div>
+
                                         {certificados.length === 0 ? (
-                                            <p className="text-[9px] text-neutral-600 italic">Nenhum certificado cadastrado</p>
+                                            <div className="p-4 rounded-lg bg-neutral-900/30 border border-neutral-800 text-center">
+                                                <p className="text-[10px] text-neutral-500">Nenhum certificado cadastrado</p>
+                                            </div>
                                         ) : (
                                             <div className="space-y-2">
-                                                {certificados.slice(0, 3).map((cert) => (
-                                                    <div key={cert.id} className="flex items-center justify-between p-2 bg-neutral-900 rounded">
-                                                        <span className="text-[9px] text-neutral-400">{cert.tipo}</span>
-                                                        <span className={`text-[8px] font-bold ${cert.data_vencimento && new Date(cert.data_vencimento) < new Date() ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                            {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString('pt-BR') : 'Sem vencimento'}
-                                                        </span>
-                                                    </div>
-                                                ))}
-                                                {certificados.length > 3 && (
-                                                    <button onClick={() => setShowVault(true)} className="text-[9px] text-emerald-500 hover:underline">
-                                                        Ver todos ({certificados.length})
-                                                    </button>
-                                                )}
+                                                {certificados.slice(0, 3).map((cert) => {
+                                                    const isVencido = cert.data_vencimento && new Date(cert.data_vencimento) < new Date();
+                                                    return (
+                                                        <div key={cert.id} className="flex items-center justify-between p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-2 h-2 rounded-full ${isVencido ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                                                                <span className="text-[11px] text-neutral-200 font-medium">{cert.tipo || 'A1'}</span>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <p className="text-[9px] text-neutral-500 uppercase font-semibold">Vencimento</p>
+                                                                <span className={`text-[10px] font-bold ${isVencido ? 'text-red-500' : 'text-neutral-300'}`}>
+                                                                    {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString('pt-BR') : 'Sem data'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
                                             </div>
                                         )}
                                     </div>
@@ -672,12 +686,18 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-2">
-                                        <p className="text-[9px] font-black text-neutral-600 uppercase">Análise de Risco</p>
-                                        <p className="text-sm font-black text-emerald-500 uppercase">BAIXO RISCO FISCAL</p>
+                                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Análise de Risco</p>
+                                        <div className="flex items-center gap-2">
+                                            <Shield className="w-5 h-5 text-emerald-500" />
+                                            <p className="text-sm font-bold text-emerald-400 uppercase">BAIXO RISCO FISCAL</p>
+                                        </div>
                                     </div>
                                     <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-2">
-                                        <p className="text-[9px] font-black text-neutral-600 uppercase">Next Action</p>
-                                        <p className="text-sm font-black text-white uppercase italic">CONCILIAR EXTRATO</p>
+                                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Next Action</p>
+                                        <div className="flex items-center gap-2">
+                                            <Activity className="w-5 h-5 text-blue-500" />
+                                            <p className="text-sm font-bold text-white uppercase">CONCILIAR EXTRATO</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -788,8 +808,13 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                         {status === 'concluido' ? <CheckCircle2 className="w-5 h-5" /> : <FileSearch className="w-5 h-5" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-bold text-neutral-200 uppercase tracking-wide">{tipo === 'Folha de Pagamento' ? 'Folha de Pagamento' : tipo}</p>
-                                                        <p className="text-[10px] font-mono text-neutral-500 uppercase mt-0.5">Ref: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' })}</p>
+                                                        <p className="text-xs font-bold text-white uppercase tracking-wide">{tipo === 'Folha de Pagamento' ? 'Folha de Pagamento' : tipo}</p>
+                                                        <div className="flex items-center gap-1.5 mt-1">
+                                                            <Calendar className="w-3 h-3 text-neutral-600" />
+                                                            <p className="text-[10px] font-semibold text-neutral-400 uppercase">
+                                                                {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
