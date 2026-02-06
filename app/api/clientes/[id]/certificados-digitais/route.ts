@@ -80,7 +80,7 @@ export async function POST(
 
         await logAudit({
             cliente_id: clientId,
-            acao: 'CERTIFICADO_DIGITAL_CRIADO',
+            acao: 'SISTEMA',
             detalhes: `Certificado ${tipo} adicionado - Vencimento: ${data_vencimento}`,
             request
         })
@@ -126,7 +126,7 @@ export async function PATCH(
 
         await logAudit({
             cliente_id: clientId,
-            acao: 'CERTIFICADO_DIGITAL_ATUALIZADO',
+            acao: 'SISTEMA',
             detalhes: `Certificado ${certificadoId} atualizado`,
             request
         })
@@ -170,7 +170,7 @@ export async function DELETE(
 
         await logAudit({
             cliente_id: clientId,
-            acao: 'CERTIFICADO_DIGITAL_DELETADO',
+            acao: 'SISTEMA',
             detalhes: `Certificado ${certificadoId} removido`,
             request
         })

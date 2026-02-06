@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         // 2. Opcional: Registrar no histórico do CRM
         await supabase.from('auditoria_crm').insert({
             cliente_id: clientId,
-            acao: 'MAPEAMENTO MANUAL',
+            acao: 'SISTEMA',
             descricao: `Obrigação ${tipo} vinculada manualmente ao arquivo: ${fileName}`,
             user_id: (await supabase.auth.getUser()).data.user?.id
         });
