@@ -125,10 +125,15 @@ export async function POST(request: Request) {
                         status: statusEntrega
                     })
 
+                    // Mapear canal para ação válida de auditoria
+                    let auditAction: any = 'SISTEMA'
+                    if (canal === 'email') auditAction = 'ENVIO_EMAIL'
+                    else if (canal === 'whatsapp') auditAction = 'ENVIO_WA'
+
                     // Log de auditoria
                     await logAudit({
                         cliente_id: agendamento.cliente_id,
-                        acao: 'ALERTA_ENVIADO',
+                        acao: auditAction,
                         detalhes: `Alerta enviado via ${canal} para: ${agendamento.descricao} (${diasRestantes} dias restantes)`,
                         request
                     })
