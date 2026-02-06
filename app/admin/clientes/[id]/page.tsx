@@ -1137,7 +1137,7 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                 </div>
             </div>
         </div>
-        
+
         {/* Modal de Pendência */ }
     <PendenciaModal
         isOpen={showPendenciaModal}
@@ -1149,5 +1149,6 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
         agendamento={agendamentoEditando}
         clientId={clientId}
     />
+    </div >
     );
 }
