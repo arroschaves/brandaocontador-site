@@ -13,16 +13,43 @@ export async function POST(request: Request) {
 
         const supabase = await createClient();
 
-        // 1. Marcar como concluído manualmente
-        const { error } = await supabase.from('obrigacoes_acessorias').upsert({
-            cliente_id: clientId,
-            tipo: tipo,
-            status: 'concluido',
-            competencia: competencia,
-            // Guardamos metadados do mapeamento manual para aprendizado futuro
-            manual_file_id: fileId,
-            manual_file_name: fileName
-        }, { onConflict: 'cliente_id, tipo, competencia' });
+        // 1. Verificar se já existe (substituindo upsert que falha sem constraint)
+        const { data: existente } = await supabase
+            .from('obrigacoes_acessorias')
+            .select('id')
+            .eq('cliente_id', clientId)
+            .eq('tipo', tipo)
+            .eq('competencia', competencia)
+            .single();
+
+        let error;
+
+        if (existente) {
+            // Atualizar
+            const { error: updateError } = await supabase
+                .from('obrigacoes_acessorias')
+                .update({
+                    status: 'concluido',
+                    manual_file_id: fileId,
+                    manual_file_name: fileName,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existente.id);
+            error = updateError;
+        } else {
+            // Inserir
+            const { error: insertError } = await supabase
+                .from('obrigacoes_acessorias')
+                .insert({
+                    cliente_id: clientId,
+                    tipo: tipo,
+                    status: 'concluido',
+                    competencia: competencia,
+                    manual_file_id: fileId,
+                    manual_file_name: fileName
+                });
+            error = insertError;
+        }
 
         if (error) throw error;
 

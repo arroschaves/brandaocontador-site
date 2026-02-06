@@ -748,8 +748,8 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                             <FileCode className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-black text-sm uppercase italic">Obrigações & Drive</h3>
-                                            <p className="text-[9px] font-mono text-neutral-600 uppercase">Documentos Sincronizados - Jan/2026</p>
+                                            <h3 className="text-white font-bold text-sm uppercase">Obrigações & Drive</h3>
+                                            <p className="text-[10px] font-mono text-neutral-500 uppercase">Documentos Sincronizados • Jan/2026</p>
                                         </div>
                                     </div>
                                     {client?.drive_folder_id && (
@@ -757,16 +757,16 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                             <button
                                                 onClick={handleSync}
                                                 disabled={syncing}
-                                                className={`flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[9px] font-black uppercase text-emerald-500 rounded transition-all italic border border-emerald-500/20 ${syncing ? 'animate-pulse opacity-50' : ''}`}
+                                                className={`flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-[10px] font-bold uppercase text-emerald-500 rounded transition-all border border-emerald-500/20 ${syncing ? 'animate-pulse opacity-50' : ''}`}
                                             >
-                                                <Activity className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
-                                                {syncing ? 'Sincronizando...' : 'Sincronizar Drive'}
+                                                <Activity className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
+                                                {syncing ? 'Sincronizando...' : 'Sincronizar'}
                                             </button>
                                             <button
                                                 onClick={() => window.open(`https://drive.google.com/drive/folders/${client.drive_folder_id}`, '_blank')}
-                                                className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[9px] font-black uppercase text-white rounded transition-all italic border border-neutral-700"
+                                                className="flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-[10px] font-bold uppercase text-white rounded transition-all border border-neutral-700"
                                             >
-                                                <ExternalLink className="w-3 h-3" /> Abrir no Drive
+                                                <ExternalLink className="w-3.5 h-3.5" /> Abrir Drive
                                             </button>
                                         </div>
                                     )}
@@ -784,25 +784,25 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                 className={`p-5 bg-black border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-emerald-500/30 transition-all cursor-pointer ${status !== 'concluido' ? 'hover:bg-neutral-900/50' : ''}`}
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg ${status === 'concluido' ? 'text-emerald-500' : 'text-neutral-600'} group-hover:text-emerald-500 transition-colors`}>
+                                                    <div className={`w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center rounded-lg ${status === 'concluido' ? 'text-emerald-500' : 'text-neutral-500'} group-hover:text-emerald-500 transition-colors`}>
                                                         {status === 'concluido' ? <CheckCircle2 className="w-5 h-5" /> : <FileSearch className="w-5 h-5" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-[11px] font-black text-neutral-300 uppercase tracking-widest">{tipo === 'Folha de Pagamento' ? 'Folha' : tipo}</p>
-                                                        <p className="text-[8px] font-mono text-neutral-600 uppercase">Ref: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' })}</p>
+                                                        <p className="text-xs font-bold text-neutral-200 uppercase tracking-wide">{tipo === 'Folha de Pagamento' ? 'Folha de Pagamento' : tipo}</p>
+                                                        <p className="text-[10px] font-mono text-neutral-500 uppercase mt-0.5">Ref: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' })}</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`text-[8px] font-black px-2 py-0.5 rounded border uppercase italic ${status === 'concluido' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
+                                                    <span className={`text-[9px] font-bold px-2 py-1 rounded border uppercase ${status === 'concluido' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
                                                         status === 'atrasado' ? 'bg-red-500/10 border-red-500/20 text-red-500' :
-                                                            'bg-neutral-900 border-neutral-800 text-neutral-600'
+                                                            'bg-neutral-900 border-neutral-800 text-neutral-500'
                                                         }`}>
-                                                        {status === 'concluido' ? 'No Drive' : status === 'atrasado' ? 'Atrasado' : 'Mapear Arquivo'}
+                                                        {status === 'concluido' ? 'Sincronizado' : status === 'atrasado' ? 'Atrasado' : 'Vincular Arquivo'}
                                                     </span>
                                                     {status === 'concluido' ? (
                                                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                                                     ) : (
-                                                        <Search className="w-4 h-4 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
+                                                        <Search className="w-4 h-4 text-neutral-600 group-hover:text-emerald-500 transition-colors" />
                                                     )}
                                                 </div>
                                             </div>
