@@ -13,6 +13,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import AgendaCalendar from '../components/AgendaCalendar'
+import AgendaList from '../components/AgendaList'
+import PendenciaModal from '../components/PendenciaModal'
 
 export default function ClientHubPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: clientId } = use(params)
@@ -37,12 +40,19 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [selectedRoutine, setSelectedRoutine] = useState<any>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // Estados para Agenda de Pendências
+    const [agendamentos, setAgendamentos] = useState<any[]>([])
+    const [loadingAgendamentos, setLoadingAgendamentos] = useState(false)
+    const [showPendenciaModal, setShowPendenciaModal] = useState(false)
+    const [agendamentoEditando, setAgendamentoEditando] = useState<any | null>(null)
+
     const supabase = createClient()
 
     useEffect(() => {
         if (clientId) {
             fetchClientData()
             fetchCertificados()
+            fetchAgendamentos()
         }
     }, [clientId])
 
@@ -250,6 +260,114 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         }
     }
 
+    // ========================================================================
+    // FUNÇÕES DE GERENCIAMENTO DE AGENDAMENTOS
+    // ========================================================================
+
+    async function fetchAgendamentos() {
+        setLoadingAgendamentos(true)
+        try {
+            const res = await fetch(`/api/clientes/${clientId}/agendamentos`)
+            const data = await res.json()
+            if (res.ok) {
+                setAgendamentos(Array.isArray(data) ? data : [])
+            } else {
+                console.error('Erro ao buscar agendamentos:', data.error)
+            }
+        } catch (err) {
+            console.error('Erro de rede ao buscar agendamentos:', err)
+        } finally {
+            setLoadingAgendamentos(false)
+        }
+    }
+
+    async function handleSalvarAgendamento(agendamentoData: any) {
+        try {
+            if (agendamentoEditando) {
+                // Atualizar existente
+                const res = await fetch(`/api/clientes/${clientId}/agendamentos`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        agendamentoId: agendamentoEditando.id,
+                        ...agendamentoData
+                    })
+                })
+
+                if (!res.ok) {
+                    const error = await res.json()
+                    throw new Error(error.error || 'Erro ao atualizar agendamento')
+                }
+
+                alert('✅ Agendamento atualizado com sucesso!')
+            } else {
+                // Criar novo
+                const res = await fetch(`/api/clientes/${clientId}/agendamentos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(agendamentoData)
+                })
+
+                if (!res.ok) {
+                    const error = await res.json()
+                    throw new Error(error.error || 'Erro ao criar agendamento')
+                }
+
+                alert('✅ Agendamento criado com sucesso!')
+            }
+
+            setShowPendenciaModal(false)
+            setAgendamentoEditando(null)
+            await fetchAgendamentos()
+        } catch (err: any) {
+            console.error('Erro ao salvar agendamento:', err)
+            alert(`❌ Erro: ${err.message}`)
+        }
+    }
+
+    async function handleMarcarConcluido(agendamentoId: string) {
+        try {
+            const res = await fetch(`/api/clientes/${clientId}/agendamentos`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    agendamentoId,
+                    status: 'concluido'
+                })
+            })
+
+            if (!res.ok) {
+                const error = await res.json()
+                throw new Error(error.error || 'Erro ao marcar como concluído')
+            }
+
+            await fetchAgendamentos()
+        } catch (err: any) {
+            console.error('Erro ao marcar concluído:', err)
+            alert(`❌ Erro: ${err.message}`)
+        }
+    }
+
+    async function handleExcluirAgendamento(agendamentoId: string) {
+        if (!confirm('Deseja realmente excluir esta pendência?')) return
+
+        try {
+            const res = await fetch(`/api/clientes/${clientId}/agendamentos?agendamentoId=${agendamentoId}`, {
+                method: 'DELETE'
+            })
+
+            if (!res.ok) {
+                const error = await res.json()
+                throw new Error(error.error || 'Erro ao excluir agendamento')
+            }
+
+            await fetchAgendamentos()
+        } catch (err: any) {
+            console.error('Erro ao excluir agendamento:', err)
+            alert(`❌ Erro: ${err.message}`)
+        }
+    }
+
     async function handleViewPassword(certId: string) {
         try {
             const res = await fetch(`/api/clientes/certificados/${certId}`)
@@ -367,9 +485,11 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 <div className="flex-1 space-y-6">
                     <div className="flex gap-1 border-b border-neutral-900 pb-0.5">
                         {[
+                            { id: 'info', label: 'Informações', icon: Info },
                             { id: 'timeline', label: 'Overview', icon: History },
                             { id: 'wiki', label: 'Dossiê Técnico', icon: FileText },
                             { id: 'docs', label: 'Arquivos & Drive', icon: FileCode },
+                            { id: 'agenda', label: 'Agenda', icon: Calendar },
                             { id: 'ia', label: 'IA Insights', icon: Activity }
                         ].map((t) => (
                             <button
@@ -409,6 +529,112 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {/* NOVA ABA: Informações Cadastrais */}
+                        {activeTab === 'info' && (
+                            <div className="space-y-6">
+                                <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Dados Cadastrais Completos</h3>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Dados Básicos */}
+                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
+                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
+                                            <Info className="w-3 h-3" />
+                                            Identificação
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Razão Social</p>
+                                                <p className="text-[11px] text-white font-black">{client?.razao_social || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Nome Fantasia</p>
+                                                <p className="text-[11px] text-white">{client?.nome || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">CNPJ / CPF</p>
+                                                <p className="text-[11px] text-white font-mono">{client?.cnpj_cpf || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Inscrição Estadual</p>
+                                                <p className="text-[11px] text-white font-mono">{client?.inscricao_estadual || 'Isento'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Contato */}
+                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
+                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
+                                            <MessageSquare className="w-3 h-3" />
+                                            Contato
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Email</p>
+                                                <p className="text-[11px] text-white">{client?.email || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Telefone</p>
+                                                <p className="text-[11px] text-white font-mono">{client?.telefone || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Endereço</p>
+                                                <p className="text-[11px] text-white">{client?.endereco || 'Não cadastrado'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Tributação */}
+                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
+                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
+                                            <LayoutDashboard className="w-3 h-3" />
+                                            Regime Tributário
+                                        </h4>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Regime</p>
+                                                <p className="text-[11px] text-white font-black uppercase">{client?.regime_tributario?.replace('_', ' ') || '-'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Situação Fiscal</p>
+                                                <p className="text-[11px] text-emerald-500 font-bold">ATIVA</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">CNAEs</p>
+                                                <p className="text-[11px] text-white">{client?.cnaes || 'Não cadastrado'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Certificados */}
+                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
+                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
+                                            <Shield className="w-3 h-3" />
+                                            Certificados Digitais
+                                        </h4>
+                                        {certificados.length === 0 ? (
+                                            <p className="text-[9px] text-neutral-600 italic">Nenhum certificado cadastrado</p>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                {certificados.slice(0, 3).map((cert) => (
+                                                    <div key={cert.id} className="flex items-center justify-between p-2 bg-neutral-900 rounded">
+                                                        <span className="text-[9px] text-neutral-400">{cert.tipo}</span>
+                                                        <span className={`text-[8px] font-bold ${cert.data_vencimento && new Date(cert.data_vencimento) < new Date() ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                            {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString('pt-BR') : 'Sem vencimento'}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                                {certificados.length > 3 && (
+                                                    <button onClick={() => setShowVault(true)} className="text-[9px] text-emerald-500 hover:underline">
+                                                        Ver todos ({certificados.length})
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
 
@@ -454,6 +680,63 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         <p className="text-sm font-black text-white uppercase italic">CONCILIAR EXTRATO</p>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* NOVA ABA: Agenda de Pendências */}
+                        {activeTab === 'agenda' && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 className="text-white font-black text-xs uppercase tracking-[0.2em]">Agenda de Pendências</h3>
+                                        <p className="text-[9px] font-mono text-neutral-600 uppercase mt-1">
+                                            {agendamentos.filter(a => a.status === 'pendente').length} pendências ativas
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setAgendamentoEditando(null)
+                                            setShowPendenciaModal(true)
+                                        }}
+                                        className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 text-[9px] font-black uppercase rounded transition-all shadow-xl shadow-emerald-500/10"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Nova Pendência
+                                    </button>
+                                </div>
+
+                                {loadingAgendamentos ? (
+                                    <div className="py-20 flex items-center justify-center">
+                                        <Activity className="w-8 h-8 text-emerald-500 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Calendário */}
+                                        <AgendaCalendar
+                                            agendamentos={agendamentos}
+                                            onDayClick={(date, agendamentosDoDia) => {
+                                                if (agendamentosDoDia.length > 0) {
+                                                    // Scroll para a lista e destacar pendências do dia
+                                                    console.log('Pendências do dia:', agendamentosDoDia)
+                                                }
+                                            }}
+                                        />
+
+                                        {/* Lista de Pendências */}
+                                        <div>
+                                            <h4 className="text-white font-black text-[10px] uppercase mb-4">Todas as Pendências</h4>
+                                            <AgendaList
+                                                agendamentos={agendamentos}
+                                                onMarcarConcluido={handleMarcarConcluido}
+                                                onEditar={(ag) => {
+                                                    setAgendamentoEditando(ag)
+                                                    setShowPendenciaModal(true)
+                                                }}
+                                                onExcluir={handleExcluirAgendamento}
+                                            />
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
 
@@ -854,5 +1137,17 @@ function MappingModal({ showMappingModal, setShowMappingModal, mappingLoading, m
                 </div>
             </div>
         </div>
+        
+        {/* Modal de Pendência */ }
+    <PendenciaModal
+        isOpen={showPendenciaModal}
+        onClose={() => {
+            setShowPendenciaModal(false)
+            setAgendamentoEditando(null)
+        }}
+        onSave={handleSalvarAgendamento}
+        agendamento={agendamentoEditando}
+        clientId={clientId}
+    />
     );
 }
