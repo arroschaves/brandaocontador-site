@@ -64,9 +64,13 @@ async function fetchFromReceitaWS(cnpj: string): Promise<EnrichmentData> {
 async function enrichRuralData(cpf: string): Promise<EnrichmentData> {
     // Nota: Atualmente não existe API pública gratuita e unificada para IE de Produtor Rural (Portais SEFAZ).
     // Implementaremos a lógica de scraping ou API específica de MS no futuro.
-    // Por enquanto, validamos apenas o formato.
     console.log(`[Enrichment] CPF Rural detectado (${cpf}). Aguardando integração com SEFAZ-MS.`);
-    throw new Error('Consulta de Inscrição Estadual para Produtor Rural (CPF) requer integração com SEFAZ-MS, que está em desenvolvimento.');
+
+    // Retornamos um objeto vazio ou com erro amigável em vez de travar o processo
+    return {
+        status_rfb: 'Pessoa Física - Consulta Manual Necessária',
+        razao_social: 'REGISTRO DE PRODUTOR RURAL (CPF)'
+    };
 }
 
 export async function enrichCompanyData(identifier: string): Promise<EnrichmentData> {
@@ -96,7 +100,7 @@ export async function enrichCompanyData(identifier: string): Promise<EnrichmentD
             estado: normalize(data.estabelecimento?.estado?.sigla),
             cep: data.estabelecimento?.cep,
             natureza_juridica: normalize(data.natureza_juridica?.descricao),
-            status_rfb: normalize(data.estabelecimento?.situacao),
+            status_rfb: normalize(data.estabelecimento?.situacao_cadastral),
             data_abertura: data.estabelecimento?.data_inicio_atividade,
             cnae_principal: data.estabelecimento?.atividade_principal
                 ? `${data.estabelecimento.atividade_principal.id} - ${data.estabelecimento.atividade_principal.descricao}`
@@ -115,8 +119,8 @@ export async function enrichCompanyData(identifier: string): Promise<EnrichmentD
         return enriched;
 
     } catch (error: any) {
-        // 2. Se falhar por limite (429) ou erro temporário, tentar Fallback
-        if (error.response?.status === 429 || error.code === 'ECONNABORTED') {
+        // 2. Se falhar por limite (429), bloqueio (403/401) ou erro temporário, tentar Fallback
+        if (error.response?.status === 429 || error.response?.status === 403 || error.response?.status === 401 || error.code === 'ECONNABORTED') {
             console.log(`[Enrichment] CNPJ.ws limitado. Tentando Fallback para ReceitaWS para o CNPJ ${cleanId}...`);
             try {
                 return await fetchFromReceitaWS(cleanId);

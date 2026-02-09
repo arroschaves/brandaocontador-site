@@ -40,13 +40,13 @@ export async function POST(
             .from('clientes')
             .update({
                 ...enrichedData,
-                updated_at: new Date().toISOString()
+                log_atualizacao: new Date().toISOString()
             })
             .eq('id', clientId)
 
         if (updateErr) {
             console.error('[Enrichment API] Erro ao atualizar cliente:', updateErr)
-            throw new Error('Falha ao salvar dados enriquecidos no banco de dados.')
+            throw new Error(`Erro ao salvar no banco: ${updateErr.message}`)
         }
 
         // 4. Registrar a ação na auditoria
@@ -66,8 +66,11 @@ export async function POST(
     } catch (error: any) {
         console.error('[Enrichment API Error]:', error)
         return NextResponse.json(
-            { error: error.message || 'Erro interno ao processar enriquecimento.' },
-            { status: error.message.includes('Limite') ? 429 : 500 }
+            {
+                error: error.message || 'Erro interno ao processar enriquecimento.',
+                details: error.response?.data || error.stack
+            },
+            { status: error.message?.includes('Limite') ? 429 : 500 }
         )
     }
 }
