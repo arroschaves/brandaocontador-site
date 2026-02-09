@@ -4,154 +4,141 @@
 
 @layer base {
   :root {
-    --obsidian: #0A0A0B;
-    --amber-electric: #FFB000;
-    --bronze-heritage: #8A6D3B;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 160 84% 39%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 160 84% 39%;
+    
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+    
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 160 84% 45%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 217.2 32.6% 12.5%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217.2 32.6% 12.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 217.2 32.6% 12.5%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 160 84% 39%;
   }
 
   * {
-    @apply border-neutral-800;
+    @apply border-border;
     box-sizing: border-box;
   }
 
   html {
     scroll-behavior: smooth;
     font-size: 16px;
-    background-color: var(--obsidian);
   }
 
   body {
-    @apply font-sans antialiased bg-obsidian text-neutral-200 overflow-x-hidden;
-    line-height: 1.6;
+    @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
+    line-height: 1.5;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-display font-bold text-neutral-50 tracking-tight leading-[0.9];
-  }
-
-  h1 {
-    font-size: clamp(3.5rem, 8vw, 6.5rem);
-  }
-
-  h2 {
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-  }
-
-  h3 {
-    font-size: clamp(1.8rem, 4vw, 3rem);
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold tracking-tight text-foreground/90;
   }
 }
 
 @layer components {
-  .brutalist-card {
-    @apply bg-neutral-900 border border-neutral-800 p-8 transition-all duration-500 relative overflow-hidden;
-    border-radius: 0 !important;
+  .lucid-card {
+    @apply bg-card border border-border/50 text-card-foreground shadow-sm rounded-2xl p-6 transition-all duration-300;
   }
 
-  .brutalist-card:hover {
-    @apply border-amber-electric/30 bg-neutral-800/80;
-    box-shadow: 12px 12px 0px 0px rgba(255, 176, 0, 0.05);
+  .lucid-card:hover {
+    @apply shadow-md border-primary/20 bg-card/80;
   }
 
-  .btn-brutal {
-    @apply inline-flex items-center justify-center px-10 py-5 bg-amber-electric text-obsidian font-mono font-black uppercase tracking-widest border-2 border-amber-electric transition-all duration-300 relative z-10;
-    border-radius: 0 !important;
+  .btn-modern {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-xl border border-transparent transition-all duration-200 active:scale-[0.98] outline-none hover:shadow-lg hover:shadow-primary/20;
   }
 
-  .btn-brutal:hover {
-    @apply bg-obsidian text-amber-electric scale-[1.02];
-    box-shadow: 10px 10px 0px 0px #FFB000;
-  }
-
-  .btn-brutal-outline {
-    @apply inline-flex items-center justify-center px-10 py-5 bg-transparent text-amber-electric font-mono font-black uppercase tracking-widest border-2 border-amber-electric transition-all duration-300;
-    border-radius: 0 !important;
-  }
-
-  .btn-brutal-outline:hover {
-    @apply bg-amber-electric text-obsidian scale-[1.02];
-    box-shadow: 10px 10px 0px 0px #0A0A0B;
+  .btn-modern-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-transparent text-primary font-semibold rounded-xl border border-primary/20 transition-all duration-200 hover:bg-primary/5 active:scale-[0.98];
   }
 
   .container-custom {
-    @apply max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-24;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
 
 @layer utilities {
-  .text-glow {
-    text-shadow: 0 0 20px rgba(255, 176, 0, 0.4);
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
   }
 
-  .bg-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.03;
+  .dark .glass {
+    @apply bg-black/40 backdrop-blur-md border border-white/5;
   }
 
-  .page-transition {
-    animation: fadeInSlideUp 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+  .page-fade-in {
+    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
-  @keyframes fadeInSlideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-shake {
-    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-  }
-
-  @keyframes shake {
-
-    10%,
-    90% {
-      transform: translate3d(-1px, 0, 0);
-    }
-
-    20%,
-    80% {
-      transform: translate3d(2px, 0, 0);
-    }
-
-    30%,
-    50%,
-    70% {
-      transform: translate3d(-4px, 0, 0);
-    }
-
-    40%,
-    60% {
-      transform: translate3d(4px, 0, 0);
-    }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
 
-/* Custom Scrollbar Premium */
+/* Custom Scrollbar Modern */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--obsidian);
+  @apply bg-background;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1A1A1B;
-  border: 3px solid var(--obsidian);
+  @apply bg-muted rounded-full border-2 border-background;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--amber-electric);
+  @apply bg-primary/40;
 }

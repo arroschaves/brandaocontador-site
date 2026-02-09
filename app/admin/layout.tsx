@@ -53,34 +53,33 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex">
+    <div className="min-h-screen bg-background text-foreground flex page-fade-in">
       {/* Sidebar */}
       <aside
         className={`${isSidebarOpen ? 'w-64' : 'w-20'
-          } bg-neutral-900 border-r border-neutral-800 transition-all duration-300 flex flex-col fixed h-full z-50`}
+          } bg-card border-r border-border/50 transition-all duration-500 flex flex-col fixed h-full z-50 shadow-sm`}
       >
         <div className="p-6 flex items-center justify-between">
           {isSidebarOpen ? (
             <Link href="/admin" className="flex items-center space-x-2">
-              {/* Replaced Brandão CRM text with image */}
               <div className="flex items-center gap-3 px-2">
                 <div className="relative w-full h-12">
                   <img
                     src="/logo-full.jpg"
                     alt="Brandão Contabilidade"
-                    className="h-full w-auto object-contain"
+                    className="h-full w-auto object-contain brightness-0 dark:brightness-100 invert-0 dark:invert-0"
                   />
                 </div>
               </div>
             </Link>
           ) : (
-            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center mx-auto">
-              <ShieldCheck className="w-5 h-5 text-neutral-900" />
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center mx-auto border border-primary/20">
+              <ShieldCheck className="w-5 h-5 text-primary" />
             </div>
           )}
         </div>
 
-        <nav className="flex-1 px-4 py-4 space-y-2">
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
             const Icon = item.icon;
@@ -89,28 +88,28 @@ export default function AdminLayout({
               <Link
                 key={item.path}
                 href={item.path}
-                className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                  ? 'bg-primary-500/10 text-primary-400'
-                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100'
+                className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative ${isActive
+                  ? 'bg-primary/10 text-primary shadow-sm shadow-primary/5'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                   }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`} />
-                {isSidebarOpen && <span className="ml-4 font-bold uppercase tracking-wide text-[11px]">{item.name}</span>}
+                <Icon className={`w-5 h-5 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-primary' : ''}`} />
+                {isSidebarOpen && <span className="ml-4 font-semibold text-[13px] tracking-tight">{item.name}</span>}
                 {isActive && isSidebarOpen && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-400 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-neutral-800">
+        <div className="p-4 border-t border-border/50">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-3 text-neutral-400 hover:text-error-400 hover:bg-error-500/10 rounded-xl transition-all duration-200"
+            className="flex items-center w-full px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl transition-all duration-200"
           >
             <LogOut className="w-5 h-5" />
-            {isSidebarOpen && <span className="ml-4 font-medium">Sair</span>}
+            {isSidebarOpen && <span className="ml-4 font-semibold text-[13px]">Sair do Sistema</span>}
           </button>
         </div>
       </aside>
@@ -118,14 +117,14 @@ export default function AdminLayout({
       {/* Main Content */}
       <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}>
         {/* Top Header */}
-        <header className="h-16 bg-neutral-950/50 backdrop-blur-md border-b border-neutral-800 flex items-center justify-between px-8 sticky top-0 z-40">
+        <header className="h-16 glass sticky top-0 z-40 flex items-center justify-between px-8">
           <div className="flex items-center flex-1 max-w-md">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <div className="relative w-full group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
-                placeholder="Pesquisar cliente, CNPJ ou prazo..."
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary-500 transition-colors"
+                placeholder="Pesquisar no Maestro..."
+                className="w-full bg-secondary/50 border border-border/50 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary/30 focus:bg-white transition-all shadow-none focus:shadow-sm"
               />
             </div>
           </div>
@@ -133,18 +132,18 @@ export default function AdminLayout({
           <div className="flex items-center space-x-6">
             <WhatsAppRadar />
             <div className="flex items-center space-x-4">
-              <button className="p-2 relative text-neutral-400 hover:text-neutral-100 transition-colors">
+              <button className="p-2.5 relative text-muted-foreground hover:text-primary transition-all hover:bg-primary/5 rounded-xl">
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-error-500 rounded-full border-2 border-neutral-950" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-destructive rounded-full border-2 border-background" />
               </button>
-              <div className="h-8 w-px bg-neutral-800 mx-2" />
-              <div className="flex items-center space-x-3">
+              <div className="h-6 w-px bg-border/50 mx-2" />
+              <div className="flex items-center space-x-3 group cursor-pointer p-1.5 hover:bg-secondary rounded-xl transition-all">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-neutral-100">Alessandro</p>
-                  <p className="text-xs text-neutral-500">Administrador</p>
+                  <p className="text-[13px] font-bold text-foreground leading-none">Alessandro</p>
+                  <p className="text-[10px] text-muted-foreground font-medium mt-1 uppercase tracking-wider">Administrador Master</p>
                 </div>
-                <div className="w-9 h-9 bg-neutral-800 rounded-full border border-neutral-700 flex items-center justify-center">
-                  <UserIcon className="w-5 h-5 text-neutral-400" />
+                <div className="w-10 h-10 bg-primary/10 rounded-xl border border-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-sm shadow-primary/5">
+                  <UserIcon className="w-5 h-5" />
                 </div>
               </div>
             </div>
@@ -152,8 +151,10 @@ export default function AdminLayout({
         </header>
 
         {/* Content View */}
-        <div className="w-full px-4 md:px-6 lg:px-8 py-4 md:py-6 lg:py-8">
-          {children}
+        <div className="w-full px-6 py-8">
+          <div className="max-w-[1600px] mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

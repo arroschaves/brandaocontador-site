@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { formatCNPJ } from '@/lib/utils/format'
 import ClientDetailSidebar from './components/ClientDetailSidebar';
+import EnrichmentProgressModal from './components/EnrichmentProgressModal';
 
 const supabase = createClient();
 
@@ -57,6 +58,10 @@ function ClientesContent() {
     // Sidebar State
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+
+    // Enrichment Modal State
+    const [isEnrichModalOpen, setIsEnrichModalOpen] = useState(false);
+    const [enrichCandidates, setEnrichCandidates] = useState<any[]>([]);
 
     // Modal State (Cadastro Rápido)
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -195,8 +200,6 @@ function ClientesContent() {
         }
     }
     async function handleEnrichmentMaster() {
-        if (!confirm('MAESTRO: Deseja iniciar o enriquecimento inteligente de toda a carteira PJ? Os dados serão validados e preenchidos via API CNPJ.ws (SINTEGRA). Tempo estimado: ~21s por cliente.')) return;
-
         try {
             setGlobalSyncing(true);
             const res = await fetch('/api/clientes/enrich-all');
@@ -206,36 +209,16 @@ function ClientesContent() {
 
             if (candidates.length === 0) {
                 alert('MAESTRO: Todos os clientes PJ já estão com dados enriquecidos!');
+                setGlobalSyncing(false);
                 return;
             }
 
-            for (let i = 0; i < candidates.length; i++) {
-                const client = candidates[i];
-                console.log(`[MAESTRO] Enriquecendo (${i + 1}/${candidates.length}): ${client.nome}`);
-
-                const enrichRes = await fetch(`/api/clientes/${client.id}/enrich`, { method: 'POST' });
-
-                if (!enrichRes.ok) {
-                    const err = await enrichRes.json();
-                    if (enrichRes.status === 429) {
-                        alert('LIMITE ATINGIDO: A API de consulta atingiu o limite de 3/min. A operação será pausada. Retome em instantes.');
-                        break;
-                    }
-                    console.error(`Falha no cliente ${client.nome}:`, err.error);
-                }
-
-                if (i < candidates.length - 1) {
-                    // Delay para respeitar limite de 3 req/min (20s + buffer)
-                    await new Promise(r => setTimeout(r, 21000));
-                }
-            }
-
-            alert('MAESTRO: Enriquecimento Master concluído!');
-            fetchClientes();
+            setEnrichCandidates(candidates);
+            setIsEnrichModalOpen(true);
+            // O modal assume o controle do processamento a partir daqui
         } catch (err: any) {
             console.error(err);
             alert('Erro no Enriquecimento Master: ' + err.message);
-        } finally {
             setGlobalSyncing(false);
         }
     }
@@ -352,111 +335,126 @@ function ClientesContent() {
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-            {/* Header Pro Max com Dash de Operações */}
-            <div className="space-y-6 px-1">
+        <div className="space-y-8 page-fade-in pb-20">
+            {/* Header Moderno com Dash de Operações */}
+            <div className="space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-black text-white italic uppercase tracking-tight">Centro de Controle Master</h1>
-                        <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-[0.2em] mt-2">Status Operacional da Carteira <span className="text-neutral-600 px-2">//</span> Brandão Contabilidade</p>
+                        <h1 className="text-3xl font-bold text-foreground">Centro de Controle Maestro</h1>
+                        <p className="text-[13px] font-medium text-muted-foreground mt-1">Gestão inteligente e operacional da carteira de clientes</p>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-2">
                         <button
                             onClick={handleGlobalSync}
                             disabled={globalSyncing}
-                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'} border border-current font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
+                            className={`btn-modern-outline flex items-center gap-2 text-[12px] py-2.5 ${globalSyncing ? 'opacity-50' : ''}`}
                         >
-                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldAlert className="w-3.5 h-3.5" />}
-                            {globalSyncing ? 'SINCRONIZANDO CARTEIRA...' : 'RADAR GLOBAL'}
+                            {globalSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldAlert className="w-4 h-4" />}
+                            Radar Global
                         </button>
                         <button
                             onClick={handleEnrichmentMaster}
                             disabled={globalSyncing}
-                            className={`px-6 py-2.5 ${globalSyncing ? 'bg-neutral-800 text-neutral-700' : 'bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20'} border border-current font-black uppercase text-[10px] tracking-widest transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl`}
+                            className={`btn-modern-outline flex items-center gap-2 text-[12px] py-2.5 ${globalSyncing ? 'opacity-50' : ''}`}
                         >
-                            {globalSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                            ENRIQUECIMENTO MASTER
+                            {globalSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                            Enriquecimento Master
                         </button>
                         <button
                             onClick={() => handleOpenModal()}
-                            className="px-6 py-2.5 bg-white text-black font-black uppercase text-[10px] tracking-widest hover:bg-neutral-200 transition-all active:scale-95 flex items-center gap-2 rounded shadow-xl"
+                            className="btn-modern flex items-center gap-2 text-[12px] py-2.5 shadow-primary/10"
                         >
-                            <Plus className="w-3.5 h-3.5" /> Novo Cliente Agro
+                            <Plus className="w-4 h-4" /> Novo Cliente
                         </button>
                     </div>
                 </div>
 
-                {/* Cards de Inteligência */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Cards de Inteligência (Estilo Dashboard Lúcido) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                        { label: 'Clientes Ativos', value: stats.total, color: 'neutral', icon: Users },
-                        { label: 'Pendências de Auditoria', value: stats.pendentes, color: 'rose', icon: AlertCircle },
-                        { label: 'Certificados Vencendo', value: stats.certVencendo, color: 'amber', icon: ShieldCheck },
-                        { label: 'Auditados OK (Mês)', value: stats.auditadosOk, color: 'emerald', icon: CheckCircle2 }
+                        { label: 'Clientes Ativos', value: stats.total, color: 'primary', icon: Users, desc: 'Base total cadastrada' },
+                        { label: 'Pendências Auditoria', value: stats.pendentes, color: 'destructive', icon: AlertCircle, desc: 'Aguardando ação' },
+                        { label: 'Certificados', value: stats.certVencendo, color: 'amber', icon: ShieldCheck, desc: 'Vencimento em 30 dias' },
+                        { label: 'Auditados OK', value: stats.auditadosOk, color: 'primary', icon: CheckCircle2, desc: 'Sincronizados este mês' }
                     ].map((stat, i) => {
                         const Icon = stat.icon as any;
+                        const colorClass = stat.color === 'destructive' ? 'text-destructive bg-destructive/10' :
+                            stat.color === 'amber' ? 'text-amber-600 bg-amber-50' :
+                                'text-primary bg-primary/10';
+
                         return (
-                            <div key={i} className={`p-4 bg-neutral-900/40 border-l-4 border-l-${stat.color === 'rose' ? 'rose-500' : stat.color === 'amber' ? 'amber-500' : stat.color === 'emerald' ? 'emerald-500' : 'neutral-700'} border border-neutral-900 rounded-xl space-y-1`}>
-                                <div className="flex justify-between items-center">
-                                    <p className="text-[9px] font-black uppercase text-neutral-500 tracking-widest">{stat.label}</p>
-                                    <Icon className={`w-3.5 h-3.5 text-neutral-700`} />
+                            <div key={i} className="lucid-card group">
+                                <div className="flex justify-between items-start">
+                                    <div className={`p-2.5 rounded-xl ${colorClass} transition-colors group-hover:bg-primary group-hover:text-white`}>
+                                        <Icon className="w-5 h-5" />
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                                        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-tight">{stat.label}</p>
+                                    </div>
                                 </div>
-                                <p className="text-xl font-black text-white italic">{stat.value}</p>
+                                <div className="mt-4 pt-4 border-t border-border/50">
+                                    <p className="text-[10px] text-muted-foreground font-medium">{stat.desc}</p>
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             </div>
 
-            {/* Filtros e Busca Brutalista */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div className="md:col-span-3 relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-700">
-                        <Search className="w-4 h-4" />
-                    </div>
+            {/* Filtros e Busca */}
+            <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex-1 relative group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <input
                         type="text"
-                        placeholder="BUSCAR NO RADAR..."
-                        className="w-full bg-neutral-950 border border-neutral-800 focus:border-emerald-500/50 p-2.5 pl-10 text-[11px] font-medium outline-none transition-all placeholder:text-neutral-800 text-neutral-300 rounded"
+                        placeholder="Pesquisar por nome, CNPJ ou razão social..."
+                        className="w-full bg-card border border-border/60 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 transition-all shadow-sm"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <button className="flex items-center justify-center gap-2 bg-neutral-900/50 border border-neutral-800 text-neutral-600 font-bold uppercase text-[10px] tracking-widest hover:text-white transition-all rounded">
-                    <Filter className="w-3.5 h-3.5" /> Filtrar
+                <button className="flex items-center justify-center gap-2 px-5 py-3 bg-card border border-border/60 text-muted-foreground rounded-xl font-semibold text-sm hover:bg-secondary hover:text-foreground transition-all shadow-sm">
+                    <Filter className="w-4 h-4" /> Filtrar
                 </button>
             </div>
 
-            {/* Tabela de Clientes Brutalista */}
-            <div className="relative border border-neutral-800 rounded-xl overflow-hidden bg-neutral-950 shadow-2xl">
+            {/* Tabela de Clientes Modernizada */}
+            <div className="lucid-card p-0 overflow-hidden border-border/40 shadow-xl">
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-neutral-900/40 text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500">
-                                <th className="p-4 pl-6 border-b border-neutral-900">Cliente Alpha</th>
-                                <th className="p-4 border-b border-neutral-900 text-center">DAS / SN</th>
-                                <th className="p-4 border-b border-neutral-900 text-center">FGTS</th>
-                                <th className="p-4 border-b border-neutral-900 text-center">INSS</th>
-                                <th className="p-4 border-b border-neutral-900 text-center">Folha</th>
-                                <th className="p-4 border-b border-neutral-900 text-center">Vault</th>
-                                <th className="p-4 border-b border-neutral-900 text-right pr-6">Ação</th>
+                            <tr className="bg-muted/30 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                                <th className="p-5 pl-8">Identificação do Cliente</th>
+                                <th className="p-5 text-center">DAS / SN</th>
+                                <th className="p-5 text-center">FGTS</th>
+                                <th className="p-5 text-center">INSS</th>
+                                <th className="p-5 text-center">Folha</th>
+                                <th className="p-5 text-center">Vault</th>
+                                <th className="p-5 text-right pr-8">Ações</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-neutral-900">
+                        <tbody className="divide-y divide-border/40">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="py-20 text-center">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
-                                            <span className="text-[10px] font-bold text-neutral-700 uppercase tracking-widest">Sincronizando...</span>
+                                    <td colSpan={7} className="py-24 text-center">
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                                                <Loader2 className="w-8 h-8 animate-spin text-primary relative" />
+                                            </div>
+                                            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Sincronizando Base Sefaz...</span>
                                         </div>
                                     </td>
                                 </tr>
                             ) : filteredClientes.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="py-20 text-center italic text-neutral-700 uppercase font-black tracking-widest">
-                                        Nenhum registro encontrado.
+                                    <td colSpan={7} className="py-24 text-center">
+                                        <div className="flex flex-col items-center gap-2 text-muted-foreground opacity-40">
+                                            <Building2 className="w-12 h-12 mb-2" />
+                                            <p className="font-bold uppercase tracking-widest text-sm">Nenhum cliente no radar</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
@@ -465,11 +463,13 @@ function ClientesContent() {
 
                                     const StatusBadge = ({ name }: { name: string }) => {
                                         const status = getObrStatus(name);
-                                        if (!status) return <div className="w-1.5 h-1.5 rounded-full bg-neutral-900 mx-auto" />;
+                                        if (!status) return <div className="w-2 h-2 rounded-full bg-muted/50 mx-auto" />;
+
+                                        const isDone = status === 'concluido';
                                         return (
                                             <div className="flex justify-center group/tip relative">
-                                                <div className={`w-3.5 h-3.5 rounded-full border-2 border-black ${status === 'concluido' ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]' : 'bg-rose-500 shadow-[0_0_10px_#f43f5e] animate-pulse'} `} />
-                                                <div className="absolute bottom-full mb-2 hidden group-hover/tip:block bg-neutral-900 text-[8px] font-black uppercase text-white px-2 py-1 rounded border border-neutral-800 whitespace-nowrap z-50">
+                                                <div className={`w-3.5 h-3.5 rounded-full border-2 border-background shadow-sm ${isDone ? 'bg-primary' : 'bg-destructive animate-pulse'} `} />
+                                                <div className="absolute bottom-full mb-2 hidden group-hover/tip:block bg-foreground text-[10px] font-bold text-background px-2 py-1.5 rounded-lg shadow-xl whitespace-nowrap z-50 animate-in fade-in zoom-in duration-200">
                                                     {name}: {status.toUpperCase()}
                                                 </div>
                                             </div>
@@ -477,50 +477,65 @@ function ClientesContent() {
                                     };
 
                                     return (
-                                        <tr key={c.id} className="group hover:bg-neutral-900/40 transition-all">
-                                            <td className="p-4 pl-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 bg-neutral-900 border border-neutral-800 rounded-lg flex items-center justify-center text-neutral-600 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-all">
-                                                        <Building2 className="w-4.5 h-4.5" />
+                                        <tr key={c.id} className="group hover:bg-secondary/40 transition-colors">
+                                            <td className="p-5 pl-8">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-11 h-11 bg-secondary border border-border/50 rounded-xl flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20 transition-all shadow-sm">
+                                                        <Building2 className="w-5 h-5" />
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <Link
                                                             href={`/admin/clientes/${c.id}`}
-                                                            className="text-white font-black hover:text-emerald-500 transition-colors text-[13px] tracking-tight uppercase italic leading-tight"
+                                                            className="text-foreground font-bold hover:text-primary transition-colors text-[15px] tracking-tight leading-tight"
                                                         >
                                                             {c.nome || c.razao_social}
                                                         </Link>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            <span className="text-[10px] font-bold text-neutral-500 tracking-wider">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
+                                                        <div className="flex items-center gap-2.5 mt-1.5">
+                                                            <span className="text-[11px] font-medium text-muted-foreground/80 font-mono tracking-tight">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
                                                             {c.isCertNearExp && (
-                                                                <span className="text-[7px] bg-amber-500 text-black px-1.5 py-0.5 font-black uppercase rounded shadow-[0_0_8px_rgba(245,158,11,0.4)]">
-                                                                    Vencimento Próximo
-                                                                </span>
+                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-full">
+                                                                    <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-pulse" />
+                                                                    <span className="text-[9px] font-bold uppercase tracking-tighter">Vencimento</span>
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="p-4"><StatusBadge name="DAS" /></td>
-                                            <td className="p-4"><StatusBadge name="FGTS" /></td>
-                                            <td className="p-4"><StatusBadge name="INSS" /></td>
-                                            <td className="p-4"><StatusBadge name="Folha de Pagamento" /></td>
-                                            <td className="p-4">
+                                            <td className="p-5"><StatusBadge name="DAS" /></td>
+                                            <td className="p-5"><StatusBadge name="FGTS" /></td>
+                                            <td className="p-5"><StatusBadge name="INSS" /></td>
+                                            <td className="p-5"><StatusBadge name="Folha de Pagamento" /></td>
+                                            <td className="p-5 text-center">
                                                 <div className="flex justify-center">
-                                                    <Lock className={`w-3.5 h-3.5 ${c.isCertNearExp ? 'text-amber-500 animate-pulse' : 'text-emerald-500/20'}`} />
+                                                    <div className={`p-1.5 rounded-lg border ${c.isCertNearExp ? 'border-amber-200 bg-amber-50 text-amber-600 animate-pulse' : 'border-border/50 text-muted-foreground/20'}`}>
+                                                        <Lock className="w-4 h-4" />
+                                                    </div>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-right pr-6">
-                                                <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
-                                                    <Link
-                                                        href={`/admin/clientes/${c.id}`}
-                                                        className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-600 hover:text-white transition-all rounded"
-                                                        title="Mural de Operações"
+                                            <td className="p-5 text-right pr-8">
+                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <button
+                                                        onClick={() => handleOpenDetails(c.id)}
+                                                        className="p-2.5 bg-card border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all rounded-xl shadow-sm"
+                                                        title="Visualizar"
                                                     >
-                                                        <Eye className="w-3.5 h-3.5" />
-                                                    </Link>
-                                                    <button onClick={() => handleOpenModal(c)} className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-600 hover:text-white transition-all rounded"><Edit className="w-3.5 h-3.5" /></button>
-                                                    <button onClick={() => handleDelete(c.id, c.nome)} className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-700 hover:text-rose-500 transition-all rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleOpenModal(c)}
+                                                        className="p-2.5 bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:border-border transition-all rounded-xl shadow-sm"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(c.id, c.nome)}
+                                                        className="p-2.5 bg-card border border-border/60 text-muted-foreground hover:text-destructive hover:bg-destructive/5 hover:border-destructive/30 transition-all rounded-xl shadow-sm"
+                                                        title="Excluir"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -532,7 +547,7 @@ function ClientesContent() {
                 </div>
             </div>
 
-            {/* Sidebar de Detalhes (Sobrepágina Lateral) */}
+            {/* Componentes Laterais e Modais */}
             <ClientDetailSidebar
                 clientId={selectedClientId}
                 isOpen={isSidebarOpen}
@@ -540,116 +555,140 @@ function ClientesContent() {
                 onUpdate={fetchClientes}
             />
 
-            {/* Modal de Cadastro (Legacy UI/Quick Edit) */}
-            {
-                isModalOpen && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-end p-0 bg-black/70 backdrop-blur-sm animate-in fade-in duration-300">
-                        <div className="bg-neutral-950 border-l border-neutral-800 w-full max-w-xl h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-500">
-                            <div className="p-6 border-b border-neutral-800 flex justify-between items-center bg-neutral-900/30">
-                                <div>
-                                    <h2 className="text-lg font-bold text-neutral-100 tracking-tight uppercase">{editingClient ? 'Ajustar Cadastro' : 'Novo Alistamento'}</h2>
-                                    <p className="text-[9px] font-mono text-neutral-600 uppercase mt-1 tracking-widest">Procedimento Interno // v2.0</p>
-                                </div>
-                                <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-neutral-800 rounded transition-colors text-neutral-600"><X className="w-5 h-5" /></button>
+            <EnrichmentProgressModal
+                isOpen={isEnrichModalOpen}
+                candidates={enrichCandidates}
+                onClose={(refetch) => {
+                    setIsEnrichModalOpen(false);
+                    setGlobalSyncing(false);
+                    if (refetch) fetchClientes();
+                }}
+            />
+
+            {/* Drawer de Cadastro Moderno */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-end p-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-card border-l border-border/50 w-full max-w-xl h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-500">
+                        <div className="p-8 border-b border-border/50 flex justify-between items-center bg-secondary/30">
+                            <div>
+                                <h2 className="text-xl font-bold text-foreground tracking-tight">{editingClient ? 'Ajustar Cadastro' : 'Novo Cliente Agro'}</h2>
+                                <p className="text-xs font-medium text-muted-foreground mt-1">Preencha as informações fiscais e cadastrais</p>
                             </div>
-                            <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-4 overflow-y-auto no-scrollbar pb-24">
-                                {/* CNPJ Consult Section */}
-                                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg space-y-2">
-                                    <label className="text-[9px] font-black text-emerald-500 uppercase flex items-center gap-2 tracking-[0.2em]">
-                                        <ShieldAlert className="w-3 h-3" /> Identificação Fiscal
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <input required className="flex-1 bg-neutral-900 border border-neutral-800 p-2 text-xs font-mono outline-none focus:border-emerald-500 text-neutral-100 rounded"
-                                            placeholder="CNPJ ou CPF"
-                                            value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
-                                        {formData.cnpj_cpf?.replace(/\D/g, '').length === 14 && (
-                                            <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="px-4 bg-emerald-500 text-neutral-950 font-black uppercase text-[9px] hover:bg-emerald-400 transition-all disabled:opacity-50 rounded">
-                                                {consulting ? <Loader2 className="animate-spin w-3 h-3" /> : 'Consultar'}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1 col-span-2">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Razão Social</label>
-                                        <input required className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-bold uppercase text-neutral-300 focus:border-emerald-500 outline-none rounded"
-                                            value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1 col-span-2">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Nome Fantasia / Apelido</label>
-                                        <input required className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-bold uppercase text-emerald-500 outline-none rounded"
-                                            value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Regime Fiscal</label>
-                                        <select className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[10px] font-bold uppercase text-neutral-400 outline-none rounded"
-                                            value={formData.regime_tributario || ''} onChange={e => setFormData({ ...formData, regime_tributario: e.target.value })}>
-                                            <option value="">SELECIONE...</option>
-                                            <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
-                                            <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
-                                            <option value="LUCRO_REAL">LUCRO REAL</option>
-                                            <option value="PESSOA_FISICA">PF (FAZENDA)</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Situação RFB</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[10px] font-bold uppercase text-emerald-500 outline-none rounded"
-                                            value={formData.status_rfb || ''} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">WhatsApp</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            placeholder="5567..."
-                                            value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">E-mail</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            placeholder="contato@..."
-                                            value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Inscrição Estadual</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            value={formData.inscricao_estadual || ''} onChange={e => setFormData({ ...formData, inscricao_estadual: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">CEP</label>
-                                        <input className="w-full bg-neutral-900 border border-neutral-800 p-2 text-[11px] font-mono text-neutral-400 outline-none rounded"
-                                            value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
-                                    </div>
-                                    <div className="space-y-1 col-span-2">
-                                        <label className="text-[9px] font-bold text-neutral-600 uppercase tracking-widest">Pasta Google Drive (ID)</label>
-                                        <input className="w-full bg-neutral-950 border border-neutral-800 p-2 text-[10px] font-mono text-neutral-700 outline-none rounded"
-                                            value={formData.drive_folder_id || ''} onChange={e => setFormData({ ...formData, drive_folder_id: e.target.value })} />
-                                    </div>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="flex gap-3 pt-6 border-t border-neutral-900 sticky bottom-0 bg-neutral-950 pb-6">
-                                    <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-3 text-[10px] font-black uppercase text-neutral-600 hover:text-neutral-401 transition-colors">Cancelar</button>
-                                    <button type="submit" disabled={syncing} className={`flex-[2] py-3 rounded ${syncing ? 'bg-neutral-800 text-neutral-700' : 'bg- emerald-500 text-neutral-950 hover:bg-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} font-black uppercase text-[10px] tracking-widest transition-all active:scale-95`}>
-                                        {syncing ? (
-                                            <span className="flex items-center justify-center gap-2">
-                                                <Loader2 className="w-3 h-3 animate-spin" /> Processando...
-                                            </span>
-                                        ) : (
-                                            editingClient ? 'Salvar Alterações' : 'Confirmar Cadastro'
-                                        )}
-                                    </button>
-                                </div>
-                            </form>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-muted rounded-xl transition-colors text-muted-foreground">
+                                <X className="w-6 h-6" />
+                            </button>
                         </div>
+
+                        <form onSubmit={handleSubmit} className="flex-1 p-8 space-y-6 overflow-y-auto no-scrollbar pb-32">
+                            {/* CNPJ Consult Section */}
+                            <div className="p-6 bg-primary/5 border border-primary/10 rounded-2xl space-y-3">
+                                <label className="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-2">
+                                    <ShieldAlert className="w-4 h-4" /> Inteligência Cadastral
+                                </label>
+                                <div className="flex gap-2">
+                                    <input required className="flex-1 bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
+                                        placeholder="CNPJ ou CPF para consulta"
+                                        value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
+                                    {formData.cnpj_cpf?.replace(/\D/g, '').length === 14 && (
+                                        <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="btn-modern shadow-primary/20 px-6">
+                                            {consulting ? <Loader2 className="animate-spin w-4 h-4" /> : 'Consultar'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-5">
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="razao_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Razão Social</label>
+                                    <input id="razao_social" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground focus:border-primary/40 outline-none transition-all"
+                                        value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="apelido" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Apelido / Nome Curto</label>
+                                    <input id="apelido" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-bold text-primary focus:border-primary outline-none transition-all shadow-sm"
+                                        value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="regime_tributario" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Regime Fiscal</label>
+                                    <select id="regime_tributario" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none appearance-none cursor-pointer"
+                                        value={formData.regime_tributario || ''} onChange={e => setFormData({ ...formData, regime_tributario: e.target.value })}>
+                                        <option value="">Selecione...</option>
+                                        <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
+                                        <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
+                                        <option value="LUCRO_REAL">LUCRO REAL</option>
+                                        <option value="PESSOA_FISICA">PF (AGRO)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="status_rfb" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Situação RFB</label>
+                                    <input id="status_rfb" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-bold text-emerald-600 outline-none"
+                                        value={formData.status_rfb || ''} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="telefone_whatsapp" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">WhatsApp</label>
+                                    <input id="telefone_whatsapp" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                        placeholder="67 9..."
+                                        value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="email_fiscal" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">E-mail Fiscal</label>
+                                    <input id="email_fiscal" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                        placeholder="contato@..."
+                                        value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="inscricao_estadual" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Inscrição Estadual</label>
+                                    <input id="inscricao_estadual" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none"
+                                        value={formData.inscricao_estadual || ''} onChange={e => setFormData({ ...formData, inscricao_estadual: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="cep" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">CEP</label>
+                                    <input id="cep" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none"
+                                        value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Link Drive (ID)</label>
+                                    <input className="w-full bg-secondary/40 border border-border/40 rounded-xl p-3 text-xs font-mono text-muted-foreground outline-none"
+                                        value={formData.drive_folder_id || ''} onChange={e => setFormData({ ...formData, drive_folder_id: e.target.value })} />
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-4 pt-10 border-t border-border/50 sticky bottom-0 bg-card pb-8">
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 text-sm font-bold text-muted-foreground hover:bg-muted rounded-xl transition-all">Cancelar</button>
+                                <button type="submit" disabled={syncing} className={`flex-[2] btn-modern py-4 ${syncing ? 'opacity-50' : ''}`}>
+                                    {syncing ? (
+                                        <span className="flex items-center justify-center gap-3">
+                                            <Loader2 className="w-5 h-5 animate-spin" /> Salvando...
+                                        </span>
+                                    ) : (
+                                        editingClient ? 'Salvar Alterações' : 'Confirmar Cadastro'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                )}
+                </div>
+            )}
+
+            {/* Footer Informativo Maestro (Design Reflexivo) */}
+            <div className="pt-20 border-t border-border/40 text-center space-y-4 opacity-60 pb-10">
+                <div className="flex justify-center items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-foreground">Ecossistema Maestro</span>
+                </div>
+                <p className="text-[11px] max-w-lg mx-auto leading-relaxed text-muted-foreground font-medium">
+                    A Brandão Contabilidade une tradição e inovação para entregar inteligência fiscal superior.
+                    O Maestro é a nossa resposta tecnológica para um mercado que exige precisão, agilidade e segurança absoluta.
+                </p>
+            </div>
         </div>
     );
 }
 
 export default function ClientesPage() {
     return (
-        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-emerald-500" /></div>}>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
             <ClientesContent />
         </Suspense>
     );

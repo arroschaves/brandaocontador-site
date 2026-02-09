@@ -71,7 +71,7 @@ function OnboardingContent() {
         return (
             <div className="text-center p-20">
                 <ShieldCheck className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <h1 className="text-2xl font-black text-white uppercase italic">LINK INVÁLIDO</h1>
+                <h2 className="text-2xl font-black text-white uppercase italic">LINK INVÁLIDO</h2>
                 <p className="text-neutral-500 mt-2">O e-mail de ativação não foi identificado.</p>
             </div>
         )
@@ -83,7 +83,7 @@ function OnboardingContent() {
                 <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(16,185,129,0.3)]">
                     <CheckCircle2 className="w-10 h-10 text-black" />
                 </div>
-                <h1 className="text-3xl font-black text-white italic uppercase">BEM-VINDO AO TIME</h1>
+                <h2 className="text-3xl font-black text-white italic uppercase">BEM-VINDO AO TIME</h2>
                 <p className="text-neutral-500">Sua conta foi ativada com sucesso. Redirecionando para o login...</p>
             </div>
         )

@@ -7,7 +7,7 @@ import {
     MessageSquare, RefreshCw, Loader2, Building,
     Briefcase, ShieldAlert, FolderOpen, Calculator,
     FileCheck, FileSearch, Landmark, Users, Upload, Monitor, Server,
-    Sparkles, MapPin, Fingerprint
+    Sparkles, MapPin, Fingerprint, CheckCircle2, History
 } from 'lucide-react'
 
 interface ClientDetailSidebarProps {
@@ -281,119 +281,133 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
-            <div className="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm" onClick={onClose} />
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-            <div className="relative w-full max-w-xl bg-neutral-950 border-l border-neutral-900 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            <div className="relative w-full max-w-xl bg-card border-l border-border/50 shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
 
-                {/* Header High-Density */}
-                <div className="flex items-center justify-between p-4 bg-neutral-900/50 border-b border-neutral-900">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
-                            <Building2 className="w-5 h-5 text-emerald-500" />
+                {/* Header Lúcido de Alta Densidade */}
+                <div className="flex items-center justify-between p-6 bg-secondary/30 border-b border-border/40">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center border border-primary/20 shadow-sm shadow-primary/5">
+                            <Building2 className="w-6 h-6 text-primary" />
                         </div>
                         <div>
-                            <h2 className="text-xs font-black text-neutral-400 uppercase tracking-widest">Ficha do Cliente</h2>
-                            <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">{client?.cnpj_cpf}</p>
+                            <h2 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Ficha Maestro</h2>
+                            <p className="text-[13px] font-mono font-medium text-foreground mt-1.5">{client?.cnpj_cpf}</p>
                         </div>
                     </div>
-                    <div className="flex gap-2">
-                        <button onClick={handleAuditIndividual} disabled={syncing} className="p-2 bg-neutral-800 border border-neutral-700 text-emerald-500 hover:bg-neutral-700 rounded transition-all">
-                            {syncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                    <div className="flex gap-2.5">
+                        <button
+                            onClick={handleAuditIndividual}
+                            disabled={syncing}
+                            className="p-3 bg-card border border-border/60 text-primary hover:bg-primary/5 hover:border-primary/30 rounded-xl transition-all shadow-sm"
+                            title="Sincronizar"
+                        >
+                            {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                         </button>
-                        <button onClick={onClose} className="p-2 bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white rounded">
-                            <X className="w-4 h-4" />
+                        <button
+                            onClick={onClose}
+                            className="p-3 bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:border-border rounded-xl transition-all shadow-sm"
+                        >
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto no-scrollbar pb-20">
+                <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
                     {loading ? (
-                        <div className="h-full flex flex-col items-center justify-center gap-4 text-emerald-500">
-                            <Loader2 className="w-8 h-8 animate-spin" />
-                            <span className="font-mono text-[9px] uppercase tracking-widest">Sincronizando Auditoria...</span>
+                        <div className="h-full flex flex-col items-center justify-center gap-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
+                                <Loader2 className="w-10 h-10 animate-spin text-primary relative" />
+                            </div>
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Sincronizando Auditoria...</span>
                         </div>
                     ) : (
                         <div className="space-y-0">
-                            {/* Banner Informativo */}
-                            <div className="p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-b border-neutral-900">
-                                <h1 className="text-2xl font-black text-neutral-100 italic uppercase leading-tight tracking-tight">{client?.nome}</h1>
-                                <div className="flex gap-3 mt-4">
-                                    <span className="text-[9px] font-black px-2 py-1 bg-neutral-900 border border-emerald-500/20 text-emerald-500 uppercase italic">
-                                        {client?.regime_tributario?.replace(/_/g, ' ') || 'REVISÃO NECESSÁRIA'}
-                                    </span>
-                                    <span className="text-[9px] font-black px-2 py-1 bg-neutral-900 border border-neutral-800 text-neutral-500 uppercase">
+                            {/* Banner Informativo Refinado */}
+                            <div className="p-8 bg-gradient-to-b from-secondary/20 to-transparent border-b border-border/40">
+                                <h1 className="text-2xl font-bold text-foreground tracking-tight leading-tight">{client?.nome}</h1>
+                                <div className="flex flex-wrap gap-2 mt-5">
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-tight rounded-xl">
+                                        <ShieldAlert className="w-3.5 h-3.5" />
+                                        {client?.regime_tributario?.replace(/_/g, ' ') || 'Revisão Necessária'}
+                                    </div>
+                                    <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary border border-border/60 text-muted-foreground text-[10px] font-bold uppercase tracking-tight rounded-xl">
+                                        <Briefcase className="w-3.5 h-3.5" />
                                         CNAE: {client?.cnae_principal?.split(' - ')[0] || '---'}
-                                    </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Tabs High-Density */}
-                            <div className="flex bg-neutral-900/40 border-b border-neutral-900 overflow-x-auto no-scrollbar px-2">
+                            {/* Tabs Modernas */}
+                            <div className="flex bg-card border-b border-border/40 overflow-x-auto no-scrollbar px-4 pt-4 sticky top-0 z-10">
                                 {[
-                                    { id: 'fiscal', label: 'Auditoria Mural', icon: FileSearch },
-                                    { id: 'unidades', label: 'Propriedades', icon: Landmark },
-                                    { id: 'rh', label: 'E-Social/Folha', icon: Users },
+                                    { id: 'fiscal', label: 'Auditoria', icon: FileSearch },
+                                    { id: 'unidades', label: 'Unidades', icon: Landmark },
+                                    { id: 'rh', label: 'e-Social', icon: Users },
                                     { id: 'vencimentos', label: 'Validades', icon: Clock },
-                                    { id: 'historico', label: 'Histórico/Auditoria', icon: ShieldAlert },
+                                    { id: 'historico', label: 'Logs', icon: HistoryIcon() },
                                     { id: 'dados', label: 'Cadastro', icon: Mail }
                                 ].map(tab => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id as any)}
-                                        className={`px-4 py-3 text-[9px] font-black uppercase whitespace-nowrap border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id
-                                            ? 'border-emerald-500 text-emerald-500 bg-emerald-500/5'
-                                            : 'border-transparent text-neutral-500 hover:text-neutral-300'}`}
+                                        className={`px-4 py-3 text-[11px] font-bold uppercase tracking-tight whitespace-nowrap border-b-2 transition-all flex items-center gap-2.5 ${activeTab === tab.id
+                                            ? 'border-primary text-primary bg-primary/5 rounded-t-xl'
+                                            : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-t-xl'}`}
                                     >
-                                        <tab.icon className="w-3 h-3" /> {tab.label}
+                                        <tab.icon className="w-4 h-4" /> {tab.label}
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Conteúdo Aba Fiscal (Auditoria) */}
-                            <div className="p-6 space-y-8">
+                            {/* Conteúdo Aba Fiscal (Auditoria Mural) */}
+                            <div className="p-8 space-y-8 page-fade-in transition-all">
                                 {activeTab === 'fiscal' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
-                                            <h3>Obrigações Exigíveis ({new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(new Date())})</h3>
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center text-[11px] font-bold uppercase text-muted-foreground tracking-widest pl-1">
+                                            <h3>Obrigações Exigíveis • {new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date())}</h3>
                                         </div>
-                                        <div className="grid gap-2">
+                                        <div className="grid gap-3">
                                             {expectedRoutines.map((rout, i) => {
                                                 const history = cronograma.find(o => o.tipo === rout.name);
                                                 const isConcluido = history?.status === 'concluido';
                                                 return (
-                                                    <div key={i} className={`p-3 bg-neutral-900/40 border ${isConcluido ? 'border-emerald-500/20' : 'border-neutral-800'} rounded group space-y-3`}>
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`p-2 rounded ${isConcluido ? 'bg-emerald-500/10 text-emerald-500' : 'bg-neutral-800 text-neutral-600'}`}>
-                                                                    {isConcluido ? <FileCheck className="w-3.5 h-3.5" /> : <Calculator className="w-3.5 h-3.5" />}
+                                                    <div key={i} className={`lucid-card p-0 overflow-hidden border ${isConcluido ? 'border-primary/20 bg-primary/5 shadow-sm shadow-primary/5' : 'border-border/60 bg-card hover:border-primary/20 transition-all shadow-sm'}`}>
+                                                        <div className="p-5 flex items-center justify-between">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className={`p-3 rounded-2xl border transition-all ${isConcluido ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20' : 'bg-secondary text-muted-foreground border-border shadow-none'}`}>
+                                                                    {isConcluido ? <FileCheck className="w-5 h-5" /> : <Calculator className="w-5 h-5" />}
                                                                 </div>
                                                                 <div>
-                                                                    <p className="text-[10px] font-black text-neutral-200 uppercase">{rout.name}</p>
-                                                                    <p className="text-[8px] text-neutral-600 uppercase italic">{rout.description}</p>
+                                                                    <p className="text-[13px] font-bold text-foreground leading-tight">{rout.name}</p>
+                                                                    <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{rout.description}</p>
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
                                                                 {isConcluido && (
                                                                     <button
                                                                         onClick={() => handleSendWhatsApp(rout.name)}
-                                                                        className="p-2 bg-emerald-500/10 text-emerald-500 rounded border border-emerald-500/20 hover:bg-emerald-500 hover:text-neutral-950 transition-all"
+                                                                        className="p-2.5 bg-card border border-border text-emerald-600 rounded-xl hover:bg-emerald-50 transition-all shadow-sm"
                                                                         title="Enviar via WhatsApp"
                                                                     >
-                                                                        <MessageSquare className="w-3.5 h-3.5" />
+                                                                        <MessageSquare className="w-4 h-4" />
                                                                     </button>
                                                                 )}
-                                                                <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${isConcluido ? 'bg-emerald-500 text-neutral-950' : 'bg-neutral-800 text-neutral-500'}`}>
-                                                                    {isConcluido ? 'AUDITADO OK' : 'PENDENTE'}
-                                                                </span>
+                                                                <div className={`px-2.5 py-1 text-[10px] font-bold rounded-lg border flex items-center gap-1.5 ${isConcluido ? 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/5' : 'bg-muted/30 text-muted-foreground border-border/50 shadow-none'}`}>
+                                                                    {isConcluido && <CheckCircle2 className="w-3 h-3" />}
+                                                                    {isConcluido ? 'AUDITADO' : 'PENDENTE'}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         {!isConcluido && (
-                                                            <div className="flex pt-2 border-t border-neutral-800/50">
-                                                                <label className="flex-1 cursor-pointer">
+                                                            <div className="flex">
+                                                                <label className="flex-1 cursor-pointer group/upload">
                                                                     <input type="file" className="hidden" onChange={e => handleFileUpload(e, rout.name)} disabled={uploading} />
-                                                                    <div className="flex items-center justify-center gap-2 py-1.5 bg-neutral-800 text-[9px] font-bold text-neutral-400 hover:text-emerald-500 transition-all">
-                                                                        <Upload className="w-3 h-3" />
-                                                                        {uploading ? 'SUBINDO...' : 'SUBIR GUIA MANUAL'}
+                                                                    <div className="flex items-center justify-center gap-2.5 py-2.5 bg-secondary/50 text-[11px] font-bold text-muted-foreground group-hover/upload:bg-primary group-hover/upload:text-white transition-all border-t border-border/40">
+                                                                        <Upload className="w-3.5 h-3.5" />
+                                                                        {uploading ? 'SINCRONIZANDO...' : 'UPLOAD MANUAL DA GUIA'}
                                                                     </div>
                                                                 </label>
                                                             </div>
@@ -406,25 +420,25 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                 )}
 
                                 {activeTab === 'historico' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
-                                            <h3>Auditoria de Acessos e Ações</h3>
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center text-[11px] font-bold uppercase text-muted-foreground tracking-widest pl-1">
+                                            <h3>Auditoria de Eventos e Acessos</h3>
                                         </div>
                                         <div className="space-y-3">
                                             {historico.length === 0 ? (
-                                                <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-20">
-                                                    <p className="text-[10px] font-bold uppercase">Nenhum registro de auditoria.</p>
+                                                <div className="p-16 text-center bg-secondary/20 rounded-3xl border border-dashed border-border/60">
+                                                    <p className="text-sm font-bold text-muted-foreground opacity-40">Sem registros recentes.</p>
                                                 </div>
                                             ) : historico.map(log => (
-                                                <div key={log.id} className="p-3 bg-neutral-900/40 border border-neutral-800 rounded">
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase">{log.acao}</span>
-                                                        <span className="text-[8px] text-neutral-600 font-mono">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
+                                                <div key={log.id} className="lucid-card p-5 space-y-4 border-border/40 shadow-sm">
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="px-2.5 py-1 text-[9px] font-bold rounded-lg bg-primary/10 text-primary border border-primary/20 uppercase tracking-tight">{log.acao}</span>
+                                                        <span className="text-[10px] text-muted-foreground font-mono font-medium">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
                                                     </div>
-                                                    <p className="text-[10px] text-neutral-300 mb-2">{log.detalhes}</p>
-                                                    <div className="flex gap-4 text-[7px] text-neutral-700 font-bold uppercase border-t border-neutral-900 pt-2">
-                                                        <span className="truncate flex items-center gap-1 max-w-[150px]"><Monitor className="w-2.5 h-2.5" /> {log.user_agent?.substring(0, 30)}...</span>
-                                                        <span className="flex items-center gap-1"><Server className="w-2.5 h-2.5" /> IP: {log.ip_address}</span>
+                                                    <p className="text-[13px] font-medium text-foreground leading-relaxed">{log.detalhes}</p>
+                                                    <div className="flex gap-5 text-[10px] text-muted-foreground font-medium pt-3 border-t border-border/40">
+                                                        <span className="truncate flex items-center gap-1.5"><Monitor className="w-3.5 h-3.5 opacity-60" /> {log.user_agent?.substring(0, 30)}...</span>
+                                                        <span className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5 opacity-60" /> IP: {log.ip_address}</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -433,43 +447,48 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                 )}
 
                                 {activeTab === 'vencimentos' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
-                                            <h3>Validade de Certificados Digitais</h3>
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center text-[11px] font-bold uppercase text-muted-foreground tracking-widest pl-1">
+                                            <h3>Monitor de Certificados Digitais</h3>
                                         </div>
-                                        <div className="grid gap-3">
+                                        <div className="grid gap-4">
                                             {loadingCerts ? (
-                                                <div className="py-10 text-center"><Loader2 className="w-5 h-5 animate-spin mx-auto text-amber-500" /></div>
+                                                <div className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" /></div>
                                             ) : certificados.length === 0 ? (
-                                                <div className="p-10 text-center border-2 border-dashed border-neutral-900 opacity-20 italic text-[10px] uppercase">
-                                                    Nenhum certificado detectado.
+                                                <div className="p-16 text-center bg-secondary/20 rounded-3xl border border-dashed border-border/60">
+                                                    <Fingerprint className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-10" />
+                                                    <p className="text-sm font-bold text-muted-foreground opacity-40 uppercase tracking-widest">Nenhum certificado no cofre</p>
                                                 </div>
                                             ) : certificados.map(cert => {
                                                 const diasRestantes = cert.data_vencimento ? Math.ceil((new Date(cert.data_vencimento).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
                                                 const isExpirado = diasRestantes !== null && diasRestantes <= 0;
                                                 const isAlerta = diasRestantes !== null && diasRestantes <= 30;
 
+                                                const colorClass = isExpirado ? 'bg-destructive/10 text-destructive border-destructive/20' :
+                                                    isAlerta ? 'bg-amber-100/50 text-amber-600 border-amber-200' :
+                                                        'bg-primary/10 text-primary border-primary/20';
+
                                                 return (
-                                                    <div key={cert.id} className={`p-4 bg-neutral-900/40 border ${isExpirado ? 'border-rose-500/30' : isAlerta ? 'border-amber-500/30' : 'border-neutral-800'} rounded-lg flex items-center justify-between`}>
-                                                        <div className="flex items-center gap-3">
-                                                            <div className={`p-2 rounded ${isExpirado ? 'bg-rose-500/10 text-rose-500' : isAlerta ? 'bg-amber-500/10 text-amber-500 animate-pulse' : 'bg-emerald-500/10 text-emerald-500'}`}>
-                                                                <ShieldAlert className="w-4 h-4" />
+                                                    <div key={cert.id} className={`lucid-card p-5 group flex items-center justify-between border ${isExpirado ? 'border-destructive/30 bg-destructive/5' : isAlerta ? 'border-amber-300/50 bg-amber-50' : 'border-border/60 bg-card hover:bg-secondary/40 transition-colors shadow-sm'}`}>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className={`p-3.5 rounded-2xl border transition-all ${colorClass} ${isAlerta && 'animate-pulse'}`}>
+                                                                <Fingerprint className="w-6 h-6" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <span className="text-[8px] px-1.5 py-0.5 bg-neutral-900 border border-neutral-800 text-neutral-500 font-bold rounded">{cert.tipo}</span>
-                                                                    <span className={`text-[8px] font-black uppercase ${isExpirado ? 'text-rose-500' : isAlerta ? 'text-amber-500' : 'text-emerald-500'}`}>
-                                                                        {isExpirado ? 'EXPIRADO' : diasRestantes !== null ? `Vence em ${diasRestantes} dias` : 'Data não informada'}
+                                                                <p className="text-[14px] font-bold text-foreground leading-tight truncate max-w-[200px]">{cert.nome_arquivo}</p>
+                                                                <div className="flex items-center gap-3 mt-1.5">
+                                                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-card/60 border border-border text-muted-foreground rounded-lg">{cert.tipo}</span>
+                                                                    <span className={`text-[10px] font-bold uppercase tracking-tight ${isExpirado ? 'text-destructive' : isAlerta ? 'text-amber-600' : 'text-primary'}`}>
+                                                                        {isExpirado ? 'Expirado' : diasRestantes !== null ? `${diasRestantes} dias restantes` : 'Data Pendente'}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <button
-                                                            onClick={() => setActiveTab('fiscal')} // Atalho para o Mural
-                                                            className="p-2 text-neutral-700 hover:text-white transition-all"
+                                                            onClick={() => setActiveTab('fiscal')}
+                                                            className="p-3 bg-card border border-border/60 text-muted-foreground hover:text-primary transition-all rounded-xl shadow-sm"
                                                         >
-                                                            <Monitor className="w-3.5 h-3.5" />
+                                                            <Monitor className="w-5 h-5" />
                                                         </button>
                                                     </div>
                                                 );
@@ -479,56 +498,68 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                 )}
 
                                 {activeTab === 'dados' && (
-                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                                        <div className="flex justify-between items-center text-[10px] font-black uppercase text-neutral-500 tracking-widest">
-                                            <h3>Detalhamento Cadastral</h3>
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-center text-[11px] font-bold uppercase text-muted-foreground tracking-widest pl-1">
+                                            <h3>Detalhamento da Ficha Maestro</h3>
                                         </div>
-                                        <div className="grid gap-3">
-                                            {/* Botão de Enriquecimento Inteligente */}
+                                        <div className="grid gap-4">
                                             <button
                                                 onClick={handleEnrich}
                                                 disabled={syncing}
-                                                className="w-full py-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-lg flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-neutral-950 transition-all text-[11px] font-black uppercase tracking-widest group"
+                                                className="w-full py-4 bg-primary text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-primary/90 transition-all text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/20 group"
                                             >
-                                                {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 group-hover:scale-125 transition-transform" />}
-                                                ✨ Enriquecer Dados via IA/Receita
+                                                {syncing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform" />}
+                                                Enriquecimento de Dados Master
                                             </button>
 
-                                            {[
-                                                { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
-                                                { label: 'Identificação Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
-                                                { label: 'Inscrição Estadual', value: client?.inscricao_estadual, icon: Fingerprint },
-                                                { label: 'E-mail Corporativo', value: client?.email, icon: Mail },
-                                                { label: 'Telefone/WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
-                                                { label: 'Endereço Completo', value: client?.logradouro ? `${client.logradouro}, ${client.numero}${client.complemento ? ' - ' + client.complemento : ''}, ${client.bairro}, ${client.cidade}/${client.estado}` : null, icon: MapPin },
-                                                { label: 'Regime Tributário', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
-                                                { label: 'CNAE Principal', value: client?.cnae_principal, icon: Briefcase }
-                                            ].map((info, idx) => (
-                                                <div key={idx} className="flex items-center gap-4 bg-neutral-900/40 p-3 border border-neutral-900 rounded-lg group">
-                                                    <info.icon className="w-3.5 h-3.5 text-neutral-700 group-hover:text-emerald-500 transition-colors" />
-                                                    <div className="flex-1 overflow-hidden">
-                                                        <p className="text-[8px] font-black text-neutral-700 uppercase">{info.label}</p>
-                                                        <p className="text-[11px] font-bold text-neutral-400 uppercase truncate">{info.value || 'NÃO CADASTRADO'}</p>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {[
+                                                    { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
+                                                    { label: 'ID Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
+                                                    { label: 'Inscr. Estadual', value: client?.inscricao_estadual, icon: Fingerprint },
+                                                    { label: 'E-mail Fiscal', value: client?.email, icon: Mail },
+                                                    { label: 'WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
+                                                    { label: 'Regime Fiscal', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
+                                                    { label: 'CNAE', value: client?.cnae_principal, icon: Briefcase },
+                                                    { label: 'Localidade', value: client?.cidade ? `${client.cidade}/${client.estado}` : null, icon: MapPin }
+                                                ].map((info, idx) => (
+                                                    <div key={idx} className="lucid-card p-3.5 space-y-2.5 border-border/40 shadow-sm flex flex-col justify-center">
+                                                        <div className="flex items-center gap-2">
+                                                            <info.icon className="w-3.5 h-3.5 text-primary opacity-60" />
+                                                            <p className="text-[10px] font-bold text-muted-foreground uppercase">{info.label}</p>
+                                                        </div>
+                                                        <p className="text-[12px] font-bold text-foreground uppercase truncate pl-0.5">{info.value || 'NÃO CADASTRADO'}</p>
                                                     </div>
+                                                ))}
+                                                <div className="lucid-card p-3.5 space-y-2.5 border-border/40 shadow-sm col-span-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin className="w-3.5 h-3.5 text-primary opacity-60" />
+                                                        <p className="text-[10px] font-bold text-muted-foreground uppercase">Endereço Operacional</p>
+                                                    </div>
+                                                    <p className="text-[12px] font-bold text-foreground uppercase leading-relaxed pl-0.5">
+                                                        {client?.logradouro ? `${client.logradouro}, ${client.numero}${client.complemento ? ' - ' + client.complemento : ''}, ${client.bairro}` : 'ENDEREÇO PENDENTE'}
+                                                    </p>
                                                 </div>
-                                            ))}
+                                            </div>
                                         </div>
 
-                                        {/* Secao LGPD (Apenas Admin) */}
+                                        {/* Ações Administrativas (LGPD) */}
                                         {userRole === 'admin' && (
-                                            <div className="mt-10 pt-6 border-t border-rose-500/20 space-y-4">
-                                                <h4 className="text-[10px] font-black uppercase text-rose-500 tracking-widest flex items-center gap-2">
-                                                    <ShieldAlert className="w-4 h-4" /> Gestão de Conformidade (LGPD)
-                                                </h4>
-                                                <p className="text-[9px] text-neutral-600 uppercase font-bold leading-relaxed">
-                                                    Utilize o Offboarding para encerrar o vínculo contratual. Isso removerá permanentemente todos os certificados digitais e senhas do Vault.
+                                            <div className="mt-12 p-8 bg-destructive/5 border border-destructive/20 rounded-3xl space-y-5">
+                                                <div className="flex items-center gap-3 text-destructive">
+                                                    <ShieldAlert className="w-6 h-6" />
+                                                    <h4 className="text-sm font-bold uppercase tracking-tight">Zona de Risco • LGPD & Offboarding</h4>
+                                                </div>
+                                                <p className="text-xs font-semibold text-muted-foreground leading-relaxed">
+                                                    O fechamento de conta é irreversível. Todos os documentos confidenciais,
+                                                    certificados e senhas do cofre serão eliminados permanentemente do CRM Maestro.
                                                 </p>
                                                 <button
                                                     onClick={handleOffboarding}
                                                     disabled={syncing}
-                                                    className="w-full py-3 rounded text-[10px] font-black uppercase transition-all bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white"
+                                                    className="w-full py-4 rounded-2xl text-[11px] font-bold uppercase transition-all bg-destructive text-white hover:bg-destructive/90 shadow-lg shadow-destructive/20"
                                                 >
-                                                    INICIAR OFFBOARDING DEFINITIVO
+                                                    Executar Offboarding Definitivo
                                                 </button>
                                             </div>
                                         )}
@@ -539,16 +570,24 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                     )}
                 </div>
 
-                {/* Footer Fixo */}
-                <div className="absolute bottom-0 left-0 w-full p-4 bg-neutral-950 border-t border-neutral-900 flex gap-4">
-                    <button onClick={onClose} className="flex-1 py-3 text-[10px] font-black uppercase text-neutral-600 hover:text-neutral-400 transition-colors">Fechar Vista</button>
+                {/* Footer Lúcido Fixo */}
+                <div className="absolute bottom-0 left-0 w-full p-6 bg-card border-t border-border/50 flex gap-4 backdrop-blur-md">
+                    <button onClick={onClose} className="flex-1 py-4 text-xs font-bold uppercase text-muted-foreground hover:bg-secondary rounded-2xl transition-all">Sair da Ficha</button>
                     {client?.drive_folder_id && (
-                        <a href={`https://drive.google.com/drive/folders/${client.drive_folder_id}`} target="_blank" className="flex-[2] py-3 bg-emerald-500 text-neutral-950 text-[10px] font-black uppercase rounded text-center hover:bg-emerald-400 transition-all flex items-center justify-center gap-2">
-                            <FolderOpen className="w-3.5 h-3.5" /> GOOGLE DRIVE
+                        <a
+                            href={`https://drive.google.com/drive/folders/${client.drive_folder_id}`}
+                            target="_blank"
+                            className="flex-[2] py-4 bg-primary text-white text-xs font-bold uppercase rounded-2xl text-center hover:bg-primary/90 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary/20"
+                        >
+                            <FolderOpen className="w-4.5 h-4.5" /> Acessar Drive
                         </a>
                     )}
                 </div>
             </div>
         </div>
     )
+}
+
+function HistoryIcon() {
+    return (props: any) => <History {...props} />
 }
