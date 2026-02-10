@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { StatsGrid } from "./components/StatsGrid";
+import Link from 'next/link';
 import {
     LucideCalendar,
     RefreshCcw,
@@ -402,7 +403,7 @@ export default function MaestroPage() {
                             Ações Rápidas
                         </h3>
                         <div className="space-y-3">
-                            <a href="/admin/clientes" className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
+                            <Link href="/admin/clientes" className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
                                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
                                     <MapPin className="w-4 h-4" />
                                 </div>
@@ -411,7 +412,7 @@ export default function MaestroPage() {
                                     <p className="text-xs text-muted-foreground">Cadastrar + criar pastas automáticas</p>
                                 </div>
                                 <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </a>
+                            </Link>
                             <a href="/admin/vencimentos" className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
                                 <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
                                     <LucideCalendar className="w-4 h-4" />

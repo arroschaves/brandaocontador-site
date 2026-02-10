@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 
@@ -15,9 +16,11 @@ function Header() {
           <div className="flex-shrink-0 flex items-center h-full">
             <Link href="/" className="flex items-center group h-full py-4 gap-6">
               <div className="relative h-full aspect-[4/3] flex items-center">
-                <img
+                <Image
                   src="/logo-full.jpg"
                   alt="Brandão Contabilidade Logo"
+                  width={160}
+                  height={120}
                   className="h-full w-auto contrast-125 brightness-110 group-hover:scale-105 transition-all duration-700 object-contain"
                 />
               </div>

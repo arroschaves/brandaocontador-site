@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { User, Lock, ArrowRight, ShieldCheck, FileText, Clock, ShieldAlert, Loader2 } from 'lucide-react'
 
 /**
@@ -34,7 +35,7 @@ export default function ClienteLoginPage() {
         <div className="bg-noise absolute inset-0 opacity-10"></div>
 
         <div className="relative z-10 animate-in fade-in slide-in-from-left-4 duration-1000">
-          <img src="/logo-full.jpg" alt="Brandão" className="h-16 w-auto brightness-125 mb-10" />
+          <Image src="/logo-full.jpg" alt="Brandão" width={200} height={64} className="h-16 w-auto brightness-125 mb-10" />
           <h1 className="text-7xl font-black italic tracking-tighter uppercase leading-[0.85] text-white">
             PORTAL DO <br />
             <span className="text-amber-electric">CLIENTE.</span>

@@ -127,7 +127,7 @@ export default function PedidosPage() {
 
                             <div className="flex-1 bg-neutral-950/50 p-4 rounded-xl border border-neutral-800/50 mb-4 overflow-hidden">
                                 <p className="text-sm text-neutral-300 leading-relaxed font-medium italic">
-                                    "{p.mensagem}"
+                                    &quot;{p.mensagem}&quot;
                                 </p>
                             </div>
 

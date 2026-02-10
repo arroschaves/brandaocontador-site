@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShieldCheck, Instagram, Facebook, Linkedin } from 'lucide-react';
 
 export default function Footer() {
@@ -10,7 +11,7 @@ export default function Footer() {
                 <div className="grid md:grid-cols-12 gap-16 mb-20">
                     <div className="md:col-span-5">
                         <Link href="/" className="inline-block mb-8">
-                            <img src="/logo-full.jpg" alt="Brandão Logo" className="h-12 w-auto contrast-125 brightness-110 group-hover:scale-105 transition-all" />
+                            <Image src="/logo-full.jpg" alt="Brandão Logo" width={180} height={48} className="h-12 w-auto contrast-125 brightness-110 group-hover:scale-105 transition-all" />
                         </Link>
                         <p className="text-neutral-500 font-sans text-sm leading-relaxed max-w-sm mb-8 uppercase tracking-tight">
                             Desde 1993, transformando a complexidade contábil em vantagem estratégica para o agronegócio e empresas em Mato Grosso do Sul.
