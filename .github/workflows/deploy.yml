@@ -57,6 +57,21 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Verify Vercel Secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::VERCEL_ORG_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
@@ -104,6 +119,21 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+
+      - name: Verify Vercel Secrets
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "::error::VERCEL_TOKEN is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "::error::VERCEL_ORG_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
