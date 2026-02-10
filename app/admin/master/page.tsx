@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     ShieldCheck, Lock, Eye, AlertTriangle,
@@ -19,11 +19,7 @@ export default function MasterDashboard() {
 
     const supabase = createClient()
 
-    useEffect(() => {
-        fetchSecurityData()
-    }, [])
-
-    async function fetchSecurityData() {
+    const fetchSecurityData = useCallback(async () => {
         setLoading(true)
         try {
             // 1. Logs de Segurança Recentes
@@ -48,7 +44,11 @@ export default function MasterDashboard() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchSecurityData()
+    }, [fetchSecurityData])
 
     return (
         <div className="space-y-8 animate-in fade-in duration-1000">

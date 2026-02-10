@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     Zap,
@@ -37,13 +37,8 @@ export default function AutomacaoPage() {
 
     const supabase = createClient()
 
-    useEffect(() => {
-        fetchStats()
-        loadSavedConfig()
-        fetchNotebooks()
-    }, [])
 
-    async function fetchNotebooks() {
+    const fetchNotebooks = useCallback(async () => {
         // Busca configurações
         const { data: configs } = await supabase
             .from('admin_settings')
@@ -67,7 +62,7 @@ export default function AutomacaoPage() {
             }
         })
         setNotebooks(combined)
-    }
+    }, [supabase])
 
     async function saveNotebookConfig(hostname: string, folders: string[]) {
         setLoading(true)
@@ -87,7 +82,7 @@ export default function AutomacaoPage() {
         }
     }
 
-    async function loadSavedConfig() {
+    const loadSavedConfig = useCallback(async () => {
         const { data } = await supabase
             .from('admin_settings')
             .select('value')
@@ -97,7 +92,7 @@ export default function AutomacaoPage() {
         if (data?.value) {
             setSelectedFolders(data.value)
         }
-    }
+    }, [supabase])
 
     async function saveConfig(folders: string[]) {
         try {
@@ -128,14 +123,20 @@ export default function AutomacaoPage() {
         await saveConfig(newFolders)
     }
 
-    async function fetchStats() {
+    const fetchStats = useCallback(async () => {
         const { count } = await supabase
             .from('clientes')
             .select('*', { count: 'exact', head: true })
             .is('drive_folder_id', null)
 
         setStats(prev => ({ ...prev, clientesSemPasta: count || 0 }))
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchStats()
+        loadSavedConfig()
+        fetchNotebooks()
+    }, [fetchStats, loadSavedConfig, fetchNotebooks])
 
     const runAnalysis = async () => {
         setScanning(true)

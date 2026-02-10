@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     Users, UserPlus, ShieldAlert, Activity,
@@ -17,11 +17,7 @@ export default function EquipePage() {
 
     const supabase = createClient()
 
-    useEffect(() => {
-        fetchEquipe()
-    }, [])
-
-    async function fetchEquipe() {
+    const fetchEquipe = useCallback(async () => {
         setLoading(true)
         try {
             const { data } = await supabase
@@ -46,7 +42,11 @@ export default function EquipePage() {
         } finally {
             setLoading(false)
         }
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchEquipe()
+    }, [fetchEquipe])
 
     async function handleInvite() {
         const nome = prompt('Nome do Funcionário:')

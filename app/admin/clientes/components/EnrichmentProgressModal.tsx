@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     Loader2,
     CheckCircle2,
@@ -26,18 +26,7 @@ export default function EnrichmentProgressModal({ isOpen, candidates, onClose }:
     const [results, setResults] = useState<{ id: string, nome: string, success: boolean, error?: string }[]>([])
     const [currentClientName, setCurrentClientName] = useState('')
 
-    useEffect(() => {
-        if (isOpen && status === 'idle' && candidates.length > 0) {
-            startEnrichment()
-        }
-    }, [isOpen])
-
-    async function startEnrichment() {
-        setStatus('running')
-        processNext(0)
-    }
-
-    async function processNext(index: number) {
+    const processNext = useCallback(async (index: number) => {
         if (index >= candidates.length) {
             setStatus('completed')
             return
@@ -75,7 +64,18 @@ export default function EnrichmentProgressModal({ isOpen, candidates, onClose }:
         } else {
             setStatus('completed')
         }
-    }
+    }, [candidates, status])
+
+    const startEnrichment = useCallback(async () => {
+        setStatus('running')
+        processNext(0)
+    }, [processNext])
+
+    useEffect(() => {
+        if (isOpen && status === 'idle' && candidates.length > 0) {
+            startEnrichment()
+        }
+    }, [isOpen, status, candidates.length, startEnrichment])
 
     if (!isOpen) return null
 

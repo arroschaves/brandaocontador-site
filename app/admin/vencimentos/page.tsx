@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
     Calendar,
@@ -18,11 +18,7 @@ export default function VencimentosPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 
-    useEffect(() => {
-        fetchVencimentos();
-    }, []);
-
-    async function fetchVencimentos() {
+    const fetchVencimentos = useCallback(async () => {
         try {
             // Buscamos clientes que tenham algum vencimento preenchido
             const { data, error } = await supabase
@@ -75,7 +71,11 @@ export default function VencimentosPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        fetchVencimentos();
+    }, [fetchVencimentos]);
 
     const getStatusInfo = (dateStr: string) => {
         const today = new Date();

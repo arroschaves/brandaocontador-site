@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     ChevronLeft,
     ChevronRight,
@@ -25,16 +25,9 @@ export default function CalendarioPage() {
     const currentMonth = viewDate.getMonth();
     const currentYear = viewDate.getFullYear();
 
-    useEffect(() => {
-        fetchDeadlines();
-    }, [currentMonth, currentYear]);
-
-    async function fetchDeadlines() {
+    const fetchDeadlines = useCallback(async () => {
         setLoading(true);
         try {
-            // Buscamos as obrigações para o mês atual
-            // No banco as obrigações tem 'competencia' ou 'vencimento'
-            // O importador fiscal usa 'competencia' (ex: 2026-01-01)
             const firstDay = new Date(currentYear, currentMonth, 1).toISOString();
             const lastDay = new Date(currentYear, currentMonth + 1, 0).toISOString();
 
@@ -46,9 +39,8 @@ export default function CalendarioPage() {
 
             if (error) throw error;
 
-            // Mapear para o formato do calendário
             const mapped = (data || []).map((d: any) => ({
-                day: new Date(d.competencia).getUTCDate(), // Assumindo que queremos mostrar no dia da competência ou similar
+                day: new Date(d.competencia).getUTCDate(),
                 type: d.tipo,
                 title: d.tipo,
                 client: d.clientes?.nome || 'Desconhecido',
@@ -61,7 +53,11 @@ export default function CalendarioPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [currentMonth, currentYear]);
+
+    useEffect(() => {
+        fetchDeadlines();
+    }, [fetchDeadlines]);
 
     const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();

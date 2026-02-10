@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
     Calendar,
@@ -28,18 +28,7 @@ export default function CronogramaPage() {
         'DAS', 'FOLHA', 'FGTS', 'INSS', 'DCTF', 'DARF', 'ITR_CCIR', 'CND_CERT', 'XML_NF'
     ];
 
-    useEffect(() => {
-        fetchData();
-    }, [competencia]);
-
-    useEffect(() => {
-        const p = obrigacoes.filter(o => o.status === 'pendente').length;
-        const c = obrigacoes.filter(o => o.status === 'concluido').length;
-        const a = obrigacoes.filter(o => o.status === 'atrasado').length;
-        setResumo({ pendentes: p, concluidos: c, atrasados: a });
-    }, [obrigacoes]);
-
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const { data: dataClientes } = await supabase
@@ -63,7 +52,11 @@ export default function CronogramaPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [competencia])
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleSync = async () => {
         try {

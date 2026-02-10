@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     X, Building2, Mail, Phone, Clock, FileText,
@@ -43,7 +43,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
 
     const supabase = createClient()
 
-    async function fetchHistorico() {
+    const fetchHistorico = useCallback(async () => {
         if (!clientId) return;
         const { data } = await supabase
             .from('auditoria_crm')
@@ -52,7 +52,58 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
             .order('created_at', { ascending: false })
             .limit(20);
         setHistorico(data || []);
-    }
+    }, [clientId, supabase]);
+
+    const fetchCertificados = useCallback(async () => {
+        if (!clientId) return
+        try {
+            setLoadingCerts(true)
+            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
+            const data = await res.json()
+            if (res.ok) setCertificados(data)
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoadingCerts(false)
+        }
+    }, [clientId])
+
+    const fetchUserRole = useCallback(async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+            const { data } = await supabase.from('perfis').select('role').eq('id', user.id).single()
+            if (data) setUserRole(data.role)
+        }
+    }, [supabase])
+
+    const getFullClientData = useCallback(async () => {
+        if (!clientId) return
+        try {
+            setLoading(true)
+            const { data: cliente } = await supabase.from('clientes').select('*').eq('id', clientId).single()
+            setClient(cliente)
+            setEditedClient(cliente)
+
+            const { data: cron } = await supabase.from('obrigacoes_acessorias').select('*').eq('cliente_id', clientId)
+            setCronograma(cron || [])
+
+            const { data: units } = await supabase.from('unidades_negocio').select('*').eq('cliente_id', clientId)
+            setUnidades(units || [])
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
+    }, [clientId, supabase])
+
+    useEffect(() => {
+        if (clientId && isOpen) {
+            getFullClientData()
+            fetchHistorico()
+            fetchCertificados()
+            fetchUserRole()
+        }
+    }, [clientId, isOpen, getFullClientData, fetchHistorico, fetchCertificados, fetchUserRole])
 
     async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, routineName?: string) {
         const file = e.target.files?.[0];
@@ -84,57 +135,6 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
             alert('Erro no upload.');
         } finally {
             setUploading(false);
-        }
-    }
-
-    async function fetchCertificados() {
-        if (!clientId) return
-        try {
-            setLoadingCerts(true)
-            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
-            const data = await res.json()
-            if (res.ok) setCertificados(data)
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoadingCerts(false)
-        }
-    }
-
-    async function fetchUserRole() {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-            const { data } = await supabase.from('perfis').select('role').eq('id', user.id).single()
-            if (data) setUserRole(data.role)
-        }
-    }
-
-    useEffect(() => {
-        if (clientId && isOpen) {
-            getFullClientData()
-            fetchHistorico()
-            fetchCertificados()
-            fetchUserRole()
-        }
-    }, [clientId, isOpen])
-
-    async function getFullClientData() {
-        if (!clientId) return
-        try {
-            setLoading(true)
-            const { data: cliente } = await supabase.from('clientes').select('*').eq('id', clientId).single()
-            setClient(cliente)
-            setEditedClient(cliente)
-
-            const { data: cron } = await supabase.from('obrigacoes_acessorias').select('*').eq('cliente_id', clientId)
-            setCronograma(cron || [])
-
-            const { data: units } = await supabase.from('unidades_negocio').select('*').eq('cliente_id', clientId)
-            setUnidades(units || [])
-        } catch (err) {
-            console.error(err)
-        } finally {
-            setLoading(false)
         }
     }
 
@@ -347,7 +347,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                     { id: 'unidades', label: 'Unidades', icon: Landmark },
                                     { id: 'rh', label: 'e-Social', icon: Users },
                                     { id: 'vencimentos', label: 'Validades', icon: Clock },
-                                    { id: 'historico', label: 'Logs', icon: HistoryIcon() },
+                                    { id: 'historico', label: 'Logs', icon: HistoryIcon },
                                     { id: 'dados', label: 'Cadastro', icon: Mail }
                                 ].map(tab => (
                                     <button
@@ -588,6 +588,6 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     )
 }
 
-function HistoryIcon() {
-    return (props: any) => <History {...props} />
+function HistoryIcon(props: any) {
+    return <History {...props} />;
 }

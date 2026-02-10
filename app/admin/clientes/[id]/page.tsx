@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, use, useRef } from 'react'
+import { useState, useEffect, use, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     FileText, History, Info, Shield,
@@ -48,15 +48,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
     const supabase = createClient()
 
-    useEffect(() => {
-        if (clientId) {
-            fetchClientData()
-            fetchCertificados()
-            fetchAgendamentos()
-        }
-    }, [clientId])
-
-    async function fetchClientData() {
+    const fetchClientData = useCallback(async () => {
         setLoading(true)
         setError(null)
         try {
@@ -100,7 +92,49 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoading(false)
         }
-    }
+    }, [clientId, supabase])
+
+    const fetchCertificados = useCallback(async () => {
+        setLoadingCerts(true)
+        try {
+            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
+            const data = await res.json()
+            if (res.ok) {
+                setCertificados(Array.isArray(data) ? data : [])
+            } else {
+                console.error('Erro ao buscar certificados:', data.error)
+            }
+        } catch (err) {
+            console.error('Erro de rede ao buscar certificados:', err)
+        } finally {
+            setLoadingCerts(false)
+        }
+    }, [clientId])
+
+    const fetchAgendamentos = useCallback(async () => {
+        setLoadingAgendamentos(true)
+        try {
+            const res = await fetch(`/api/clientes/${clientId}/agendamentos`)
+            const data = await res.json()
+            if (res.ok) {
+                setAgendamentos(Array.isArray(data) ? data : [])
+            } else {
+                console.error('Erro ao buscar agendamentos:', data.error)
+            }
+        } catch (err) {
+            console.error('Erro de rede ao buscar agendamentos:', err)
+        } finally {
+            setLoadingAgendamentos(false)
+        }
+    }, [clientId])
+
+    useEffect(() => {
+        if (clientId) {
+            fetchClientData()
+            fetchCertificados()
+            fetchAgendamentos()
+        }
+    }, [clientId, fetchClientData, fetchCertificados, fetchAgendamentos])
 
     async function handleSync() {
         setSyncing(true)
@@ -243,43 +277,11 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         }
     }
 
-    async function fetchCertificados() {
-        setLoadingCerts(true)
-        try {
-            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
-            const data = await res.json()
-            if (res.ok) {
-                setCertificados(Array.isArray(data) ? data : [])
-            } else {
-                console.error('Erro ao buscar certificados:', data.error)
-            }
-        } catch (err) {
-            console.error('Erro de rede ao buscar certificados:', err)
-        } finally {
-            setLoadingCerts(false)
-        }
-    }
 
     // ========================================================================
     // FUNÇÕES DE GERENCIAMENTO DE AGENDAMENTOS
     // ========================================================================
 
-    async function fetchAgendamentos() {
-        setLoadingAgendamentos(true)
-        try {
-            const res = await fetch(`/api/clientes/${clientId}/agendamentos`)
-            const data = await res.json()
-            if (res.ok) {
-                setAgendamentos(Array.isArray(data) ? data : [])
-            } else {
-                console.error('Erro ao buscar agendamentos:', data.error)
-            }
-        } catch (err) {
-            console.error('Erro de rede ao buscar agendamentos:', err)
-        } finally {
-            setLoadingAgendamentos(false)
-        }
-    }
 
     async function handleSalvarAgendamento(agendamentoData: any) {
         try {
@@ -681,7 +683,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         <h3 className="text-white font-black text-sm uppercase italic">Brain Maestro Insights</h3>
                                     </div>
                                     <p className="text-neutral-400 text-xs leading-relaxed italic">
-                                        "Baseado nos últimos 5 áudios do WhatsApp e nos arquivos PDF de competência enviados, este cliente tende a enviar o DAS no último dia do vencimento. Recomendo disparo de lembrete preventivo D-2."
+                                        &quot;Baseado nos últimos 5 áudios do WhatsApp e nos arquivos PDF de competência enviados, este cliente tende a enviar o DAS no último dia do vencimento. Recomendo disparo de lembrete preventivo D-2.&quot;
                                     </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">

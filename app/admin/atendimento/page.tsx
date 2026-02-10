@@ -362,10 +362,10 @@ export default function AtendimentoPage() {
                                             {ticket.transcricao_audio ? (
                                                 <div className="flex gap-2">
                                                     <Mic className="w-3 h-3 text-purple-500 mt-0.5" />
-                                                    <p>"{ticket.transcricao_audio}"</p>
+                                                    <p>&quot;{ticket.transcricao_audio}&quot;</p>
                                                 </div>
                                             ) : (
-                                                <p>"{ticket.mensagem}"</p>
+                                                <p>&quot;{ticket.mensagem}&quot;</p>
                                             )}
                                         </div>
 
@@ -376,7 +376,7 @@ export default function AtendimentoPage() {
                                                     <Bot className="w-4 h-4 text-green-400" />
                                                     <span className="text-xs font-bold text-green-400">Resposta Automática:</span>
                                                 </div>
-                                                <p className="text-sm text-neutral-300 italic">"{ticket.resposta_automatica}"</p>
+                                                <p className="text-sm text-neutral-300 italic">&quot;{ticket.resposta_automatica}&quot;</p>
                                             </div>
                                         )}
 

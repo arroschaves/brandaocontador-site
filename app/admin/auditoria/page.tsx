@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
     ShieldAlert, Search, Filter, Calendar,
@@ -15,11 +15,7 @@ export default function AuditoriaMasterPage() {
     const [filter, setFilter] = useState('')
     const supabase = createClient()
 
-    useEffect(() => {
-        fetchLogs()
-    }, [])
-
-    async function fetchLogs() {
+    const fetchLogs = useCallback(async () => {
         setLoading(true)
         const { data, error } = await supabase
             .from('auditoria_crm')
@@ -29,7 +25,11 @@ export default function AuditoriaMasterPage() {
 
         if (data) setLogs(data)
         setLoading(false)
-    }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchLogs()
+    }, [fetchLogs])
 
     const filteredLogs = logs.filter(log =>
         log.detalhes?.toLowerCase().includes(filter.toLowerCase()) ||
@@ -114,8 +114,8 @@ export default function AuditoriaMasterPage() {
                                     <tr key={log.id} className="group hover:bg-neutral-900/40 transition-colors">
                                         <td className="p-6 whitespace-nowrap">
                                             <span className={`px-2 py-1 text-[8px] font-black uppercase rounded ${log.acao === 'VISUALIZACAO_SENHA' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                                                    log.acao === 'EXCLUSAO_CERTIFICADO' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
-                                                        'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                                log.acao === 'EXCLUSAO_CERTIFICADO' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                                    'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                                                 }`}>
                                                 {log.acao}
                                             </span>

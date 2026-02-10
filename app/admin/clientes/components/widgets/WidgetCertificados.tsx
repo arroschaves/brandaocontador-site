@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Shield, Plus, Upload, Eye, EyeOff, Calendar, AlertTriangle } from 'lucide-react'
 import WidgetCard from './WidgetCard'
 
@@ -22,11 +22,7 @@ export default function WidgetCertificados({ clientId }: WidgetCertificadosProps
     const [loading, setLoading] = useState(true)
     const [showAddModal, setShowAddModal] = useState(false)
 
-    useEffect(() => {
-        fetchCertificados()
-    }, [clientId])
-
-    async function fetchCertificados() {
+    const fetchCertificados = useCallback(async () => {
         setLoading(true)
         try {
             const res = await fetch(`/api/clientes/${clientId}/certificados-digitais`)
@@ -39,7 +35,11 @@ export default function WidgetCertificados({ clientId }: WidgetCertificadosProps
         } finally {
             setLoading(false)
         }
-    }
+    }, [clientId])
+
+    useEffect(() => {
+        fetchCertificados()
+    }, [fetchCertificados])
 
     // Calcular dias restantes
     const getDiasRestantes = (dataVencimento: string) => {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import {
     MessageCircle,
@@ -18,6 +18,22 @@ export default function PedidosPage() {
     const [pedidos, setPedidos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const fetchPedidos = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('atendimentos')
+                .select('*, clientes(nome)')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setPedidos(data || []);
+        } catch (err) {
+            console.error('Erro ao buscar pedidos:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [])
+
     useEffect(() => {
         fetchPedidos();
 
@@ -32,23 +48,7 @@ export default function PedidosPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
-
-    async function fetchPedidos() {
-        try {
-            const { data, error } = await supabase
-                .from('atendimentos')
-                .select('*, clientes(nome)')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setPedidos(data || []);
-        } catch (err) {
-            console.error('Erro ao buscar pedidos:', err);
-        } finally {
-            setLoading(false);
-        }
-    }
+    }, [fetchPedidos]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
