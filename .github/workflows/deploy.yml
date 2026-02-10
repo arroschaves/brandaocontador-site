@@ -7,8 +7,9 @@ on:
     branches: [main, master]
 
 env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+env:
+  VERCEL_ORG_ID: team_H3O6lhEtrp7ysfHiEL4C2FJ2
+  VERCEL_PROJECT_ID: prj_4X0GE0UdZjY9Cvp3aqpu8IUFnzuA
 
 jobs:
   # Job de Qualidade de Código
@@ -66,14 +67,7 @@ jobs:
             echo "::error::VERCEL_TOKEN is missing. Please add it to GitHub Secrets."
             exit 1
           fi
-          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
-            echo "::error::VERCEL_ORG_ID is missing. Please add it to GitHub Secrets."
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
-            exit 1
-          fi
+
 
 
       - name: Install Vercel CLI
@@ -130,14 +124,7 @@ jobs:
             echo "::error::VERCEL_TOKEN is missing. Please add it to GitHub Secrets."
             exit 1
           fi
-          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
-            echo "::error::VERCEL_ORG_ID is missing. Please add it to GitHub Secrets."
-            exit 1
-          fi
-          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
-            echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
-            exit 1
-          fi
+
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
