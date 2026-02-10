@@ -10,8 +10,8 @@ export function createClient() {
 
     if (!supabaseUrl || !supabaseKey) {
         return createBrowserClient(
-            supabaseUrl ?? 'https://placeholder.supabase.co',
-            supabaseKey ?? 'placeholder'
+            supabaseUrl || 'https://placeholder.supabase.co',
+            supabaseKey || 'placeholder'
         )
     }
 
