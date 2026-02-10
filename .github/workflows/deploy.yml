@@ -38,6 +38,9 @@ jobs:
         continue-on-error: true
 
       - name: Build check
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
   # Job de Deploy para Preview (Pull Requests)
@@ -69,6 +72,14 @@ jobs:
           fi
           if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
             echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "::error::NEXT_PUBLIC_SUPABASE_URL is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then
+            echo "::error::NEXT_PUBLIC_SUPABASE_ANON_KEY is missing. Please add it to GitHub Secrets."
             exit 1
           fi
 
@@ -132,6 +143,14 @@ jobs:
           fi
           if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
             echo "::error::VERCEL_PROJECT_ID is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "::error::NEXT_PUBLIC_SUPABASE_URL is missing. Please add it to GitHub Secrets."
+            exit 1
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then
+            echo "::error::NEXT_PUBLIC_SUPABASE_ANON_KEY is missing. Please add it to GitHub Secrets."
             exit 1
           fi
 
