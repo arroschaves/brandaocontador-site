@@ -14,13 +14,41 @@ export default function GestaoValidades() {
 
     async function fetchValidades() {
         try {
+            setLoading(true)
             const { data, error } = await supabase
-                .from('controle_validades')
-                .select('*, clientes(nome)')
-                .order('vencimento', { ascending: true })
+                .from('clientes')
+                .select('id, nome, vencimento_alvara_funcionamento, vencimento_alvara_sanitario, vencimento_alvara_bombeiros, vencimento_alvara_ambiental, vencimento_certificado_a1, vencimento_certificado_a3')
 
             if (error) throw error
-            setValidades(data || [])
+
+            const allValidades: any[] = []
+            const mapeamento = [
+                { field: 'vencimento_alvara_funcionamento', label: 'Alvará Funcionamento' },
+                { field: 'vencimento_alvara_sanitario', label: 'Alvará Sanitário' },
+                { field: 'vencimento_alvara_bombeiros', label: 'Alvará Bombeiros' },
+                { field: 'vencimento_alvara_ambiental', label: 'Alvará Ambiental' },
+                { field: 'vencimento_certificado_a1', label: 'Certificado A1' },
+                { field: 'vencimento_certificado_a3', label: 'Certificado A3' },
+            ]
+
+            data?.forEach((c: any) => {
+                mapeamento.forEach(m => {
+                    if (c[m.field]) {
+                        allValidades.push({
+                            id: `${c.id}-${m.field}`,
+                            clientes: { nome: c.nome },
+                            tipo: m.label,
+                            vencimento: c[m.field],
+                            status: 'pendente' // Default, lógica de status já trata
+                        })
+                    }
+                })
+            })
+
+            // Ordenar por vencimento mais próximo
+            allValidades.sort((a, b) => new Date(a.vencimento).getTime() - new Date(b.vencimento).getTime())
+
+            setValidades(allValidades)
         } catch (err) {
             console.error('Erro ao buscar validades:', err)
         } finally {

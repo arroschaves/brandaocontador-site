@@ -35,7 +35,7 @@ const ACT_CONFIG: Record<string, { icon: any; color: string; bg: string; label: 
     alert: { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-500', label: 'Alerta' },
     folder_created: { icon: FolderPlus, color: 'text-indigo-600', bg: 'bg-indigo-500', label: 'Pasta' },
     payment_detected: { icon: CreditCard, color: 'text-green-600', bg: 'bg-green-500', label: 'Pagamento' },
-    obligation_completed: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-500', label: 'Concluído' },
+    obligation_completed: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-500', label: 'Maestro AI' },
 };
 
 export default function AdminDashboard() {
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
             const { count: countHoje } = await supabase
                 .from('activity_log')
                 .select('*', { count: 'exact', head: true })
-                .eq('tipo', 'upload')
+                .in('tipo', ['upload', 'obligation_completed'])
                 .gte('created_at', `${today}T00:00:00`);
 
             setStats({
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
             .channel('dashboard-realtime')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
                 setActivities(prev => [payload.new as any, ...prev].slice(0, 8));
-                if ((payload.new as any).tipo === 'upload') {
+                if (['upload', 'obligation_completed'].includes((payload.new as any).tipo)) {
                     setStats((prev: any) => ({ ...prev, arquivosHoje: prev.arquivosHoje + 1 }));
                 }
             })
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/20">
-                                    {['DCTFWeb', 'FGTS Digital', 'PGDAS-D', 'EFD-Reinf', 'DAS', 'IRPF', 'Folha de Pagamento'].map((tipo) => {
+                                    {['DCTFWeb', 'FGTS', 'DAS', 'EFD-Reinf', 'Folha de Pagamento'].map((tipo) => {
                                         const totalTipo = stats.obrCounts?.[tipo]?.total || 0;
                                         const doneTipo = stats.obrCounts?.[tipo]?.concluido || 0;
                                         const percent = totalTipo > 0 ? Math.round((doneTipo / totalTipo) * 100) : 0;
@@ -434,9 +434,9 @@ export default function AdminDashboard() {
                                         <div key={v.id} className="p-4 hover:bg-secondary/30 transition-all group flex items-center justify-between">
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-xs border shrink-0 ${isOverdue ? 'bg-destructive/10 text-destructive border-destructive/20' :
-                                                        isUrgent ? 'bg-rose-50 text-rose-600 border-rose-200' :
-                                                            isWarning ? 'bg-amber-50 text-amber-600 border-amber-200' :
-                                                                'bg-blue-50 text-blue-600 border-blue-200'
+                                                    isUrgent ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                                                        isWarning ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                                                            'bg-blue-50 text-blue-600 border-blue-200'
                                                     }`}>
                                                     <Calendar className="w-4 h-4" />
                                                 </div>
@@ -455,9 +455,9 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                             <span className={`text-[9px] font-bold px-2.5 py-1 rounded-full shrink-0 ${isOverdue ? 'bg-destructive/10 text-destructive animate-pulse' :
-                                                    isUrgent ? 'bg-rose-100 text-rose-700' :
-                                                        isWarning ? 'bg-amber-100 text-amber-700' :
-                                                            'bg-blue-100 text-blue-700'
+                                                isUrgent ? 'bg-rose-100 text-rose-700' :
+                                                    isWarning ? 'bg-amber-100 text-amber-700' :
+                                                        'bg-blue-100 text-blue-700'
                                                 } uppercase`}>
                                                 {isOverdue ? 'VENCIDO' : v.diffDays === 0 ? 'HOJE' : `${v.diffDays}d`}
                                             </span>
