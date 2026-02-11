@@ -1,210 +1,249 @@
-import { Metadata } from 'next';
-import Link from 'next/link';
-import { MapPin, TrendingUp, Shield, Award, Calculator, Users, Phone, MessageSquare } from 'lucide-react';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Contabilidade Rural e Agronegócio | Brandão Contabilidade',
-  description: 'Especialistas em contabilidade para produtores rurais em Sidrolândia e região. Gestão de ICMS rural, Funrural, ITR e assessoria para a Reforma Tributária 2026.',
+import { useState, useEffect } from 'react';
+import {
+  TrendingUp, TrendingDown, DollarSign, Wheat, Beef,
+  RefreshCw, BarChart3, ArrowUpRight, ArrowDownRight, Minus,
+  Activity, Percent
+} from 'lucide-react';
+
+/**
+ * Página Mercado Agro — Cotações Diárias
+ * Foco: MS e Brasil | Pecuária + Grãos + Câmbio + Índices
+ */
+
+interface CommodityPrice {
+  nome: string;
+  preco: number;
+  unidade: string;
+  variacao: number;
+  fonte: string;
+  atualizado: string;
+  regiao: string;
 }
 
-export default function Agronegocio() {
+interface MarketData {
+  dolar: { compra: number; venda: number; variacao: number; atualizado: string };
+  commodities: CommodityPrice[];
+  indices: { selic: number; ipca: number; igpm: number };
+}
+
+function VariacaoTag({ valor }: { valor: number }) {
+  if (valor > 0) return (
+    <span className="inline-flex items-center gap-1 text-emerald-400 text-sm font-mono font-bold">
+      <ArrowUpRight className="w-3.5 h-3.5" /> +{valor.toFixed(2)}%
+    </span>
+  );
+  if (valor < 0) return (
+    <span className="inline-flex items-center gap-1 text-red-400 text-sm font-mono font-bold">
+      <ArrowDownRight className="w-3.5 h-3.5" /> {valor.toFixed(2)}%
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-1 text-neutral-500 text-sm font-mono font-bold">
+      <Minus className="w-3.5 h-3.5" /> 0.00%
+    </span>
+  );
+}
+
+export default function MercadoAgroPage() {
+  const [data, setData] = useState<MarketData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState('');
+
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/mercado/cotacoes');
+      if (response.ok) {
+        const result = await response.json();
+        setData(result);
+        setLastUpdate(new Date().toLocaleString('pt-BR'));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar cotações:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { fetchData(); }, []);
+
+  // Separar commodities por categoria
+  const graos = data?.commodities.filter(c => ['Soja', 'Milho'].includes(c.nome)) || [];
+  const pecuaria = data?.commodities.filter(c => !['Soja', 'Milho'].includes(c.nome)) || [];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20">
-        <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-50 mb-6 text-balance">
-            Contabilidade para <span className="text-gradient">Agronegócio</span> e Produtor Rural
-          </h1>
-          <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Soluções especializadas para produtores rurais (PF e PJ) no Mato Grosso do Sul e região. Gestão contábil, tributária e fiscal adaptada ao agronegócio, com foco na Reforma Tributária 2026.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/contato" className="btn-primary w-full sm:w-auto">
-              <Phone className="w-5 h-5 mr-2" />
-              Consultoria Rural Gratuita
-            </Link>
-            <Link href="/reforma-tributaria" className="btn-secondary w-full sm:w-auto">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Reforma 2026 no Agro
-            </Link>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-neutral-400 mt-8 justify-center">
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-success-400" />
-              Especialistas em ICMS Rural
-            </div>
-            <div className="flex items-center">
-              <Award className="w-4 h-4 mr-2 text-primary-400" />
-              +200 Clientes no Agro
-            </div>
-            <div className="flex items-center">
-              <Users className="w-4 h-4 mr-2 text-warning-400" />
-              PF e PJ Atendidas
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Desafios no Agronegócio */}
-      <section className="py-20 bg-neutral-800/30">
+    <main className="min-h-screen bg-obsidian text-neutral-100 pt-24">
+      {/* Hero */}
+      <section className="py-16 border-b border-neutral-800">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-neutral-50 mb-16 text-balance">
-            Desafios Contábeis no Agronegócio
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <MapPin className="w-8 h-8 text-primary-400" />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+            <div>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="w-12 h-[1px] bg-amber-electric"></span>
+                <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Mercado em Tempo Real</span>
               </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Tributação Rural</h3>
-              <p className="text-neutral-300 leading-relaxed">Gestão de ICMS rural, Funrural e regimes diferenciados para produtores PF/PJ. Otimização de créditos e deduções sazonais.</p>
-            </div>
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <TrendingUp className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Reforma Tributária no Agro</h3>
-              <p className="text-neutral-300 leading-relaxed">Impactos do IBS/CBS em 2026: Regimes específicos para agricultura, preservação de incentivos fiscais e transição suave.</p>
-            </div>
-            <div className="card text-center group">
-              <div className="w-16 h-16 bg-primary-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary-500/30 transition-colors">
-                <Calculator className="w-8 h-8 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4">Declarações e Obrigações</h3>
-              <p className="text-neutral-300 leading-relaxed">DCTRural, ITR, DIRF rural e eSocial para agro. Conformidade com SEFAZ MS e Receita Federal.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Serviços para Produtor Rural */}
-      <section className="py-20">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-50 mb-4 text-balance">
-              Nossos Serviços para o Agronegócio
-            </h2>
-            <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
-              Atendimento especializado para produtores rurais de todos os portes
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Shield className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">ICMS Rural</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Apuração e otimização de ICMS diferencial de alíquota para operações interesbtais.</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li>• Créditos presumidos</li>
-                <li>• Exportações de commodities</li>
-                <li>• Regime especial MS</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Award className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Funrural e ITR</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Gestão de contribuições previdenciárias e Imposto Territorial Rural.</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li>• Descontos para PF rural</li>
-                <li>• Planejamento sucessório</li>
-                <li>• Isenções para pequenas propriedades</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Calculator className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Regimes Tributários</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Assessoria em Lucro Presumido, Real e Simples para PJ rural.</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li>• Elegibilidade Funrural</li>
-                <li>• Planejamento para Reforma</li>
-                <li>• Otimização de custos</li>
-              </ul>
-            </div>
-            <div className="card group">
-              <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-500/30 transition-colors">
-                <Users className="w-6 h-6 text-primary-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-neutral-100 mb-3">Consultoria Agro</h3>
-              <p className="text-neutral-300 mb-4 leading-relaxed">Estratégias financeiras e fiscais adaptadas ao ciclo produtivo.</p>
-              <ul className="text-sm text-neutral-400 space-y-2">
-                <li>• Análise de safra</li>
-                <li>• Financiamentos rurais</li>
-                <li>• Sustentabilidade fiscal</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Impacto da Reforma no Agro */}
-      <section className="py-20 bg-neutral-800/30">
-        <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-neutral-50 mb-16 text-balance">
-            Reforma Tributária e o Produtor Rural
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="card p-6">
-              <TrendingUp className="w-12 h-12 text-primary-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4 text-center">2025-2026: Mudanças no Setor</h3>
-              <p className="text-neutral-300 leading-relaxed text-center">
-                IBS diferenciado para agronegócio, preservando incentivos do ICMS rural. Cashback para insumos essenciais. Transição gradual para PF/PJ, com foco em não cumulatividade.
+              <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85]">
+                PAINEL <span className="text-amber-electric italic font-display">AGRO</span>
+              </h1>
+              <p className="text-neutral-400 mt-4 max-w-lg font-sans">
+                Cotações diárias de commodities, pecuária e índices econômicos com foco em Mato Grosso do Sul.
               </p>
-              <ul className="text-sm text-neutral-400 mt-4 space-y-2">
-                <li>• Regime específico para produtores</li>
-                <li>• Créditos sobre energia e fertilizantes</li>
-                <li>• Integração com exportações agro</li>
-              </ul>
             </div>
-            <div className="card p-6">
-              <Shield className="w-12 h-12 text-primary-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-neutral-100 mb-4 text-center">Como Podemos Ajudar</h3>
-              <p className="text-neutral-300 leading-relaxed text-center">
-                Nossa equipe conhece as especificidades do agro MS. Deixe-nos guiar na adaptação à Reforma e otimização tributária.
-              </p>
-              <ul className="text-sm text-neutral-400 mt-4 space-y-2">
-                <li>• Auditoria tributária rural</li>
-                <li>• Planejamento para 2026</li>
-                <li>• Suporte em declarações</li>
-              </ul>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={fetchData}
+                disabled={loading}
+                className="btn-brutal !py-3 !px-6 text-sm flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                {loading ? 'Atualizando...' : 'Atualizar'}
+              </button>
+              {lastUpdate && (
+                <span className="text-[10px] font-mono text-neutral-600 uppercase">
+                  Última: {lastUpdate}
+                </span>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 to-primary-500">
-        <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 mb-6 text-balance">
-            Eleve sua Produção com Contabilidade Inteligente
-          </h2>
-          <p className="text-lg text-neutral-800 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Contate-nos para serviços personalizados no agronegócio. Especialistas em produtor rural em Campo Grande e interior de MS.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <a
-              href="https://wa.me/5567996011356?text=Interesse%20em%20contabilidade%20para%20agroneg%C3%B3cio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-neutral-900 text-primary-400 px-8 py-4 rounded-xl font-semibold hover:bg-neutral-800 transition-all duration-300 flex items-center justify-center w-full sm:w-auto shadow-lg hover:shadow-xl"
-            >
-              <Phone className="w-5 h-5 mr-2" />
-              WhatsApp Rural
-            </a>
-            <Link
-              href="/contato"
-              className="border-2 border-neutral-900 text-neutral-900 px-8 py-4 rounded-xl font-semibold hover:bg-neutral-900 hover:text-primary-400 transition-all duration-300 flex items-center justify-center w-full sm:w-auto"
-            >
-              <MessageSquare className="w-5 h-5 mr-2" />
-              Orçamento Agro
-            </Link>
+      {/* Dólar + Índices Econômicos */}
+      <section className="py-8 bg-neutral-900/50 border-b border-neutral-800">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {/* Dólar */}
+            <div className="col-span-2 p-6 bg-obsidian border border-amber-electric/30 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-electric/5 rounded-full -translate-y-8 translate-x-8"></div>
+              <div className="flex items-center gap-3 mb-2">
+                <DollarSign className="w-6 h-6 text-amber-electric" />
+                <span className="text-xs font-mono text-amber-electric uppercase tracking-widest">Dólar PTAX</span>
+              </div>
+              <div className="flex items-end gap-6 mt-3">
+                <div>
+                  <div className="text-[10px] font-mono text-neutral-600 uppercase">Compra</div>
+                  <div className="text-3xl font-black font-mono text-neutral-100">
+                    R$ {data?.dolar.compra.toFixed(4) || '-.----'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono text-neutral-600 uppercase">Venda</div>
+                  <div className="text-2xl font-bold font-mono text-neutral-300">
+                    R$ {data?.dolar.venda.toFixed(4) || '-.----'}
+                  </div>
+                </div>
+                <div className="ml-auto">
+                  {data && <VariacaoTag valor={data.dolar.variacao} />}
+                </div>
+              </div>
+              <div className="text-[9px] font-mono text-neutral-700 mt-3 uppercase">
+                Fonte: Banco Central do Brasil • {data?.dolar.atualizado || '-'}
+              </div>
+            </div>
+
+            {/* SELIC */}
+            <div className="p-6 bg-obsidian border border-neutral-800 hover:border-neutral-700 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Percent className="w-4 h-4 text-emerald-400" />
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">SELIC</span>
+              </div>
+              <div className="text-2xl font-black font-mono">{data?.indices.selic.toFixed(2) || '-'}%</div>
+              <div className="text-[9px] font-mono text-neutral-700 uppercase mt-1">Taxa anual</div>
+            </div>
+
+            {/* IPCA */}
+            <div className="p-6 bg-obsidian border border-neutral-800 hover:border-neutral-700 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="w-4 h-4 text-amber-400" />
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">IPCA</span>
+              </div>
+              <div className="text-2xl font-black font-mono">{data?.indices.ipca.toFixed(2) || '-'}%</div>
+              <div className="text-[9px] font-mono text-neutral-700 uppercase mt-1">Acum. 12 meses</div>
+            </div>
+
+            {/* IGP-M */}
+            <div className="p-6 bg-obsidian border border-neutral-800 hover:border-neutral-700 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 className="w-4 h-4 text-blue-400" />
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">IGP-M</span>
+              </div>
+              <div className="text-2xl font-black font-mono">{data?.indices.igpm.toFixed(2) || '-'}%</div>
+              <div className="text-[9px] font-mono text-neutral-700 uppercase mt-1">Acum. 12 meses</div>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* Grãos */}
+      <section className="py-12">
+        <div className="container-custom">
+          <div className="flex items-center gap-3 mb-8">
+            <Wheat className="w-6 h-6 text-amber-electric" />
+            <h2 className="text-2xl font-black uppercase tracking-tighter">Grãos</h2>
+            <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider ml-2">CEPEA / ESALQ</span>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {graos.map((item, i) => (
+              <div key={i} className="group p-8 bg-neutral-900/40 border border-neutral-800 hover:border-amber-electric/30 transition-all duration-500">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-3xl font-black uppercase tracking-tighter">{item.nome}</h3>
+                    <span className="text-[10px] font-mono text-neutral-600 uppercase">{item.regiao}</span>
+                  </div>
+                  <VariacaoTag valor={item.variacao} />
+                </div>
+                <div className="text-4xl font-black font-mono text-amber-electric mb-2">
+                  R$ {item.preco.toFixed(2)}
+                </div>
+                <div className="text-xs text-neutral-500 font-mono">{item.unidade}</div>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-neutral-800/50">
+                  <span className="text-[9px] font-mono text-neutral-700 uppercase">Fonte: {item.fonte}</span>
+                  <span className="text-[9px] font-mono text-neutral-700 uppercase">{item.atualizado}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pecuária */}
+      <section className="py-12 border-t border-neutral-800">
+        <div className="container-custom">
+          <div className="flex items-center gap-3 mb-8">
+            <Beef className="w-6 h-6 text-amber-electric" />
+            <h2 className="text-2xl font-black uppercase tracking-tighter">Pecuária</h2>
+            <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider ml-2">Foco MS</span>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {pecuaria.map((item, i) => (
+              <div key={i} className="group p-6 bg-neutral-900/40 border border-neutral-800 hover:border-amber-electric/20 transition-all duration-300">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-black uppercase tracking-tight">{item.nome}</h3>
+                  <VariacaoTag valor={item.variacao} />
+                </div>
+                <div className="text-2xl font-black font-mono text-amber-electric">
+                  R$ {item.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="text-[10px] text-neutral-500 font-mono mt-1">{item.unidade}</div>
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-neutral-800/30">
+                  <span className="text-[9px] font-mono text-neutral-700 uppercase">{item.fonte}</span>
+                  <span className="text-[9px] font-mono text-neutral-700 uppercase">{item.regiao}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Disclaimer */}
+      <section className="py-8 border-t border-neutral-800">
+        <div className="container-custom">
+          <p className="text-[10px] font-mono text-neutral-700 uppercase tracking-wider text-center max-w-3xl mx-auto leading-relaxed">
+            Cotações de referência. Valores podem variar conforme região e negociação. Dólar: Banco Central do Brasil (PTAX).
+            Grãos: CEPEA/ESALQ. Pecuária: Indicadores regionais MS/BR. Consulte seu contador para decisões financeiras.
+          </p>
         </div>
       </section>
     </main>

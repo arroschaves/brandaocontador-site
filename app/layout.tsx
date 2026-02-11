@@ -4,6 +4,7 @@ import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import ClientWrapper from './components/ClientWrapper'
 import ScrollReveal from './components/ScrollReveal'
+import JsonLd from './components/JsonLd'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
     siteName: 'Brandão Contabilidade',
     images: [
       {
-        url: 'https://www.brandaocontador.com.br/og-image.jpg',
+        url: 'https://www.brandaocontador.com.br/api/og',
         width: 1200,
         height: 630,
         alt: 'Brandão Contabilidade Logo',
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}>
       <body className="font-sans antialiased bg-obsidian text-neutral-200">
+        <JsonLd />
         <SpeedInsights />
         <ScrollReveal />
         <ClientWrapper>

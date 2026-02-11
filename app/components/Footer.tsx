@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Instagram, Facebook, Linkedin } from 'lucide-react';
+import { ShieldCheck, Instagram, Facebook } from 'lucide-react';
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -17,9 +17,8 @@ export default function Footer() {
                             Desde 1993, transformando a complexidade contábil em vantagem estratégica para o agronegócio e empresas em Mato Grosso do Sul.
                         </p>
                         <div className="flex gap-6">
-                            <a href="#" className="text-neutral-600 hover:text-amber-electric transition-colors"><Instagram size={20} /></a>
-                            <a href="#" className="text-neutral-600 hover:text-amber-electric transition-colors"><Facebook size={20} /></a>
-                            <a href="#" className="text-neutral-600 hover:text-amber-electric transition-colors"><Linkedin size={20} /></a>
+                            <a href="https://www.instagram.com/bcbrandaocontabilidade/" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Brandão Contabilidade" className="text-neutral-600 hover:text-amber-electric transition-colors"><Instagram size={20} /></a>
+                            <a href="https://www.facebook.com/profile.php?id=61583096446223" target="_blank" rel="noopener noreferrer" aria-label="Facebook da Brandão Contabilidade" className="text-neutral-600 hover:text-amber-electric transition-colors"><Facebook size={20} /></a>
                         </div>
                     </div>
 

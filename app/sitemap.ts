@@ -25,14 +25,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
         {
             url: `${baseUrl}/agronegocio`,
             lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
+            changeFrequency: 'daily',
+            priority: 0.9,
         },
         {
             url: `${baseUrl}/reforma-tributaria`,
             lastModified: new Date(),
             changeFrequency: 'weekly',
             priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/noticias-contabeis`,
+            lastModified: new Date(),
+            changeFrequency: 'daily',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/links-uteis`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.7,
         },
     ]
 }

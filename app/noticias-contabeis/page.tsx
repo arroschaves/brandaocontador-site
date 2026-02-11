@@ -1,185 +1,216 @@
-"use client";
+'use client';
 
-import Link from 'next/link';
-import { AlertCircle, FileText, Briefcase, DollarSign, Landmark, Scale, TrendingUp } from 'lucide-react';
-import { useState } from 'react'; // Para placeholder de refresh (simulado)
+import { useState, useEffect } from 'react';
+import {
+  Newspaper, Filter, ExternalLink, Sparkles, Building2,
+  Tractor, Calculator, FileText, Landmark, Store, RefreshCw
+} from 'lucide-react';
 
-export default function NoticiasContabeis() {
-  const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleString('pt-BR'));
+/**
+ * Página de Notícias Contábeis — Brandão Contabilidade
+ * Combina RSS público + IA por setor
+ * Filtros: Todos, Tributária, Trabalhista, Fiscal, Agro, MEI, SEFAZ MS
+ */
 
-  const simulateRefresh = () => {
-    // Placeholder: Em produção, integrar com API/RSS para fetch real
-    setLastUpdate(new Date().toLocaleString('pt-BR'));
-  };
+interface NewsItem {
+  id: string;
+  titulo: string;
+  resumo: string;
+  fonte: string;
+  fonteUrl: string;
+  categoria: string;
+  data: string;
+  destaque: boolean;
+  link: string;
+  icone: string;
+}
+
+const CATEGORIAS = [
+  { id: 'todos', label: 'Todos', icon: Newspaper },
+  { id: 'tributaria', label: 'Tributária', icon: Calculator },
+  { id: 'trabalhista', label: 'Trabalhista', icon: Building2 },
+  { id: 'fiscal', label: 'Fiscal', icon: FileText },
+  { id: 'agronegocio', label: 'Agronegócio', icon: Tractor },
+  { id: 'mei', label: 'MEI / Simples', icon: Store },
+  { id: 'sefaz_ms', label: 'SEFAZ MS', icon: Landmark },
+  { id: 'contabilidade', label: 'Contabilidade', icon: Calculator },
+];
+
+const categoriaCores: Record<string, string> = {
+  tributaria: 'border-amber-500/40 bg-amber-500/5',
+  trabalhista: 'border-blue-500/40 bg-blue-500/5',
+  fiscal: 'border-purple-500/40 bg-purple-500/5',
+  agronegocio: 'border-emerald-500/40 bg-emerald-500/5',
+  mei: 'border-orange-500/40 bg-orange-500/5',
+  sefaz_ms: 'border-cyan-500/40 bg-cyan-500/5',
+  contabilidade: 'border-neutral-500/40 bg-neutral-500/5',
+};
+
+const categoriaLabels: Record<string, string> = {
+  tributaria: 'Tributária',
+  trabalhista: 'Trabalhista',
+  fiscal: 'Fiscal',
+  agronegocio: 'Agronegócio',
+  mei: 'MEI / Simples',
+  sefaz_ms: 'SEFAZ MS',
+  contabilidade: 'Contabilidade',
+};
+
+export default function NoticiasPage() {
+  const [noticias, setNoticias] = useState<NewsItem[]>([]);
+  const [filtroAtivo, setFiltroAtivo] = useState('todos');
+  const [loading, setLoading] = useState(true);
+
+  async function fetchNoticias() {
+    setLoading(true);
+    try {
+      const url = filtroAtivo === 'todos'
+        ? '/api/noticias'
+        : `/api/noticias?categoria=${filtroAtivo}`;
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        setNoticias(data.noticias || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar notícias:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { fetchNoticias(); }, [filtroAtivo]);
+
+  const destaque = noticias.find(n => n.destaque);
+  const restantes = noticias.filter(n => !n.destaque);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-800">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20">
-        <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-neutral-50 mb-6 text-balance">
-            Notícias e <span className="text-gradient">Atualizações</span> Contábeis
-          </h1>
-          <p className="text-lg md:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Fique por dentro das informações importantes e atualizações dos principais setores da contabilidade. Conteúdo atualizado a cada hora com fontes oficiais.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-            <button
-              onClick={simulateRefresh}
-              className="btn-primary w-full sm:w-auto flex items-center"
-            >
-              <Scale className="w-5 h-5 mr-2" />
-              Atualizar Agora
-            </button>
-            <Link href="/contato" className="btn-secondary w-full sm:w-auto">
-              <FileText className="w-5 h-5 mr-2" />
-              Consultar Especialista
-            </Link>
-          </div>
-          <div className="text-sm text-neutral-400 mt-2">
-            Última atualização: {lastUpdate}
-          </div>
-        </div>
-      </section>
-
-      {/* Setores da Contabilidade */}
-      <section id="setores" className="py-20">
+    <main className="min-h-screen bg-obsidian text-neutral-100 pt-24">
+      {/* Hero */}
+      <section className="py-16 border-b border-neutral-800">
         <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-50 mb-4 text-balance">
-              Setores Principais
-            </h2>
-            <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
-              Informações relevantes de órgãos e temas contábeis, com links oficiais e alertas recentes.
-            </p>
+          <div className="flex items-center gap-4 mb-4">
+            <span className="w-12 h-[1px] bg-amber-electric"></span>
+            <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Central de Informações</span>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Tributária */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <DollarSign className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">Tributária</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>Atualização:</strong> Alíquotas IBS/CBS para 2026 publicadas (out/2025). Transição com cashback para famílias. <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">Ver mais na RFB</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Reforma Tributária: LC 214/2025 em vigor. Impacto em Simples Nacional. <a href="https://www.gov.br/economia/pt-br/assuntos/reforma-tributaria" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">Detalhes</a></span>
-                </li>
-                <li><em>Próxima: Novos incentivos fiscais para exportações (estimado dez/2025).</em></li>
-              </ul>
-            </div>
+          <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-4">
+            NOTÍCIAS <span className="text-amber-electric italic font-display">CONTÁBEIS</span>
+          </h1>
+          <p className="text-neutral-400 max-w-2xl font-sans text-lg">
+            Informações atualizadas sobre legislação, tributação, obrigações e mercado — combinando fontes oficiais com análise inteligente.
+          </p>
 
-            {/* Fiscal */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <FileText className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">Fiscal</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>Alerta:</strong> Prazo SPED Fiscal Q4/2025 encurtado. Obrigações acessórias digitalizadas. <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">RFB Alertas</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>NF-e 4.0: Validações aprimoradas para 2026. Integração com SEFAZ. <a href="https://www.nfe.fazenda.gov.br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">Portal SEFAZ</a></span>
-                </li>
-                <li><em>Atual: Normas para DCTF (out/2025).</em></li>
-              </ul>
-            </div>
-
-            {/* Trabalhista */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <Briefcase className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">Trabalhista</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>Atualização:</strong> eSocial v.S 1.2: Novos campos para folha 2026. Prazo de envio reduzido. <a href="https://www.gov.br/trabalho/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">MTE Portal</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Reforma Trabalhista: Ajustes em FGTS para PJ. <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">INSS Guia</a></span>
-                </li>
-                <li><em>Próxima: CAGED digital obrigatório (nov/2025).</em></li>
-              </ul>
-            </div>
-
-            {/* Econômicos */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <TrendingUp className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">Econômicos</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>Relatório:</strong> Inflação e IPCA impactam deduções fiscais (set/2025). <a href="https://www.ibge.gov.br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">IBGE Dados</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Análise econômica: Crescimento PIB 2.5% projetado para 2026, efeitos na contabilidade. <a href="https://www.bcb.gov.br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">BCB Relatórios</a></span>
-                </li>
-                <li><em>Atual: Indicadores setoriais (out/2025).</em></li>
-              </ul>
-            </div>
-
-            {/* Receita Federal */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <Landmark className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">Receita Federal</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>Alerta:</strong> DIRF 2026: Novos campos para IBS. Prazo jan/2025. <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">RFB Site</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>ECF: Integração com SPED, multas por atraso. <a href="https://www.gov.br/receitafederal/pt-br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">Manual ECF</a></span>
-                </li>
-                <li><em>Próxima: DCTFWeb enhancements (dez/2025).</em></li>
-              </ul>
-            </div>
-
-            {/* SEFAZ e CFC */}
-            <div className="card group p-6">
-              <div className="flex items-center mb-4">
-                <Scale className="w-8 h-8 text-primary-400 mr-3" />
-                <h3 className="text-xl font-semibold text-neutral-100">SEFAZ & CFC</h3>
-              </div>
-              <ul className="space-y-3 text-sm text-neutral-300">
-                <li className="flex items-start">
-                  <AlertCircle className="w-4 h-4 text-warning-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span><strong>SEFAZ:</strong> SINIEF atualiza convênios ICMS (out/2025). <a href="https://www.confaz.fazenda.gov.br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">CONFAZ Portal</a></span>
-                </li>
-                <li className="flex items-start">
-                  <FileText className="w-4 h-4 text-success-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>CFC: Normas NBC TG 1000 para PMEs. Treinamentos obrigatórios. <a href="https://cfc.org.br" target="_blank" rel="noopener noreferrer" className="text-primary-400 hover:underline">CFC Site</a></span>
-                </li>
-                <li><em>Atual: Resoluções CFC (set/2025).</em></li>
-              </ul>
-            </div>
+          {/* Tags de Fonte */}
+          <div className="flex items-center gap-3 mt-6">
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono uppercase tracking-wider">
+              <Sparkles className="w-3 h-3" /> API + IA
+            </span>
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-mono uppercase tracking-wider">
+              <Newspaper className="w-3 h-3" /> RSS Público
+            </span>
           </div>
         </div>
       </section>
 
-      {/* Nota sobre Updates */}
-      <section className="py-20 bg-neutral-800/50">
-        <div className="container-custom text-center">
-          <p className="text-lg text-neutral-300 mb-4">
-            <strong>Nota:</strong> Este conteúdo é estático com exemplos. Para atualizações automáticas a cada hora, integre API/RSS de fontes como RFB, CFC ou agregadores de notícias contábeis (ex: via cron job no servidor ou service worker para client-side fetch).
-          </p>
-          <Link href="/reforma-tributaria" className="btn-secondary">
-            Ver Reforma Tributária 2026
-          </Link>
+      {/* Filtros */}
+      <section className="py-6 border-b border-neutral-800 bg-neutral-900/30 sticky top-24 z-40 backdrop-blur-sm">
+        <div className="container-custom">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
+            <Filter className="w-4 h-4 text-neutral-600 shrink-0" />
+            {CATEGORIAS.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setFiltroAtivo(cat.id)}
+                className={`flex items-center gap-2 px-4 py-2 text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-all border ${filtroAtivo === cat.id
+                    ? 'bg-amber-electric text-obsidian border-amber-electric font-bold'
+                    : 'bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600'
+                  }`}
+              >
+                <cat.icon className="w-3.5 h-3.5" />
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Conteúdo */}
+      <section className="py-12">
+        <div className="container-custom">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <RefreshCw className="w-8 h-8 text-amber-electric animate-spin" />
+              <span className="text-xs font-mono text-neutral-600 uppercase tracking-widest">Carregando notícias...</span>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {/* Destaque */}
+              {destaque && (
+                <a
+                  href={destaque.link !== '#' ? destaque.link : undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group p-10 bg-gradient-to-br from-amber-electric/10 to-transparent border-2 border-amber-electric/30 hover:border-amber-electric/60 transition-all duration-500"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-2xl">{destaque.icone}</span>
+                    <span className="px-3 py-1 bg-amber-electric text-obsidian text-[10px] font-mono font-bold uppercase tracking-widest">
+                      Destaque
+                    </span>
+                    <span className="text-[10px] font-mono text-neutral-600 uppercase">{destaque.data}</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4 group-hover:text-amber-electric transition-colors">
+                    {destaque.titulo}
+                  </h2>
+                  <p className="text-neutral-400 font-sans text-lg max-w-3xl leading-relaxed">
+                    {destaque.resumo}
+                  </p>
+                  <div className="flex items-center gap-2 mt-6 text-xs font-mono text-neutral-600 uppercase">
+                    Fonte: {destaque.fonte}
+                    {destaque.link !== '#' && <ExternalLink className="w-3 h-3" />}
+                  </div>
+                </a>
+              )}
+
+              {/* Lista de Notícias */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {restantes.map((noticia) => (
+                  <a
+                    key={noticia.id}
+                    href={noticia.link !== '#' ? noticia.link : undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group block p-6 border transition-all duration-300 hover:translate-y-[-2px] ${categoriaCores[noticia.categoria] || 'border-neutral-800 bg-neutral-900/40'
+                      }`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-xl">{noticia.icone}</span>
+                      <span className="text-[9px] font-mono text-neutral-600 uppercase">
+                        {categoriaLabels[noticia.categoria] || noticia.categoria}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold uppercase tracking-tight mb-3 group-hover:text-amber-electric transition-colors leading-tight">
+                      {noticia.titulo}
+                    </h3>
+                    <p className="text-sm text-neutral-500 font-sans leading-relaxed mb-4 line-clamp-3">
+                      {noticia.resumo}
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-neutral-800/30">
+                      <span className="text-[9px] font-mono text-neutral-700 uppercase">{noticia.fonte}</span>
+                      <span className="text-[9px] font-mono text-neutral-700 uppercase">{noticia.data}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {noticias.length === 0 && !loading && (
+                <div className="text-center py-20">
+                  <span className="text-neutral-700 text-4xl">📭</span>
+                  <p className="text-neutral-600 font-mono text-sm mt-4 uppercase tracking-wider">Nenhuma notícia encontrada para esta categoria.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </main>

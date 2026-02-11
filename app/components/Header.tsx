@@ -2,11 +2,47 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, MessageCircle, Shield } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
+/**
+ * Header Público — Brandão Contabilidade
+ * Inclui botão condicional "Painel" para admins logados
+ */
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    async function checkAdminStatus() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          const role = user.user_metadata?.role || user.app_metadata?.role || 'client';
+          const adminRoles = ['admin', 'staff', 'master'];
+          setIsAdmin(adminRoles.includes(role));
+        }
+      } catch {
+        // Silently fail - user is not logged in
+      }
+    }
+
+    checkAdminStatus();
+  }, []);
+
+  const navItems = [
+    { name: "Início", href: "/" },
+    { name: "Serviços", href: "/servicos" },
+    { name: "Agro", href: "/agronegocio" },
+    { name: "Notícias", href: "/noticias-contabeis" },
+    { name: "Reforma", href: "/reforma-tributaria" },
+    { name: "Links", href: "/links-uteis" },
+    { name: "Contato", href: "/contato" },
+    { name: "Portal", href: "/login" },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-obsidian border-b border-neutral-800">
@@ -31,15 +67,10 @@ function Header() {
             </Link>
           </div>
 
-          {/* Menu */}
+          {/* Menu Desktop */}
           <div className="hidden md:flex items-center gap-12">
             <nav className="flex items-center gap-8">
-              {[
-                { name: "Início", href: "/" },
-                { name: "Serviços", href: "/servicos" },
-                { name: "Contato", href: "/contato" },
-                { name: "Portal", href: "/cliente/login" },
-              ].map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -50,12 +81,29 @@ function Header() {
                 </Link>
               ))}
             </nav>
-            <a href="https://wa.me/5567996011356" target="_blank" className="btn-brutal !py-2 !px-6 text-sm">
-              <MessageCircle className="w-4 h-4 mr-2" /> CONTATO_IMEDIATO
+
+            {/* Botão Admin Condicional */}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all text-xs font-mono uppercase tracking-widest"
+                title="Acessar Painel Administrativo"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Painel
+              </Link>
+            )}
+
+            <a href="https://wa.me/5567996011356" target="_blank" rel="noopener noreferrer" className="btn-brutal !py-2 !px-6 text-sm" aria-label="Entrar em contato via WhatsApp">
+              <MessageCircle className="w-4 h-4 mr-2" /> WHATSAPP
             </a>
           </div>
 
-          <button className="md:hidden text-amber-electric" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            className="md:hidden text-amber-electric"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+          >
             {isMenuOpen ? <X size={32} /> : <Menu size={32} />}
           </button>
         </div>
@@ -65,11 +113,27 @@ function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-obsidian border-t border-neutral-800 animate-in slide-in-from-top duration-300">
           <nav className="flex flex-col p-8 gap-6">
-            <Link href="/" className="mono-label text-xl">Início</Link>
-            <Link href="/servicos" className="mono-label text-xl">Serviços</Link>
-            <Link href="/contato" className="mono-label text-xl">Contato</Link>
-            <Link href="/cliente/login" className="mono-label text-xl">Portal</Link>
-            <a href="https://wa.me/5567996011356" target="_blank" className="btn-brutal w-full mt-4">
+            <Link href="/" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Início</Link>
+            <Link href="/servicos" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Serviços</Link>
+            <Link href="/agronegocio" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Painel Agro</Link>
+            <Link href="/noticias-contabeis" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Notícias</Link>
+            <Link href="/reforma-tributaria" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Reforma Tributária</Link>
+            <Link href="/links-uteis" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Links Úteis</Link>
+            <Link href="/contato" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Contato</Link>
+            <Link href="/login" className="mono-label text-xl" onClick={() => setIsMenuOpen(false)}>Portal</Link>
+
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 mono-label text-xl text-emerald-400"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Shield className="w-5 h-5" />
+                Painel Admin
+              </Link>
+            )}
+
+            <a href="https://wa.me/5567996011356" target="_blank" rel="noopener noreferrer" className="btn-brutal w-full mt-4">
               WHATSAPP
             </a>
           </nav>
