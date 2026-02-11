@@ -271,29 +271,34 @@ function ClientesContent() {
         }
         setConsulting(true);
         try {
-            const response = await fetch(`https://open.cnpja.com/office/${cnpj}`);
-            if (!response.ok) throw new Error('Falha na consulta.');
+            // Usa API proxy do servidor para evitar CORS
+            const response = await fetch(`/api/clientes/cnpj?cnpj=${cnpj}`);
             const data = await response.json();
 
-            // Log do resultado para debug
-            console.log('[CNPJ Consult]', data);
+            if (!response.ok) {
+                throw new Error(data.error || 'Falha na consulta.');
+            }
+
+            console.log('[CNPJ Consult]', data.source, data);
 
             setFormData((prev: any) => ({
                 ...prev,
-                nome: data.alias || data.name || prev.nome,
-                razao_social: data.name || prev.razao_social,
-                email: data.emails?.[0]?.address || prev.email,
-                cnae_principal: data.mainActivity ? `${data.mainActivity.code} - ${data.mainActivity.text}` : prev.cnae_principal,
-                status_rfb: data.status?.text || 'ATIVA',
-                logradouro: data.address?.street || prev.logradouro,
-                numero: data.address?.number || prev.numero,
-                bairro: data.address?.district || prev.bairro,
-                cep: data.address?.zip || prev.cep,
-                cidade: data.address?.city || prev.cidade,
-                estado: data.address?.state || prev.estado
+                nome: data.nome || prev.nome,
+                razao_social: data.razao_social || prev.razao_social,
+                email: data.email || prev.email,
+                telefone_whatsapp: data.telefone || prev.telefone_whatsapp,
+                cnae_principal: data.cnae_principal || prev.cnae_principal,
+                status_rfb: data.status_rfb || 'ATIVA',
+                logradouro: data.logradouro || prev.logradouro,
+                numero: data.numero || prev.numero,
+                bairro: data.bairro || prev.bairro,
+                cep: data.cep || prev.cep,
+                cidade: data.cidade || prev.cidade,
+                estado: data.estado || prev.estado,
+                inscricao_estadual: data.inscricao_estadual || prev.inscricao_estadual,
             }));
         } catch (err: any) {
-            alert('Erro: ' + err.message);
+            alert('Erro ao consultar CNPJ: ' + err.message);
         } finally {
             setConsulting(false);
         }
@@ -301,24 +306,33 @@ function ClientesContent() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setSyncing(true); // Reusar ou criar estado de loading
+        setSyncing(true);
         try {
             if (editingClient) {
-                const { error } = await supabase.from('clientes').update(formData).eq('id', editingClient.id);
-                if (error) throw error;
+                // Edição: direto no Supabase (campos limpos)
+                const cleanData = { ...formData };
+                delete cleanData.drive_folder_id; // Não editar drive_folder_id manualmente
+                const { error } = await supabase.from('clientes').update(cleanData).eq('id', editingClient.id);
+                if (error) throw new Error(error.message);
             } else {
-                // Chamada para a API Soberana que cria pastas no Drive
+                // Novo cliente: via API que sanitiza campos + dispara n8n
                 const response = await fetch('/api/clientes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-                if (!response.ok) throw new Error('Falha na criação soberana');
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Falha ao cadastrar cliente');
+                }
+                console.log('[CADASTRO] Sucesso:', result);
+                alert(`✅ ${result.message}`);
             }
             setIsModalOpen(false);
             fetchClientes();
         } catch (err: any) {
-            alert('Erro ao salvar: ' + err.message);
+            console.error('[CADASTRO] Erro:', err);
+            alert('❌ Erro ao salvar: ' + err.message);
         } finally {
             setSyncing(false);
         }
