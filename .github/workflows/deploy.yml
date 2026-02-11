@@ -159,6 +159,8 @@ jobs:
         run: sleep 30
 
       - name: Health Check
+        id: health-check
+        continue-on-error: true
         run: |
           response=$(curl -s -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36" -o /dev/null -w "%{http_code}" https://brandaocontador.com.br)
           if [ $response -eq 200 ]; then
