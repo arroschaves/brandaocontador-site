@@ -35,13 +35,39 @@ export async function POST(
         console.log(`[Enrichment API] Iniciando consulta para CNPJ: ${client.cnpj_cpf}`)
         const enrichedData = await enrichCompanyData(client.cnpj_cpf)
 
-        // 3. Atualizar o cliente no Supabase com os novos dados
+        // 3. Sanitizar dados antes de enviar ao Supabase
+        const safeData: Record<string, any> = {};
+        const DATE_FIELDS = ['data_abertura', 'data_situacao_cadastral'];
+        const SKIP_FIELDS = ['cnaes_secundarios']; // Array, não é coluna
+
+        for (const [key, value] of Object.entries(enrichedData)) {
+            if (SKIP_FIELDS.includes(key)) continue;
+            if (value === null || value === undefined || value === '') continue;
+
+            // Validar datas
+            if (DATE_FIELDS.includes(key)) {
+                const dateStr = String(value).substring(0, 10);
+                const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (match) {
+                    const d = new Date(parseInt(match[1]), parseInt(match[2]) - 1, parseInt(match[3]));
+                    if (d.getFullYear() === parseInt(match[1]) && d.getMonth() === parseInt(match[2]) - 1 && d.getDate() === parseInt(match[3])) {
+                        safeData[key] = dateStr;
+                    } else {
+                        console.warn(`[Enrichment] Data inválida ignorada: ${key}=${value}`);
+                    }
+                } else {
+                    console.warn(`[Enrichment] Formato de data não reconhecido: ${key}=${value}`);
+                }
+                continue;
+            }
+
+            safeData[key] = value;
+        }
+
+        // 4. Atualizar o cliente no Supabase com os dados validados
         const { error: updateErr } = await supabase
             .from('clientes')
-            .update({
-                ...enrichedData,
-                log_atualizacao: new Date().toISOString()
-            })
+            .update(safeData)
             .eq('id', clientId)
 
         if (updateErr) {

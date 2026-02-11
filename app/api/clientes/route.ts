@@ -8,8 +8,8 @@ import { NextResponse, NextRequest } from 'next/server'
  * GET: Lista todos os clientes (com filtros opcionais).
  */
 
-// Campos válidos na tabela 'clientes' do Supabase
-const CAMPOS_VALIDOS = [
+// Campos TEXT seguros — correspondentes ao formulário do CRM
+const CAMPOS_TEXT = [
     'nome',
     'cnpj_cpf',
     'telefone_whatsapp',
@@ -26,35 +26,89 @@ const CAMPOS_VALIDOS = [
     'inscricao_estadual',
     'inscricao_municipal',
     'status_rfb',
-    'drive_folder_id',
-    'tipo_pessoa',
-    'data_abertura',
+    'telefone',
     'natureza_juridica',
     'porte',
-    'capital_social',
-    'telefone',
-    'situacao_cadastral',
-    'data_situacao_cadastral',
-    'motivo_situacao_cadastral',
     'atividade_principal',
-    'atividades_secundarias',
+    'tipo_pessoa',
+];
+
+// Campos DATE — precisam de validação extra
+const CAMPOS_DATE = [
+    'data_abertura',
+    'data_situacao_cadastral',
+];
+
+// Campos NUMBER
+const CAMPOS_NUMBER = [
+    'capital_social',
 ];
 
 /**
- * Filtra o formData para enviar apenas campos que existem na tabela.
- * Remove campos vazios/undefined e campos não reconhecidos.
+ * Valida se uma string é uma data válida no formato YYYY-MM-DD
+ */
+function isValidDate(dateStr: string): boolean {
+    if (!dateStr || typeof dateStr !== 'string') return false;
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) return false;
+
+    const year = parseInt(match[1]);
+    const month = parseInt(match[2]);
+    const day = parseInt(match[3]);
+
+    // Verifica se é uma data válida usando Date
+    const date = new Date(year, month - 1, day);
+    return (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+    );
+}
+
+/**
+ * Filtra e sanitiza o formData antes do insert.
+ * - Remove campos não reconhecidos
+ * - Remove valores vazios
+ * - Valida datas
  */
 function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
     const sanitized: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(raw)) {
-        // Ignora campos não reconhecidos
-        if (!CAMPOS_VALIDOS.includes(key)) continue;
-
-        // Ignora valores vazios (string vazia, null, undefined)
+        // Ignora valores vazios
         if (value === '' || value === null || value === undefined) continue;
 
-        sanitized[key] = value;
+        // Campos TEXT
+        if (CAMPOS_TEXT.includes(key)) {
+            sanitized[key] = String(value).trim();
+            continue;
+        }
+
+        // Campos DATE — validação rigorosa
+        if (CAMPOS_DATE.includes(key)) {
+            const dateStr = String(value).trim().substring(0, 10); // Pega só YYYY-MM-DD
+            if (isValidDate(dateStr)) {
+                sanitized[key] = dateStr;
+            } else {
+                console.warn(`[SANITIZE] Data inválida ignorada: ${key}=${value}`);
+            }
+            continue;
+        }
+
+        // Campos NUMBER
+        if (CAMPOS_NUMBER.includes(key)) {
+            const num = parseFloat(value);
+            if (!isNaN(num)) {
+                sanitized[key] = num;
+            }
+            continue;
+        }
+
+        // Campo drive_folder_id — nunca enviar vazio no insert
+        if (key === 'drive_folder_id' && value) {
+            sanitized[key] = String(value).trim();
+        }
+        // Todos os outros campos são IGNORADOS (segurança)
     }
 
     return sanitized;
@@ -62,7 +116,6 @@ function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
 
 /**
  * Dispara o webhook do n8n para criar pastas no Google Drive.
- * O workflow n8n busca clientes sem drive_folder_id e cria automaticamente.
  */
 async function triggerDriveAutomation(): Promise<void> {
     const webhookUrl = process.env.N8N_DRIVE_WEBHOOK_URL ||
@@ -71,11 +124,10 @@ async function triggerDriveAutomation(): Promise<void> {
     try {
         const res = await fetch(webhookUrl, {
             method: 'GET',
-            signal: AbortSignal.timeout(10000), // 10s timeout
+            signal: AbortSignal.timeout(10000),
         });
         console.log(`[N8N] Drive automation triggered: ${res.status}`);
     } catch (err: any) {
-        // Não bloqueia — o n8n processa async
         console.warn('[N8N] Drive automation trigger falhou (não-bloqueante):', err.message);
     }
 }
@@ -85,7 +137,7 @@ export async function POST(request: NextRequest) {
         const rawData = await request.json();
         const supabase = await createClient();
 
-        // 1. Sanitizar dados — remove campos inválidos e vazios
+        // 1. Sanitizar dados — remove campos inválidos, valida datas
         const formData = sanitizeFormData(rawData);
 
         if (!formData.nome && !formData.razao_social) {
@@ -98,7 +150,7 @@ export async function POST(request: NextRequest) {
         console.log('[CLIENT API] Inserindo cliente:', {
             nome: formData.nome,
             cnpj_cpf: formData.cnpj_cpf,
-            campos: Object.keys(formData).length
+            campos: Object.keys(formData),
         });
 
         // 2. Inserir o cliente no Supabase
@@ -110,6 +162,42 @@ export async function POST(request: NextRequest) {
 
         if (insertErr) {
             console.error('[CLIENT API] Erro no insert:', insertErr);
+
+            // Se o erro for de coluna inexistente, tenta sem o campo problemático
+            if (insertErr.message?.includes('column') || insertErr.message?.includes('field')) {
+                console.log('[CLIENT API] Tentando insert com campos mínimos...');
+
+                // Campos mínimos garantidos
+                const minimalData: Record<string, any> = {};
+                const SAFE_FIELDS = ['nome', 'cnpj_cpf', 'razao_social', 'email', 'telefone_whatsapp',
+                    'regime_tributario', 'status_rfb', 'cidade', 'estado'];
+
+                for (const field of SAFE_FIELDS) {
+                    if (formData[field]) minimalData[field] = formData[field];
+                }
+
+                const { data: client2, error: err2 } = await supabase
+                    .from('clientes')
+                    .insert([minimalData])
+                    .select()
+                    .single();
+
+                if (err2) {
+                    return NextResponse.json(
+                        { error: `Erro ao salvar: ${err2.message}` },
+                        { status: 400 }
+                    );
+                }
+
+                triggerDriveAutomation();
+                return NextResponse.json({
+                    success: true,
+                    clientId: client2.id,
+                    message: `Cliente "${client2.nome || client2.razao_social}" cadastrado (modo seguro). Alguns campos extras foram ignorados.`,
+                    warning: `Campo ignorado pelo banco: ${insertErr.message}`
+                });
+            }
+
             return NextResponse.json(
                 { error: `Erro ao salvar: ${insertErr.message}` },
                 { status: 400 }
@@ -118,7 +206,7 @@ export async function POST(request: NextRequest) {
 
         console.log('[CLIENT API] Cliente criado:', client.id, client.nome);
 
-        // 3. Disparar automação n8n para criação de pastas no Drive (async, não-bloqueante)
+        // 3. Disparar automação n8n (async)
         triggerDriveAutomation();
 
         return NextResponse.json({
@@ -152,7 +240,6 @@ export async function GET(request: NextRequest) {
         }
 
         const { data, error } = await query;
-
         if (error) throw error;
 
         return NextResponse.json(data);
