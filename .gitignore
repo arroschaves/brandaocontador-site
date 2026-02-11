@@ -61,3 +61,41 @@ MANIFEST
 
 # PyInstaller
 *.spec
+
+# ========================================
+# SEGURANÇA — Documentos Sensíveis
+# ========================================
+
+# Arquivos fiscais e CRM (documentos de clientes)
+ARQUIVOS*/
+ARQUIVOS  DAS FGTS INSS XML E SPED DARF/
+
+# Documentos sensíveis
+*.pdf
+!public/*.pdf
+
+# Credenciais e dados sensíveis
+*.sql
+credentials.json
+token.pickle
+*.pickle
+*.key
+*.cert
+*.p12
+*.pfx
+
+# Logs de build
+build*.log
+
+# Executáveis
+*.exe
+*.msi
+
+# Automação e relatórios
+automation_report.json
+
+# IDE e sistema
+.qodo/
+.trae/
+.venv/
+*.spec
