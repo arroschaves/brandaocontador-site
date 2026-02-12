@@ -1,3 +1,6 @@
+/**
+ * Última atualização: 2026-02-12 10:10 (Forçando Deploy)
+ */
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse, NextRequest } from 'next/server'
 
