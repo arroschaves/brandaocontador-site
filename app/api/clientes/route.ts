@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
                 const { data: client2, error: err2 } = await supabase
                     .from('clientes')
                     .insert([minimalData])
-                    .select('id, nome, razao_social, pushname') // Adjusted select to include pushname
+                    .select('id, nome, razao_social')
                     .single();
 
                 if (err2) {
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({
                     success: true,
                     clientId: client2.id,
-                    message: `Cliente "${client2.nome || client2.razao_social || client2.pushname || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
+                    message: `Cliente "${client2.nome || client2.razao_social || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
                     warning: `Campo ignorado pelo banco: ${insertErr.message}`
                 });
             }
