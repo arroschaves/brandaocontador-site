@@ -119,17 +119,18 @@ function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
  * Agora envia o payload completo do cliente para permitir a criação inteligente de pastas.
  */
 async function triggerDriveAutomation(clientData: any): Promise<void> {
-    // URL do Webhook "Golden Path" - Substitua pelo ID real quando importado no N8N
+    // URL real capturada do workflow "AutoAutomacao Google Drive"
     const webhookUrl = process.env.N8N_CADASTRO_WEBHOOK ||
-        'https://webhook.brandaocontador.com.br/webhook/cadastro-cliente-golden';
+        'https://webhook.brandaocontador.com.br/webhook/3232dacd-f6a4-40ed-9b57-5a22045de998';
 
     try {
         const res = await fetch(webhookUrl, {
-            method: 'POST',
+            method: 'GET', // O workflow está configurado para GET conforme triggerInfo
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(clientData),
+            // Embora seja GET, o n8n costuma ignorar o body em GET, 
+            // mas o trigger vai iniciar o processo que busca via Supabase (getAll)
             signal: AbortSignal.timeout(10000),
         });
         console.log(`[N8N] Drive automation triggered for ${clientData.nome}: ${res.status}`);
