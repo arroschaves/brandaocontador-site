@@ -54,7 +54,7 @@ export default function WhatsAppRadar() {
                 .select(`
                     id,
                     mensagem,
-                    pushName,
+                    pushname,
                     created_at,
                     clientes ( nome )
                 `)
@@ -97,7 +97,7 @@ export default function WhatsAppRadar() {
                     </span>
                     <span className="w-1 h-1 rounded-full bg-neutral-700" />
                     <span className="text-[9px] font-mono text-neutral-300 truncate max-w-[120px]">
-                        {latestMessage?.clientes?.nome || latestMessage?.pushName || 'Desconhecido'}
+                        {latestMessage?.clientes?.nome || latestMessage?.pushname || 'Desconhecido'}
                     </span>
                 </div>
             </div>

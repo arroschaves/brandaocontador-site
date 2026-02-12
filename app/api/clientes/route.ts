@@ -130,7 +130,8 @@ async function triggerDriveAutomation(clientData: any): Promise<void> {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(clientData),
+            // Enviamos um objeto 'body' para o n8n capturar corretamente
+            body: JSON.stringify({ body: clientData }),
             // Aumentado para 15s para dar tempo do Google Drive responder ao n8n
             signal: AbortSignal.timeout(15000),
         });
@@ -194,7 +195,7 @@ export async function POST(request: NextRequest) {
                 const { data: client2, error: err2 } = await supabase
                     .from('clientes')
                     .insert([minimalData])
-                    .select()
+                    .select('id, nome, razao_social, pushname') // Adjusted select to include pushname
                     .single();
 
                 if (err2) {
@@ -208,7 +209,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({
                     success: true,
                     clientId: client2.id,
-                    message: `Cliente "${client2.nome || client2.razao_social}" cadastrado (modo seguro). Pastas sendo criadas...`,
+                    message: `Cliente "${client2.nome || client2.razao_social || client2.pushname || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
                     warning: `Campo ignorado pelo banco: ${insertErr.message}`
                 });
             }
