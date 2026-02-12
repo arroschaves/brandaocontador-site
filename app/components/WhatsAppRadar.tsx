@@ -32,15 +32,24 @@ export default function WhatsAppRadar() {
     async function fetchStatus() {
         try {
             // Conta pendentes
-            const { count } = await supabase
+            const { count, error: countErr } = await supabase
                 .from('atendimentos')
                 .select('*', { count: 'exact', head: true })
                 .eq('status', 'pendente')
 
+            if (countErr) {
+                if (countErr.code === '42P01') {
+                    console.warn('[Radar] Tabela atendimentos não localizada. Aguardando migration.');
+                    setPendingCount(0);
+                    return;
+                }
+                throw countErr;
+            }
+
             setPendingCount(count || 0)
 
             // Busca a última mensagem pendente
-            const { data } = await supabase
+            const { data, error: msgErr } = await supabase
                 .from('atendimentos')
                 .select(`
                     id,
@@ -53,6 +62,10 @@ export default function WhatsAppRadar() {
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .single()
+
+            if (msgErr && msgErr.code !== 'PGRST116') { // Ignora se não houver registros
+                console.error('[Radar] Erro ao buscar mensagem:', msgErr.message);
+            }
 
             if (data) setLatestMessage(data)
         } catch (err) {

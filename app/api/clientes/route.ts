@@ -157,6 +157,8 @@ export async function POST(request: NextRequest) {
             nome: formData.nome,
             cnpj_cpf: formData.cnpj_cpf,
             campos: Object.keys(formData),
+            data_abertura: formData.data_abertura, // Inspecionar campo problemático
+            payload: formData // Log completo para debug de data
         });
 
         // 2. Inserir o cliente no Supabase
