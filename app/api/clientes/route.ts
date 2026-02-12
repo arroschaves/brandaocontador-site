@@ -124,17 +124,24 @@ async function triggerDriveAutomation(clientData: any): Promise<void> {
         'https://webhook.brandaocontador.com.br/webhook/cadastro-cliente';
 
     try {
+        console.log(`[N8N] Disparando Golden Path para: ${clientData.nome}`);
         const res = await fetch(webhookUrl, {
-            method: 'POST', // O Golden Path usa POST
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(clientData),
-            signal: AbortSignal.timeout(10000),
+            // Aumentado para 15s para dar tempo do Google Drive responder ao n8n
+            signal: AbortSignal.timeout(15000),
         });
-        console.log(`[N8N] Drive automation triggered for ${clientData.nome}: ${res.status}`);
+        const status = res.status;
+        console.log(`[N8N] Resposta do webhook: ${status}`);
     } catch (err: any) {
-        console.warn('[N8N] Drive automation trigger falhou (não-bloqueante):', err.message);
+        if (err.name === 'TimeoutError') {
+            console.warn('[N8N] O Webhook demorou muito, mas o n8n deve processar em background.');
+        } else {
+            console.error('[N8N] Erro ao chamar automação:', err.message);
+        }
     }
 }
 
