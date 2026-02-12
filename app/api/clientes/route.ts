@@ -116,17 +116,23 @@ function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
 
 /**
  * Dispara o webhook do n8n para criar pastas no Google Drive.
+ * Agora envia o payload completo do cliente para permitir a criação inteligente de pastas.
  */
-async function triggerDriveAutomation(): Promise<void> {
-    const webhookUrl = process.env.N8N_DRIVE_WEBHOOK_URL ||
-        'https://webhook.brandaocontador.com.br/webhook/3232dacd-f6a4-40ed-9b57-5a22045de998';
+async function triggerDriveAutomation(clientData: any): Promise<void> {
+    // URL do Webhook "Golden Path" - Substitua pelo ID real quando importado no N8N
+    const webhookUrl = process.env.N8N_CADASTRO_WEBHOOK ||
+        'https://webhook.brandaocontador.com.br/webhook/cadastro-cliente-golden';
 
     try {
         const res = await fetch(webhookUrl, {
-            method: 'GET',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(clientData),
             signal: AbortSignal.timeout(10000),
         });
-        console.log(`[N8N] Drive automation triggered: ${res.status}`);
+        console.log(`[N8N] Drive automation triggered for ${clientData.nome}: ${res.status}`);
     } catch (err: any) {
         console.warn('[N8N] Drive automation trigger falhou (não-bloqueante):', err.message);
     }
@@ -189,11 +195,11 @@ export async function POST(request: NextRequest) {
                     );
                 }
 
-                triggerDriveAutomation();
+                triggerDriveAutomation(client2);
                 return NextResponse.json({
                     success: true,
                     clientId: client2.id,
-                    message: `Cliente "${client2.nome || client2.razao_social}" cadastrado (modo seguro). Alguns campos extras foram ignorados.`,
+                    message: `Cliente "${client2.nome || client2.razao_social}" cadastrado (modo seguro). Pastas sendo criadas...`,
                     warning: `Campo ignorado pelo banco: ${insertErr.message}`
                 });
             }
@@ -206,13 +212,14 @@ export async function POST(request: NextRequest) {
 
         console.log('[CLIENT API] Cliente criado:', client.id, client.nome);
 
-        // 3. Disparar automação n8n (async)
-        triggerDriveAutomation();
+        // 3. Disparar automação n8n (async) com dados completos
+        // O N8N vai receber isso, criar pastas e atualizar o drive_folder_id e status_setup
+        triggerDriveAutomation(client);
 
         return NextResponse.json({
             success: true,
             clientId: client.id,
-            message: `Cliente "${client.nome || client.razao_social}" cadastrado com sucesso. Pastas do Drive serão criadas automaticamente.`
+            message: `Cliente "${client.nome || client.razao_social}" cadastrado com sucesso. Sistema de pastas iniciado.`
         });
 
     } catch (error: any) {

@@ -1,0 +1,191 @@
+{
+    "name": "Cadastro Cliente - Criação de Pastas e Notificações (Golden Path)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "cadastro-cliente",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "name": "Webhook Cadastro",
+            "webhookId": "cadastro-cliente-golden"
+        },
+        {
+            "parameters": {
+                "resource": "folder",
+                "name": "={{$json.body.nome}} - {{$json.body.cnpj_cpf}}",
+                "parents": [
+                    "{{$env.GDRIVE_ROOT_FOLDER_ID}}"
+                ]
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 2,
+            "position": [
+                450,
+                300
+            ],
+            "name": "Criar Pasta Cliente",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "folder",
+                "name": "Documentos Fiscais",
+                "parents": [
+                    "={{$json.id}}"
+                ]
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 2,
+            "position": [
+                650,
+                200
+            ],
+            "name": "Pasta Documentos",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "resource": "folder",
+                "name": "Contabilidade",
+                "parents": [
+                    "={{$json.parents[0]}}"
+                ]
+            },
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 2,
+            "position": [
+                650,
+                400
+            ],
+            "name": "Pasta Contabilidade",
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "b4mywljyK2WCSlSG",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "table": "clientes",
+                "operation": "update",
+                "columns": {
+                    "drive_folder_id": "={{$node[\"Criar Pasta Cliente\"].json.id}}",
+                    "status_setup": "READY"
+                },
+                "query": "id=eq.{{$node[\"Webhook Cadastro\"].json.body.id}}"
+            },
+            "type": "n8n-nodes-base.supabase",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ],
+            "name": "Atualizar Supabase",
+            "credentials": {
+                "supabaseApi": {
+                    "id": "tvymDvbKT2vFr50N",
+                    "name": "Supabase account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.EVOLUTION_INSTANCE}}",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "={{$env.EVOLUTION_API_KEY}}"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "number",
+                            "value": "={{$node[\"Webhook Cadastro\"].json.body.telefone_whatsapp}}"
+                        },
+                        {
+                            "name": "text",
+                            "value": "Olá {{$node[\"Webhook Cadastro\"].json.body.nome}}! Bem-vindo à Brandão Contabilidade. Seu cadastro foi realizado com sucesso."
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Enviar WhatsApp",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                1050,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Cadastro": {
+            "main": [
+                [
+                    {
+                        "node": "Criar Pasta Cliente",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Criar Pasta Cliente": {
+            "main": [
+                [
+                    {
+                        "node": "Pasta Documentos",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Pasta Contabilidade",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Atualizar Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Atualizar Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Enviar WhatsApp",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

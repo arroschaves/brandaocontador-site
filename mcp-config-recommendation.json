@@ -1,0 +1,40 @@
+{
+    "mcpServers": {
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "E:\\PROJETOS\\brandaocontador-site"
+            ]
+        },
+        "git": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-git",
+                "--repository",
+                "E:\\PROJETOS\\brandaocontador-site"
+            ]
+        },
+        "supabase": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-postgres",
+                "postgres://postgres:[SUA_SENHA_AQUI]@[SEU_HOST_AQUI]:5432/postgres"
+            ]
+        },
+        "n8n": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "n8n-mcp-server"
+            ],
+            "env": {
+                "N8N_API_KEY": "SUA_API_KEY_AQUI",
+                "N8N_HOST": "https://seu-n8n.com"
+            }
+        }
+    }
+}

@@ -82,8 +82,7 @@ function ClientesContent() {
         estado: 'MS',
         inscricao_estadual: '',
         inscricao_municipal: '',
-        status_rfb: 'ATIVA',
-        drive_folder_id: ''
+        status_rfb: 'ATIVA'
     });
     const [consulting, setConsulting] = useState(false);
 
@@ -246,8 +245,7 @@ function ClientesContent() {
                 cidade: client.cidade || 'Sidrolândia',
                 estado: client.estado || 'MS',
                 inscricao_estadual: client.inscricao_estadual || '',
-                status_rfb: client.status_rfb || 'ATIVA',
-                drive_folder_id: client.drive_folder_id || ''
+                status_rfb: client.status_rfb || 'ATIVA'
             });
         } else {
             setEditingClient(null);
@@ -257,7 +255,7 @@ function ClientesContent() {
                 logradouro: '', numero: '', bairro: '', cep: '',
                 cidade: 'Sidrolândia', estado: 'MS',
                 inscricao_estadual: '',
-                status_rfb: 'ATIVA', drive_folder_id: ''
+                status_rfb: 'ATIVA'
             });
         }
         setIsModalOpen(true);
@@ -522,9 +520,21 @@ function ClientesContent() {
                                             <td className="p-5"><StatusBadge name="Folha de Pagamento" /></td>
                                             <td className="p-5 text-center">
                                                 <div className="flex justify-center">
-                                                    <div className={`p-1.5 rounded-lg border ${c.isCertNearExp ? 'border-amber-200 bg-amber-50 text-amber-600 animate-pulse' : 'border-border/50 text-muted-foreground/20'}`}>
-                                                        <Lock className="w-4 h-4" />
-                                                    </div>
+                                                    {c.drive_folder_id ? (
+                                                        <a
+                                                            href={`https://drive.google.com/drive/folders/${c.drive_folder_id}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="p-1.5 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                                                            title="Abrir Pasta no Drive"
+                                                        >
+                                                            <FolderOpen className="w-4 h-4" />
+                                                        </a>
+                                                    ) : (
+                                                        <div className="p-1.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-600 animate-pulse" title="Sincronizando Drive...">
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </td>
                                             <td className="p-5 text-right pr-8">
@@ -660,11 +670,7 @@ function ClientesContent() {
                                     <input id="cep" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none"
                                         value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
                                 </div>
-                                <div className="space-y-2 col-span-2">
-                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Link Drive (ID)</label>
-                                    <input className="w-full bg-secondary/40 border border-border/40 rounded-xl p-3 text-xs font-mono text-muted-foreground outline-none"
-                                        value={formData.drive_folder_id || ''} onChange={e => setFormData({ ...formData, drive_folder_id: e.target.value })} />
-                                </div>
+                                {/* Campo Drive removido para evitar edição manual. O N8N gerencia isso. */}
                             </div>
 
                             {/* Action Buttons */}
