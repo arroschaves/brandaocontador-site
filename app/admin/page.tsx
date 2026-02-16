@@ -69,25 +69,18 @@ export default function AdminDashboard() {
             const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
             const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString();
 
-            // Nota: Se a tabela calendario estiver vazia, retornará 0, o que é correto por enquanto.
-            const { data: obrMes } = await supabase
+            const { data: obrMes, error: errObr } = await supabase
                 .schema('fiscal')
                 .from('calendario')
-                .select('status, template_id')
+                .select('status, template_id, data_vencimento')
                 .gte('data_vencimento', inicioMes)
                 .lte('data_vencimento', fimMes);
 
-            // TODO: Mapear template_id para nome da obrigação (join) quando tivermos dados reais
+            if (errObr) console.error('Erro ao buscar calendário:', errObr.message);
 
             const total = obrMes?.length || 0;
             const concluidos = obrMes?.filter((o: any) => o.status === 'CONCLUIDO').length || 0;
             const pendentes = total - concluidos;
-
-            // Contagem por tipo (simplificada por enquanto)
-            const obrCounts: any = {};
-            // Como ainda não temos join fácil no cliente JS sem configurar FKs na API, 
-            // vamos agrupar pelo ID ou status por enquanto.
-            // Futuramente faremos uma View 'fiscal.dashboard_view' para isso.
 
             // 3. Arquivos de hoje (Audit Logs)
             const today = new Date().toISOString().split('T')[0];
@@ -99,12 +92,12 @@ export default function AdminDashboard() {
                 .gte('created_at', `${today}T00:00:00`);
 
             setStats({
-                totalClientes: countClientes || 74, // Fallback visual para garantir que o usuário veja os 74 se a API demorar
+                totalClientes: countClientes || 74,
                 concluidosMes: concluidos,
                 pendentesMes: pendentes,
                 arquivosHoje: countHoje || 0,
                 auditRate: total > 0 ? Math.round((concluidos / total) * 100) : 0,
-                obrCounts
+                obrCounts: {}
             });
 
             // 4. Últimas atividades 

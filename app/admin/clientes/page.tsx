@@ -99,23 +99,26 @@ function ClientesContent() {
     async function fetchClientes() {
         try {
             setLoading(true);
-            // 1. Buscar Clientes
+            // 1. Buscar Empresas (Schema CORE)
             const { data: clientsData, error: clientErr } = await supabase
-                .from('clientes')
+                .schema('core')
+                .from('empresas')
                 .select('*')
-                .order('nome', { ascending: true });
+                .order('razao_social', { ascending: true });
 
             if (clientErr) throw clientErr;
 
-            // 2. Buscar Status de Obrigações (Mês Atual)
-            const hoje = new Date();
-            const refDate = new Date(hoje.getFullYear(), hoje.getMonth() - (hoje.getDate() < 15 ? 1 : 0), 1);
-            const competencia = refDate.toISOString().split('T')[0];
+            // 2. Buscar Status de Obrigações (Mês Atual - Schema FISCAL)
+            const agora = new Date();
+            const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString();
+            const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString();
 
             const { data: obrs } = await supabase
-                .from('obrigacoes_acessorias')
-                .select('*')
-                .eq('competencia', competencia);
+                .schema('fiscal')
+                .from('calendario')
+                .select('*, template:template_id(nome, departamento)')
+                .gte('data_vencimento', inicioMes)
+                .lte('data_vencimento', fimMes);
 
             // 3. Buscar Certificados (para alertas de vencimento)
             const { data: certs } = await supabase
@@ -127,14 +130,14 @@ function ClientesContent() {
             let certsVencendo = 0;
 
             const enriched = (clientsData || []).map((c: any) => {
-                const clientObrs = (obrs || []).filter((o: any) => o.cliente_id === c.id);
-                const hasPending = clientObrs.some((o: any) => o.status === 'pendente');
+                const clientObrs = (obrs || []).filter((o: any) => o.empresa_id === c.id);
+                const hasPending = clientObrs.some((o: any) => o.status === 'PENDENTE');
                 if (hasPending) pendenciasTotal++;
 
                 const clientCerts = (certs || []).filter((ct: any) => ct.cliente_id === c.id);
                 const isNearExp = clientCerts.some((ct: any) => {
                     if (!ct.data_vencimento) return false;
-                    const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+                    const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - agora.getTime()) / (1000 * 60 * 60 * 24));
                     return diff <= 30;
                 });
                 if (isNearExp) certsVencendo++;
@@ -470,13 +473,13 @@ function ClientesContent() {
                                 </tr>
                             ) : (
                                 filteredClientes.map((c) => {
-                                    const getObrStatus = (name: string) => c.obrigacoes?.find((o: any) => o.tipo === name)?.status;
+                                    const getObrStatus = (name: string) => c.obrigacoes?.find((o: any) => o.template?.nome === name)?.status;
 
                                     const StatusBadge = ({ name }: { name: string }) => {
                                         const status = getObrStatus(name);
                                         if (!status) return <div className="w-2 h-2 rounded-full bg-muted/50 mx-auto" />;
 
-                                        const isDone = status === 'concluido';
+                                        const isDone = status === 'CONCLUIDO';
                                         return (
                                             <div className="flex justify-center group/tip relative">
                                                 <div className={`w-3.5 h-3.5 rounded-full border-2 border-background shadow-sm ${isDone ? 'bg-primary' : 'bg-destructive animate-pulse'} `} />
