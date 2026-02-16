@@ -120,12 +120,13 @@ export default function AdminDashboard() {
     useEffect(() => {
         fetchData();
 
-        // Realtime: atualizar quando activity_log receber novo registro
+        // Realtime: atualizar quando audit.logs receber novo registro
         const channel = supabase
             .channel('dashboard-realtime')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload: any) => {
-                setActivities(prev => [payload.new as any, ...prev].slice(0, 8));
-                if (['upload', 'obligation_completed'].includes((payload.new as any).tipo)) {
+            .on('postgres_changes', { event: 'INSERT', schema: 'audit', table: 'logs' }, (payload: any) => {
+                const newAct = payload.new;
+                setActivities(prev => [newAct as any, ...prev].slice(0, 8));
+                if (newAct.dados_novos?.tipo === 'upload') {
                     setStats((prev: any) => ({ ...prev, arquivosHoje: prev.arquivosHoje + 1 }));
                 }
             })
@@ -253,7 +254,9 @@ export default function AdminDashboard() {
                             ) : (
                                 <div className="divide-y divide-border/20">
                                     {activities.map((act, idx) => {
-                                        const config = ACT_CONFIG[act.tipo] || ACT_CONFIG.upload;
+                                        const displayDesc = act.dados_novos?.descricao || act.tabela;
+                                        const displayTipo = act.dados_novos?.tipo || 'system';
+                                        const config = ACT_CONFIG[displayTipo] || ACT_CONFIG.upload;
                                         const IconComp = config.icon;
                                         return (
                                             <div key={act.id || idx} className="p-4 hover:bg-secondary/30 transition-all group">
@@ -271,12 +274,12 @@ export default function AdminDashboard() {
                                                             </span>
                                                         </div>
                                                         <p className="text-[11px] font-medium text-foreground leading-snug mt-0.5 line-clamp-2">
-                                                            {act.descricao}
+                                                            {displayDesc}
                                                         </p>
-                                                        {act.cliente_nome && act.cliente_nome !== 'Desconhecido' && (
+                                                        {act.dados_novos?.cliente_nome && act.dados_novos?.cliente_nome !== 'Desconhecido' && (
                                                             <p className="text-[9px] text-muted-foreground mt-1 flex items-center gap-1">
                                                                 <MapPin className="w-2.5 h-2.5" />
-                                                                {act.cliente_nome}
+                                                                {act.dados_novos.cliente_nome}
                                                             </p>
                                                         )}
                                                     </div>

@@ -71,12 +71,14 @@ export default function MaestroPage() {
             const { count: countUnidades } = await supabase.from('unidades_fiscais').select('*', { count: 'exact', head: true }); // Verificaremos se este também precisa mudar
             const { count: countPendencias } = await supabase.schema('fiscal').from('calendario').select('*', { count: 'exact', head: true }).eq('status', 'PENDENTE');
 
-            // Arquivos de hoje
+            // Arquivos de hoje (Schema AUDIT)
             const today = new Date().toISOString().split('T')[0];
             const { count: countHoje } = await supabase
-                .from('activity_log')
+                .schema('audit')
+                .from('logs')
                 .select('*', { count: 'exact', head: true })
-                .eq('tipo', 'upload')
+                .eq('acao', 'INSERT')
+                .contains('dados_novos', { tipo: 'upload' })
                 .gte('created_at', `${today}T00:00:00`);
 
             setStats({
@@ -86,9 +88,10 @@ export default function MaestroPage() {
                 arquivosHoje: countHoje || 0
             });
 
-            // 2. Activity Feed (últimas 50 atividades)
+            // 2. Activity Feed (últimas 50 atividades do Schema AUDIT)
             const { data: actData, error: actError } = await supabase
-                .from('activity_log')
+                .schema('audit')
+                .from('logs')
                 .select('*')
                 .order('created_at', { ascending: false })
                 .limit(50);
@@ -127,18 +130,19 @@ export default function MaestroPage() {
     useEffect(() => {
         fetchData();
 
-        // Realtime subscription para activity_log
+        // Realtime subscription para audit.logs
         const channel = supabase
             .channel('maestro-realtime')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload: any) => {
+            .on('postgres_changes', { event: 'INSERT', schema: 'audit', table: 'logs' }, (payload: any) => {
                 console.log('[MAESTRO] Nova atividade:', payload.new);
-                setActivities(prev => [payload.new as any, ...prev].slice(0, 50));
+                const newAct = payload.new;
+                setActivities(prev => [newAct as any, ...prev].slice(0, 50));
                 // Atualizar contadores
-                if ((payload.new as any).tipo === 'upload') {
+                if (newAct.dados_novos?.tipo === 'upload') {
                     setStats(prev => ({ ...prev, arquivosHoje: prev.arquivosHoje + 1 }));
                 }
             })
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'obrigacoes_acessorias' }, () => {
+            .on('postgres_changes', { event: '*', schema: 'fiscal', table: 'calendario' }, () => {
                 fetchData(); // Refresh on obligation change
             })
             .subscribe();
@@ -279,9 +283,11 @@ export default function MaestroPage() {
                                 </div>
                             ) : (
                                 filteredActivities.map((act, idx) => {
-                                    const config = ACTIVITY_ICONS[act.tipo] || ACTIVITY_ICONS.upload;
+                                    const displayDesc = act.dados_novos?.descricao || act.tabela;
+                                    const displayTipo = act.dados_novos?.tipo || 'system';
+                                    const config = ACTIVITY_ICONS[displayTipo] || ACTIVITY_ICONS.upload;
                                     const IconComp = config.icon;
-                                    const label = ACTIVITY_LABELS[act.tipo] || act.tipo;
+                                    const label = ACTIVITY_LABELS[displayTipo] || displayTipo;
 
                                     return (
                                         <div key={act.id || idx} className="relative pl-8 pb-6 last:pb-2 border-l-2 border-border/50 ml-2 hover:border-primary/30 transition-colors">
@@ -297,9 +303,9 @@ export default function MaestroPage() {
                                                         >
                                                             {label}
                                                         </span>
-                                                        {act.categoria && (
+                                                        {act.tabela && (
                                                             <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                                                {act.categoria}
+                                                                {act.tabela}
                                                             </span>
                                                         )}
                                                         <span className="text-[10px] text-muted-foreground ml-auto whitespace-nowrap">
@@ -307,17 +313,17 @@ export default function MaestroPage() {
                                                         </span>
                                                     </div>
                                                     <p className="text-sm font-medium text-foreground leading-snug">
-                                                        {act.descricao}
+                                                        {displayDesc}
                                                     </p>
-                                                    {act.arquivo_nome && (
+                                                    {act.dados_novos?.arquivo_nome && (
                                                         <p className="text-xs text-muted-foreground mt-1 bg-muted/30 p-2 rounded-lg border border-border/50 font-mono break-all truncate">
-                                                            {act.arquivo_nome}
+                                                            {act.dados_novos.arquivo_nome}
                                                         </p>
                                                     )}
-                                                    {act.cliente_nome && act.cliente_nome !== 'Desconhecido' && (
+                                                    {act.dados_novos?.cliente_nome && (
                                                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                                             <MapPin className="w-3 h-3" />
-                                                            {act.cliente_nome}
+                                                            {act.dados_novos.cliente_nome}
                                                         </p>
                                                     )}
                                                 </div>
@@ -359,7 +365,7 @@ export default function MaestroPage() {
                                 </div>
                             ) : (
                                 obrigacoes.map((ob: any) => {
-                                    const due = new Date(ob.vencimento);
+                                    const due = new Date(ob.data_vencimento);
                                     const diffDays = Math.ceil((due.getTime() - Date.now()) / 86400000);
                                     const isUrgent = diffDays <= 3;
                                     const isWarning = diffDays <= 7;
@@ -372,7 +378,7 @@ export default function MaestroPage() {
                                                 : 'bg-background border-border/50 hover:border-primary/30'
                                             }`}>
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="font-medium text-sm text-foreground">{ob.tipo}</span>
+                                                <span className="font-medium text-sm text-foreground">{ob.template?.nome}</span>
                                                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isUrgent
                                                     ? 'bg-rose-100 text-rose-700'
                                                     : isWarning
@@ -386,9 +392,9 @@ export default function MaestroPage() {
                                                 <Clock className="w-3 h-3" />
                                                 {due.toLocaleDateString('pt-BR')}
                                             </p>
-                                            {ob.clientes?.nome && (
+                                            {ob.empresas?.razao_social && (
                                                 <p className="text-xs text-muted-foreground mt-1 truncate">
-                                                    {ob.clientes.nome}
+                                                    {ob.empresas.razao_social}
                                                 </p>
                                             )}
                                         </div>
