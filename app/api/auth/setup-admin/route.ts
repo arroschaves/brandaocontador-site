@@ -1,61 +1,123 @@
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-    const { email, password } = await request.json()
+    console.log('[Setup Admin] Iniciando criação de usuário...')
+    try {
+        const { email, password } = await request.json()
 
-    if (!email || !password) {
-        return NextResponse.json({ error: 'Email e senha são obrigatórios' }, { status: 400 })
-    }
-
-    const supabase = createClient()
-
-    // Tentar criar o usuário
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: {
-                role: 'admin'
-            }
+        if (!email || !password) {
+            return NextResponse.json({ error: 'Email e senha são obrigatórios' }, { status: 400 })
         }
-    })
 
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        const supabase = await createClient()
+
+        // Tentar criar o usuário
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    role: 'admin',
+                    full_name: 'Administrador Maestro'
+                }
+            }
+        })
+
+        if (error) {
+            console.error('[Setup Admin] Erro no signUp:', error.message)
+            return NextResponse.json({ error: error.message }, { status: 500 })
+        }
+
+        console.log('[Setup Admin] Usuário criado:', data.user?.email)
+
+        return NextResponse.json({
+            message: 'Usuário cadastrado com sucesso!',
+            details: 'Verifique sua caixa de entrada (e spam) para confirmar o e-mail antes de tentar o login no Portal.',
+            user: data.user?.email
+        })
+    } catch (err: any) {
+        console.error('[Setup Admin] Falha crítica:', err.message)
+        return NextResponse.json({ error: 'Erro interno ao processar cadastro' }, { status: 500 })
     }
-
-    return NextResponse.json({
-        message: 'Usuário administrador criado com sucesso! Agora você pode fazer login.',
-        user: data.user?.email
-    })
 }
 
 export async function GET() {
     return new NextResponse(`
-        <html>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
             <head>
-                <title>Setup Admin - Brandão Maestro</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Setup Admin - Maestro</title>
                 <style>
-                    body { background: #050505; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-                    .card { background: #111; padding: 2rem; border: 1px solid #333; width: 100%; max-width: 400px; }
-                    input { width: 100%; padding: 0.8rem; margin: 0.5rem 0; background: #000; border: 1px solid #444; color: white; box-sizing: border-box; }
-                    button { width: 100%; padding: 1rem; margin-top: 1rem; background: #f59e0b; border: none; font-weight: bold; cursor: pointer; }
-                    h1 { color: #f59e0b; font-size: 1.5rem; margin-bottom: 1.5rem; }
+                    body { 
+                        background: #050505; 
+                        color: #e5e5e5; 
+                        font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        height: 100vh; 
+                        margin: 0; 
+                    }
+                    .card { 
+                        background: #0a0a0a; 
+                        padding: 2.5rem; 
+                        border: 1px solid #222; 
+                        width: 100%; 
+                        max-width: 400px; 
+                        border-radius: 4px;
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    }
+                    h1 { color: #f59e0b; font-size: 1.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+                    p { font-size: 0.8rem; color: #737373; margin-bottom: 2rem; }
+                    label { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; color: #404040; display: block; margin-bottom: 0.4rem; }
+                    input { 
+                        width: 100%; 
+                        padding: 1rem; 
+                        margin-bottom: 1.5rem; 
+                        background: #000; 
+                        border: 1px solid #1a1a1a; 
+                        color: white; 
+                        box-sizing: border-box; 
+                        font-family: monospace;
+                        outline: none;
+                    }
+                    input:focus { border-color: #f59e0b; }
+                    button { 
+                        width: 100%; 
+                        padding: 1rem; 
+                        background: #f59e0b; 
+                        border: none; 
+                        color: black;
+                        font-weight: 900; 
+                        text-transform: uppercase;
+                        letter-spacing: 0.1em;
+                        cursor: pointer; 
+                        transition: all 0.2s;
+                    }
+                    button:hover { background: #d97706; }
+                    button:disabled { background: #404040; cursor: not-allowed; }
+                    #msg { margin-top: 1.5rem; font-size: 0.8rem; line-height: 1.4; border-radius: 4px; display: none; padding: 1rem; }
+                    .success { display: block !important; border: 1px solid #064e3b; color: #10b981; background: rgba(16, 185, 129, 0.05); }
+                    .error { display: block !important; border: 1px solid #7f1d1d; color: #ef4444; background: rgba(239, 68, 68, 0.05); }
                 </style>
             </head>
             <body>
                 <div class="card">
                     <h1>Maestro Admin Setup</h1>
-                    <p>Crie sua conta de acesso mestre.</p>
+                    <p>Crie sua credencial de acesso mestre ao sistema.</p>
                     <form id="setupForm">
-                        <input type="email" id="email" placeholder="Seu e-mail corporativo" required>
-                        <input type="password" id="password" placeholder="Sua senha mestre" required>
-                        <button type="submit">CRIAR ACESSO</button>
+                        <label>E-mail Corporativo</label>
+                        <input type="email" id="email" placeholder="ex: admin@brandaocontador.com.br" required>
+                        <label>Senha de Acesso</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                        <button type="submit" id="btn">EXECUTAR PROTOCOLO</button>
                     </form>
-                    <p id="msg" style="margin-top: 1rem; font-size: 0.8rem;"></p>
+                    <div id="msg"></div>
                 </div>
                 <script>
                     document.getElementById('setupForm').onsubmit = async (e) => {
@@ -63,7 +125,12 @@ export async function GET() {
                         const email = document.getElementById('email').value;
                         const password = document.getElementById('password').value;
                         const msg = document.getElementById('msg');
-                        msg.innerText = 'Processando...';
+                        const btn = document.getElementById('btn');
+                        
+                        btn.disabled = true;
+                        msg.className = '';
+                        msg.innerText = 'Processando requisição no núcleo...';
+                        msg.style.display = 'block';
                         
                         try {
                             const res = await fetch('/api/auth/setup-admin', {
@@ -73,14 +140,18 @@ export async function GET() {
                             });
                             const data = await res.json();
                             if (res.ok) {
-                                msg.style.color = '#10b981';
-                                msg.innerText = data.message;
+                                msg.className = 'success';
+                                msg.innerHTML = '<strong>' + data.message + '</strong><br><br>' + data.details;
+                                document.getElementById('setupForm').style.display = 'none';
                             } else {
-                                msg.style.color = '#ef4444';
-                                msg.innerText = 'Erro: ' + data.error;
+                                msg.className = 'error';
+                                msg.innerText = 'Falha no cadastro: ' + data.error;
+                                btn.disabled = false;
                             }
                         } catch (err) {
-                            msg.innerText = 'Falha crítica na rede.';
+                            msg.className = 'error';
+                            msg.innerText = 'Erro crítico de rede ou timeout.';
+                            btn.disabled = false;
                         }
                     }
                 </script>
