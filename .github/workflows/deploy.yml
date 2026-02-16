@@ -177,7 +177,7 @@ jobs:
             https://brandaocontador.com.br
             https://brandaocontador.com.br/servicos
             https://brandaocontador.com.br/contato
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
 
   # Job de Notificação
