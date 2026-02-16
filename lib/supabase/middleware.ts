@@ -35,9 +35,19 @@ export async function updateSession(request: NextRequest) {
         request,
     })
 
+    const url = request.nextUrl.clone()
+
+    // Pula middleware para arquivos estáticos
+    if (url.pathname.includes('.') || url.pathname.startsWith('/_next')) {
+        return supabaseResponse
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder',
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseKey || 'placeholder',
         {
             cookies: {
                 getAll() {
@@ -56,49 +66,27 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
-    const url = request.nextUrl.clone()
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
 
-    // Rate limiting para login
-    if (url.pathname === '/login' && request.method === 'POST') {
-        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-        if (checkLoginRateLimit(ip)) {
-            return NextResponse.json(
-                { error: 'Muitas tentativas de login. Tente novamente em 5 minutos.' },
-                { status: 429 }
-            );
-        }
-    }
-
-    // Protege rotas /admin — requer autenticação + role admin/staff
-    if (url.pathname.startsWith('/admin')) {
-        if (!user) {
-            url.pathname = '/login'
-            return NextResponse.redirect(url)
+        // Protege rotas /admin
+        if (url.pathname.startsWith('/admin')) {
+            if (!user) {
+                console.log('[Middleware] Usuário não autenticado tentando acessar admin, redirecionando para login.')
+                url.pathname = '/login'
+                return NextResponse.redirect(url)
+            }
         }
 
-        // Verifica role do usuário no metadata
-        const userRole = user.user_metadata?.role || user.app_metadata?.role || 'client';
-        const allowedRoles = ['admin', 'staff', 'master'];
-
-        if (!allowedRoles.includes(userRole)) {
-            // Usuário autenticado mas sem permissão para admin
-            url.pathname = '/'
-            return NextResponse.redirect(url)
-        }
-    }
-
-    // Redireciona usuário logado que acessa /login para /admin
-    if (url.pathname === '/login' && user) {
-        const userRole = user.user_metadata?.role || user.app_metadata?.role || 'client';
-        const allowedRoles = ['admin', 'staff', 'master'];
-
-        if (allowedRoles.includes(userRole)) {
+        // Redireciona usuário logado de /login para /admin
+        if (url.pathname === '/login' && user) {
+            console.log('[Middleware] Usuário já logado acessando login, redirecionando para admin.')
             url.pathname = '/admin'
-        } else {
-            url.pathname = '/'
+            return NextResponse.redirect(url)
         }
-        return NextResponse.redirect(url)
+
+    } catch (err: any) {
+        console.error('[Middleware] Falha crítica:', err.message)
     }
 
     return supabaseResponse
