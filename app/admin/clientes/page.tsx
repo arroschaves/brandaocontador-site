@@ -34,11 +34,10 @@ import { formatCNPJ } from '@/lib/utils/format'
 import ClientDetailSidebar from './components/ClientDetailSidebar';
 import EnrichmentProgressModal from './components/EnrichmentProgressModal';
 
-const supabase = createClient();
-
 export const dynamic = 'force-dynamic';
 
 function ClientesContent() {
+    const supabase = createClient();
     const router = useRouter();
     const searchParams = useSearchParams();
 

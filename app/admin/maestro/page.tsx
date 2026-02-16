@@ -24,8 +24,6 @@ import {
     Activity as ActivityIcon,
 } from "lucide-react";
 
-const supabase = createClient();
-
 // Map de ícone por tipo de atividade
 const ACTIVITY_ICONS: Record<string, { icon: any; color: string; bgColor: string }> = {
     upload: { icon: Upload, color: 'text-emerald-600', bgColor: 'bg-emerald-500' },
@@ -47,6 +45,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 };
 
 export default function MaestroPage() {
+    const supabase = createClient();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activities, setActivities] = useState<any[]>([]);
