@@ -38,6 +38,8 @@ const ACT_CONFIG: Record<string, { icon: any; color: string; bg: string; label: 
     obligation_completed: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-500', label: 'Maestro AI' },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminDashboard() {
     const [stats, setStats] = useState<any>({
         totalClientes: 0,
@@ -128,7 +130,7 @@ export default function AdminDashboard() {
         // Realtime: atualizar quando activity_log receber novo registro
         const channel = supabase
             .channel('dashboard-realtime')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload: any) => {
                 setActivities(prev => [payload.new as any, ...prev].slice(0, 8));
                 if (['upload', 'obligation_completed'].includes((payload.new as any).tipo)) {
                     setStats((prev: any) => ({ ...prev, arquivosHoje: prev.arquivosHoje + 1 }));

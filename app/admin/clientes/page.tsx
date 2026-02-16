@@ -126,13 +126,13 @@ function ClientesContent() {
             let pendenciasTotal = 0;
             let certsVencendo = 0;
 
-            const enriched = (clientsData || []).map(c => {
-                const clientObrs = (obrs || []).filter(o => o.cliente_id === c.id);
-                const hasPending = clientObrs.some(o => o.status === 'pendente');
+            const enriched = (clientsData || []).map((c: any) => {
+                const clientObrs = (obrs || []).filter((o: any) => o.cliente_id === c.id);
+                const hasPending = clientObrs.some((o: any) => o.status === 'pendente');
                 if (hasPending) pendenciasTotal++;
 
-                const clientCerts = (certs || []).filter(ct => ct.cliente_id === c.id);
-                const isNearExp = clientCerts.some(ct => {
+                const clientCerts = (certs || []).filter((ct: any) => ct.cliente_id === c.id);
+                const isNearExp = clientCerts.some((ct: any) => {
                     if (!ct.data_vencimento) return false;
                     const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
                     return diff <= 30;
@@ -150,9 +150,9 @@ function ClientesContent() {
             setClientes(enriched);
             setStats({
                 total: enriched.length,
-                pendentes: enriched.filter(e => e.hasPending).length,
+                pendentes: enriched.filter((e: any) => e.hasPending).length,
                 certVencendo: certsVencendo,
-                auditadosOk: enriched.filter(e => !e.hasPending && e.obrigacoes.length > 0).length
+                auditadosOk: enriched.filter((e: any) => !e.hasPending && e.obrigacoes.length > 0).length
             });
 
         } catch (err: any) {
