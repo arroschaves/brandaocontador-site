@@ -4,16 +4,17 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-    console.log('[Setup Admin] Inciando protocolo de criação...')
+    console.log('[Setup Admin] Iniciando protocolo de criação...')
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    // Diagnóstico inicial
-    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+    console.log('[Debug] URL configurada:', !!supabaseUrl)
+    console.log('[Debug] Key configurada:', !!supabaseKey)
+
+    if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('placeholder')) {
         return NextResponse.json({
-            error: 'NÚCLEO OFFLINE: NEXT_PUBLIC_SUPABASE_URL não configurada no ambiente de produção (Vercel).'
+            error: 'NÚCLEO OFFLINE: As variáveis do Supabase não foram encontradas pela Vercel. Faça um novo Deploy no painel da Vercel para ativá-las.'
         }, { status: 500 })
     }
 
@@ -24,10 +25,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Identificação e Chave são obrigatórias' }, { status: 400 })
         }
 
-        // Usar o cliente de servidor padrão
-        const supabase = await createClient()
+        // Teste de conectividade pura
+        try {
+            const testFetch = await fetch(`${supabaseUrl}/auth/v1/health`, { method: 'GET' })
+            console.log('[Debug] Conectividade Supabase:', testFetch.status)
+        } catch (fetchErr: any) {
+            console.error('[Debug] Falha na rede servidor-servidor:', fetchErr.message)
+            return NextResponse.json({
+                error: `ERRO DE REDE: O servidor da Vercel não conseguiu alcançar o Supabase (${fetchErr.message}). Verifique se a URL está correta.`
+            }, { status: 500 })
+        }
 
-        console.log('[Setup Admin] Tentando signUp para:', email)
+        const supabase = await createClient()
 
         const { data, error } = await supabase.auth.signUp({
             email,
@@ -43,19 +52,19 @@ export async function POST(request: Request) {
         if (error) {
             console.error('[Setup Admin] Erro Supabase:', error.message)
             return NextResponse.json({
-                error: `Erro no Supabase: ${error.message}. Isso pode ocorrer se o Sign Up estiver desabilitado ou se houver erro de rede entre Vercel e Supabase.`
+                error: `Erro no Supabase: ${error.message}.`
             }, { status: 500 })
         }
 
         return NextResponse.json({
             message: 'PROTOCOLO CONCLUÍDO!',
-            details: 'Usuário registrado. IMPORTANTE: Verifique seu e-mail para confirmar a conta antes de logar.',
+            details: 'Usuário registrado. IMPORTANTE: Confirme o e-mail enviado antes de logar.',
             user: data.user?.email
         })
     } catch (err: any) {
-        console.error('[Setup Admin] Falha Crítica de Execução:', err.message)
+        console.error('[Setup Admin] Falha Crítica:', err.message)
         return NextResponse.json({
-            error: `FALHA NO NÚCLEO: ${err.message}. Verifique se a URL do Supabase está correta nas variáveis da Vercel.`
+            error: `FALHA NO NÚCLEO: ${err.message}.`
         }, { status: 500 })
     }
 }
