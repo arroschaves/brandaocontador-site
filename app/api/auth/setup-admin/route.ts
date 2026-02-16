@@ -4,17 +4,31 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-    console.log('[Setup Admin] Iniciando criação de usuário...')
+    console.log('[Setup Admin] Inciando protocolo de criação...')
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    // Diagnóstico inicial
+    if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
+        return NextResponse.json({
+            error: 'NÚCLEO OFFLINE: NEXT_PUBLIC_SUPABASE_URL não configurada no ambiente de produção (Vercel).'
+        }, { status: 500 })
+    }
+
     try {
         const { email, password } = await request.json()
 
         if (!email || !password) {
-            return NextResponse.json({ error: 'Email e senha são obrigatórios' }, { status: 400 })
+            return NextResponse.json({ error: 'Identificação e Chave são obrigatórias' }, { status: 400 })
         }
 
+        // Usar o cliente de servidor padrão
         const supabase = await createClient()
 
-        // Tentar criar o usuário
+        console.log('[Setup Admin] Tentando signUp para:', email)
+
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -27,20 +41,22 @@ export async function POST(request: Request) {
         })
 
         if (error) {
-            console.error('[Setup Admin] Erro no signUp:', error.message)
-            return NextResponse.json({ error: error.message }, { status: 500 })
+            console.error('[Setup Admin] Erro Supabase:', error.message)
+            return NextResponse.json({
+                error: `Erro no Supabase: ${error.message}. Isso pode ocorrer se o Sign Up estiver desabilitado ou se houver erro de rede entre Vercel e Supabase.`
+            }, { status: 500 })
         }
 
-        console.log('[Setup Admin] Usuário criado:', data.user?.email)
-
         return NextResponse.json({
-            message: 'Usuário cadastrado com sucesso!',
-            details: 'Verifique sua caixa de entrada (e spam) para confirmar o e-mail antes de tentar o login no Portal.',
+            message: 'PROTOCOLO CONCLUÍDO!',
+            details: 'Usuário registrado. IMPORTANTE: Verifique seu e-mail para confirmar a conta antes de logar.',
             user: data.user?.email
         })
     } catch (err: any) {
-        console.error('[Setup Admin] Falha crítica:', err.message)
-        return NextResponse.json({ error: 'Erro interno ao processar cadastro' }, { status: 500 })
+        console.error('[Setup Admin] Falha Crítica de Execução:', err.message)
+        return NextResponse.json({
+            error: `FALHA NO NÚCLEO: ${err.message}. Verifique se a URL do Supabase está correta nas variáveis da Vercel.`
+        }, { status: 500 })
     }
 }
 
