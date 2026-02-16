@@ -38,6 +38,7 @@ const ACT_CONFIG: Record<string, { icon: any; color: string; bg: string; label: 
     obligation_completed: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-500', label: 'Maestro AI' },
 };
 
+// Deployment Trigger: 2026-02-16 14:35 - Sincronização Master
 export const dynamic = 'force-dynamic';
 
 export default function AdminDashboard() {
