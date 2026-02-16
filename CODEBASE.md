@@ -1,6 +1,6 @@
 # CODEBASE.md — Mapa de Dependências do Projeto
 
-> **Última atualização:** 2026-02-11
+> **Última atualização:** 2026-02-16
 > **Propósito:** Documento de referência para entender as dependências entre arquivos.
 > Consulte ANTES de modificar qualquer arquivo.
 

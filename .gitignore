@@ -75,7 +75,7 @@ ARQUIVOS  DAS FGTS INSS XML E SPED DARF/
 !public/*.pdf
 
 # Credenciais e dados sensíveis
-*.sql
+# NOTA: *.sql NÃO é ignorado — migrations devem ser versionadas
 credentials.json
 token.pickle
 *.pickle
@@ -99,3 +99,14 @@ automation_report.json
 .trae/
 .venv/
 *.spec
+
+# Temporários de extração
+temp_*/
+
+# Arquivos de debug descartáveis
+lint_output.txt
+build.log
+debug-deploy.md
+MaestroSync.spec
+mcp-config-recommendation.json
+TECH_SPECS_DATA_ENRICHMENT.md
