@@ -9,15 +9,16 @@ import {
     ArrowUpRight, BadgeCheck
 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 export default function EquipePage() {
     const [equipe, setEquipe] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [stats, setStats] = useState({ totalAtivos: 0, totalAcoesHoje: 0 })
 
-    const supabase = createClient()
-
     const fetchEquipe = useCallback(async () => {
+        const supabase = createClient()
         setLoading(true)
         try {
             const { data } = await supabase
@@ -34,7 +35,7 @@ export default function EquipePage() {
                 .gte('created_at', new Date().toISOString().split('T')[0])
 
             setStats({
-                totalAtivos: data?.filter(f => f.ativo).length || 0,
+                totalAtivos: data?.filter((f: any) => f.ativo).length || 0,
                 totalAcoesHoje: acoesHoje || 0
             })
         } catch (err) {
@@ -42,7 +43,7 @@ export default function EquipePage() {
         } finally {
             setLoading(false)
         }
-    }, [supabase])
+    }, [])
 
     useEffect(() => {
         fetchEquipe()
@@ -75,6 +76,7 @@ export default function EquipePage() {
     async function handleDelete(id: string, nome: string) {
         if (!confirm(`TEM CERTEZA QUE DESEJA REMOVER ${nome.toUpperCase()}? ESTA AÇÃO É IRREVERSÍVEL NO MAESTRO.`)) return
 
+        const supabase = createClient()
         try {
             const { error } = await supabase.from('equipe').delete().eq('id', id)
             if (error) throw error

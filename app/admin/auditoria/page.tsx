@@ -9,13 +9,15 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic';
+
 export default function AuditoriaMasterPage() {
     const [logs, setLogs] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [filter, setFilter] = useState('')
-    const supabase = createClient()
 
     const fetchLogs = useCallback(async () => {
+        const supabase = createClient()
         setLoading(true)
         const { data, error } = await supabase
             .from('auditoria_crm')
@@ -25,7 +27,7 @@ export default function AuditoriaMasterPage() {
 
         if (data) setLogs(data)
         setLoading(false)
-    }, [supabase])
+    }, [])
 
     useEffect(() => {
         fetchLogs()

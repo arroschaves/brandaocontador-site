@@ -5,11 +5,16 @@ export function createClient() {
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     // No CI/Build as vezes as variáveis não estão disponíveis no prerender.
-    // Retornamos um cliente "dummy" ou deixamos o Supabase lidar se for no browser.
     if (!supabaseUrl || !supabaseKey) {
         if (typeof window === 'undefined') {
-            console.warn('[Supabase] Missing env vars during build/SSR. Returning empty client to prevent build crash.')
-            return {} as any // Proxy or dummy for build persistence
+            console.warn('[Supabase] Missing env vars during build/SSR. Returning safe proxy to prevent build crash.')
+            // Recursive proxy that returns itself for any property access or function call
+            const logger = () => safeProxy;
+            const safeProxy: any = new Proxy(logger, {
+                get: () => safeProxy,
+                apply: () => safeProxy
+            });
+            return safeProxy;
         }
     }
 

@@ -19,13 +19,15 @@ import {
     Trash2
 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 export default function AutomacaoPage() {
     const [loading, setLoading] = useState(false)
     const [scanning, setScanning] = useState(false)
     const [stats, setStats] = useState({
-        clientesSemPasta: 0,
-        arquivosLocaisMapeados: 0,
-        tarefasPendentesn8n: 0
+        totalClientesSemPasta: 0,
+        arquivosMapeados: 0,
+        tarefasPendentes: 0
     })
     const [selectedFolders, setSelectedFolders] = useState<string[]>([])
     const [customPath, setCustomPath] = useState('')
@@ -35,10 +37,8 @@ export default function AutomacaoPage() {
     const [notebooks, setNotebooks] = useState<any[]>([])
     const [notebookFolderInput, setNotebookFolderInput] = useState('')
 
-    const supabase = createClient()
-
-
     const fetchNotebooks = useCallback(async () => {
+        const supabase = createClient()
         // Busca configurações
         const { data: configs } = await supabase
             .from('admin_settings')
@@ -51,9 +51,9 @@ export default function AutomacaoPage() {
             .select('*')
             .ilike('key', 'notebook_status_%')
 
-        const combined = (configs || []).map(nb => {
+        const combined = (configs || []).map((nb: any) => {
             const hostname = nb.key.replace('notebook_config_', '')
-            const status = statusData?.find(s => s.key === `notebook_status_${hostname}`)?.value || {}
+            const status = statusData?.find((s: any) => s.key === `notebook_status_${hostname}`)?.value || {}
             return {
                 hostname,
                 folders: nb.value || [],
@@ -62,9 +62,10 @@ export default function AutomacaoPage() {
             }
         })
         setNotebooks(combined)
-    }, [supabase])
+    }, [])
 
     async function saveNotebookConfig(hostname: string, folders: string[]) {
+        const supabase = createClient()
         setLoading(true)
         try {
             await supabase
@@ -83,6 +84,7 @@ export default function AutomacaoPage() {
     }
 
     const loadSavedConfig = useCallback(async () => {
+        const supabase = createClient()
         const { data } = await supabase
             .from('admin_settings')
             .select('value')
@@ -92,9 +94,10 @@ export default function AutomacaoPage() {
         if (data?.value) {
             setSelectedFolders(data.value)
         }
-    }, [supabase])
+    }, [])
 
     async function saveConfig(folders: string[]) {
+        const supabase = createClient()
         try {
             await supabase
                 .from('admin_settings')
@@ -124,13 +127,14 @@ export default function AutomacaoPage() {
     }
 
     const fetchStats = useCallback(async () => {
+        const supabase = createClient()
         const { count } = await supabase
             .from('clientes')
             .select('*', { count: 'exact', head: true })
             .is('drive_folder_id', null)
 
-        setStats(prev => ({ ...prev, clientesSemPasta: count || 0 }))
-    }, [supabase])
+        setStats(prev => ({ ...prev, totalClientesSemPasta: count || 0 }))
+    }, [])
 
     useEffect(() => {
         fetchStats()
@@ -180,7 +184,7 @@ export default function AutomacaoPage() {
                 </div>
                 <div className="bg-neutral-900 p-6 border-l-4 border-primary-500">
                     <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Clientes s/ Pasta</p>
-                    <p className="text-3xl font-black text-neutral-100 italic">{stats.clientesSemPasta}</p>
+                    <p className="text-3xl font-black text-neutral-100 italic">{stats.totalClientesSemPasta}</p>
                 </div>
                 <div className="bg-neutral-900 p-6 border-l-4 border-emerald-500">
                     <p className="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-1">Status do Sistema</p>

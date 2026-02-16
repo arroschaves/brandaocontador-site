@@ -8,6 +8,8 @@ import {
     Globe, Terminal, Fingerprint, Cpu
 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic';
+
 export default function MasterDashboard() {
     const [auditLogs, setAuditLogs] = useState<any[]>([])
     const [securityStats, setSecurityStats] = useState({
@@ -17,9 +19,8 @@ export default function MasterDashboard() {
     })
     const [loading, setLoading] = useState(true)
 
-    const supabase = createClient()
-
     const fetchSecurityData = useCallback(async () => {
+        const supabase = createClient()
         setLoading(true)
         try {
             // 1. Logs de Segurança Recentes
@@ -32,11 +33,11 @@ export default function MasterDashboard() {
             setAuditLogs(data || [])
 
             // 2. Cálculo de Stats
-            const ips = new Set(data?.map(l => l.ip_address))
+            const ips = new Set(data?.map((l: any) => l.ip_address))
             setSecurityStats({
                 totalLogs: data?.length || 0,
                 uniqueIPs: ips.size,
-                suspectActivities: data?.filter(l => l.acao === 'LOGIN_FAILED' || l.acao === 'SEC_BREACH').length || 0
+                suspectActivities: data?.filter((l: any) => l.acao === 'LOGIN_FAILED' || l.acao === 'SEC_BREACH').length || 0
             })
 
         } catch (err) {
@@ -44,7 +45,7 @@ export default function MasterDashboard() {
         } finally {
             setLoading(false)
         }
-    }, [supabase])
+    }, [])
 
     useEffect(() => {
         fetchSecurityData()

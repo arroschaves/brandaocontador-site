@@ -8,11 +8,24 @@ import { cookies } from 'next/headers'
  * Compatível com Next.js 15 (cookies() retorna Promise)
  */
 export async function createMaestroClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseKey) {
+        console.warn('[Supabase-Maestro] Missing env vars during build. Returning safe proxy.')
+        const logger = () => safeProxy;
+        const safeProxy: any = new Proxy(logger, {
+            get: () => safeProxy,
+            apply: () => safeProxy
+        });
+        return safeProxy;
+    }
+
     const cookieStore = await cookies()
 
     return createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        supabaseUrl!,
+        supabaseKey!,
         {
             cookies: {
                 getAll() {

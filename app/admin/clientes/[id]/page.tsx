@@ -17,6 +17,8 @@ import AgendaCalendar from '../components/AgendaCalendar'
 import AgendaList from '../components/AgendaList'
 import PendenciaModal from '../components/PendenciaModal'
 
+export const dynamic = 'force-dynamic';
+
 export default function ClientHubPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: clientId } = use(params)
     const router = useRouter()
