@@ -66,10 +66,10 @@ export default function MaestroPage() {
             setLoading(true);
             setError(null);
 
-            // 1. Stats
-            const { count: countClientes } = await supabase.from('clientes').select('*', { count: 'exact', head: true });
-            const { count: countUnidades } = await supabase.from('unidades_fiscais').select('*', { count: 'exact', head: true });
-            const { count: countPendencias } = await supabase.from('obrigacoes_acessorias').select('*', { count: 'exact', head: true }).eq('status', 'pendente');
+            // 1. Stats (Schemas CORE e FISCAL)
+            const { count: countClientes } = await supabase.schema('core').from('empresas').select('*', { count: 'exact', head: true });
+            const { count: countUnidades } = await supabase.from('unidades_fiscais').select('*', { count: 'exact', head: true }); // Verificaremos se este também precisa mudar
+            const { count: countPendencias } = await supabase.schema('fiscal').from('calendario').select('*', { count: 'exact', head: true }).eq('status', 'PENDENTE');
 
             // Arquivos de hoje
             const today = new Date().toISOString().split('T')[0];
@@ -104,12 +104,13 @@ export default function MaestroPage() {
                 setActivities(actData || []);
             }
 
-            // 3. Obrigações próximas
+            // 3. Obrigações próximas (Schema FISCAL)
             const { data: obData, error: oError } = await supabase
-                .from('obrigacoes_acessorias')
-                .select('*, clientes(nome)')
-                .order('vencimento', { ascending: true })
-                .eq('status', 'pendente')
+                .schema('fiscal')
+                .from('calendario')
+                .select('*, empresas:empresa_id(razao_social), template:template_id(nome)')
+                .order('data_vencimento', { ascending: true })
+                .eq('status', 'PENDENTE')
                 .limit(10);
 
             if (oError && !oError.message?.includes('does not exist')) throw oError;

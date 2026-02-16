@@ -32,19 +32,20 @@ export default function CalendarioPage() {
             const lastDay = new Date(currentYear, currentMonth + 1, 0).toISOString();
 
             const { data, error } = await supabase
-                .from('obrigacoes_acessorias')
-                .select('*, clientes(nome)')
-                .gte('competencia', firstDay)
-                .lte('competencia', lastDay);
+                .schema('fiscal')
+                .from('calendario')
+                .select('*, empresas:empresa_id(razao_social), template:template_id(nome)')
+                .gte('data_vencimento', firstDay)
+                .lte('data_vencimento', lastDay);
 
             if (error) throw error;
 
             const mapped = (data || []).map((d: any) => ({
-                day: new Date(d.competencia).getUTCDate(),
-                type: d.tipo,
-                title: d.tipo,
-                client: d.clientes?.nome || 'Desconhecido',
-                status: d.status || 'pendente'
+                day: new Date(d.data_vencimento).getUTCDate(),
+                type: d.template?.nome || 'Obrigação',
+                title: d.template?.nome || 'Obrigação',
+                client: d.empresas?.razao_social || 'Desconhecido',
+                status: d.status || 'PENDENTE'
             }));
 
             setDeadlines(mapped);

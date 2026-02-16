@@ -129,7 +129,8 @@ export default function AutomacaoPage() {
     const fetchStats = useCallback(async () => {
         const supabase = createClient()
         const { count } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .select('*', { count: 'exact', head: true })
             .is('drive_folder_id', null)
 

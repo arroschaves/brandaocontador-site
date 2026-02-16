@@ -46,9 +46,10 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     const fetchHistorico = useCallback(async () => {
         if (!clientId) return;
         const { data } = await supabase
-            .from('auditoria_crm')
+            .schema('audit')
+            .from('logs')
             .select('*')
-            .eq('cliente_id', clientId)
+            .contains('dados_novos', { empresa_id: clientId })
             .order('created_at', { ascending: false })
             .limit(20);
         setHistorico(data || []);
@@ -80,14 +81,14 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
         if (!clientId) return
         try {
             setLoading(true)
-            const { data: cliente } = await supabase.from('clientes').select('*').eq('id', clientId).single()
+            const { data: cliente } = await supabase.schema('core').from('empresas').select('*').eq('id', clientId).single()
             setClient(cliente)
             setEditedClient(cliente)
 
-            const { data: cron } = await supabase.from('obrigacoes_acessorias').select('*').eq('cliente_id', clientId)
+            const { data: cron } = await supabase.schema('fiscal').from('calendario').select('*, template:template_id(nome)').eq('empresa_id', clientId)
             setCronograma(cron || [])
 
-            const { data: units } = await supabase.from('unidades_negocio').select('*').eq('cliente_id', clientId)
+            const { data: units } = await supabase.from('unidades_fiscais').select('*').eq('cliente_id', clientId)
             setUnidades(units || [])
         } catch (err) {
             console.error(err)
@@ -371,8 +372,8 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                         </div>
                                         <div className="grid gap-3">
                                             {expectedRoutines.map((rout, i) => {
-                                                const history = cronograma.find(o => o.tipo === rout.name);
-                                                const isConcluido = history?.status === 'concluido';
+                                                const history = cronograma.find(o => o.template?.nome === rout.name);
+                                                const isConcluido = history?.status === 'CONCLUIDO';
                                                 return (
                                                     <div key={i} className={`lucid-card p-0 overflow-hidden border ${isConcluido ? 'border-primary/20 bg-primary/5 shadow-sm shadow-primary/5' : 'border-border/60 bg-card hover:border-primary/20 transition-all shadow-sm'}`}>
                                                         <div className="p-5 flex items-center justify-between">
@@ -435,7 +436,9 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                                         <span className="px-2.5 py-1 text-[9px] font-bold rounded-lg bg-primary/10 text-primary border border-primary/20 uppercase tracking-tight">{log.acao}</span>
                                                         <span className="text-[10px] text-muted-foreground font-mono font-medium">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
                                                     </div>
-                                                    <p className="text-[13px] font-medium text-foreground leading-relaxed">{log.detalhes}</p>
+                                                    <p className="text-[13px] font-medium text-foreground leading-relaxed">
+                                                        {log.dados_novos?.descricao || log.tabela}
+                                                    </p>
                                                     <div className="flex gap-5 text-[10px] text-muted-foreground font-medium pt-3 border-t border-border/40">
                                                         <span className="truncate flex items-center gap-1.5"><Monitor className="w-3.5 h-3.5 opacity-60" /> {log.user_agent?.substring(0, 30)}...</span>
                                                         <span className="flex items-center gap-1.5"><Server className="w-3.5 h-3.5 opacity-60" /> IP: {log.ip_address}</span>

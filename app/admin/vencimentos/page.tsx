@@ -20,18 +20,17 @@ export default function VencimentosPage() {
 
     const fetchVencimentos = useCallback(async () => {
         try {
-            // Buscamos clientes que tenham algum vencimento preenchido
+            // Buscamos empresas que tenham algum vencimento (Schema CORE)
             const { data, error } = await supabase
-                .from('clientes')
+                .schema('core')
+                .from('empresas')
                 .select(`
                     id, 
-                    nome, 
+                    razao_social, 
                     vencimento_alvara_funcionamento, 
                     vencimento_alvara_sanitario, 
                     vencimento_alvara_bombeiros, 
                     vencimento_alvara_ambiental,
-                    vencimento_certificado_a1,
-                    vencimento_certificado_a3,
                     drive_folder_id
                 `);
 
@@ -54,7 +53,7 @@ export default function VencimentosPage() {
                     if (client[m.field]) {
                         events.push({
                             id: `${c.id}-${m.field}`,
-                            cliente: c.nome,
+                            cliente: c.razao_social,
                             tipo: m.label,
                             data: client[m.field],
                             folder: c.drive_folder_id

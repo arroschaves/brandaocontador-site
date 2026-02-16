@@ -32,18 +32,17 @@ export default function CronogramaPage() {
         setLoading(true);
         try {
             const { data: dataClientes } = await supabase
-                .from('clientes')
-                .select('id, nome, cnpj_cpf')
-                .order('nome');
-
-            const inicioMes = new Date(competencia.getFullYear(), competencia.getMonth(), 1).toISOString();
-            const fimMes = new Date(competencia.getFullYear(), competencia.getMonth() + 1, 0).toISOString();
+                .schema('core')
+                .from('empresas')
+                .select('id, razao_social, documento')
+                .order('razao_social');
 
             const { data: dataObrigacoes } = await supabase
-                .from('obrigacoes_acessorias')
-                .select('*')
-                .gte('competencia', inicioMes)
-                .lte('competencia', fimMes);
+                .schema('fiscal')
+                .from('calendario')
+                .select('*, template:template_id(nome)')
+                .eq('ano_referencia', competencia.getFullYear())
+                .eq('mes_referencia', competencia.getMonth() + 1);
 
             setClientes(dataClientes || []);
             setObrigacoes(dataObrigacoes || []);
@@ -80,14 +79,7 @@ export default function CronogramaPage() {
 
         try {
             if (existente) {
-                await supabase.from('obrigacoes_acessorias').update({ status: novoStatus }).eq('id', existente.id);
-            } else {
-                await supabase.from('obrigacoes_acessorias').insert([{
-                    cliente_id: clienteId,
-                    tipo,
-                    status: novoStatus,
-                    competencia: new Date(competencia.getFullYear(), competencia.getMonth(), 1).toISOString()
-                }]);
+                await supabase.schema('fiscal').from('calendario').update({ status: novoStatus }).eq('id', existente.id);
             }
             fetchData();
         } catch (err) {
@@ -96,12 +88,12 @@ export default function CronogramaPage() {
     };
 
     const getStatusObrigacao = (clienteId: string, tipo: string) => {
-        const o = obrigacoes.find(ob => ob.cliente_id === clienteId && ob.tipo === tipo);
+        const o = obrigacoes.find(ob => ob.empresa_id === clienteId && ob.template?.nome === tipo);
         return o ? o.status : 'vazio';
     };
 
     const clientesFiltrados = clientes.filter(c =>
-        c.nome?.toLowerCase().includes(filtroNome.toLowerCase())
+        c.razao_social?.toLowerCase().includes(filtroNome.toLowerCase())
     );
 
     return (
@@ -203,8 +195,8 @@ export default function CronogramaPage() {
                                 clientesFiltrados.map((cliente) => (
                                     <tr key={cliente.id} className="hover:bg-neutral-800/20 transition-colors group">
                                         <td className="p-5 sticky left-0 bg-neutral-900 group-hover:bg-neutral-800 transition-colors border-r border-neutral-800 z-10 shadow-xl">
-                                            <div className="font-black text-neutral-200 truncate max-w-[240px] uppercase italic text-sm">{cliente.nome}</div>
-                                            <div className="text-[9px] text-neutral-600 font-mono mt-1">ID: {cliente.cnpj_cpf || 'CADASTRO_INCOMPLETO'}</div>
+                                            <div className="font-black text-neutral-200 truncate max-w-[240px] uppercase italic text-sm">{cliente.razao_social}</div>
+                                            <div className="text-[9px] text-neutral-600 font-mono mt-1">DOC: {cliente.documento || 'CADASTRO_INCOMPLETO'}</div>
                                         </td>
                                         {tiposObrigacoes.map(tipo => {
                                             const status = getStatusObrigacao(cliente.id, tipo);

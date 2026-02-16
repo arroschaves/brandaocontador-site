@@ -312,7 +312,7 @@ function ClientesContent() {
                 // Edição: direto no Supabase (campos limpos)
                 const cleanData = { ...formData };
                 delete cleanData.drive_folder_id; // Não editar drive_folder_id manualmente
-                const { error } = await supabase.from('clientes').update(cleanData).eq('id', editingClient.id);
+                const { error } = await supabase.schema('core').from('empresas').update(cleanData).eq('id', editingClient.id);
                 if (error) throw new Error(error.message);
             } else {
                 // Novo cliente: via API que sanitiza campos + dispara n8n
@@ -341,7 +341,7 @@ function ClientesContent() {
     async function handleDelete(id: string, nome: string) {
         if (!confirm(`Excluir ${nome}?`)) return;
         try {
-            await supabase.from('clientes').delete().eq('id', id);
+            await supabase.schema('core').from('empresas').delete().eq('id', id);
             setClientes(clientes.filter(c => c.id !== id));
         } catch (err) {
             alert('Erro ao excluir');

@@ -16,8 +16,9 @@ export default function GestaoValidades() {
         try {
             setLoading(true)
             const { data, error } = await supabase
-                .from('clientes')
-                .select('id, nome, vencimento_alvara_funcionamento, vencimento_alvara_sanitario, vencimento_alvara_bombeiros, vencimento_alvara_ambiental, vencimento_certificado_a1, vencimento_certificado_a3')
+                .schema('core')
+                .from('empresas')
+                .select('id, razao_social, vencimento_alvara_funcionamento, vencimento_alvara_sanitario, vencimento_alvara_bombeiros, vencimento_alvara_ambiental')
 
             if (error) throw error
 
@@ -36,7 +37,7 @@ export default function GestaoValidades() {
                     if (c[m.field]) {
                         allValidades.push({
                             id: `${c.id}-${m.field}`,
-                            clientes: { nome: c.nome },
+                            clientes: { nome: c.razao_social },
                             tipo: m.label,
                             vencimento: c[m.field],
                             status: 'pendente' // Default, lógica de status já trata

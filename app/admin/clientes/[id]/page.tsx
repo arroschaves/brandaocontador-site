@@ -54,9 +54,14 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         setLoading(true)
         setError(null)
         try {
-            // 1. Dados do Cliente
-            const { data: c, error: cErr } = await supabase.from('clientes').select('*').eq('id', clientId).single()
-            if (cErr) throw new Error('Cliente não encontrado.')
+            // 1. Dados da Empresa (Schema CORE)
+            const { data: c, error: cErr } = await supabase
+                .schema('core')
+                .from('empresas')
+                .select('*')
+                .eq('id', clientId)
+                .single()
+            if (cErr) throw new Error('Empresa não encontrada.')
             setClient(c)
 
             // Determinar competência (Mês anterior ao atual se for início do mês)
@@ -79,12 +84,16 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             const { data: w } = await supabase.from('cliente_wiki').select('conteudo').eq('cliente_id', clientId).single()
             setWiki(w?.conteudo || '')
 
-            // 4. Obrigações do Mês Atual (competência de referência)
+            // 4. Obrigações do Ano/Mês (Schema FISCAL)
+            const year = agora.getFullYear()
+            const month = refDate.getMonth() + 1
             const { data: obr } = await supabase
-                .from('obrigacoes_acessorias')
-                .select('*')
-                .eq('cliente_id', clientId)
-                .eq('competencia', refStr)
+                .schema('fiscal')
+                .from('calendario')
+                .select('*, template:template_id(nome, departamento)')
+                .eq('empresa_id', clientId)
+                .eq('ano_referencia', year)
+                .eq('mes_referencia', month)
 
             setObrigacoes(obr || [])
 
