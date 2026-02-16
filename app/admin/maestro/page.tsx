@@ -44,6 +44,8 @@ const ACTIVITY_LABELS: Record<string, string> = {
     obligation_completed: 'Concluído',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function MaestroPage() {
     const supabase = createClient();
     const [loading, setLoading] = useState(true);
@@ -127,7 +129,7 @@ export default function MaestroPage() {
         // Realtime subscription para activity_log
         const channel = supabase
             .channel('maestro-realtime')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload) => {
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_log' }, (payload: any) => {
                 console.log('[MAESTRO] Nova atividade:', payload.new);
                 setActivities(prev => [payload.new as any, ...prev].slice(0, 50));
                 // Atualizar contadores
