@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
                 cnae_principal: data.mainActivity
                     ? `${data.mainActivity.id || data.mainActivity.code} - ${data.mainActivity.text}`
                     : '',
+                cnaes_secundarios: data.sideActivities
+                    ? data.sideActivities.map((a: any) => `${a.id || a.code} - ${a.text}`).join('; ')
+                    : '',
                 status_rfb: data.status?.text || data.registration?.status || 'ATIVA',
                 natureza_juridica: data.nature?.text || '',
                 porte: data.size?.text || data.company?.size?.text || '',
@@ -56,6 +59,8 @@ export async function GET(request: NextRequest) {
                 cidade: data.address?.city || '',
                 estado: data.address?.state || '',
                 inscricao_estadual: '',
+                simples_nacional: data.tax?.simples?.optant || false,
+                regime_tributario: data.tax?.simples?.optant ? 'SIMPLES_NACIONAL' : 'LUCRO_PRESUMIDO'
             })
         }
 

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
         const supabase = await createClient();
 
         // 1. Buscar cliente(s)
-        let queryBuilder = supabase.from('clientes').select('*');
+        let queryBuilder = supabase.schema('core').from('empresas').select('*');
         if (clientId) {
             queryBuilder = queryBuilder.eq('id', clientId);
         }
@@ -23,11 +23,12 @@ export async function POST(request: Request) {
         }
 
         // 2. Configurar Google Drive
-        if (!process.env.GOOGLE_CREDENTIALS_JSON) {
-            throw new Error('Configuração do Google Drive ausente');
+        const gCreds = process.env.GOOGLE_DRIVE_CREDENTIALS || process.env.GOOGLE_CREDENTIALS_JSON;
+        if (!gCreds) {
+            throw new Error('Configuração do Google Drive ausente (GOOGLE_DRIVE_CREDENTIALS)');
         }
 
-        const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+        const credentials = JSON.parse(gCreds);
         const auth = new google.auth.GoogleAuth({
             credentials,
             scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -140,6 +141,7 @@ export async function POST(request: Request) {
                 }));
 
                 // --- 3. AUDITORIA DE ROTINAS ---
+                const { data: templates } = await supabase.schema('fiscal').from('obrigacoes_templates').select('id, nome');
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
                     'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO', 'DECLARACAO', 'SIMPLES_NACIONAL'],
@@ -179,12 +181,19 @@ export async function POST(request: Request) {
                     });
 
                     const found = matchesFound.length > 0;
-                    return supabase.from('obrigacoes_acessorias').upsert({
-                        cliente_id: cliente.id,
-                        tipo: rotina.name,
-                        status: found ? 'concluido' : 'pendente',
-                        competencia: competenciaStr,
-                    }, { onConflict: 'cliente_id, tipo, competencia' });
+                    if (!found) return Promise.resolve(null); // Não criar pendentes aqui, apenas marcar concluídos detectados
+
+                    const template = templates?.find(t => t.nome === rotina.name);
+                    if (!template) return Promise.resolve(null);
+
+                    return supabase.schema('fiscal').from('calendario').upsert({
+                        empresa_id: cliente.id,
+                        template_id: template.id,
+                        status: 'CONCLUIDO',
+                        ano_referencia: refDate.getFullYear(),
+                        mes_referencia: refDate.getMonth() + 1,
+                        data_vencimento: new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0), // Último dia do mês
+                    }, { onConflict: 'empresa_id, template_id, ano_referencia, mes_referencia' });
                 });
 
                 await Promise.all(upsertPromises);

@@ -12,7 +12,8 @@ export async function GET() {
         // 1. Buscar clientes PJ que possuam CNPJ mas faltem dados essenciais (ex: logradouro ou IE)
         // Usamos uma query que pega clientes PJ (cnpj_cpf não nulos)
         const { data: clients, error } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .select('id, nome, cnpj_cpf, logradouro, inscricao_estadual')
             .not('cnpj_cpf', 'is', null)
             .limit(100) // Limite de segurança para uma sessão de enriquecimento

@@ -19,8 +19,9 @@ export async function POST(request: Request) {
 
         // 1. Buscar pasta do Drive do cliente
         const { data: cliente } = await supabase
-            .from('clientes')
-            .select('nome, drive_folder_id')
+            .schema('core')
+            .from('empresas')
+            .select('razao_social, drive_folder_id')
             .eq('id', clientId)
             .single()
 
@@ -29,7 +30,8 @@ export async function POST(request: Request) {
         }
 
         // 2. Autenticar no Google Drive
-        const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON!);
+        const gCreds = process.env.GOOGLE_DRIVE_CREDENTIALS || process.env.GOOGLE_CREDENTIALS_JSON;
+        const credentials = JSON.parse(gCreds!);
         const auth = new google.auth.GoogleAuth({
             credentials,
             scopes: ['https://www.googleapis.com/auth/drive.file'],
@@ -59,15 +61,28 @@ export async function POST(request: Request) {
         const fileId = driveRes.data.id
         const fileLink = driveRes.data.webViewLink
 
-        // 5. Registrar no Supabase (Obrigações)
+        // 5. Registrar no Supabase (Calendário Fiscal)
         if (routineName) {
-            await supabase.from('obrigacoes_acessorias').upsert({
-                cliente_id: clientId,
-                tipo: routineName,
-                status: 'concluido',
-                arquivo_url: fileLink,
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'cliente_id, tipo' });
+            const { data: template } = await supabase
+                .schema('fiscal')
+                .from('obrigacoes_templates')
+                .select('id')
+                .eq('nome', routineName)
+                .single();
+
+            if (template) {
+                const now = new Date();
+                await supabase.schema('fiscal').from('calendario').upsert({
+                    empresa_id: clientId,
+                    template_id: template.id,
+                    mes_referencia: now.getMonth() + 1,
+                    ano_referencia: now.getFullYear(),
+                    status: 'CONCLUIDO',
+                    drive_file_id: fileId,
+                    drive_file_name: file.name,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'empresa_id, template_id, mes_referencia, ano_referencia' });
+            }
         }
 
         // 6. Registrar Auditoria

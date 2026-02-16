@@ -17,7 +17,8 @@ export async function POST(
 
         // 1. Buscar o CNPJ do cliente no banco
         const { data: client, error: fetchErr } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .select('cnpj_cpf, nome')
             .eq('id', clientId)
             .single()
@@ -66,7 +67,8 @@ export async function POST(
 
         // 4. Atualizar o cliente no Supabase com os dados validados
         const { error: updateErr } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .update(safeData)
             .eq('id', clientId)
 

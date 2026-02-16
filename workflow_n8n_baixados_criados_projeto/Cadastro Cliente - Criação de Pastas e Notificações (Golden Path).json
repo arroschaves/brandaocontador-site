@@ -1,0 +1,202 @@
+{
+  "name": "Cadastro Cliente - Criação de Pastas e Notificações (Golden Path)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cadastro-cliente",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -288
+      ],
+      "name": "Webhook Cadastro",
+      "webhookId": "cadastro-cliente-golden",
+      "id": "4ea3ebdb-38a6-4128-9b0f-3e01b35710fc"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{$json.body.nome}} - {{$json.body.cnpj_cpf}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        288,
+        -288
+      ],
+      "name": "Criar Pasta Cliente",
+      "id": "f51596b6-09b9-43ab-8d8c-3909802c409c",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Documentos Fiscais",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -400
+      ],
+      "name": "Pasta Documentos",
+      "id": "6477eb62-270d-4f1e-a497-713cd5ac78e9",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "Contabilidade",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        496,
+        -192
+      ],
+      "name": "Pasta Contabilidade",
+      "id": "34fd6bcb-de59-44fa-a714-9dbc959a3ac3",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "core.empresas"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        688,
+        -288
+      ],
+      "name": "Atualizar Supabase",
+      "id": "3ff6187a-3448-4c85-b7e2-6c703091a238",
+      "credentials": {
+        "supabaseApi": {
+          "id": "tvymDvbKT2vFr50N",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.EVOLUTION_INSTANCE}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.EVOLUTION_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{$node[\"Webhook Cadastro\"].json.body.telefone_whatsapp}}"
+            },
+            {
+              "name": "text",
+              "value": "Olá {{$node[\"Webhook Cadastro\"].json.body.nome}}! Bem-vindo à Brandão Contabilidade. Seu cadastro foi realizado com sucesso."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        896,
+        -288
+      ],
+      "id": "7e7b79b1-bd91-430c-927c-45c951a7dd1d"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Cadastro": {
+      "main": [
+        [
+          {
+            "node": "Criar Pasta Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Pasta Cliente": {
+      "main": [
+        [
+          {
+            "node": "Pasta Documentos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pasta Contabilidade",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualizar Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atualizar Supabase": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "e01e5683-0e35-4a55-8832-90736966059b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56ed0aec25ea742b0b6d48f55706d0f988bdebb61f0b991401e77f87e65b2bf3"
+  },
+  "id": "tDbX0s2hQ26bYuWh",
+  "tags": []
+}

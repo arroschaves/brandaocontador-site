@@ -21,20 +21,21 @@ export async function POST(request: Request) {
 
         // 2. Registrar no banco de dados (se houver ticketId)
         if (ticketId) {
-            await supabase.from('atendimentos').update({
+            await supabase.schema('core').from('atendimentos').update({
                 status: 'em_atendimento',
                 observacoes_internas: `Mensagem enviada via CRM: ${message}`
             }).eq('id', ticketId)
 
             // Registrar Auditoria
             const { data: atendimentoData } = await supabase
+                .schema('core')
                 .from('atendimentos')
-                .select('cliente_id')
+                .select('empresa_id')
                 .eq('id', ticketId)
                 .single();
 
             await logAudit({
-                cliente_id: atendimentoData?.cliente_id,
+                cliente_id: atendimentoData?.empresa_id,
                 acao: 'ENVIO_WA',
                 detalhes: `Mensagem enviada para ${number}: ${message.substring(0, 50)}${message.length > 50 ? '...' : ''}`,
                 request

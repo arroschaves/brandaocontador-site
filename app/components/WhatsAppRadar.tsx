@@ -17,7 +17,7 @@ export default function WhatsAppRadar() {
             .channel('radar_atendimento')
             .on('postgres_changes', {
                 event: '*',
-                schema: 'public',
+                schema: 'core',
                 table: 'atendimentos'
             }, () => {
                 fetchStatus()
@@ -33,13 +33,14 @@ export default function WhatsAppRadar() {
         try {
             // Conta pendentes
             const { count, error: countErr } = await supabase
+                .schema('core')
                 .from('atendimentos')
                 .select('*', { count: 'exact', head: true })
                 .eq('status', 'pendente')
 
             if (countErr) {
                 if (countErr.code === '42P01') {
-                    console.warn('[Radar] Tabela atendimentos não localizada. Aguardando migration.');
+                    console.warn('[Radar] Tabela atendimentos não localizada no schema core.');
                     setPendingCount(0);
                     return;
                 }
@@ -50,13 +51,14 @@ export default function WhatsAppRadar() {
 
             // Busca a última mensagem pendente
             const { data, error: msgErr } = await supabase
+                .schema('core')
                 .from('atendimentos')
                 .select(`
                     id,
                     mensagem,
                     pushname,
                     created_at,
-                    clientes ( nome )
+                    empresas:empresa_id ( razao_social )
                 `)
                 .eq('status', 'pendente')
                 .order('created_at', { ascending: false })
@@ -97,7 +99,7 @@ export default function WhatsAppRadar() {
                     </span>
                     <span className="w-1 h-1 rounded-full bg-neutral-700" />
                     <span className="text-[9px] font-mono text-neutral-300 truncate max-w-[120px]">
-                        {latestMessage?.clientes?.nome || latestMessage?.pushname || 'Desconhecido'}
+                        {latestMessage?.empresas?.razao_social || latestMessage?.pushname || 'Desconhecido'}
                     </span>
                 </div>
             </div>

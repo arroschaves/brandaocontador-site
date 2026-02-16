@@ -49,7 +49,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
             .schema('audit')
             .from('logs')
             .select('*')
-            .contains('dados_novos', { empresa_id: clientId })
+            .eq('empresa_id', clientId)
             .order('created_at', { ascending: false })
             .limit(20);
         setHistorico(data || []);
@@ -88,7 +88,11 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
             const { data: cron } = await supabase.schema('fiscal').from('calendario').select('*, template:template_id(nome)').eq('empresa_id', clientId)
             setCronograma(cron || [])
 
-            const { data: units } = await supabase.from('unidades_fiscais').select('*').eq('cliente_id', clientId)
+            const { data: units } = await supabase
+                .schema('core')
+                .from('unidades_fiscais')
+                .select('*')
+                .eq('empresa_id', clientId)
             setUnidades(units || [])
         } catch (err) {
             console.error(err)

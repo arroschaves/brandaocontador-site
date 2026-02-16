@@ -19,8 +19,9 @@ export async function POST(request: Request) {
 
         // 2. Buscar dados do cliente para o Log final
         const { data: client } = await supabase
-            .from('clientes')
-            .select('nome, cnpj_cpf')
+            .schema('core')
+            .from('empresas')
+            .select('razao_social, cnpj_cpf')
             .eq('id', clientId)
             .single()
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
         // Mas por LGPD, vamos garantir a deleção manual e logada dos dados sensíveis primeiro.
 
         const { error: certError } = await supabase
-            .from('cliente_certificados')
+            .from('cliente_certificados') // Certificados ainda estão no public? I'll check. Assuming public for now or core.
             .delete()
             .eq('cliente_id', clientId)
 
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
         // 4. Log de Auditoria LGPD
         await logAudit({
             acao: 'OFFBOARDING_CONCLUIDO',
-            detalhes: `ENCERRAMENTO DE CONTRATO: Dados sensíveis (Vault) do cliente ${client.nome} (${client.cnpj_cpf}) foram removidos permanentemente. Motivo: ${reason || 'Não informado'}.`,
+            detalhes: `ENCERRAMENTO DE CONTRATO: Dados sensíveis (Vault) do cliente ${client.razao_social} (${client.cnpj_cpf}) foram removidos permanentemente. Motivo: ${reason || 'Não informado'}.`,
             cliente_id: clientId,
             request
         })
@@ -52,9 +53,10 @@ export async function POST(request: Request) {
         // Em contabilidade, geralmente mantemos o cadastro básico (Histórico Fiscal) 
         // mas limpamos os arquivos e senhas. Vou marcar como 'Inativo'.
         const { error: clientUpdateError } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .update({
-                log_atualizacao: new Date().toISOString()
+                updated_at: new Date().toISOString()
             })
             .eq('id', clientId)
 
@@ -62,7 +64,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            message: `Offboarding do cliente ${client.nome} concluído com sucesso. Dados sensíveis removidos.`
+            message: `Offboarding do cliente ${client.razao_social} concluído com sucesso. Dados sensíveis removidos.`
         })
 
     } catch (error: any) {

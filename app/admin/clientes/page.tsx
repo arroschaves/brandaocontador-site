@@ -288,6 +288,12 @@ function ClientesContent() {
                 email: data.email || prev.email,
                 telefone_whatsapp: data.telefone || prev.telefone_whatsapp,
                 cnae_principal: data.cnae_principal || prev.cnae_principal,
+                cnaes_secundarios: data.cnaes_secundarios || prev.cnaes_secundarios,
+                natureza_juridica: data.natureza_juridica || prev.natureza_juridica,
+                porte: data.porte || prev.porte,
+                capital_social: data.capital_social || prev.capital_social,
+                data_abertura: data.data_abertura || prev.data_abertura,
+                regime_tributario: data.regime_tributario || prev.regime_tributario,
                 status_rfb: data.status_rfb || 'ATIVA',
                 logradouro: data.logradouro || prev.logradouro,
                 numero: data.numero || prev.numero,
@@ -504,6 +510,11 @@ function ClientesContent() {
                                                         >
                                                             {c.nome || c.razao_social}
                                                         </Link>
+                                                        {c.nome && c.razao_social && c.nome !== c.razao_social && (
+                                                            <span className="text-[10px] text-muted-foreground block truncate max-w-[250px] mt-0.5">
+                                                                {c.razao_social}
+                                                            </span>
+                                                        )}
                                                         <div className="flex items-center gap-2.5 mt-1.5">
                                                             <span className="text-[11px] font-medium text-muted-foreground/80 font-mono tracking-tight">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
                                                             {c.isCertNearExp && (

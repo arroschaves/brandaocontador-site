@@ -69,12 +69,12 @@ export default function CronogramaPage() {
     };
 
     const toggleStatus = async (clienteId: string, tipo: string) => {
-        const existente = obrigacoes.find(o => o.cliente_id === clienteId && o.tipo === tipo);
-        let novoStatus = 'concluido';
+        const existente = obrigacoes.find(o => o.empresa_id === clienteId && o.template?.nome === tipo);
+        let novoStatus = 'CONCLUIDO';
 
         if (existente) {
-            if (existente.status === 'concluido') novoStatus = 'atrasado';
-            else if (existente.status === 'atrasado') novoStatus = 'pendente';
+            if (existente.status === 'CONCLUIDO') novoStatus = 'ATRASADO';
+            else if (existente.status === 'ATRASADO') novoStatus = 'PENDENTE';
         }
 
         try {
@@ -206,15 +206,15 @@ export default function CronogramaPage() {
                                                     className="p-5 text-center border-l border-neutral-800/50 cursor-pointer hover:bg-neutral-800/40 transition-all"
                                                     onClick={() => toggleStatus(cliente.id, tipo)}
                                                 >
-                                                    {status === 'concluido' ? (
+                                                    {status === 'CONCLUIDO' ? (
                                                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-500 border border-emerald-500/40 animate-in zoom-in duration-300" title="Arquivo no Drive OK">
                                                             <CheckCircle2 className="w-4 h-4" />
                                                         </div>
-                                                    ) : status === 'atrasado' ? (
+                                                    ) : status === 'ATRASADO' ? (
                                                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/20 text-red-500 border border-red-500/40 animate-pulse" title="Pendente de Transmissão">
                                                             <AlertCircle className="w-4 h-4" />
                                                         </div>
-                                                    ) : status === 'pendente' ? (
+                                                    ) : status === 'PENDENTE' ? (
                                                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500/30 border border-amber-500/10" title="Aguardando Arquivo">
                                                             <FileText className="w-4 h-4" />
                                                         </div>

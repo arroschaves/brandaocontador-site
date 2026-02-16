@@ -34,12 +34,30 @@ const CAMPOS_TEXT = [
     'porte',
     'atividade_principal',
     'tipo_pessoa',
+    'cnaes_secundarios',
+    'atendimento_automatico',
+    'vencimento_alvara_funcionamento',
+    'vencimento_alvara_sanitario',
+    'vencimento_alvara_bombeiros',
+    'vencimento_alvara_ambiental',
+    'vencimento_certidao_negativa_federal',
+    'vencimento_certidao_negativa_estadual',
+    'vencimento_certidao_negativa_municipal',
+    'vencimento_certidao_fgts',
 ];
 
 // Campos DATE — precisam de validação extra
 const CAMPOS_DATE = [
     'data_abertura',
     'data_situacao_cadastral',
+    'vencimento_alvara_funcionamento',
+    'vencimento_alvara_sanitario',
+    'vencimento_alvara_bombeiros',
+    'vencimento_alvara_ambiental',
+    'vencimento_certidao_negativa_federal',
+    'vencimento_certidao_negativa_estadual',
+    'vencimento_certidao_negativa_municipal',
+    'vencimento_certidao_fgts',
 ];
 
 // Campos NUMBER
@@ -174,7 +192,8 @@ export async function POST(request: NextRequest) {
 
         // 2. Inserir o cliente no Supabase
         const { data: client, error: insertErr } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .insert([formData])
             .select()
             .single();
@@ -196,7 +215,8 @@ export async function POST(request: NextRequest) {
                 }
 
                 const { data: client2, error: err2 } = await supabase
-                    .from('clientes')
+                    .schema('core')
+                    .from('empresas')
                     .insert([minimalData])
                     .select('id, nome, razao_social')
                     .single();
@@ -251,9 +271,10 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get('search');
 
         let query = supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .select('*')
-            .order('nome', { ascending: true });
+            .order('razao_social', { ascending: true });
 
         if (search) {
             query = query.or(`nome.ilike.%${search}%,cnpj_cpf.ilike.%${search}%,razao_social.ilike.%${search}%`);

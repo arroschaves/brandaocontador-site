@@ -1,0 +1,333 @@
+{
+  "name": "Brandão Contabilidade - COMPLETO (Com Envio)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-message",
+        "options": {}
+      },
+      "id": "6f733d02-e251-418d-a84e-d1f2c6e41074",
+      "name": "Receber Mensagem",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        2144,
+        -1584
+      ],
+      "webhookId": "30fab5bd-7cc2-4808-80ac-fbbfba4f2960"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg",
+              "name": "message",
+              "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage.text || 'Mídia' }}",
+              "type": "string"
+            },
+            {
+              "id": "tel",
+              "name": "whatsapp",
+              "value": "={{ $json.body.data.key.remoteJid.split('@')[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4cc127c4-3c27-4509-b1f1-04eacd1e3ced",
+      "name": "Dados Brutos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2368,
+        -1584
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "core.empresas",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone_whatsapp",
+              "condition": "ilike",
+              "keyValue": "=%{{ $json.whatsapp.slice(-8) }}%"
+            }
+          ]
+        }
+      },
+      "id": "ffe631d2-a2b7-4ab9-a7aa-f38ca055f739",
+      "name": "Busca Cliente",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        -1584
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "tvymDvbKT2vFr50N",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const feriados = ['2026-01-01', '2026-02-16', '2026-02-17', '2026-04-03', '2026-04-21', '2026-05-01', '2026-06-04', '2026-09-07', '2026-10-12', '2026-11-02', '2026-11-15', '2026-11-20', '2026-12-25'];\nconst agora = $now.setZone('America/Campo_Grande');\nconst hoje = agora.toFormat('yyyy-MM-dd');\nconst isFeriado = feriados.includes(hoje);\nconst isFimDeSemana = agora.weekday >= 6;\nconst isAberto = !isFeriado && !isFimDeSemana && agora.hour >= 8 && agora.hour < 18;\nreturn { escritorio_aberto: isAberto, motivo: isFeriado ? 'feriado' : (isFimDeSemana ? 'fim de semana' : 'fora do horário'), hora_atual: agora.toFormat('HH:mm') };"
+      },
+      "id": "b6120596-a835-401f-bf68-a891b263e0d3",
+      "name": "Check Expediente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2736,
+        -1584
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=CLIENTE: {{ $node[\"Busca Cliente\"].json.nome || 'Amigo(a)' }}\nCNPJ: {{ $node[\"Busca Cliente\"].json.cnpj_cpf || 'Não informado' }}\nABERTO AGORA: {{ $json.escritorio_aberto }}\nMOTIVO FECHADO: {{ $json.motivo }}\nMENSAGEM: {{ $node[\"Dados Brutos\"].json.message }}",
+        "options": {
+          "systemMessage": "=# PERFIL\nVocê é o assistente da Brandão Contabilidade.\n\n# REGRAS\n- Se o escritório estiver fechado, informe o motivo e diga que retornaremos no próximo dia útil às 08:00.\n- Use sempre o nome do cliente.\n- SAÍDA JSON PURA: {\"is_pedido\": true, \"categoria\": \"...\", \"prioridade\": \"NORMAL\", \"resposta\": \"...\"}"
+        }
+      },
+      "id": "6592a2aa-0320-4e67-b804-e99245d32aac",
+      "name": "IA Classificador",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        2944,
+        -1584
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let output = {};\ntry {\n  const raw = $node[\"IA Classificador\"].json.output.replace(/```json|```/g, \"\").trim();\n  output = JSON.parse(raw);\n} catch (e) {\n  output = { resposta: $node[\"IA Classificador\"].json.output, categoria: \"Geral\", prioridade: \"NORMAL\" };\n}\n// Ajuste de prioridade para MAIÚSCULAS (evita erro de constraint no Supabase)\nlet p = String(output.prioridade).toUpperCase();\noutput.prioridade = p.includes(\"ALTA\") ? \"ALTA\" : (p.includes(\"BAIXA\") ? \"BAIXA\" : \"NORMAL\");\nreturn output;"
+      },
+      "id": "243a8d95-7535-4014-9723-5831f514c04f",
+      "name": "Tratar Saída IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        -1584
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "core.atendimentos",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone_whatsapp",
+              "fieldValue": "={{ $node[\"Dados Brutos\"].json.whatsapp }}"
+            },
+            {
+              "fieldId": "mensagem",
+              "fieldValue": "={{ $node[\"Dados Brutos\"].json.message }}"
+            },
+            {
+              "fieldId": "prioridade",
+              "fieldValue": "={{ $json.prioridade }}"
+            },
+            {
+              "fieldId": "categoria_solicitacao",
+              "fieldValue": "={{ $json.categoria }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "pendente"
+            },
+            {
+              "fieldId": "cliente_id",
+              "fieldValue": "={{ $node[\"Busca Cliente\"].json.id || null }}"
+            }
+          ]
+        }
+      },
+      "id": "a4214ca6-8902-41d5-9b5c-612aa73aa419",
+      "name": "Registrar no CRM",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3472,
+        -1584
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "tvymDvbKT2vFr50N",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evolution.brandaocontador.com.br/message/sendText/escritorioatendimento",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "E8FF815DA119-42E7-BFF8-0168CED66708"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $node[\"Dados Brutos\"].json.whatsapp }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $node[\"Tratar Saída IA\"].json.resposta }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28a7e813-b312-40cf-995b-d9fa08763f75",
+      "name": "Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3696,
+        -1584
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2848,
+        -1392
+      ],
+      "id": "11f6df86-1bfc-4044-85a8-6fba77455189",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7GUTW2bFdnyNqit9",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receber Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Dados Brutos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados Brutos": {
+      "main": [
+        [
+          {
+            "node": "Busca Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Cliente": {
+      "main": [
+        [
+          {
+            "node": "Check Expediente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Expediente": {
+      "main": [
+        [
+          {
+            "node": "IA Classificador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Classificador": {
+      "main": [
+        [
+          {
+            "node": "Tratar Saída IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tratar Saída IA": {
+      "main": [
+        [
+          {
+            "node": "Registrar no CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar no CRM": {
+      "main": [
+        [
+          {
+            "node": "Enviar WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IA Classificador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "binaryMode": "separate"
+  },
+  "versionId": "18bce7a7-f0f6-43a2-8abc-0a26715de188",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "56ed0aec25ea742b0b6d48f55706d0f988bdebb61f0b991401e77f87e65b2bf3"
+  },
+  "id": "HHatPEUIfY14RNxJXBN1V",
+  "tags": []
+}

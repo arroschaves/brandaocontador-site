@@ -23,9 +23,10 @@ export async function POST(request: Request) {
 
         if (atendimentoId) {
             await supabase
+                .schema('core')
                 .from('atendimentos')
                 .update({
-                    transcricao_ia: analysis,
+                    transcricao_audio: analysis, // Corrigindo para o nome real da coluna
                     status_ia: 'PROCESSADO'
                 })
                 .eq('id', atendimentoId)

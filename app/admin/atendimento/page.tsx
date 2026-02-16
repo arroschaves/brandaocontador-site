@@ -44,7 +44,7 @@ export default function AtendimentoPage() {
 
         const channel = supabase
             .channel('atendimentos_realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'atendimentos' }, (payload: any) => {
+            .on('postgres_changes', { event: '*', schema: 'core', table: 'atendimentos' }, (payload: any) => {
                 console.log('Nova atualização via Realtime:', payload);
                 fetchTickets();
             })
@@ -59,10 +59,11 @@ export default function AtendimentoPage() {
     async function fetchTickets() {
         try {
             const { data, error } = await supabase
+                .schema('core')
                 .from('atendimentos')
                 .select(`
                     *,
-                    clientes ( nome, email )
+                    empresas:empresa_id ( razao_social, email )
                 `)
                 .order('created_at', { ascending: false });
 
@@ -80,6 +81,7 @@ export default function AtendimentoPage() {
             console.log('Atualizando status:', { id, newStatus });
 
             const { data, error } = await supabase
+                .schema('core')
                 .from('atendimentos')
                 .update({ status: newStatus })
                 .eq('id', id)
@@ -105,6 +107,7 @@ export default function AtendimentoPage() {
             console.log('Salvando classificação:', { id, editForm });
 
             const { data, error } = await supabase
+                .schema('core')
                 .from('atendimentos')
                 .update({
                     categoria_solicitacao: editForm.categoria_solicitacao,
@@ -196,13 +199,13 @@ export default function AtendimentoPage() {
                 ? { ticketId: ticket.id, number: ticket.telefone_whatsapp, message: responseForm.message }
                 : {
                     ticketId: ticket.id,
-                    to: ticket.clientes?.email || '',
+                    to: ticket.empresas?.email || '',
                     subject: responseForm.subject,
                     message: responseForm.message,
                     fromAccount: 'ADM'
                 };
 
-            if (responseForm.type === 'email' && !ticket.clientes?.email) {
+            if (responseForm.type === 'email' && !ticket.empresas?.email) {
                 alert('Este cliente não possui e-mail cadastrado.');
                 return;
             }
@@ -319,12 +322,12 @@ export default function AtendimentoPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                                             <h3 className="text-[12px] font-bold text-neutral-100 truncate">
-                                                {ticket.clientes?.nome || ticket.pushName || 'Desconhecido'}
+                                                {ticket.empresas?.razao_social || ticket.pushName || 'Desconhecido'}
                                             </h3>
 
                                             <div className="flex gap-1 items-center ml-1">
                                                 {/* Badge de Identificação */}
-                                                {ticket.clientes ? (
+                                                {ticket.empresas ? (
                                                     <span className="text-[8px] border border-emerald-500/20 text-emerald-500 px-1.5 py-0.5 rounded uppercase font-black">Cliente</span>
                                                 ) : (
                                                     <span className="text-[8px] border border-neutral-800 text-neutral-600 px-1.5 py-0.5 rounded uppercase font-black">Visitante</span>

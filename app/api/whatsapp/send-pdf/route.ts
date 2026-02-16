@@ -15,7 +15,8 @@ export async function POST(request: Request) {
 
         // 1. Buscar dados do cliente
         const { data: cliente, error: clientError } = await supabase
-            .from('clientes')
+            .schema('core')
+            .from('empresas')
             .select('*')
             .eq('id', clientId)
             .single()
@@ -37,7 +38,8 @@ export async function POST(request: Request) {
         }
 
         // 3. Configurar Google Drive para buscar o arquivo
-        const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON!);
+        const gCreds = process.env.GOOGLE_DRIVE_CREDENTIALS || process.env.GOOGLE_CREDENTIALS_JSON;
+        const credentials = JSON.parse(gCreds!);
         const auth = new google.auth.GoogleAuth({
             credentials,
             scopes: ['https://www.googleapis.com/auth/drive.readonly'],
@@ -67,8 +69,8 @@ export async function POST(request: Request) {
         }
 
         // 7. Registrar Log de Atendimento
-        await supabase.from('atendimentos').insert({
-            cliente_id: clientId,
+        await supabase.schema('core').from('atendimentos').insert({
+            empresa_id: clientId,
             telefone_whatsapp: cliente.telefone_whatsapp,
             mensagem: `[Documento Enviado: ${fileName}]`,
             status: 'concluido',

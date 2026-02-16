@@ -68,7 +68,7 @@ export default function MaestroPage() {
 
             // 1. Stats (Schemas CORE e FISCAL)
             const { count: countClientes } = await supabase.schema('core').from('empresas').select('*', { count: 'exact', head: true });
-            const { count: countUnidades } = await supabase.from('unidades_fiscais').select('*', { count: 'exact', head: true }); // Verificaremos se este também precisa mudar
+            const { count: countUnidades } = await supabase.schema('core').from('unidades_fiscais').select('*', { count: 'exact', head: true });
             const { count: countPendencias } = await supabase.schema('fiscal').from('calendario').select('*', { count: 'exact', head: true }).eq('status', 'PENDENTE');
 
             // Arquivos de hoje (Schema AUDIT)
@@ -77,8 +77,7 @@ export default function MaestroPage() {
                 .schema('audit')
                 .from('logs')
                 .select('*', { count: 'exact', head: true })
-                .eq('acao', 'INSERT')
-                .contains('dados_novos', { tipo: 'upload' })
+                .in('acao', ['UPLOAD', 'FILE_SYNC'])
                 .gte('created_at', `${today}T00:00:00`);
 
             setStats({
@@ -303,27 +302,22 @@ export default function MaestroPage() {
                                                         >
                                                             {label}
                                                         </span>
-                                                        {act.tabela && (
-                                                            <span className="text-[10px] font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                                                                {act.tabela}
-                                                            </span>
-                                                        )}
                                                         <span className="text-[10px] text-muted-foreground ml-auto whitespace-nowrap">
                                                             {timeAgo(act.created_at)}
                                                         </span>
                                                     </div>
                                                     <p className="text-sm font-medium text-foreground leading-snug">
-                                                        {displayDesc}
+                                                        {act.descricao}
                                                     </p>
-                                                    {act.dados_novos?.arquivo_nome && (
+                                                    {act.metadata?.file_name && (
                                                         <p className="text-xs text-muted-foreground mt-1 bg-muted/30 p-2 rounded-lg border border-border/50 font-mono break-all truncate">
-                                                            {act.dados_novos.arquivo_nome}
+                                                            {act.metadata.file_name}
                                                         </p>
                                                     )}
-                                                    {act.dados_novos?.cliente_nome && (
+                                                    {act.empresa_id && (
                                                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                                             <MapPin className="w-3 h-3" />
-                                                            {act.dados_novos.cliente_nome}
+                                                            ID Empresa: {act.empresa_id.substring(0, 8)}...
                                                         </p>
                                                     )}
                                                 </div>

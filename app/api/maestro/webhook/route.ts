@@ -55,26 +55,28 @@ async function handleFile(
 
     // 2a. Buscar por Unidade Fiscal (Fazenda)
     const { data: unidade } = await supabase
+        .schema('core')
         .from('unidades_fiscais')
-        .select('id, cliente_id, nome_identificador, clientes(nome)')
+        .select('id, empresa_id, nome_identificador, empresas:empresa_id(razao_social)')
         .eq('drive_folder_id', folderId)
         .single();
 
     if (unidade) {
         unidadeId = unidade.id;
-        clienteId = unidade.cliente_id;
-        clienteNome = unidade.clientes?.nome || unidade.nome_identificador;
+        clienteId = unidade.empresa_id;
+        clienteNome = unidade.empresas?.razao_social || unidade.nome_identificador;
     } else {
-        // 2b. Buscar por Cliente Direto
+        // 2b. Buscar por Empresa Direta
         const { data: cliente } = await supabase
-            .from('clientes')
-            .select('id, nome')
+            .schema('core')
+            .from('empresas')
+            .select('id, razao_social')
             .eq('drive_folder_id', folderId)
             .single();
 
         if (cliente) {
             clienteId = cliente.id;
-            clienteNome = cliente.nome;
+            clienteNome = cliente.razao_social;
         }
     }
 
@@ -99,26 +101,36 @@ async function handleFile(
 
     // 4. Tentar completar obrigação pendente
     if (obligationType && (unidadeId || clienteId)) {
-        const query = supabase.from('obrigacoes_acessorias')
+        // Buscar template_id
+        const { data: template } = await supabase
+            .schema('fiscal')
+            .from('obrigacoes_templates')
             .select('id')
-            .eq('tipo', obligationType)
-            .eq('status', 'pendente')
-            .limit(1);
+            .eq('nome', obligationType)
+            .single();
 
-        if (unidadeId) query.eq('unidade_fiscal_id', unidadeId);
-        else if (clienteId) query.eq('cliente_id', clienteId);
+        if (template) {
+            const query = supabase.schema('fiscal').from('calendario')
+                .select('id')
+                .eq('template_id', template.id)
+                .eq('status', 'PENDENTE')
+                .limit(1);
 
-        const { data: ob } = await query;
+            if (unidadeId) query.eq('unidade_fiscal_id', unidadeId);
+            else if (clienteId) query.eq('empresa_id', clienteId);
 
-        if (ob && ob.length > 0) {
-            await supabase.from('obrigacoes_acessorias').update({
-                status: 'concluido',
-                arquivo_url: driveUrl,
-                manual_file_name: fileName,
-                updated_at: new Date().toISOString()
-            }).eq('id', ob[0].id);
+            const { data: ob } = await query;
 
-            obligationCompleted = true;
+            if (ob && ob.length > 0) {
+                await supabase.schema('fiscal').from('calendario').update({
+                    status: 'CONCLUIDO',
+                    drive_file_id: folderId, // Usando folderId como fileId simplificado se não houver guid
+                    drive_file_name: fileName,
+                    updated_at: new Date().toISOString()
+                }).eq('id', ob[0].id);
+
+                obligationCompleted = true;
+            }
         }
     }
 
@@ -165,17 +177,19 @@ async function handleFile(
         }
     });
 
-    // 7. Gravar no maestro_drive_sync_log (compatibilidade com sistema antigo)
-    await supabase.from('maestro_drive_sync_log').insert({
-        cliente_id: clienteId,
-        unidade_fiscal_id: unidadeId,
-        file_name: fileName,
-        file_id: folderId,
-        action_type: obligationCompleted ? 'COMPLETED_OBLIGATION' : clienteId ? 'MATCHED_ENTITY' : 'UNMATCHED',
-        details: descricao,
+    // 7. Gravar no audit.logs (Antigo sync_log)
+    await supabase.schema('audit').from('logs').insert({
+        empresa_id: clienteId,
+        acao: obligationCompleted ? 'OBLIGATION_COMPLETED' : 'FILE_SYNC',
+        descricao: descricao,
+        metadata: {
+            file_name: fileName,
+            drive_url: driveUrl,
+            unidade_fiscal_id: unidadeId,
+        },
         created_at: new Date().toISOString()
     }).then(({ error }: any) => {
-        if (error) console.error('[MAESTRO] Erro sync_log:', error.message);
+        if (error) console.error('[MAESTRO] Erro audit_log:', error.message);
     });
 
     console.log(`[MAESTRO] ✅ ${tipo}: ${descricao}`);
@@ -214,17 +228,18 @@ async function logActivity(supabase: any, data: {
     status?: string;
     metadata?: Record<string, any>;
 }) {
-    const { error } = await supabase.from('activity_log').insert({
-        cliente_id: data.cliente_id || null,
-        cliente_nome: data.cliente_nome || null,
+    const { error } = await supabase.schema('audit').from('logs').insert({
+        empresa_id: data.cliente_id || null,
         tipo: data.tipo,
         categoria: data.categoria || null,
         descricao: data.descricao,
-        arquivo_nome: data.arquivo_nome || null,
-        arquivo_url: data.arquivo_url || null,
-        pasta_path: data.pasta_path || null,
-        status: data.status || 'info',
-        metadata: data.metadata || {},
+        metadata: {
+            ...data.metadata,
+            arquivo_nome: data.arquivo_nome,
+            arquivo_url: data.arquivo_url,
+            pasta_path: data.pasta_path,
+            status: data.status
+        },
         created_at: new Date().toISOString(),
     });
 

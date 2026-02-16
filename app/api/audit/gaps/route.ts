@@ -11,7 +11,7 @@ export async function GET(request: Request) {
         const supabase = await createClient()
 
         // 1. Buscar todos os clientes
-        const { data: clientes, error: clientErr } = await supabase.from('clientes').select('*')
+        const { data: clientes, error: clientErr } = await supabase.schema('core').from('empresas').select('*')
         if (clientErr) throw clientErr
 
         // 2. Buscar obrigações já registradas no mês atual
@@ -20,9 +20,11 @@ export async function GET(request: Request) {
         const competenciaStr = competenciaAtual.toISOString().split('T')[0]
 
         const { data: obrigaçõesExistentes } = await supabase
-            .from('obrigacoes_acessorias')
-            .select('*')
-            .eq('competencia', competenciaStr)
+            .schema('fiscal')
+            .from('calendario')
+            .select('*, template:template_id(nome)')
+            .eq('mes_referencia', competenciaAtual.getMonth() + 1)
+            .eq('ano_referencia', competenciaAtual.getFullYear())
 
         const gaps = []
 
@@ -33,16 +35,16 @@ export async function GET(request: Request) {
 
             for (const routine of expected) {
                 // Verificar se já temos registro de 'concluido' para esta rotina
-                const exists = obrigaçõesExistentes?.find(o =>
-                    o.cliente_id === cliente.id &&
-                    o.tipo === routine.name &&
-                    o.status === 'concluido'
+                const exists = (obrigaçõesExistentes as any[])?.find(o =>
+                    o.empresa_id === cliente.id &&
+                    o.template?.nome === routine.name &&
+                    o.status === 'CONCLUIDO'
                 )
 
                 if (!exists) {
                     gaps.push({
                         clienteId: cliente.id,
-                        clienteNome: cliente.nome,
+                        clienteNome: cliente.razao_social || cliente.nome,
                         regime: cliente.regime_tributario,
                         obrigacao: routine.name,
                         grupo: routine.taxGroup,
