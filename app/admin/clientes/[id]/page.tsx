@@ -71,18 +71,23 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             const refStr = refDate.toISOString().split('T')[0]
             setCompetenciaReferencia(refStr)
 
-            // 2. Histórico / Auditoria (Safe Join)
+            // 2. Histórico / Auditoria (Schema AUDIT)
             const { data: h } = await supabase
-                .from('auditoria_crm')
+                .schema('audit')
+                .from('logs')
                 .select('*')
-                .eq('cliente_id', clientId)
+                .eq('registro_id', clientId)
                 .order('created_at', { ascending: false })
                 .limit(20)
 
             setHistory(h || [])
 
             // 3. Wiki (Notas) - Safe fetch
-            const { data: w } = await supabase.from('cliente_wiki').select('conteudo').eq('cliente_id', clientId).single()
+            const { data: w } = await supabase
+                .from('cliente_wiki')
+                .select('conteudo')
+                .eq('cliente_id', clientId)
+                .single()
             setWiki(w?.conteudo || '')
 
             // 4. Obrigações do Ano/Mês (Schema FISCAL)
@@ -90,7 +95,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             const month = refDate.getMonth() + 1
             const { data: obr } = await supabase
                 .schema('fiscal')
-                .from('calendario')
+                .from('obrigacoes')
                 .select('*, template:template_id(nome, departamento)')
                 .eq('empresa_id', clientId)
                 .eq('ano_referencia', year)
@@ -154,7 +159,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     doc:documento_id(drive_file_id, nome_arquivo)
                 `)
                 .eq('empresa_id', clientId)
-                .order('processado_em', { ascending: false });
+                .order('analisado_em', { ascending: false });
 
             if (error) throw error;
             setMaestroDocs(data || []);
@@ -495,17 +500,17 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="md:col-span-3 bg-neutral-900/50 border border-neutral-800 p-8 rounded-2xl flex flex-col md:flex-row gap-8 items-start md:items-center">
                     <div className="w-24 h-24 bg-neutral-800 border-2 border-emerald-500/20 flex items-center justify-center rounded-2xl shadow-2xl">
-                        <span className="text-3xl font-black text-white italic">{client?.nome?.substring(0, 2).toUpperCase()}</span>
+                        <span className="text-3xl font-black text-white italic">{client?.nome?.substring(0, 2)?.toUpperCase() || 'HB'}</span>
                     </div>
                     <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-3">
-                            <h1 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none">{client?.razao_social || client?.nome}</h1>
+                            <h1 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none">{client?.razao_social || client?.nome || 'CLIENTE MAESTRO'}</h1>
                             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full">Ativo</span>
                         </div>
                         <div className="flex flex-wrap gap-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wide">
-                            <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded border border-neutral-800"><Hash className="w-3.5 h-3.5 text-neutral-600" /> {client?.cnpj_cpf}</span>
-                            <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded border border-neutral-800 text-emerald-500"><Calendar className="w-3.5 h-3.5" /> COMPETÊNCIA: {new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}</span>
-                            <span className="flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20 text-blue-400"><LayoutDashboard className="w-3.5 h-3.5" /> {client?.regime_tributario?.replace('_', ' ')}</span>
+                            <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded border border-neutral-800"><Hash className="w-3.5 h-3.5 text-neutral-600" /> {client?.cnpj_cpf || client?.cnpj || '-'}</span>
+                            <span className="flex items-center gap-1.5 bg-neutral-800/50 px-2 py-1 rounded border border-neutral-800 text-emerald-500"><Calendar className="w-3.5 h-3.5" /> COMPETÊNCIA: {competenciaReferencia ? new Date(competenciaReferencia + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase() : '-'}</span>
+                            <span className="flex items-center gap-1.5 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20 text-blue-400"><LayoutDashboard className="w-3.5 h-3.5" /> {client?.regime_tributario?.replace(/_/g, ' ') || client?.regime_atual || '-'}</span>
                         </div>
                     </div>
                 </div>
@@ -563,7 +568,10 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                         <span className="text-[9px] font-mono text-neutral-600">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
                                                     </div>
                                                     <p className="text-[10px] text-neutral-400 bg-black/40 p-4 border border-neutral-800 rounded-xl leading-relaxed">
-                                                        {typeof log.detalhes === 'string' ? log.detalhes : JSON.stringify(log.detalhes)}
+                                                        {(() => {
+                                                            const d = log.detalhes || log.dados_novos?.detalhes;
+                                                            return typeof d === 'string' ? d : JSON.stringify(d || 'Ação registrada pelo sistema');
+                                                        })()}
                                                     </p>
                                                 </div>
                                             </div>
@@ -670,7 +678,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         ) : (
                                             <div className="space-y-2">
                                                 {certificados.slice(0, 3).map((cert) => {
-                                                    const isVencido = cert.data_vencimento && new Date(cert.data_vencimento) < new Date();
+                                                    const isVencido = cert.validade && new Date(cert.validade) < new Date();
                                                     return (
                                                         <div key={cert.id} className="flex items-center justify-between p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors">
                                                             <div className="flex items-center gap-3">
@@ -680,7 +688,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                             <div className="text-right">
                                                                 <p className="text-[9px] text-neutral-500 uppercase font-semibold">Vencimento</p>
                                                                 <span className={`text-[10px] font-bold ${isVencido ? 'text-red-500' : 'text-neutral-300'}`}>
-                                                                    {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString('pt-BR') : 'Sem data'}
+                                                                    {cert.validade ? new Date(cert.validade).toLocaleDateString('pt-BR') : 'Sem data'}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -930,7 +938,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {['DAS', 'FGTS', 'INSS', 'DCTFWeb', 'Folha de Pagamento'].map((tipo) => {
-                                        const ob = obrigacoes.find(o => o.tipo.toUpperCase() === tipo.toUpperCase());
+                                        const ob = obrigacoes.find(o => (o.template?.nome || '').toUpperCase() === tipo.toUpperCase());
                                         const status = ob?.status || 'pendente';
 
                                         return (

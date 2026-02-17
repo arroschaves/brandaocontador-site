@@ -5,11 +5,13 @@ import { Clock, CheckCircle2, AlertTriangle, Trash2, Edit2, Filter } from 'lucid
 
 interface Agendamento {
     id: string
-    tipo_pendencia: string
+    titulo: string // Novo: workflow.tarefas
+    tipo_pendencia?: string // Legado: agendamentos_pendencias
     subtipo?: string
     descricao: string
-    data_vencimento: string
-    status: 'pendente' | 'concluido' | 'atrasado' | 'cancelado'
+    data_limite: string // Novo: workflow.tarefas
+    data_vencimento?: string // Legado: agendamentos_pendencias
+    status: 'PENDENTE' | 'CONCLUIDA' | 'ATRASADA' | 'CANCELADA' | 'pendente' | 'concluido' | 'atrasado' | 'cancelado'
     alertas_config?: any
     metadata?: any
 }
@@ -27,14 +29,17 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
 
     // Filtrar agendamentos
     const agendamentosFiltrados = agendamentos.filter(ag => {
-        if (filtroStatus !== 'todos' && ag.status !== filtroStatus) return false
-        if (filtroTipo !== 'todos' && ag.tipo_pendencia !== filtroTipo) return false
+        const normStatus = ag.status?.toLowerCase()
+        if (filtroStatus !== 'todos' && normStatus !== filtroStatus) return false
+        if (filtroTipo !== 'todos' && (ag.titulo || '').includes(filtroTipo)) return false
         return true
     })
 
     // Ordenar por data de vencimento (mais próximos primeiro)
     const agendamentosOrdenados = [...agendamentosFiltrados].sort((a, b) => {
-        return new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()
+        const dateA = a.data_limite || a.data_vencimento || ''
+        const dateB = b.data_limite || b.data_vencimento || ''
+        return new Date(dateA).getTime() - new Date(dateB).getTime()
     })
 
     // Calcular dias restantes
@@ -48,10 +53,11 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
 
     // Cor e ícone por status
     const getStatusInfo = (status: string, diasRestantes: number) => {
-        if (status === 'concluido') {
+        const s = status?.toLowerCase()
+        if (s === 'concluido' || s === 'concluida') {
             return { color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', icon: CheckCircle2, label: 'Concluído' }
         }
-        if (status === 'atrasado' || diasRestantes < 0) {
+        if (s === 'atrasado' || s === 'atrasada' || diasRestantes < 0) {
             return { color: 'text-red-500 bg-red-500/10 border-red-500/20', icon: AlertTriangle, label: 'Atrasado' }
         }
         if (diasRestantes <= 3) {
@@ -61,7 +67,7 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
     }
 
     // Tipos de pendências únicos para filtro
-    const tiposUnicos = Array.from(new Set(agendamentos.map(a => a.tipo_pendencia)))
+    const tiposUnicos = Array.from(new Set(agendamentos.map(a => a.titulo || a.tipo_pendencia || 'OUTRO')))
 
     return (
         <div className="space-y-6">
@@ -110,7 +116,8 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
                     </div>
                 ) : (
                     agendamentosOrdenados.map((ag) => {
-                        const diasRestantes = getDiasRestantes(ag.data_vencimento)
+                        const dataVenc = ag.data_limite || ag.data_vencimento || ''
+                        const diasRestantes = getDiasRestantes(dataVenc)
                         const statusInfo = getStatusInfo(ag.status, diasRestantes)
                         const StatusIcon = statusInfo.icon
 
@@ -132,7 +139,7 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
                                                 {ag.descricao}
                                             </h4>
                                             <span className="text-[7px] bg-neutral-800 px-2 py-0.5 rounded font-black uppercase text-neutral-500">
-                                                {ag.tipo_pendencia.replace('_', ' ')}
+                                                {(ag.titulo || ag.tipo_pendencia || 'OUTRO').replace('_', ' ')}
                                             </span>
                                             {ag.subtipo && (
                                                 <span className="text-[7px] bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-black uppercase text-emerald-500">
@@ -142,8 +149,8 @@ export default function AgendaList({ agendamentos, onMarcarConcluido, onEditar, 
                                         </div>
 
                                         <div className="flex items-center gap-4 text-[9px] font-mono text-neutral-600">
-                                            <span>Vencimento: {new Date(ag.data_vencimento).toLocaleDateString('pt-BR')}</span>
-                                            {ag.status !== 'concluido' && (
+                                            <span>Vencimento: {new Date(ag.data_limite || ag.data_vencimento || '').toLocaleDateString('pt-BR')}</span>
+                                            {ag.status?.toLowerCase() !== 'concluido' && (
                                                 <span className={diasRestantes < 0 ? 'text-red-500 font-bold' : diasRestantes <= 3 ? 'text-amber-500 font-bold' : ''}>
                                                     {diasRestantes < 0 ? `${Math.abs(diasRestantes)} dias atrasado` : `${diasRestantes} dias restantes`}
                                                 </span>

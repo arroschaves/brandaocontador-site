@@ -5,11 +5,13 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, AlertTriang
 
 interface Agendamento {
     id: string
-    tipo_pendencia: string
+    titulo: string
+    tipo_pendencia?: string // Backward compatibility
     subtipo?: string
     descricao: string
-    data_vencimento: string
-    status: 'pendente' | 'concluido' | 'atrasado' | 'cancelado'
+    data_limite: string
+    data_vencimento?: string // Backward compatibility
+    status: string
 }
 
 interface AgendaCalendarProps {
@@ -58,14 +60,17 @@ export default function AgendaCalendar({ agendamentos, onDayClick }: AgendaCalen
     const getAgendamentosDoDia = (date: Date | null) => {
         if (!date) return []
         const dateStr = date.toISOString().split('T')[0]
-        return agendamentos.filter(a => a.data_vencimento === dateStr)
+        return agendamentos.filter(a => (a.data_limite || a.data_vencimento) === dateStr)
     }
 
     // Determinar cor do badge por status
     const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'atrasado': return 'bg-red-500'
-            case 'concluido': return 'bg-emerald-500'
+        const s = status?.toLowerCase()
+        switch (s) {
+            case 'atrasado':
+            case 'atrasada': return 'bg-red-500'
+            case 'concluido':
+            case 'concluida': return 'bg-emerald-500'
             case 'pendente': return 'bg-amber-500'
             default: return 'bg-neutral-600'
         }
@@ -88,7 +93,7 @@ export default function AgendaCalendar({ agendamentos, onDayClick }: AgendaCalen
                             {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}
                         </h3>
                         <p className="text-[9px] font-mono text-neutral-600 uppercase">
-                            {agendamentos.filter(a => a.status === 'pendente').length} pendências ativas
+                            {agendamentos.filter(a => a.status?.toLowerCase() === 'pendente').length} pendências ativas
                         </p>
                     </div>
                 </div>

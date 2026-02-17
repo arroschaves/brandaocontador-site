@@ -19,14 +19,22 @@ export async function logAudit({ cliente_id, acao, detalhes, request }: AuditOpt
             userAgent = request.headers.get('user-agent') || 'unknown';
         }
 
-        const { error } = await supabase.from('auditoria_crm').insert({
-            cliente_id,
-            acao,
-            detalhes,
-            ip_address: ip,
-            user_agent: userAgent,
-            created_at: new Date().toISOString()
-        });
+        const { error } = await supabase
+            .schema('audit')
+            .from('logs')
+            .insert({
+                usuario_id: (await supabase.auth.getUser()).data.user?.id || '00000000-0000-0000-0000-000000000000',
+                tabela: 'core.empresas',
+                acao,
+                registro_id: cliente_id,
+                antes: null,
+                dados_novos: {
+                    detalhes,
+                    ip_address: ip,
+                    user_agent: userAgent
+                },
+                created_at: new Date().toISOString()
+            });
 
         if (error) console.error('[Audit Log Error]:', error.message);
     } catch (err) {

@@ -24,16 +24,23 @@ export async function GET(
 
         // Query base
         let query = supabase
-            .from('agendamentos_pendencias')
+            .schema('workflow')
+            .from('tarefas')
             .select('*')
-            .eq('cliente_id', clientId)
-            .order('data_vencimento', { ascending: true })
+            .eq('empresa_id', clientId)
+            .order('data_limite', { ascending: true })
 
         // Aplicar filtros
-        if (status) query = query.eq('status', status)
-        if (tipo) query = query.eq('tipo_pendencia', tipo)
-        if (dataInicio) query = query.gte('data_vencimento', dataInicio)
-        if (dataFim) query = query.lte('data_vencimento', dataFim)
+        if (status) {
+            let s = status.toUpperCase()
+            if (s === 'CONCLUIDO') s = 'CONCLUIDA'
+            if (s === 'ATRASADO') s = 'ATRASADA'
+            if (s === 'CANCELADO') s = 'CANCELADA'
+            query = query.eq('status', s)
+        }
+        if (tipo) query = query.ilike('titulo', `%${tipo}%`)
+        if (dataInicio) query = query.gte('data_limite', dataInicio)
+        if (dataFim) query = query.lte('data_limite', dataFim)
 
         const { data, error } = await query
 
@@ -91,16 +98,15 @@ export async function POST(
 
         // Criar agendamento
         const { data, error } = await supabase
-            .from('agendamentos_pendencias')
+            .schema('workflow')
+            .from('tarefas')
             .insert({
-                cliente_id: clientId,
-                tipo_pendencia,
-                subtipo,
+                empresa_id: clientId,
+                titulo: `[${tipo_pendencia}] ${subtipo || ''}`,
                 descricao,
-                data_vencimento,
-                alertas_config: alertas_config || { dias_antes: [7, 3, 1], canais: ['sistema'] },
-                metadata,
-                status: 'pendente'
+                data_limite: data_vencimento,
+                status: 'PENDENTE',
+                prioridade: 3
             })
             .select()
             .single()
@@ -133,7 +139,15 @@ export async function PATCH(
     try {
         const { id: clientId } = await params
         const body = await request.json()
-        const { agendamentoId, ...updates } = body
+        const { agendamentoId, status, ...updates } = body
+
+        if (status) {
+            let s = status.toUpperCase()
+            if (s === 'CONCLUIDO') s = 'CONCLUIDA'
+            if (s === 'ATRASADO') s = 'ATRASADA'
+            if (s === 'CANCELADO') s = 'CANCELADA'
+            updates.status = s
+        }
 
         if (!agendamentoId) {
             return NextResponse.json(
@@ -146,10 +160,11 @@ export async function PATCH(
 
         // Atualizar agendamento
         const { data, error } = await supabase
-            .from('agendamentos_pendencias')
+            .schema('workflow')
+            .from('tarefas')
             .update(updates)
             .eq('id', agendamentoId)
-            .eq('cliente_id', clientId) // Garantir que pertence ao cliente
+            .eq('empresa_id', clientId)
             .select()
             .single()
 
@@ -194,10 +209,11 @@ export async function DELETE(
 
         // Deletar agendamento
         const { error } = await supabase
-            .from('agendamentos_pendencias')
+            .schema('workflow')
+            .from('tarefas')
             .delete()
             .eq('id', agendamentoId)
-            .eq('cliente_id', clientId) // Garantir que pertence ao cliente
+            .eq('empresa_id', clientId)
 
         if (error) throw error
 
