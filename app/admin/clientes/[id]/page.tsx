@@ -139,13 +139,39 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         }
     }, [clientId])
 
+    const [maestroDocs, setMaestroDocs] = useState<any[]>([])
+    const [loadingMaestro, setLoadingMaestro] = useState(false)
+
+    const fetchMaestroVision = useCallback(async () => {
+        setLoadingMaestro(true)
+        try {
+            const { data, error } = await supabase
+                .schema('compliance')
+                .from('documentos_processados')
+                .select(`
+                    *,
+                    doc:documento_id(drive_file_id, nome_arquivo)
+                `)
+                .eq('empresa_id', clientId)
+                .order('processado_em', { ascending: false });
+
+            if (error) throw error;
+            setMaestroDocs(data || []);
+        } catch (err) {
+            console.error('Erro ao buscar Maestro Vision:', err);
+        } finally {
+            setLoadingMaestro(false)
+        }
+    }, [clientId, supabase])
+
     useEffect(() => {
         if (clientId) {
             fetchClientData()
             fetchCertificados()
             fetchAgendamentos()
+            fetchMaestroVision()
         }
-    }, [clientId, fetchClientData, fetchCertificados, fetchAgendamentos])
+    }, [clientId, fetchClientData, fetchCertificados, fetchAgendamentos, fetchMaestroVision])
 
     async function handleSync() {
         setSyncing(true)
@@ -502,6 +528,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                             { id: 'timeline', label: 'Overview', icon: History },
                             { id: 'wiki', label: 'Dossiê Técnico', icon: FileText },
                             { id: 'docs', label: 'Arquivos & Drive', icon: FileCode },
+                            { id: 'maestro', label: 'Maestro Vision', icon: Zap },
                             { id: 'agenda', label: 'Agenda', icon: Calendar },
                             { id: 'ia', label: 'IA Insights', icon: Activity }
                         ].map((t) => (
@@ -713,6 +740,101 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'maestro' && (
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-amber-500 text-black rounded-xl shadow-lg shadow-amber-500/20">
+                                            <Zap className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-white italic uppercase tracking-tight">Maestro Vision Engine</h3>
+                                            <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em]">Inteligência Artificial e Conformidade Documental</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={fetchMaestroVision}
+                                        className="p-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-neutral-400 transition-all"
+                                    >
+                                        <RefreshCw className={`w-4 h-4 ${loadingMaestro ? 'animate-spin' : ''}`} />
+                                    </button>
+                                </div>
+
+                                {loadingMaestro ? (
+                                    <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                        <Activity className="w-8 h-8 text-amber-500 animate-spin" />
+                                        <p className="text-[10px] font-mono text-neutral-500 uppercase">Varrendo registros soberanos...</p>
+                                    </div>
+                                ) : maestroDocs.length === 0 ? (
+                                    <div className="py-20 text-center bg-black/40 border border-neutral-800 rounded-2xl border-dashed">
+                                        <Cpu className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
+                                        <h4 className="text-sm font-black text-neutral-500 uppercase italic">Aguardando Processamento</h4>
+                                        <p className="text-[10px] text-neutral-600 mt-2 max-w-xs mx-auto">
+                                            Os documentos enviados via MaestroSync ainda não passaram pelo radar de inteligência para este cliente.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4">
+                                        {maestroDocs.map((doc) => (
+                                            <div key={doc.id} className="group bg-black border border-neutral-800 p-6 rounded-2xl hover:border-amber-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-black/20">
+                                                <div className="flex items-center gap-5">
+                                                    <div className="w-14 h-14 bg-neutral-900 rounded-xl flex items-center justify-center border border-neutral-800 group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all">
+                                                        <FileText className="w-7 h-7 text-neutral-600 group-hover:text-amber-500 transition-colors" />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[16px] font-black text-white italic uppercase tracking-tight">{doc.tipo}</span>
+                                                            <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase ${doc.status_processamento === 'sucesso' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
+                                                                {doc.status_processamento}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-[10px] font-mono text-neutral-500 uppercase truncate max-w-[200px]">
+                                                            {doc.doc?.nome_arquivo || 'ARQUIVO_PROCESSADO.pdf'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-wrap gap-8 items-center bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/50">
+                                                    <div className="text-center md:text-left">
+                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Competência</p>
+                                                        <p className="text-[12px] font-black text-neutral-300">
+                                                            {doc.competencia ? new Date(doc.competencia + 'T12:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '-'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-center md:text-left">
+                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Vencimento</p>
+                                                        <p className="text-[12px] font-black text-emerald-500 italic">
+                                                            {doc.vencimento ? new Date(doc.vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-center md:text-left">
+                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Valor Extraído</p>
+                                                        <p className="text-[14px] font-black text-white tracking-tight tabular-nums">
+                                                            R$ {doc.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    {doc.doc?.drive_file_id && (
+                                                        <a
+                                                            href={`https://drive.google.com/open?id=${doc.doc.drive_file_id}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="p-3 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-xl border border-neutral-800 transition-all"
+                                                            title="Ver Arquivo Original"
+                                                        >
+                                                            <ExternalLink className="w-5 h-5" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
 

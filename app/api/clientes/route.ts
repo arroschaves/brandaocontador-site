@@ -12,15 +12,16 @@ import { NextResponse, NextRequest } from 'next/server'
  * GET: Lista todos os clientes (com filtros opcionais).
  */
 
-// Campos TEXT seguros — correspondentes ao formulário do CRM
+// Campos TEXT seguros — correspondentes ao domínio oficial do banco de dados
 const CAMPOS_TEXT = [
-    'nome',
-    'cnpj_cpf',
-    'telefone_whatsapp',
-    'email',
+    'documento',
     'razao_social',
+    'nome_fantasia',
+    'email',
+    'telefone',
     'regime_tributario',
     'cnae_principal',
+    'cnaes_secundarios',
     'logradouro',
     'numero',
     'bairro',
@@ -30,26 +31,15 @@ const CAMPOS_TEXT = [
     'inscricao_estadual',
     'inscricao_municipal',
     'status_rfb',
-    'telefone',
     'natureza_juridica',
     'porte',
-    'atividade_principal',
     'tipo_pessoa',
-    'cnaes_secundarios',
     'atendimento_automatico',
-    'vencimento_alvara_funcionamento',
-    'vencimento_alvara_sanitario',
-    'vencimento_alvara_bombeiros',
-    'vencimento_alvara_ambiental',
-    'vencimento_certidao_negativa_federal',
-    'vencimento_certidao_negativa_estadual',
-    'vencimento_certidao_negativa_municipal',
-    'vencimento_certidao_fgts',
 ];
 
 // Campos DATE — precisam de validação extra
 const CAMPOS_DATE = [
-    'data_abertura',
+    'inicio_atividade',
     'data_situacao_cadastral',
     'vencimento_alvara_funcionamento',
     'vencimento_alvara_sanitario',

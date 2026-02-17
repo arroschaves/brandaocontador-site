@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 source: 'cnpja',
-                nome: data.alias || data.company?.name || data.name,
+                nome_fantasia: data.alias || data.company?.name || data.name,
                 razao_social: data.name,
                 email: data.emails?.[0]?.address || '',
                 telefone: data.phones?.[0] ? `${data.phones[0].area}${data.phones[0].number}` : '',
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
                 natureza_juridica: data.nature?.text || '',
                 porte: data.size?.text || data.company?.size?.text || '',
                 capital_social: data.company?.equity || data.equity || 0,
-                data_abertura: data.founded || data.company?.founded || '',
+                inicio_atividade: data.founded || data.company?.founded || '',
                 logradouro: data.address?.street || '',
                 numero: data.address?.number || '',
                 bairro: data.address?.district || '',
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
 
             return NextResponse.json({
                 source: 'brasilapi',
-                nome: data.nome_fantasia || data.razao_social,
+                nome_fantasia: data.nome_fantasia || data.razao_social,
                 razao_social: data.razao_social,
                 email: data.email || '',
                 telefone: data.ddd_telefone_1 || '',
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
                 natureza_juridica: data.natureza_juridica || '',
                 porte: data.porte || '',
                 capital_social: data.capital_social || 0,
-                data_abertura: data.data_inicio_atividade || '',
+                inicio_atividade: data.data_inicio_atividade || '',
                 logradouro: data.logradouro || '',
                 numero: data.numero || '',
                 bairro: data.bairro || '',

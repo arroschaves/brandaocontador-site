@@ -20,53 +20,29 @@ export default function VencimentosPage() {
 
     const fetchVencimentos = useCallback(async () => {
         try {
-            // Buscamos empresas que tenham algum vencimento (Schema CORE)
+            setLoading(true);
+            // Agora usamos a View Soberana de Radar que unifica IA + Certificados + Obrigações
             const { data, error } = await supabase
-                .schema('core')
-                .from('empresas')
-                .select(`
-                    id, 
-                    razao_social, 
-                    vencimento_alvara_funcionamento, 
-                    vencimento_alvara_sanitario, 
-                    vencimento_alvara_bombeiros, 
-                    vencimento_alvara_ambiental,
-                    drive_folder_id
-                `);
+                .from('vw_radar_vencimentos')
+                .select('*')
+                .order('vencimento', { ascending: true });
 
             if (error) throw error;
 
-            // Transformar em lista de eventos de vencimento
-            const events: any[] = [];
-            data?.forEach((c: any) => {
-                const mapeamento = [
-                    { field: 'vencimento_alvara_funcionamento', label: 'Alvará Funcionamento' },
-                    { field: 'vencimento_alvara_sanitario', label: 'Alvará Sanitário' },
-                    { field: 'vencimento_alvara_bombeiros', label: 'Alvará Bombeiros' },
-                    { field: 'vencimento_alvara_ambiental', label: 'Alvará Ambiental' },
-                    { field: 'vencimento_certificado_a1', label: 'Certificado A1' },
-                    { field: 'vencimento_certificado_a3', label: 'Certificado A3' },
-                ];
+            // Mapear para o formato do componente
+            const events = data?.map((v: any) => ({
+                id: `${v.origem}-${v.vencimento}-${v.empresa}`,
+                cliente: v.empresa,
+                tipo: v.descricao,
+                data: v.vencimento,
+                valor: v.valor,
+                origem: v.origem,
+                folder: null // A view pode ser estendida para trazer o drive_id se necessário
+            })) || [];
 
-                mapeamento.forEach(m => {
-                    const client = c as any;
-                    if (client[m.field]) {
-                        events.push({
-                            id: `${c.id}-${m.field}`,
-                            cliente: c.razao_social,
-                            tipo: m.label,
-                            data: client[m.field],
-                            folder: c.drive_folder_id
-                        });
-                    }
-                });
-            });
-
-            // Ordenar por data mais próxima
-            events.sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
             setVencimentos(events);
         } catch (err) {
-            console.error('Erro ao buscar vencimentos:', err);
+            console.error('Erro ao buscar radar de vencimentos:', err);
         } finally {
             setLoading(false);
         }
@@ -144,6 +120,14 @@ export default function VencimentosPage() {
                                                 <Clock className="w-3.5 h-3.5" />
                                                 Vence em: {new Date(v.data).toLocaleDateString('pt-BR')}
                                             </span>
+                                            {v.valor > 0 && (
+                                                <>
+                                                    <span>•</span>
+                                                    <span className="font-bold text-emerald-500">
+                                                        R$ {v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                    </span>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

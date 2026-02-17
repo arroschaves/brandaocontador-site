@@ -101,7 +101,31 @@ export default function AdminDashboard() {
                 obrCounts: {}
             });
 
-            // 4. Últimas atividades 
+            // 4. Radar de inteligência (Maestro Vision + Certificados + Obrigações)
+            const { data: radarData } = await supabase
+                .from('vw_radar_vencimentos')
+                .select('*')
+                .order('vencimento', { ascending: true })
+                .limit(5);
+
+            if (radarData) {
+                const today = new Date();
+                const formatted = radarData.map((v: any) => {
+                    const due = new Date(v.vencimento);
+                    const diff = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return {
+                        id: `${v.origem}-${v.vencimento}`,
+                        cliente: v.empresa,
+                        tipo: v.descricao,
+                        data: v.vencimento,
+                        valor: v.valor,
+                        diffDays: diff
+                    };
+                });
+                setVencimentos(formatted);
+            }
+
+            // 5. Últimas atividades 
             const { data: actData } = await supabase
                 .schema('audit')
                 .from('logs')
@@ -419,6 +443,14 @@ export default function AdminDashboard() {
                                                             <Clock className="w-2.5 h-2.5" />
                                                             {new Date(v.data).toLocaleDateString('pt-BR')}
                                                         </span>
+                                                        {v.valor > 0 && (
+                                                            <>
+                                                                <span className="text-[9px] text-muted-foreground">•</span>
+                                                                <span className="text-[9px] font-bold text-emerald-500">
+                                                                    R$ {v.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                </span>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

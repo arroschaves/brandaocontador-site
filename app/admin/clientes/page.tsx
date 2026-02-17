@@ -283,16 +283,16 @@ function ClientesContent() {
 
             setFormData((prev: any) => ({
                 ...prev,
-                nome: data.nome || prev.nome,
+                nome_fantasia: data.nome_fantasia || prev.nome_fantasia,
                 razao_social: data.razao_social || prev.razao_social,
                 email: data.email || prev.email,
-                telefone_whatsapp: data.telefone || prev.telefone_whatsapp,
+                telefone: data.telefone || prev.telefone,
                 cnae_principal: data.cnae_principal || prev.cnae_principal,
                 cnaes_secundarios: data.cnaes_secundarios || prev.cnaes_secundarios,
                 natureza_juridica: data.natureza_juridica || prev.natureza_juridica,
                 porte: data.porte || prev.porte,
                 capital_social: data.capital_social || prev.capital_social,
-                data_abertura: data.data_abertura || prev.data_abertura,
+                inicio_atividade: data.inicio_atividade || prev.inicio_atividade,
                 regime_tributario: data.regime_tributario || prev.regime_tributario,
                 status_rfb: data.status_rfb || 'ATIVA',
                 logradouro: data.logradouro || prev.logradouro,
@@ -508,15 +508,15 @@ function ClientesContent() {
                                                             href={`/admin/clientes/${c.id}`}
                                                             className="text-foreground font-bold hover:text-primary transition-colors text-[15px] tracking-tight leading-tight"
                                                         >
-                                                            {c.nome || c.razao_social}
+                                                            {c.nome_fantasia || c.razao_social}
                                                         </Link>
-                                                        {c.nome && c.razao_social && c.nome !== c.razao_social && (
+                                                        {c.nome_fantasia && c.razao_social && c.nome_fantasia !== c.razao_social && (
                                                             <span className="text-[10px] text-muted-foreground block truncate max-w-[250px] mt-0.5">
                                                                 {c.razao_social}
                                                             </span>
                                                         )}
                                                         <div className="flex items-center gap-2.5 mt-1.5">
-                                                            <span className="text-[11px] font-medium text-muted-foreground/80 font-mono tracking-tight">{formatCNPJ(c.cnpj_cpf?.toString())}</span>
+                                                            <span className="text-[11px] font-medium text-muted-foreground/80 font-mono tracking-tight">{formatCNPJ(c.documento?.toString())}</span>
                                                             {c.isCertNearExp && (
                                                                 <div className="flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-full">
                                                                     <div className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-pulse" />
@@ -625,8 +625,8 @@ function ClientesContent() {
                                 <div className="flex gap-2">
                                     <input required className="flex-1 bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 transition-all text-foreground"
                                         placeholder="CNPJ ou CPF para consulta"
-                                        value={formData.cnpj_cpf} onChange={e => setFormData({ ...formData, cnpj_cpf: e.target.value })} />
-                                    {formData.cnpj_cpf?.replace(/\D/g, '').length === 14 && (
+                                        value={formData.documento || ''} onChange={e => setFormData({ ...formData, documento: e.target.value })} />
+                                    {formData.documento?.replace(/\D/g, '').length === 14 && (
                                         <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="btn-modern shadow-primary/20 px-6">
                                             {consulting ? <Loader2 className="animate-spin w-4 h-4" /> : 'Consultar'}
                                         </button>
@@ -643,7 +643,7 @@ function ClientesContent() {
                                 <div className="space-y-2 col-span-2">
                                     <label htmlFor="apelido" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Nome Fantasia / Apelido</label>
                                     <input id="apelido" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-bold text-primary focus:border-primary outline-none transition-all shadow-sm"
-                                        value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
+                                        value={formData.nome_fantasia || ''} onChange={e => setFormData({ ...formData, nome_fantasia: e.target.value })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="regime_tributario" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Regime Fiscal</label>
@@ -663,10 +663,10 @@ function ClientesContent() {
                                         value={formData.status_rfb || ''} onChange={e => setFormData({ ...formData, status_rfb: e.target.value })} />
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="telefone_whatsapp" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">WhatsApp</label>
-                                    <input id="telefone_whatsapp" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                    <label htmlFor="telefone" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">WhatsApp</label>
+                                    <input id="telefone" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
                                         placeholder="67 9..."
-                                        value={formData.telefone_whatsapp || ''} onChange={e => setFormData({ ...formData, telefone_whatsapp: e.target.value })} />
+                                        value={formData.telefone || ''} onChange={e => setFormData({ ...formData, telefone: e.target.value })} />
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="email_fiscal" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">E-mail Fiscal</label>
@@ -747,9 +747,9 @@ function ClientesContent() {
                                         value={formData.capital_social || ''} onChange={e => setFormData({ ...formData, capital_social: e.target.value })} />
                                 </div>
                                 <div className="space-y-2">
-                                    <label htmlFor="data_abertura" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Data Abertura</label>
-                                    <input id="data_abertura" type="date" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
-                                        value={formData.data_abertura || ''} onChange={e => setFormData({ ...formData, data_abertura: e.target.value })} />
+                                    <label htmlFor="inicio_atividade" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Data Abertura</label>
+                                    <input id="inicio_atividade" type="date" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
+                                        value={formData.inicio_atividade || ''} onChange={e => setFormData({ ...formData, inicio_atividade: e.target.value })} />
                                 </div>
                             </div>
 
