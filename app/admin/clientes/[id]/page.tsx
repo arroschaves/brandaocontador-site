@@ -9,7 +9,8 @@ import {
     Mic, Image as ImageIcon, FileCode, Search,
     ArrowLeft, MoreVertical, Plus, Hash,
     ChevronRight, LayoutDashboard, Settings,
-    FileSearch, Activity, Cpu, Trash2, ShieldAlert
+    FileSearch, Activity, Cpu, Trash2, ShieldAlert,
+    Zap, RefreshCw
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
