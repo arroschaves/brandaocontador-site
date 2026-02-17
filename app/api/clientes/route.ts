@@ -2,6 +2,7 @@
  * Última atualização: 2026-02-12 10:10 (Forçando Deploy)
  */
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse, NextRequest } from 'next/server'
 
 /**
@@ -170,7 +171,7 @@ async function triggerDriveAutomation(clientData: any): Promise<void> {
 export async function POST(request: NextRequest) {
     try {
         const rawData = await request.json();
-        const supabase = await createClient();
+        const supabase = createAdminClient();
 
         // 1. Sanitizar dados — remove campos inválidos, valida datas
         const formData = sanitizeFormData(rawData);

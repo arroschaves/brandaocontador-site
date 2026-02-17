@@ -636,12 +636,12 @@ function ClientesContent() {
 
                             <div className="grid grid-cols-2 gap-5">
                                 <div className="space-y-2 col-span-2">
-                                    <label htmlFor="razao_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Razão Social</label>
-                                    <input id="razao_social" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground focus:border-primary/40 outline-none transition-all"
+                                    <label htmlFor="razao_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Razão Social (Nome Empresarial)</label>
+                                    <input id="razao_social" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground focus:border-primary/40 outline-none transition-all shadow-sm"
                                         value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
                                 </div>
                                 <div className="space-y-2 col-span-2">
-                                    <label htmlFor="apelido" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Apelido / Nome Curto</label>
+                                    <label htmlFor="apelido" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Nome Fantasia / Apelido</label>
                                     <input id="apelido" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-bold text-primary focus:border-primary outline-none transition-all shadow-sm"
                                         value={formData.nome || ''} onChange={e => setFormData({ ...formData, nome: e.target.value })} />
                                 </div>
@@ -653,6 +653,7 @@ function ClientesContent() {
                                         <option value="SIMPLES_NACIONAL">SIMPLES NACIONAL</option>
                                         <option value="LUCRO_PRESUMIDO">LUCRO PRESUMIDO</option>
                                         <option value="LUCRO_REAL">LUCRO REAL</option>
+                                        <option value="MEI">MEI</option>
                                         <option value="PESSOA_FISICA">PF (AGRO)</option>
                                     </select>
                                 </div>
@@ -673,17 +674,83 @@ function ClientesContent() {
                                         placeholder="contato@..."
                                         value={formData.email || ''} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                                 </div>
-                                <div className="space-y-2">
-                                    <label htmlFor="inscricao_estadual" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Inscrição Estadual</label>
-                                    <input id="inscricao_estadual" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none"
-                                        value={formData.inscricao_estadual || ''} onChange={e => setFormData({ ...formData, inscricao_estadual: e.target.value })} />
+
+                                {/* Seção de Endereço */}
+                                <div className="col-span-2 pt-4">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="h-px flex-1 bg-border/40"></div>
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Endereço</span>
+                                        <div className="h-px flex-1 bg-border/40"></div>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="cep" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">CEP</label>
                                     <input id="cep" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground outline-none"
                                         value={formData.cep || ''} onChange={e => setFormData({ ...formData, cep: e.target.value })} />
                                 </div>
-                                {/* Campo Drive removido para evitar edição manual. O N8N gerencia isso. */}
+                                <div className="space-y-2">
+                                    <label htmlFor="cidade" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Cidade / UF</label>
+                                    <div className="flex gap-2">
+                                        <input id="cidade" className="flex-[3] bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                            value={formData.cidade || ''} onChange={e => setFormData({ ...formData, cidade: e.target.value })} />
+                                        <input id="estado" maxLength={2} className="flex-1 bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none text-center"
+                                            value={formData.estado || ''} onChange={e => setFormData({ ...formData, estado: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="logradouro" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Logradouro / Rua</label>
+                                    <div className="flex gap-2">
+                                        <input id="logradouro" className="flex-[3] bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                            value={formData.logradouro || ''} onChange={e => setFormData({ ...formData, logradouro: e.target.value })} />
+                                        <input id="numero" className="flex-1 bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                            placeholder="Nº"
+                                            value={formData.numero || ''} onChange={e => setFormData({ ...formData, numero: e.target.value })} />
+                                    </div>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="bairro" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Bairro</label>
+                                    <input id="bairro" className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-medium text-foreground outline-none"
+                                        value={formData.bairro || ''} onChange={e => setFormData({ ...formData, bairro: e.target.value })} />
+                                </div>
+
+                                {/* Seção Técnica */}
+                                <div className="col-span-2 pt-4">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <div className="h-px flex-1 bg-border/40"></div>
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Dossiê Técnico</span>
+                                        <div className="h-px flex-1 bg-border/40"></div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="cnae_principal" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">CNAE Principal</label>
+                                    <textarea id="cnae_principal" rows={2} className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-medium text-foreground outline-none resize-none"
+                                        value={formData.cnae_principal || ''} onChange={e => setFormData({ ...formData, cnae_principal: e.target.value })} />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="cnaes_secundarios" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">CNAEs Secundários</label>
+                                    <textarea id="cnaes_secundarios" rows={3} className="w-full bg-card border border-border/60 rounded-xl p-3 text-[10px] font-medium text-muted-foreground outline-none resize-none"
+                                        value={formData.cnaes_secundarios || ''} onChange={e => setFormData({ ...formData, cnaes_secundarios: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="natureza_juridica" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Natureza Jurídica</label>
+                                    <input id="natureza_juridica" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
+                                        value={formData.natureza_juridica || ''} onChange={e => setFormData({ ...formData, natureza_juridica: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="porte" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Porte</label>
+                                    <input id="porte" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
+                                        value={formData.porte || ''} onChange={e => setFormData({ ...formData, porte: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="capital_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Capital Social</label>
+                                    <input id="capital_social" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-bold text-primary outline-none"
+                                        value={formData.capital_social || ''} onChange={e => setFormData({ ...formData, capital_social: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label htmlFor="data_abertura" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Data Abertura</label>
+                                    <input id="data_abertura" type="date" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
+                                        value={formData.data_abertura || ''} onChange={e => setFormData({ ...formData, data_abertura: e.target.value })} />
+                                </div>
                             </div>
 
                             {/* Action Buttons */}
