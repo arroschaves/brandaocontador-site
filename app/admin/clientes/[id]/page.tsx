@@ -8,9 +8,10 @@ import {
     Lock, Calendar, CheckCircle2, AlertTriangle,
     Mic, Image as ImageIcon, FileCode, Search,
     ArrowLeft, MoreVertical, Plus, Hash,
-    ChevronRight, LayoutDashboard, Settings,
+    ChevronRight, ChevronLeft, LayoutDashboard, Settings,
     FileSearch, Activity, Cpu, Trash2, ShieldAlert,
-    Zap, RefreshCw
+    Zap, RefreshCw, Brain, TrendingUp, AlertCircle,
+    MapPin, Eye
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -24,7 +25,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const { id: clientId } = use(params)
     const router = useRouter()
     const [client, setClient] = useState<any>(null)
-    const [activeTab, setActiveTab] = useState('timeline')
+    const [activeTab, setActiveTab] = useState<string>('timeline')
     const [history, setHistory] = useState<any[]>([])
     const [wiki, setWiki] = useState('')
     const [obrigacoes, setObrigacoes] = useState<any[]>([])
@@ -51,6 +52,8 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
     const supabase = createClient()
 
+    const [selectedDate, setSelectedDate] = useState(new Date())
+
     const fetchClientData = useCallback(async () => {
         setLoading(true)
         setError(null)
@@ -65,34 +68,38 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             if (cErr) throw new Error('Empresa não encontrada.')
             setClient(c)
 
-            // Determinar competência (Mês anterior ao atual se for início do mês)
-            const agora = new Date()
-            const refDate = new Date(agora.getFullYear(), agora.getMonth() - (agora.getDate() < 15 ? 1 : 0), 1)
-            const refStr = refDate.toISOString().split('T')[0]
+            // Determinar competência de exibição baseada na data selecionada
+            const refStr = selectedDate.toISOString().split('T')[0]
             setCompetenciaReferencia(refStr)
 
             // 2. Histórico / Auditoria (Schema AUDIT)
+            // Lendo do esquema audit.logs, filtrando por cliente
             const { data: h } = await supabase
                 .schema('audit')
                 .from('logs')
                 .select('*')
                 .eq('registro_id', clientId)
                 .order('created_at', { ascending: false })
-                .limit(20)
+                .limit(30)
 
             setHistory(h || [])
 
-            // 3. Wiki (Notas) - Safe fetch
-            const { data: w } = await supabase
+            // 3. Wiki (Notas) - Schema CORE
+            const { data: w, error: wErr } = await supabase
+                .schema('core')
                 .from('cliente_wiki')
                 .select('conteudo')
                 .eq('cliente_id', clientId)
-                .single()
+                .maybeSingle()
+
+            if (wErr && wErr.code !== 'PGRST116') {
+                console.warn('Wiki not found or error:', wErr)
+            }
             setWiki(w?.conteudo || '')
 
-            // 4. Obrigações do Ano/Mês (Schema FISCAL)
-            const year = agora.getFullYear()
-            const month = refDate.getMonth() + 1
+            // 4. Obrigações do Ano/Mês Selecionado (Schema FISCAL)
+            const year = selectedDate.getFullYear()
+            const month = selectedDate.getMonth() + 1
             const { data: obr } = await supabase
                 .schema('fiscal')
                 .from('obrigacoes')
@@ -109,41 +116,50 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoading(false)
         }
-    }, [clientId, supabase])
+    }, [clientId, supabase, selectedDate])
 
     const fetchCertificados = useCallback(async () => {
         setLoadingCerts(true)
         try {
-            const res = await fetch(`/api/clientes/certificados?clientId=${clientId}`)
-            const data = await res.json()
-            if (res.ok) {
-                setCertificados(Array.isArray(data) ? data : [])
-            } else {
-                console.error('Erro ao buscar certificados:', data.error)
-            }
+            const { data, error } = await supabase
+                .schema('core')
+                .from('certificados')
+                .select('*')
+                .eq('empresa_id', clientId)
+                .order('data_vencimento', { ascending: true });
+
+            if (error) throw error;
+            setCertificados(data || []);
         } catch (err) {
-            console.error('Erro de rede ao buscar certificados:', err)
+            console.error('Erro ao buscar certificados:', err)
         } finally {
             setLoadingCerts(false)
         }
-    }, [clientId])
+    }, [clientId, supabase])
 
     const fetchAgendamentos = useCallback(async () => {
         setLoadingAgendamentos(true)
         try {
-            const res = await fetch(`/api/clientes/${clientId}/agendamentos`)
-            const data = await res.json()
-            if (res.ok) {
-                setAgendamentos(Array.isArray(data) ? data : [])
-            } else {
-                console.error('Erro ao buscar agendamentos:', data.error)
-            }
+            const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).toISOString().split('T')[0]
+            const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).toISOString().split('T')[0]
+
+            const { data, error } = await supabase
+                .schema('workflow')
+                .from('tarefas')
+                .select('*')
+                .eq('empresa_id', clientId)
+                .gte('data_limite', startOfMonth)
+                .lte('data_limite', endOfMonth)
+                .order('data_limite', { ascending: true });
+
+            if (error) throw error;
+            setAgendamentos(data || []);
         } catch (err) {
-            console.error('Erro de rede ao buscar agendamentos:', err)
+            console.error('Erro ao buscar agendamentos:', err)
         } finally {
             setLoadingAgendamentos(false)
         }
-    }, [clientId])
+    }, [clientId, supabase, selectedDate])
 
     const [maestroDocs, setMaestroDocs] = useState<any[]>([])
     const [loadingMaestro, setLoadingMaestro] = useState(false)
@@ -151,6 +167,10 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const fetchMaestroVision = useCallback(async () => {
         setLoadingMaestro(true)
         try {
+            // Busca documentos processados para a competência selecionada
+            const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1).toISOString().split('T')[0]
+            const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0).toISOString().split('T')[0]
+
             const { data, error } = await supabase
                 .schema('compliance')
                 .from('documentos_processados')
@@ -159,6 +179,8 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     doc:documento_id(drive_file_id, nome_arquivo)
                 `)
                 .eq('empresa_id', clientId)
+                .gte('competencia', startOfMonth)
+                .lte('competencia', endOfMonth)
                 .order('analisado_em', { ascending: false });
 
             if (error) throw error;
@@ -168,7 +190,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoadingMaestro(false)
         }
-    }, [clientId, supabase])
+    }, [clientId, supabase, selectedDate])
 
     useEffect(() => {
         if (clientId) {
@@ -177,7 +199,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
             fetchAgendamentos()
             fetchMaestroVision()
         }
-    }, [clientId, fetchClientData, fetchCertificados, fetchAgendamentos, fetchMaestroVision])
+    }, [clientId, selectedDate, fetchClientData, fetchCertificados, fetchAgendamentos, fetchMaestroVision])
 
     async function handleSync() {
         setSyncing(true)
@@ -475,22 +497,47 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     return (
         <div className="min-h-screen bg-black text-neutral-300 animate-in fade-in duration-500">
             {/* ClickUp Style Breadcrumb & Header */}
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-neutral-900">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-neutral-900 gap-6">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => router.push('/admin/clientes')} className="p-2 hover:bg-neutral-900 transition-colors">
-                        <ArrowLeft className="w-4 h-4" />
+                    <button onClick={() => router.push('/admin/clientes')} className="p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl hover:bg-neutral-900 transition-all text-neutral-400 hover:text-white">
+                        <ArrowLeft className="w-5 h-5" />
                     </button>
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-neutral-600 uppercase tracking-widest">
-                        <Link href="/admin" className="hover:text-neutral-400">ADMIN</Link>
-                        <ChevronRight className="w-3 h-3" />
-                        <Link href="/admin/clientes" className="hover:text-neutral-400">CLIENTES</Link>
-                        <ChevronRight className="w-3 h-3" />
-                        <span className="text-emerald-500">{client?.nome || 'HUB'}</span>
+                    <div className="flex flex-col">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-neutral-600 uppercase tracking-widest">
+                            <Link href="/admin" className="hover:text-neutral-400">ADMIN</Link>
+                            <ChevronRight className="w-3 h-3" />
+                            <Link href="/admin/clientes" className="hover:text-neutral-400">CLIENTES</Link>
+                        </div>
+                        <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">
+                            Hub do Cliente <span className="text-emerald-500">#{client?.nome?.substring(0, 5) || 'MAESTRO'}</span>
+                        </h2>
                     </div>
                 </div>
+
+                <div className="flex items-center bg-neutral-900/80 border border-neutral-800 p-1.5 rounded-2xl gap-2">
+                    <button
+                        onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1))}
+                        className="p-2 hover:bg-neutral-800 rounded-xl text-neutral-500 hover:text-white transition-all"
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div className="px-6 flex flex-col items-center min-w-[160px]">
+                        <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">Competência</span>
+                        <span className="text-[14px] font-black text-white uppercase italic tracking-tight">
+                            {selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(' de ', ' ')}
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 1))}
+                        className="p-2 hover:bg-neutral-800 rounded-xl text-neutral-500 hover:text-white transition-all"
+                    >
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
+
                 <div className="flex items-center gap-3">
-                    <button className="p-2 bg-neutral-900 border border-neutral-800 text-neutral-500 hover:text-white"><Settings className="w-4 h-4" /></button>
-                    <button className="bg-emerald-500 text-black px-4 py-2 text-[10px] font-black uppercase flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+                    <button className="p-2.5 bg-neutral-950 border border-neutral-800 text-neutral-500 hover:text-white rounded-xl hover:bg-neutral-900 transition-all"><Settings className="w-5 h-5" /></button>
+                    <button className="bg-emerald-500 text-black px-6 py-2.5 text-[10px] font-black uppercase flex items-center gap-2 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20">
                         <Plus className="w-4 h-4" /> Nova Demanda
                     </button>
                 </div>
@@ -530,31 +577,40 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 <div className="flex-1 space-y-6">
                     <div className="flex gap-1 border-b border-neutral-900 pb-0.5">
                         {[
-                            { id: 'info', label: 'Informações', icon: Info },
-                            { id: 'timeline', label: 'Overview', icon: History },
+                            { id: 'info', label: 'Cadastro', icon: Info },
+                            { id: 'timeline', label: 'Atividade Recente', icon: History },
                             { id: 'wiki', label: 'Dossiê Técnico', icon: FileText },
-                            { id: 'docs', label: 'Arquivos & Drive', icon: FileCode },
+                            { id: 'docs', label: 'Arquivos Drive', icon: FileCode },
                             { id: 'maestro', label: 'Maestro Vision', icon: Zap },
-                            { id: 'agenda', label: 'Agenda', icon: Calendar },
-                            { id: 'ia', label: 'IA Insights', icon: Activity }
+                            { id: 'agenda', label: 'Calendário / Agenda', icon: Calendar },
+                            { id: 'ia', label: 'Brain IA Insights', icon: Brain }
                         ].map((t) => (
                             <button
                                 key={t.id}
                                 onClick={() => setActiveTab(t.id)}
-                                className={`flex items-center gap-2 px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === t.id ? 'text-white border-b-2 border-emerald-500 bg-neutral-900/40' : 'text-neutral-600 hover:text-neutral-400'}`}
+                                className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === t.id ? 'text-emerald-500 border-b-2 border-emerald-500 bg-emerald-500/5' : 'text-neutral-600 hover:text-neutral-400'}`}
                             >
-                                <t.icon className="w-3.5 h-3.5" />
+                                <t.icon className={`w-3.5 h-3.5 ${activeTab === t.id ? 'animate-pulse' : ''}`} />
                                 {t.label}
                             </button>
                         ))}
                     </div>
 
-                    <div className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-8 min-h-[500px]">
+                    <div className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-8 min-h-[600px] shadow-2xl shadow-black/40">
                         {activeTab === 'timeline' && (
                             <div className="space-y-6">
-                                <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Atividade Recente</h3>
+                                <div className="flex items-center justify-between mb-8">
+                                    <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] italic">Atividade Recente (Fluxo do Sistema)</h3>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                        <span className="text-[9px] font-bold text-neutral-500 uppercase">Audit Log Ativo</span>
+                                    </div>
+                                </div>
                                 {history.length === 0 ? (
-                                    <div className="py-20 text-center opacity-20 italic text-[10px]">Sem movimentos no radar nas últimas 24h.</div>
+                                    <div className="py-20 text-center bg-black/20 border border-dashed border-neutral-800 rounded-2xl">
+                                        <History className="w-10 h-10 text-neutral-800 mx-auto mb-4" />
+                                        <p className="text-[10px] text-neutral-600 uppercase italic">Nenhum registro de auditoria para este período.</p>
+                                    </div>
                                 ) : (
                                     <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-neutral-800">
                                         {history.map((log, i) => (
@@ -564,14 +620,21 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                 </div>
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-[11px] font-black text-white uppercase italic">{log.acao?.replace('_', ' ')}</span>
-                                                        <span className="text-[9px] font-mono text-neutral-600">{new Date(log.created_at).toLocaleString('pt-BR')}</span>
+                                                        <span className="text-[11px] font-black text-white uppercase italic">
+                                                            {log.acao === 'UPLOAD' ? '📁 Arquivo Sincronizado' :
+                                                                log.acao === 'SISTEMA' ? '⚙️ Processamento AI' :
+                                                                    log.acao === 'ACESSO_VAULT' ? '🔐 Acesso ao Vault' :
+                                                                        log.acao === 'VISUALIZACAO_SENHA' ? '👁️ Senha Consultada' :
+                                                                            log.acao === 'EDICAO_CADASTRO' ? '📝 Cadastro Atualizado' :
+                                                                                log.acao === 'ENRIQUECIMENTO' ? '✨ Inteligência de Dados' :
+                                                                                    log.acao?.replace('_', ' ')}
+                                                        </span>
+                                                        <span className="text-[9px] font-mono text-neutral-600">
+                                                            {new Date(log.created_at).toLocaleString('pt-BR')}
+                                                        </span>
                                                     </div>
                                                     <p className="text-[10px] text-neutral-400 bg-black/40 p-4 border border-neutral-800 rounded-xl leading-relaxed">
-                                                        {(() => {
-                                                            const d = log.detalhes || log.dados_novos?.detalhes;
-                                                            return typeof d === 'string' ? d : JSON.stringify(d || 'Ação registrada pelo sistema');
-                                                        })()}
+                                                        {log.detalhes || log.descricao || log.dados_novos?.detalhes || 'Operação registrada pelo núcleo do sistema.'}
                                                     </p>
                                                 </div>
                                             </div>
@@ -583,118 +646,161 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
 
                         {/* NOVA ABA: Informações Cadastrais */}
                         {activeTab === 'info' && (
-                            <div className="space-y-6">
-                                <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-8">Dados Cadastrais Completos</h3>
+                            <div className="space-y-6 animate-in fade-in duration-500">
+                                <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-8 italic">Cadastro Soberano do Cliente</h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Dados Básicos */}
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
-                                            <Info className="w-3 h-3" />
-                                            Identificação
+                                    {/* Identificação */}
+                                    <div className="p-8 bg-black border border-neutral-800 rounded-3xl space-y-6 shadow-2xl shadow-black/40 group hover:border-emerald-500/30 transition-all">
+                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-3">
+                                            <div className="w-5 h-5 bg-neutral-900 rounded-lg flex items-center justify-center border border-neutral-800 group-hover:bg-emerald-500/10 group-hover:border-emerald-500/20 transition-all">
+                                                <Info className="w-3 h-3 text-emerald-500" />
+                                            </div>
+                                            Identificação Legal
                                         </h4>
-                                        <div className="space-y-3">
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Razão Social</p>
-                                                <p className="text-[11px] text-white font-black">{client?.razao_social || '-'}</p>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Razão Social</p>
+                                                <p className="text-[14px] text-white font-black italic uppercase tracking-tighter truncate" title={client?.razao_social}>{client?.razao_social || '-'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Nome Fantasia</p>
-                                                <p className="text-[11px] text-white">{client?.nome || '-'}</p>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Nome Fantasia</p>
+                                                <p className="text-[14px] text-emerald-500 font-black italic uppercase tracking-tighter truncate" title={client?.nome}>{client?.nome || '-'}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">CNPJ / CPF</p>
+                                                <p className="text-[12px] text-white font-mono font-black">{client?.cnpj_cpf || client?.cnpj || '-'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">CNPJ / CPF</p>
-                                                <p className="text-[11px] text-white font-mono">{client?.cnpj_cpf || '-'}</p>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Ins. Estadual</p>
+                                                <p className="text-[12px] text-white font-mono">{client?.inscricao_estadual || 'Isenta'}</p>
                                             </div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Inscrição Estadual</p>
-                                                <p className="text-[11px] text-white font-mono">{client?.inscricao_estadual || 'Isento'}</p>
+                                                <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Ins. Municipal</p>
+                                                <p className="text-[12px] text-white font-mono">{client?.inscricao_municipal || '-'}</p>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Contato */}
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-2">
-                                            <MessageSquare className="w-3 h-3" />
-                                            Contato
-                                        </h4>
-                                        <div className="space-y-3">
+                                {/* Overview Fiscal */}
+                                <div className="p-8 bg-black border border-neutral-800 rounded-3xl space-y-6 shadow-2xl shadow-black/40 group hover:border-blue-500/30 transition-all">
+                                    <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-3">
+                                        <div className="w-5 h-5 bg-neutral-900 rounded-lg flex items-center justify-center border border-neutral-800 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all">
+                                            <Shield className="w-3 h-3 text-blue-500" />
+                                        </div>
+                                        Enquadramento Tributário
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Regime Atual</p>
+                                            <p className="text-[12px] text-blue-400 font-black uppercase italic">{client?.regime_tributario?.replace(/_/g, ' ') || client?.regime_atual || '-'}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Situação RFB</p>
+                                            <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase rounded-full">{client?.status_rfb || 'Ativa'}</span>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Atividade Principal (CNAE)</p>
+                                            <p className="text-[11px] text-neutral-300 leading-relaxed font-medium">
+                                                {client?.cnae_principal ? (
+                                                    <span className="flex flex-col gap-1">
+                                                        <span className="text-white font-bold">{client.cnae_principal}</span>
+                                                        <span className="text-[10px] text-neutral-500">{client.cnaes_secundarios || ''}</span>
+                                                    </span>
+                                                ) : 'Não parametrizado no Cérebro.'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Localização (NOVO) */}
+                                <div className="p-8 bg-black border border-neutral-800 rounded-3xl space-y-6 shadow-2xl shadow-black/40 group hover:border-neutral-500/30 transition-all">
+                                    <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-3">
+                                        <div className="w-5 h-5 bg-neutral-900 rounded-lg flex items-center justify-center border border-neutral-800">
+                                            <MapPin className="w-3 h-3 text-neutral-400" />
+                                        </div>
+                                        Localização / Sede
+                                    </h4>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest mb-1">Endereço Completo</p>
+                                            <p className="text-[12px] text-white font-bold uppercase tracking-tight">
+                                                {client?.logradouro ? `${client.logradouro}, ${client.numero || 'S/N'}` : '-'}
+                                            </p>
+                                            <p className="text-[10px] text-neutral-500 uppercase italic">
+                                                {client?.bairro} {client?.cep ? `• CEP: ${client.cep}` : ''}
+                                            </p>
+                                            <p className="text-[11px] text-neutral-400 font-black">
+                                                {client?.cidade} / {client?.estado}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Contato e Presença */}
+                                <div className="p-8 bg-black border border-neutral-800 rounded-3xl space-y-6 shadow-2xl shadow-black/40 group hover:border-neutral-500/30 transition-all">
+                                    <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-3">
+                                        <div className="w-5 h-5 bg-neutral-900 rounded-lg flex items-center justify-center border border-neutral-800">
+                                            <MessageSquare className="w-3 h-3 text-neutral-400" />
+                                        </div>
+                                        Canais de Comunicação
+                                    </h4>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <div className="flex items-center gap-4 p-3 bg-neutral-900/50 rounded-xl border border-neutral-800">
+                                            <div className="text-emerald-500 font-black text-xs">WA</div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Email</p>
-                                                <p className="text-[11px] text-white">{client?.email || '-'}</p>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-black">WhatsApp</p>
+                                                <p className="text-[11px] text-white font-mono">{client?.telefone_whatsapp || client?.telefone || '-'}</p>
                                             </div>
+                                        </div>
+                                        <div className="flex items-center gap-4 p-3 bg-neutral-900/50 rounded-xl border border-neutral-800">
+                                            <div className="text-blue-500 font-black text-xs">@</div>
                                             <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Telefone</p>
-                                                <p className="text-[11px] text-white font-mono">{client?.telefone || '-'}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[8px] text-neutral-600 uppercase font-bold">Endereço</p>
-                                                <p className="text-[11px] text-white">{client?.endereco || 'Não cadastrado'}</p>
+                                                <p className="text-[8px] text-neutral-600 uppercase font-black">E-mail Fiscal</p>
+                                                <p className="text-[11px] text-white font-mono">{client?.email || '-'}</p>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Tributação */}
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <Info className="w-4 h-4 text-emerald-500" />
-                                            <h4 className="text-xs font-bold text-white uppercase tracking-wide">Overview Fiscal</h4>
+                                {/* Certificados ativos */}
+                                <div className="p-8 bg-black border border-neutral-800 rounded-3xl space-y-6 shadow-2xl shadow-black/40 group hover:border-amber-500/30 transition-all">
+                                    <h4 className="text-[10px] font-black text-neutral-500 uppercase flex items-center gap-3">
+                                        <div className="w-5 h-5 bg-neutral-900 rounded-lg flex items-center justify-center border border-neutral-800">
+                                            <ShieldAlert className="w-3 h-3 text-amber-500" />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div>
-                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Situação Cadastral</p>
-                                                <p className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded inline-block">ATIVA</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Regime Tributário</p>
-                                                <p className="text-xs text-blue-400 font-bold uppercase">{client?.regime_tributario || 'Não Informado'}</p>
-                                            </div>
-                                            <div className="col-span-2">
-                                                <p className="text-[10px] text-neutral-500 uppercase font-semibold mb-1">Atividade Principal (CNAE)</p>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">{client?.cnae_principal ? `${client.cnae_principal} - ${client.cnaes || ''}` : 'Não cadastrado'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Certificados */}
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Shield className="w-4 h-4 text-amber-500" />
-                                                <h4 className="text-xs font-bold text-white uppercase tracking-wide">Certificados Digitais</h4>
-                                            </div>
-                                            {certificados.length > 3 && (
-                                                <button onClick={() => setShowVault(true)} className="text-[10px] text-amber-500 hover:text-amber-400 font-bold uppercase">
-                                                    Ver Todos
-                                                </button>
-                                            )}
-                                        </div>
-
+                                        Proteção Certificados (Vault)
+                                    </h4>
+                                    <div className="space-y-3">
                                         {certificados.length === 0 ? (
-                                            <div className="p-4 rounded-lg bg-neutral-900/30 border border-neutral-800 text-center">
-                                                <p className="text-[10px] text-neutral-500">Nenhum certificado cadastrado</p>
+                                            <div className="p-6 bg-neutral-900/40 border border-dashed border-neutral-800 rounded-2xl text-center">
+                                                <p className="text-[9px] text-neutral-600 uppercase italic">Nenhum certificado no cofre.</p>
                                             </div>
                                         ) : (
-                                            <div className="space-y-2">
-                                                {certificados.slice(0, 3).map((cert) => {
-                                                    const isVencido = cert.validade && new Date(cert.validade) < new Date();
-                                                    return (
-                                                        <div key={cert.id} className="flex items-center justify-between p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg hover:border-neutral-700 transition-colors">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className={`w-2 h-2 rounded-full ${isVencido ? 'bg-red-500' : 'bg-emerald-500'}`} />
-                                                                <span className="text-[11px] text-neutral-200 font-medium">{cert.tipo || 'A1'}</span>
-                                                            </div>
-                                                            <div className="text-right">
-                                                                <p className="text-[9px] text-neutral-500 uppercase font-semibold">Vencimento</p>
-                                                                <span className={`text-[10px] font-bold ${isVencido ? 'text-red-500' : 'text-neutral-300'}`}>
-                                                                    {cert.validade ? new Date(cert.validade).toLocaleDateString('pt-BR') : 'Sem data'}
-                                                                </span>
-                                                            </div>
+                                            certificados.slice(0, 2).map((cert, i) => {
+                                                const isVencendo = cert.data_vencimento && new Date(cert.data_vencimento) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                                                return (
+                                                    <div key={i} className="flex items-center justify-between p-4 bg-neutral-900/30 border border-neutral-800 rounded-2xl">
+                                                        <div>
+                                                            <p className="text-[10px] text-white font-black truncate max-w-[150px] uppercase italic">{cert.nome_arquivo || 'Certificado A1'}</p>
+                                                            <p className={`text-[9px] font-bold mt-0.5 ${isVencendo ? 'text-red-500 animate-pulse' : 'text-emerald-500'}`}>
+                                                                Vence em: {cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'N/D'}
+                                                            </p>
                                                         </div>
-                                                    )
-                                                })}
-                                            </div>
+                                                        <div className="p-2 bg-black border border-neutral-800 rounded-lg">
+                                                            <Lock className="w-3 h-3 text-amber-500" />
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })
+                                        )}
+                                        {certificados.length > 2 && (
+                                            <button onClick={() => setShowVault(true)} className="w-full py-2 text-[9px] font-black text-neutral-500 hover:text-white uppercase transition-all">
+                                                + {certificados.length - 2} certificados no cofre
+                                            </button>
                                         )}
                                     </div>
                                 </div>
@@ -723,29 +829,71 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                         )}
 
                         {activeTab === 'ia' && (
-                            <div className="space-y-6">
-                                <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-emerald-500 text-black rounded-lg"><Cpu className="w-5 h-5" /></div>
-                                        <h3 className="text-white font-black text-sm uppercase italic">Brain Maestro Insights</h3>
-                                    </div>
-                                    <p className="text-neutral-400 text-xs leading-relaxed italic">
-                                        &quot;Baseado nos últimos 5 áudios do WhatsApp e nos arquivos PDF de competência enviados, este cliente tende a enviar o DAS no último dia do vencimento. Recomendo disparo de lembrete preventivo D-2.&quot;
-                                    </p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-2">
-                                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Análise de Risco</p>
-                                        <div className="flex items-center gap-2">
-                                            <Shield className="w-5 h-5 text-emerald-500" />
-                                            <p className="text-sm font-bold text-emerald-400 uppercase">BAIXO RISCO FISCAL</p>
+                            <div className="space-y-8 animate-in fade-in slide-in-from-right duration-700">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/20">
+                                            <Brain className="w-6 h-6 text-black" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white font-black text-sm uppercase tracking-[0.2em] italic">Brain Maestro Predictor</h3>
+                                            <p className="text-[10px] text-neutral-500 uppercase font-black">Motor Preditivo & Análise de Conformidade Soberana</p>
                                         </div>
                                     </div>
-                                    <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-2">
-                                        <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wide">Next Action</p>
-                                        <div className="flex items-center gap-2">
-                                            <Activity className="w-5 h-5 text-blue-500" />
-                                            <p className="text-sm font-bold text-white uppercase">CONCILIAR EXTRATO</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="col-span-1 p-8 bg-black border border-neutral-800 rounded-[2.5rem] space-y-6 group hover:border-emerald-500/40 transition-all">
+                                        <h4 className="text-[10px] font-black text-neutral-600 uppercase tracking-widest flex items-center gap-3">
+                                            <TrendingUp className="w-3 h-3 text-emerald-500" />
+                                            Compliance Score
+                                        </h4>
+                                        <div className="flex items-end gap-3">
+                                            <span className="text-6xl font-black text-white italic leading-none tracking-tighter">
+                                                {Math.round((obrigacoes.filter(o => o.status === 'concluido').length / (obrigacoes.length || 1)) * 100)}
+                                            </span>
+                                            <span className="text-emerald-500 font-black text-xl mb-1">%</span>
+                                        </div>
+                                        <p className="text-[10px] text-neutral-400 leading-relaxed uppercase font-bold italic">Saúde de conformidade para o ciclo de {selectedDate.toLocaleDateString('pt-BR', { month: 'long' })}.</p>
+                                    </div>
+
+                                    <div className="col-span-2 p-8 bg-black border border-neutral-800 rounded-[2.5rem] space-y-6 group hover:border-amber-500/40 transition-all">
+                                        <h4 className="text-[10px] font-black text-neutral-600 uppercase tracking-widest flex items-center gap-3">
+                                            <AlertCircle className="w-3 h-3 text-amber-500" />
+                                            Alertas Preditivos do Maestro
+                                        </h4>
+                                        <div className="space-y-4">
+                                            {certificados.some(c => c.data_vencimento && new Date(c.data_vencimento) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)) ? (
+                                                <div className="flex items-start gap-4 p-5 bg-amber-500/5 border border-amber-500/10 rounded-2xl animate-pulse">
+                                                    <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-1" />
+                                                    <div>
+                                                        <p className="text-[11px] text-white font-black uppercase tracking-tight">Risco de Interrupção Operacional</p>
+                                                        <p className="text-[10px] text-neutral-500 font-medium leading-relaxed mt-1">
+                                                            Certificado Digital ({certificados.find(c => new Date(c.data_vencimento) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))?.nome_arquivo}) expirando em breve.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-start gap-4 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+                                                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-1" />
+                                                    <div>
+                                                        <p className="text-[11px] text-white font-black uppercase tracking-tight">Vigilância Estável</p>
+                                                        <p className="text-[10px] text-neutral-500 font-medium leading-relaxed mt-1">
+                                                            Nenhum risco de conformidade crítica detectado para os próximos 15 dias.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-start gap-4 p-5 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
+                                                <Zap className="w-5 h-5 text-blue-500 shrink-0 mt-1" />
+                                                <div>
+                                                    <p className="text-[11px] text-white font-black uppercase tracking-tight">Oportunidade de Automação</p>
+                                                    <p className="text-[10px] text-neutral-500 font-medium leading-relaxed mt-1">
+                                                        O padrão de recebimento de documentos deste cliente permite ativação do Maestro Eye 2.0.
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -753,92 +901,94 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                         )}
 
                         {activeTab === 'maestro' && (
-                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                <div className="flex items-center justify-between">
+                            <div className="space-y-8 animate-in zoom-in-95 duration-500">
+                                <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="p-3 bg-amber-500 text-black rounded-xl shadow-lg shadow-amber-500/20">
-                                            <Zap className="w-6 h-6" />
+                                        <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20">
+                                            <Zap className="w-7 h-7 text-black" />
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-black text-white italic uppercase tracking-tight">Maestro Vision Engine</h3>
-                                            <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em]">Inteligência Artificial e Conformidade Documental</p>
+                                            <h3 className="text-white font-black text-xl uppercase tracking-[0.2em] italic">Maestro Vision Engine</h3>
+                                            <p className="text-[10px] font-mono text-neutral-600 uppercase mt-1">Cérebro AI e Extração de Soberania de Dados</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={fetchMaestroVision}
-                                        className="p-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-neutral-400 transition-all"
+                                        className="p-3 bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-500 hover:text-emerald-500 transition-all group"
                                     >
-                                        <RefreshCw className={`w-4 h-4 ${loadingMaestro ? 'animate-spin' : ''}`} />
+                                        <RefreshCw className={`w-5 h-5 ${loadingMaestro ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`} />
                                     </button>
                                 </div>
 
                                 {loadingMaestro ? (
-                                    <div className="py-20 flex flex-col items-center justify-center gap-4">
-                                        <Activity className="w-8 h-8 text-amber-500 animate-spin" />
-                                        <p className="text-[10px] font-mono text-neutral-500 uppercase">Varrendo registros soberanos...</p>
+                                    <div className="py-32 flex flex-col items-center justify-center gap-6 bg-black/40 border border-neutral-800 rounded-[3rem]">
+                                        <Activity className="w-12 h-12 text-emerald-500 animate-spin" />
+                                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-[0.3em] animate-pulse italic">Mapeando Registros Soberanos...</span>
                                     </div>
                                 ) : maestroDocs.length === 0 ? (
-                                    <div className="py-20 text-center bg-black/40 border border-neutral-800 rounded-2xl border-dashed">
-                                        <Cpu className="w-12 h-12 text-neutral-700 mx-auto mb-4" />
-                                        <h4 className="text-sm font-black text-neutral-500 uppercase italic">Aguardando Processamento</h4>
-                                        <p className="text-[10px] text-neutral-600 mt-2 max-w-xs mx-auto">
-                                            Os documentos enviados via MaestroSync ainda não passaram pelo radar de inteligência para este cliente.
-                                        </p>
+                                    <div className="py-32 text-center bg-black border border-dashed border-neutral-800 rounded-[3rem] group hover:border-emerald-500/40 transition-all">
+                                        <div className="relative w-24 h-24 mx-auto mb-8">
+                                            <Eye className="w-full h-full text-neutral-900 absolute inset-0" />
+                                            <Brain className="w-12 h-12 text-emerald-500/10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                                        </div>
+                                        <p className="text-sm text-neutral-500 uppercase italic font-black tracking-widest">Nenhuma soberania extraída para este ciclo</p>
+                                        <p className="text-[10px] text-neutral-700 uppercase mt-2 font-mono tracking-tighter">Aguardando processamento do motor Maestro Vision em {selectedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</p>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-4">
-                                        {maestroDocs.map((doc) => (
-                                            <div key={doc.id} className="group bg-black border border-neutral-800 p-6 rounded-2xl hover:border-amber-500/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-black/20">
-                                                <div className="flex items-center gap-5">
-                                                    <div className="w-14 h-14 bg-neutral-900 rounded-xl flex items-center justify-center border border-neutral-800 group-hover:bg-amber-500/10 group-hover:border-amber-500/20 transition-all">
-                                                        <FileText className="w-7 h-7 text-neutral-600 group-hover:text-amber-500 transition-colors" />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {maestroDocs.map((doc, i) => (
+                                            <div key={i} className="p-8 bg-black border border-neutral-800 rounded-[2.5rem] hover:border-emerald-500/40 transition-all group relative overflow-hidden shadow-2xl shadow-black/40">
+                                                <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+                                                    <Brain className="w-32 h-32 text-emerald-500" />
+                                                </div>
+
+                                                <div className="flex justify-between items-start mb-8">
+                                                    <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-[1.5rem] text-emerald-500 shadow-inner group-hover:scale-110 transition-transform">
+                                                        <FileText className="w-6 h-6" />
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[16px] font-black text-white italic uppercase tracking-tight">{doc.tipo}</span>
-                                                            <span className={`text-[9px] px-2 py-0.5 rounded-full border font-bold uppercase ${doc.status_processamento === 'sucesso' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}`}>
-                                                                {doc.status_processamento}
-                                                            </span>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <span className={`text-[10px] font-black px-4 py-1.5 rounded-full border uppercase tracking-widest shadow-lg ${doc.status_processamento === 'sucesso' ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-amber-500 text-black border-amber-400'}`}>
+                                                            {doc.status_processamento === 'sucesso' ? 'Soberano' : 'Pendente'}
+                                                        </span>
+                                                        <span className="text-[8px] font-mono text-neutral-700 uppercase tracking-tighter">ID: {doc.id.substring(0, 8)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <p className="text-[9px] text-neutral-600 uppercase font-black tracking-widest leading-none mb-2">Natureza do Documento</p>
+                                                        <p className="text-lg text-white font-black italic uppercase tracking-tighter group-hover:text-emerald-500 transition-colors">{doc.tipo_documento || 'Extração AI'}</p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-6 bg-neutral-900/40 p-6 rounded-[2rem] border border-neutral-800/50">
+                                                        <div>
+                                                            <p className="text-[8px] text-neutral-600 uppercase font-bold tracking-widest mb-1">Valor Auditado</p>
+                                                            <p className="text-lg text-emerald-500 font-black tabular-nums tracking-tighter leading-none">
+                                                                {doc.valor ? `R$ ${doc.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : 'R$ 0,00'}
+                                                            </p>
                                                         </div>
-                                                        <p className="text-[10px] font-mono text-neutral-500 uppercase truncate max-w-[200px]">
-                                                            {doc.doc?.nome_arquivo || 'ARQUIVO_PROCESSADO.pdf'}
-                                                        </p>
+                                                        <div>
+                                                            <p className="text-[8px] text-neutral-600 uppercase font-bold tracking-widest mb-1">Vencimento</p>
+                                                            <p className="text-lg text-white font-black tabular-nums tracking-tighter leading-none italic uppercase">
+                                                                {doc.vencimento ? new Date(doc.vencimento + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '--/--'}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="flex flex-wrap gap-8 items-center bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/50">
-                                                    <div className="text-center md:text-left">
-                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Competência</p>
-                                                        <p className="text-[12px] font-black text-neutral-300">
-                                                            {doc.competencia ? new Date(doc.competencia + 'T12:00:00').toLocaleDateString('pt-BR', { month: '2-digit', year: 'numeric' }) : '-'}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-center md:text-left">
-                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Vencimento</p>
-                                                        <p className="text-[12px] font-black text-emerald-500 italic">
-                                                            {doc.vencimento ? new Date(doc.vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-center md:text-left">
-                                                        <p className="text-[8px] font-black text-neutral-600 uppercase tracking-widest">Valor Extraído</p>
-                                                        <p className="text-[14px] font-black text-white tracking-tight tabular-nums">
-                                                            R$ {doc.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center gap-2">
-                                                    {doc.doc?.drive_file_id && (
+                                                    <div className="pt-6 border-t border-neutral-900 flex items-center justify-between">
+                                                        <div className="flex flex-col">
+                                                            <p className="text-[7px] text-neutral-700 uppercase font-black tracking-widest">Processamento Soberano</p>
+                                                            <p className="text-[10px] text-neutral-500 font-mono italic">{new Date(doc.analisado_em).toLocaleString('pt-BR')}</p>
+                                                        </div>
                                                         <a
-                                                            href={`https://drive.google.com/open?id=${doc.doc.drive_file_id}`}
+                                                            href={`https://drive.google.com/open?id=${doc.doc?.drive_file_id}`}
                                                             target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="p-3 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-xl border border-neutral-800 transition-all"
-                                                            title="Ver Arquivo Original"
+                                                            className="p-3.5 bg-neutral-900 hover:bg-emerald-500 hover:text-black rounded-2xl border border-neutral-800 hover:border-emerald-400 transition-all shadow-xl group/btn active:scale-95"
+                                                            title="Acessar Fonte Original no Google Drive"
                                                         >
                                                             <ExternalLink className="w-5 h-5" />
                                                         </a>
-                                                    )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -1058,25 +1208,23 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     </div>
                 </div>
             </div>
-            {/* Modal Vault - Certificados */}
-            {showVault && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-                        <div className="p-6 border-b border-neutral-800 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-amber-500" />
-                                <h2 className="text-white font-black uppercase italic text-sm">Cofre de Certificados - Vault</h2>
-                            </div>
-                            <button onClick={() => setShowVault(false)} className="p-2 hover:bg-neutral-800 rounded-lg text-neutral-500 hover:text-white transition-colors">
-                                <ArrowLeft className="w-4 h-4" />
-                            </button>
-                        </div>
+            {/* Modal Vault - Certificados Showroom Premium */}
+            {
+                showVault && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-500">
+                        <div className="w-full max-w-5xl bg-neutral-950 border border-neutral-800 rounded-[3rem] shadow-[0_0_100px_-20px_rgba(245,158,11,0.15)] overflow-hidden flex flex-col md:flex-row h-full max-h-[85vh]">
 
-                        <div className="p-8 space-y-8 overflow-y-auto">
-                            {/* Upload Section */}
-                            <div className="p-6 bg-black border border-neutral-800 rounded-xl space-y-4">
-                                <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Adicionar Novo Certificado</h3>
-                                <form className="space-y-4" onSubmit={async (e) => {
+                            {/* Lateral Esquerda: Formulário de Ingestão (40%) */}
+                            <div className="w-full md:w-[400px] bg-black border-r border-neutral-900 p-10 flex flex-col space-y-10 overflow-y-auto">
+                                <div className="space-y-2">
+                                    <div className="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/20 mb-6">
+                                        <Shield className="w-7 h-7 text-black" />
+                                    </div>
+                                    <h2 className="text-white font-black text-xl uppercase italic tracking-tighter leading-none">Safe Ingest Engine</h2>
+                                    <p className="text-[10px] text-neutral-500 uppercase font-bold tracking-widest">Protocolo de Segurança Nível 4 • AES-256</p>
+                                </div>
+
+                                <form className="space-y-6" onSubmit={async (e) => {
                                     e.preventDefault()
                                     const form = e.target as HTMLFormElement
                                     const formData = new FormData(form)
@@ -1087,26 +1235,26 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                         const result = await res.json()
 
                                         if (res.ok) {
-                                            alert('MAESTRO: Certificado protegido e salvo com sucesso no cofre!')
+                                            alert('MAESTRO: Ativo digital protegido com sucesso no núcleo do sistema!')
                                             form.reset()
                                             fetchCertificados()
                                             fetchClientData()
                                         } else {
-                                            throw new Error(result.error || 'Erro desconhecido ao salvar certificado.')
+                                            throw new Error(result.error || 'Falha crítica na ingestão do ativo.')
                                         }
                                     } catch (err: any) {
                                         console.error('Erro no Vault:', err)
-                                        alert(`ERRO NO VAULT: ${err.message}`)
+                                        alert(`ERRO NO NÚCLEO: ${err.message}`)
                                     }
                                 }}>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Data de Emissão (A1 = +1 Ano)</label>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em]">Data de Emissão (Source)</label>
                                             <input
                                                 type="date"
                                                 name="emissao"
                                                 required
-                                                className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white"
+                                                className="w-full bg-neutral-900/40 border border-neutral-800 p-4 rounded-2xl text-[11px] text-white focus:border-amber-500/50 outline-none transition-all font-bold"
                                                 onChange={(e) => {
                                                     const val = e.target.value;
                                                     if (val) {
@@ -1119,112 +1267,146 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                                 }}
                                             />
                                         </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Vencimento Calculado</label>
-                                            <input type="date" name="vencimento" readOnly className="w-full bg-neutral-900/50 border border-neutral-800 p-3 rounded text-[10px] text-neutral-500" />
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em]">Expiração Calculada (AI Sync)</label>
+                                            <input type="date" name="vencimento" readOnly className="w-full bg-black border border-neutral-900 p-4 rounded-2xl text-[11px] text-amber-500/60 font-black cursor-not-allowed" />
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Arquivo do Certificado</label>
-                                            <input type="file" name="file" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Tipo / Titularidade</label>
-                                            <select name="tipo" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white uppercase font-bold">
-                                                <option value="A1 PJ">A1 PJ (Empresa)</option>
-                                                <option value="A1 PF">A1 PF (Pessoa Física / Fazenda)</option>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em]">Tipo de Credencial</label>
+                                            <select name="tipo" required className="w-full bg-neutral-900/40 border border-neutral-800 p-4 rounded-2xl text-[11px] text-white uppercase font-black outline-none appearance-none">
+                                                <option value="A1 PJ">A1 PJ (Empresarial)</option>
+                                                <option value="A1 PF">A1 PF (Sócio / Fazenda)</option>
+                                                <option value="A3 TOKEN">A3 Token (Hardware)</option>
                                             </select>
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[8px] font-black text-neutral-500 uppercase">Senha</label>
-                                            <input type="password" name="password" placeholder="SENHA" required className="w-full bg-neutral-900 border border-neutral-800 p-3 rounded text-[10px] text-white font-mono" />
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em]">Payload (Arquivo .pfx / .p12)</label>
+                                            <div className="relative">
+                                                <input type="file" name="file" required className="w-full bg-neutral-900/40 border border-neutral-800 p-4 rounded-2xl text-[10px] text-neutral-500 font-bold file:hidden cursor-pointer" />
+                                                <Upload className="absolute right-4 top-4 w-4 h-4 text-neutral-700" />
+                                            </div>
                                         </div>
-                                        <div className="flex items-end">
-                                            <button className="w-full bg-amber-500 text-black font-black text-[10px] uppercase p-3 hover:bg-amber-400 transition-all shadow-xl shadow-amber-500/10">
-                                                PROTEGER NO COFRE
-                                            </button>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-neutral-600 uppercase tracking-[0.2em]">Chave de Criptografia (Senha)</label>
+                                            <div className="relative">
+                                                <input type="password" name="password" placeholder="••••••••" required className="w-full bg-neutral-900/40 border border-neutral-800 p-4 rounded-2xl text-[11px] text-white font-mono focus:border-emerald-500/50 outline-none transition-all" />
+                                                <Lock className="absolute right-4 top-4 w-4 h-4 text-emerald-500/50" />
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <button type="submit" className="w-full bg-white text-black font-black text-xs uppercase italic p-5 rounded-2xl hover:bg-emerald-500 transition-all shadow-xl shadow-white/5 group border-b-4 border-neutral-300 hover:border-emerald-600 active:border-b-0 active:translate-y-1">
+                                        <span className="flex items-center justify-center gap-2">
+                                            <Activity className="w-4 h-4 group-hover:animate-spin" /> Injetar Ativo no Cofre
+                                        </span>
+                                    </button>
                                 </form>
                             </div>
 
-                            {/* List Section */}
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Certificados Armazenados</h3>
-                                {certificados.length === 0 ? (
-                                    <div className="py-10 text-center opacity-20 italic text-[10px] uppercase">Nenhum certificado no cofre.</div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {certificados.map((cert) => (
-                                            <div key={cert.id} className={`p-4 bg-neutral-900/40 border ${cert.senha_dados === 'PENDENTE' ? 'border-amber-500/20' : 'border-neutral-800'} rounded-xl flex items-center justify-between group`}>
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`p-2 rounded-lg ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500/10 text-amber-500 animate-pulse' : 'bg-neutral-900 text-amber-500'}`}>
-                                                        <FileCode className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-[11px] font-black text-white uppercase">{cert.nome_arquivo}</p>
-                                                            <span className={`text-[7px] ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500' : 'bg-neutral-800'} text-black px-1.5 py-0.5 font-black uppercase rounded`}>
-                                                                {cert.tipo || 'A1'}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-[9px] font-mono text-neutral-600">
-                                                            {cert.senha_dados === 'PENDENTE' ? 'Aguardando configuração de senha' : `Vence em: ${cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'Não informado'}`}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    {cert.senha_dados === 'PENDENTE' ? (
-                                                        <button
-                                                            onClick={() => {
-                                                                const pwd = prompt(`O Maestro localizou este certificado no Drive para este cliente.\nInforme a senha para criptografar agora:`)
-                                                                if (pwd) handleUpdateCertPassword(cert.id, pwd)
-                                                            }}
-                                                            className="px-3 py-1.5 bg-amber-500 text-black text-[8px] font-black uppercase hover:bg-white transition-all"
-                                                        >
-                                                            Configurar Senha
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleViewPassword(cert.id)}
-                                                            className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 text-[8px] font-black uppercase text-neutral-400 hover:text-white hover:border-emerald-500 transition-all flex items-center gap-2"
-                                                        >
-                                                            <Shield className="w-3 h-3" /> Ver Senha
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={async () => {
-                                                            if (confirm('MAESTRO: Remover este certificado do Vault permanentemente?')) {
-                                                                const res = await fetch(`/api/clientes/certificados/${cert.id}`, { method: 'DELETE' })
-                                                                if (res.ok) {
-                                                                    fetchCertificados()
-                                                                    alert('Certificado removido.')
-                                                                }
-                                                            }
-                                                        }}
-                                                        className="p-1.5 text-neutral-800 hover:text-red-500 transition-colors"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
+                            {/* Lateral Direita: Listagem e Visualização (60%) */}
+                            <div className="flex-1 flex flex-col min-w-0 bg-neutral-950">
+                                <div className="p-10 border-b border-neutral-900 flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <h3 className="text-white font-black text-sm uppercase italic tracking-[0.2em]">Active Records Vault</h3>
+                                        <p className="text-[10px] text-neutral-500 uppercase font-black">{certificados.length} Certificados Armazenados</p>
                                     </div>
-                                )}
+                                    <button onClick={() => setShowVault(false)} className="w-12 h-12 bg-neutral-900 border border-neutral-800 rounded-2xl flex items-center justify-center text-neutral-500 hover:text-white hover:bg-neutral-800 transition-all group">
+                                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-10 space-y-6">
+                                    {certificados.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-20 grayscale">
+                                            <ShieldAlert className="w-20 h-20 text-neutral-500" />
+                                            <p className="text-[11px] font-black uppercase tracking-widest text-center">Nenhum Ativo Identificado no Perímetro.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                            {certificados.map((cert) => {
+                                                const isVencendo = cert.data_vencimento && new Date(cert.data_vencimento) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                                                return (
+                                                    <div key={cert.id} className={`group relative p-8 bg-black border ${cert.senha_dados === 'PENDENTE' ? 'border-amber-500/40 shadow-lg shadow-amber-500/5' : 'border-neutral-900'} rounded-[2rem] hover:border-blue-500/40 transition-all overflow-hidden`}>
+                                                        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                            <FileCode className="w-16 h-16 text-blue-500" />
+                                                        </div>
+
+                                                        <div className="relative space-y-6">
+                                                            <div className="flex items-start justify-between">
+                                                                <div className={`p-4 rounded-2xl border ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-blue-500/10 border-blue-500/20 text-blue-500'}`}>
+                                                                    <FileCode className="w-6 h-6" />
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <span className={`text-[8px] font-black px-3 py-1 rounded-full uppercase italic border ${cert.senha_dados === 'PENDENTE' ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'}`}>
+                                                                        {cert.senha_dados === 'PENDENTE' ? 'PENDÊNCIA' : 'SECURE'}
+                                                                    </span>
+                                                                    <span className="bg-neutral-900 border border-neutral-800 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase italic">
+                                                                        {cert.tipo || 'A1_V1'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <h4 className="text-white font-black text-sm uppercase italic tracking-tighter truncate group-hover:text-blue-400 transition-colors">{cert.nome_arquivo}</h4>
+                                                                <p className={`text-[10px] font-bold mt-2 uppercase tracking-widest ${isVencendo ? 'text-red-500 animate-pulse' : 'text-neutral-600'}`}>
+                                                                    {isVencendo ? 'Protocolo de Expiração Ativo: ' : 'Vigência do Certificado: '}
+                                                                    <span className="text-neutral-400">{cert.data_vencimento ? new Date(cert.data_vencimento).toLocaleDateString() : 'INDISPONÍVEL'}</span>
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-3 pt-4 border-t border-neutral-900">
+                                                                {cert.senha_dados === 'PENDENTE' ? (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const pwd = prompt(`PROTOCOL MAESTRO: Informe a senha de importação para este ativo:`)
+                                                                            if (pwd) handleUpdateCertPassword(cert.id, pwd)
+                                                                        }}
+                                                                        className="flex-1 bg-amber-500 text-black text-[10px] font-black px-6 py-3 rounded-xl hover:bg-white transition-all uppercase italic"
+                                                                    >
+                                                                        Configurar Nucleus
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => handleViewPassword(cert.id)}
+                                                                        className="flex-1 bg-neutral-900 border border-neutral-800 text-white text-[10px] font-black px-6 py-3 rounded-xl hover:border-emerald-500 transition-all uppercase italic flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Shield className="w-3.5 h-3.5" /> Acessar Key
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (confirm('SISTEMA MAESTRO: Deletar permanentemente este ativo digital do núcleo? Esta ação é irreversível.')) {
+                                                                            const res = await fetch(`/api/clientes/certificados/${cert.id}`, { method: 'DELETE' })
+                                                                            if (res.ok) {
+                                                                                fetchCertificados()
+                                                                                alert('Ativo purgado com sucesso.')
+                                                                            }
+                                                                        }
+                                                                    }}
+                                                                    className="w-12 h-12 bg-neutral-900/50 border border-neutral-900 rounded-xl flex items-center justify-center text-neutral-700 hover:text-red-500 hover:bg-red-500/5 transition-all"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-10 bg-black/40 border-t border-neutral-900 flex items-center justify-between">
+                                    <div className="flex items-center gap-3 text-neutral-600">
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest">Nucleus Vault Active • AES-GCM Encrypted</span>
+                                    </div>
+                                    <p className="text-[9px] text-neutral-800 font-mono tracking-tighter">Braid Nucleus v.2026.02</p>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="p-6 bg-amber-500/5 border-t border-neutral-800 text-center">
-                            <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-widest leading-relaxed">
-                                Segurança AES-256 GCM Ativa. Todos os acessos são monitorados pelo Maestro.
-                            </p>
-                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
             <MappingModal
                 showMappingModal={showMappingModal}
@@ -1236,7 +1418,6 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 handleManualLink={handleManualLink}
             />
 
-            {/* PendenciaModal AGORA NO LUGAR CORRETO (Dentro do ClientHubPage) */}
             <PendenciaModal
                 isOpen={showPendenciaModal}
                 onClose={() => {
@@ -1248,7 +1429,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                 clientId={clientId}
             />
         </div>
-    )
+    );
 }
 
 // Modal de Mapeamento Manual Maestro
