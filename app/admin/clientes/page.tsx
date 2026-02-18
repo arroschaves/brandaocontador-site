@@ -67,7 +67,7 @@ function ClientesContent() {
     const [editingClient, setEditingClient] = useState<any>(null);
     const [formData, setFormData] = useState<any>({
         nome: '',
-        cnpj_cpf: '',
+        documento: '',
         telefone_whatsapp: '',
         email: '',
         razao_social: '',
@@ -144,6 +144,7 @@ function ClientesContent() {
 
                 return {
                     ...c,
+                    documento: c.documento || '', // Garantir campo consistente
                     obrigacoes: clientObrs,
                     hasPending,
                     isCertNearExp: isNearExp
@@ -168,7 +169,7 @@ function ClientesContent() {
 
     const filteredClientes = clientes.filter(c =>
         c.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.cnpj_cpf?.toString().includes(searchTerm) ||
+        c.documento?.toString().includes(searchTerm) ||
         c.razao_social?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -234,7 +235,7 @@ function ClientesContent() {
             setEditingClient(client);
             setFormData({
                 nome: client.nome || '',
-                cnpj_cpf: client.cnpj_cpf?.toString() || '',
+                documento: client.documento?.toString() || '',
                 telefone_whatsapp: client.telefone_whatsapp || '',
                 email: client.email || '',
                 razao_social: client.razao_social || '',
@@ -252,7 +253,7 @@ function ClientesContent() {
         } else {
             setEditingClient(null);
             setFormData({
-                nome: '', cnpj_cpf: '', telefone_whatsapp: '', email: '',
+                nome: '', documento: '', telefone_whatsapp: '', email: '',
                 razao_social: '', regime_tributario: '', cnae_principal: '',
                 logradouro: '', numero: '', bairro: '', cep: '',
                 cidade: 'Sidrolândia', estado: 'MS',
@@ -263,10 +264,10 @@ function ClientesContent() {
         setIsModalOpen(true);
     };
 
-    async function handleConsultarCNPJ() {
-        const cnpj = formData.cnpj_cpf.replace(/\D/g, '');
+    async function handleConsultarCNPJ(cnpjOverride?: string) {
+        const cnpj = (cnpjOverride || formData.documento).replace(/\D/g, '');
         if (cnpj.length !== 14) {
-            alert('Digite um CNPJ válido com 14 dígitos.');
+            if (!cnpjOverride) alert('Digite um CNPJ válido com 14 dígitos.');
             return;
         }
         setConsulting(true);
@@ -309,6 +310,14 @@ function ClientesContent() {
             setConsulting(false);
         }
     }
+
+    // Consulta Automática ao digitar 14 dígitos
+    useEffect(() => {
+        const cnpj = formData.documento?.replace(/\D/g, '');
+        if (cnpj?.length === 14 && !consulting && !editingClient) {
+            handleConsultarCNPJ(cnpj);
+        }
+    }, [formData.documento]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -627,7 +636,7 @@ function ClientesContent() {
                                         placeholder="CNPJ ou CPF para consulta"
                                         value={formData.documento || ''} onChange={e => setFormData({ ...formData, documento: e.target.value })} />
                                     {formData.documento?.replace(/\D/g, '').length === 14 && (
-                                        <button type="button" onClick={handleConsultarCNPJ} disabled={consulting} className="btn-modern shadow-primary/20 px-6">
+                                        <button type="button" onClick={() => handleConsultarCNPJ()} disabled={consulting} className="btn-modern shadow-primary/20 px-6">
                                             {consulting ? <Loader2 className="animate-spin w-4 h-4" /> : 'Consultar'}
                                         </button>
                                     )}
