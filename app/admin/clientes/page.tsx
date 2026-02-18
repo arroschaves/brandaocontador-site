@@ -323,31 +323,72 @@ function ClientesContent() {
         e.preventDefault();
         setSyncing(true);
         try {
+            // 1. Limpeza e Normalização de Dados para o Banco (Schema CORE)
+            const cleanData: any = {};
+            const ALLOWED_FIELDS = [
+                'razao_social', 'nome_fantasia', 'documento', 'email', 'telefone',
+                'regime_tributario', 'cnae_principal', 'cnaes_secundarios',
+                'logradouro', 'numero', 'bairro', 'cep', 'cidade', 'estado',
+                'inscricao_estadual', 'inscricao_municipal', 'status_rfb',
+                'natureza_juridica', 'porte', 'capital_social', 'inicio_atividade'
+            ];
+
+            // Mapeia campos do formulário para colunas do banco
+            const raw = { ...formData };
+
+            // Unifica telefone
+            const finalTelefone = (raw.telefone || raw.telefone_whatsapp || '').replace(/[^\d]/g, '');
+
+            // Preenche objeto de envio apenas com campos permitidos
+            ALLOWED_FIELDS.forEach(field => {
+                let val = raw[field];
+
+                // Tratamento especial para Números
+                if (field === 'capital_social' && typeof val === 'string') {
+                    val = parseFloat(val.replace(/[^\d,]/g, '').replace(',', '.'));
+                }
+
+                // Tratamento para Telefone específico
+                if (field === 'telefone') {
+                    val = finalTelefone;
+                }
+
+                if (val !== undefined && val !== null) {
+                    cleanData[field] = val;
+                }
+            });
+
+            // Campo 'nome' no banco é usado para o display principal
+            cleanData.nome = raw.nome || raw.nome_fantasia || raw.razao_social;
+
             if (editingClient) {
                 // Edição: direto no Supabase (campos limpos)
-                const cleanData = { ...formData };
-                delete cleanData.drive_folder_id; // Não editar drive_folder_id manualmente
-                const { error } = await supabase.schema('core').from('empresas').update(cleanData).eq('id', editingClient.id);
+                const { error } = await supabase
+                    .schema('core')
+                    .from('empresas')
+                    .update(cleanData)
+                    .eq('id', editingClient.id);
+
                 if (error) throw new Error(error.message);
+                alert('✅ Cadastro atualizado com sucesso!');
             } else {
                 // Novo cliente: via API que sanitiza campos + dispara n8n
                 const response = await fetch('/api/clientes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(cleanData)
                 });
                 const result = await response.json();
                 if (!response.ok) {
                     throw new Error(result.error || 'Falha ao cadastrar cliente');
                 }
-                console.log('[CADASTRO] Sucesso:', result);
                 alert(`✅ ${result.message}`);
             }
             setIsModalOpen(false);
             fetchClientes();
         } catch (err: any) {
             console.error('[CADASTRO] Erro:', err);
-            alert('❌ Erro ao salvar: ' + err.message);
+            alert('❌ Erro de Sincronização: ' + err.message);
         } finally {
             setSyncing(false);
         }
