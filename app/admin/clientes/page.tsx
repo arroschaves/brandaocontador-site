@@ -358,9 +358,6 @@ function ClientesContent() {
                 }
             });
 
-            // Campo 'nome' no banco é usado para o display principal
-            cleanData.nome = raw.nome || raw.nome_fantasia || raw.razao_social;
-
             if (editingClient) {
                 // Edição: direto no Supabase (campos limpos)
                 const { error } = await supabase
