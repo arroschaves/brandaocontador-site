@@ -14,9 +14,9 @@ import { NextResponse, NextRequest } from 'next/server'
 
 // Campos TEXT seguros — correspondentes ao domínio oficial do banco de dados
 const CAMPOS_TEXT = [
-    'documento',
+    'cnpj_cpf',
     'razao_social',
-    'nome_fantasia',
+    'nome',
     'email',
     'telefone',
     'regime_tributario',

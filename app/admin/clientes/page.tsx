@@ -122,8 +122,9 @@ function ClientesContent() {
 
             // 3. Buscar Certificados (para alertas de vencimento)
             const { data: certs } = await supabase
-                .from('cliente_certificados')
-                .select('id, cliente_id, data_vencimento');
+                .schema('core')
+                .from('certificados_digitais')
+                .select('id, empresa_id, data_vencimento');
 
             // 4. Cruzar Dados
             let pendenciasTotal = 0;
@@ -134,7 +135,7 @@ function ClientesContent() {
                 const hasPending = clientObrs.some((o: any) => o.status === 'PENDENTE');
                 if (hasPending) pendenciasTotal++;
 
-                const clientCerts = (certs || []).filter((ct: any) => ct.cliente_id === c.id);
+                const clientCerts = (certs || []).filter((ct: any) => ct.empresa_id === c.id);
                 const isNearExp = clientCerts.some((ct: any) => {
                     if (!ct.data_vencimento) return false;
                     const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - agora.getTime()) / (1000 * 60 * 60 * 24));
@@ -326,7 +327,7 @@ function ClientesContent() {
             // 1. Limpeza e Normalização de Dados para o Banco (Schema CORE)
             const cleanData: any = {};
             const ALLOWED_FIELDS = [
-                'razao_social', 'nome_fantasia', 'documento', 'email', 'telefone',
+                'razao_social', 'nome', 'cnpj_cpf', 'email', 'telefone',
                 'regime_tributario', 'cnae_principal', 'cnaes_secundarios',
                 'logradouro', 'numero', 'bairro', 'cep', 'cidade', 'estado',
                 'inscricao_estadual', 'inscricao_municipal', 'status_rfb',
@@ -335,6 +336,8 @@ function ClientesContent() {
 
             // Mapeia campos do formulário para colunas do banco
             const raw = { ...formData };
+            if (raw.nome_fantasia) raw.nome = raw.nome_fantasia;
+            if (raw.documento) raw.cnpj_cpf = raw.documento;
 
             // Unifica telefone
             const finalTelefone = (raw.telefone || raw.telefone_whatsapp || '').replace(/[^\d]/g, '');

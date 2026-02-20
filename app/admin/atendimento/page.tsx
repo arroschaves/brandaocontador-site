@@ -313,8 +313,8 @@ export default function AtendimentoPage() {
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex gap-4 flex-1">
                                     <div className="w-9 h-9 rounded bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-500 font-bold text-sm shrink-0 uppercase">
-                                        {ticket.clientes?.nome ? (
-                                            ticket.clientes.nome.charAt(0)
+                                        {ticket.empresas?.razao_social ? (
+                                            ticket.empresas.razao_social.charAt(0)
                                         ) : (
                                             <User className="w-4 h-4 text-neutral-800" />
                                         )}
