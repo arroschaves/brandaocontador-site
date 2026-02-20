@@ -169,12 +169,17 @@ export default function MaestroPage() {
 
     // Filtrar atividades
     const filteredActivities = activities.filter(a => {
-        const matchSearch = searchTerm === '' ||
-            a.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.cliente_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            a.arquivo_nome?.toLowerCase().includes(searchTerm.toLowerCase());
+        const desc = a.dados_novos?.descricao || '';
+        const clientName = a.dados_novos?.cliente_nome || '';
+        const fileName = a.dados_novos?.arquivo_nome || '';
+        const tipo = a.dados_novos?.tipo || '';
 
-        const matchTipo = filterTipo === 'all' || a.tipo === filterTipo;
+        const matchSearch = searchTerm === '' ||
+            desc.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            fileName.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchTipo = filterTipo === 'all' || tipo === filterTipo;
 
         return matchSearch && matchTipo;
     });
@@ -307,24 +312,24 @@ export default function MaestroPage() {
                                                         </span>
                                                     </div>
                                                     <p className="text-sm font-medium text-foreground leading-snug">
-                                                        {act.descricao}
+                                                        {displayDesc}
                                                     </p>
-                                                    {act.metadata?.file_name && (
+                                                    {act.dados_novos?.arquivo_nome && (
                                                         <p className="text-xs text-muted-foreground mt-1 bg-muted/30 p-2 rounded-lg border border-border/50 font-mono break-all truncate">
-                                                            {act.metadata.file_name}
+                                                            {act.dados_novos.arquivo_nome}
                                                         </p>
                                                     )}
-                                                    {act.empresa_id && (
+                                                    {act.registro_id && (
                                                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                                             <MapPin className="w-3 h-3" />
-                                                            ID Empresa: {act.empresa_id.substring(0, 8)}...
+                                                            ID Empresa: {act.registro_id.substring(0, 8)}...
                                                         </p>
                                                     )}
                                                 </div>
 
-                                                {act.arquivo_url && (
+                                                {act.dados_novos?.arquivo_url && (
                                                     <a
-                                                        href={act.arquivo_url}
+                                                        href={act.dados_novos.arquivo_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="opacity-0 group-hover:opacity-100 p-2 hover:bg-muted rounded-lg transition-all text-muted-foreground hover:text-primary"

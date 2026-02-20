@@ -1,6 +1,16 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Users, Shield, Award, Calculator, FileText, TrendingUp, ChevronRight, ArrowUpRight } from 'lucide-react';
 import TerminalInformativo from './components/TerminalInformativo';
+
+export const metadata: Metadata = {
+  title: 'Início | Brandão Contabilidade',
+  description: 'Tradição rústica e tecnologia de ponta em serviços contábeis, gestão de DP, legalização e agro.',
+  openGraph: {
+    title: 'Início | Brandão Contabilidade',
+    description: 'Tradição rústica e tecnologia de ponta em serviços contábeis, gestão de DP, legalização e agro.',
+  }
+};
 
 /**
  * HOME PAGE - BRANDÃO CONTABILIDADE

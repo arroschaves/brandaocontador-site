@@ -15,9 +15,10 @@ export async function GET(
         const supabase = await createClient()
 
         const { data, error } = await supabase
+            .schema('core')
             .from('certificados_digitais')
             .select('*')
-            .eq('cliente_id', clientId)
+            .eq('empresa_id', clientId) // Update foreign key as per core.certificados_digitais
             .order('data_vencimento', { ascending: true })
 
         if (error) throw error
@@ -61,17 +62,17 @@ export async function POST(
         const supabase = await createClient()
 
         const { data, error } = await supabase
+            .schema('core')
             .from('certificados_digitais')
             .insert({
-                cliente_id: clientId,
+                empresa_id: clientId, // Use new foreign_key 'empresa_id'
                 tipo,
-                data_emissao,
-                data_vencimento,
-                arquivo_id,
-                senha_criptografada,
-                observacoes,
-                metadata,
-                status: 'ativo'
+                // data_emissao is removed in new schema, maybe use metadata, but schema says:
+                // tipo, titular, validade, drive_file_id, senha_vault_ref, status
+                validade: data_vencimento,
+                drive_file_id: arquivo_id,
+                senha_vault_ref: senha_criptografada,
+                status: 'ATIVO'
             })
             .select()
             .single()
@@ -115,10 +116,11 @@ export async function PATCH(
         const supabase = await createClient()
 
         const { data, error } = await supabase
+            .schema('core')
             .from('certificados_digitais')
             .update(updates)
             .eq('id', certificadoId)
-            .eq('cliente_id', clientId)
+            .eq('empresa_id', clientId) // Update foreign key string
             .select()
             .single()
 
@@ -161,10 +163,11 @@ export async function DELETE(
         const supabase = await createClient()
 
         const { error } = await supabase
+            .schema('core')
             .from('certificados_digitais')
             .delete()
             .eq('id', certificadoId)
-            .eq('cliente_id', clientId)
+            .eq('empresa_id', clientId) // Use empresa_id
 
         if (error) throw error
 

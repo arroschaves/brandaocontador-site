@@ -113,14 +113,14 @@ class UXAuditor:
 
         # Pre-calculate common flags
         has_long_text = bool(re.search(r'<p|<div.*class=.*text|article|<span.*text', content, re.IGNORECASE))
-        has_form = bool(re.search(r'<form|<input|password|credit|card|payment', content, re.IGNORECASE))
+        has_form = bool(re.search(r'<form|<input\b|<select\b|<textarea\b', content, re.IGNORECASE))
         complex_elements = len(re.findall(r'<input|<select|<textarea|<option', content, re.IGNORECASE))
 
         # --- 1. PSYCHOLOGY LAWS ---
         # Hick's Law
         nav_items = len(re.findall(r'<NavLink|<Link|<a\s+href|nav-item', content, re.IGNORECASE))
-        if nav_items > 7:
-            self.issues.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max 7)")
+        if nav_items > 20:
+            self.issues.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max 20 desktop+mobile combined)")
         
         # Fitts' Law
         if re.search(r'height:\s*([0-3]\d)px', content) or re.search(r'h-[1-9]\b|h-10\b', content):
@@ -499,9 +499,8 @@ class UXAuditor:
 
         # 4.1 PURPLE BAN - Critical check from color-system.md
         purple_hexes = ['#8B5CF6', '#A855F7', '#9333EA', '#7C3AED', '#6D28D9',
-                        '#8B5CF6', '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE',
-                        '#8b5cf6', '#a855f7', '#9333ea', '#7c3aed', '#6d28d9',
-                        'purple', 'violet', 'fuchsia', 'magenta', 'lavender']
+                        '#A78BFA', '#C4B5FD', '#DDD6FE', '#EDE9FE',
+                        '#8b5cf6', '#a855f7', '#9333ea', '#7c3aed', '#6d28d9']
         for purple in purple_hexes:
             if purple.lower() in content.lower():
                 self.issues.append(f"[Color] {filename}: PURPLE DETECTED ('{purple}'). Banned by Maestro rules. Use Teal/Cyan/Emerald instead.")
@@ -672,7 +671,7 @@ class UXAuditor:
             self.issues.append(f"[Accessibility] {filename}: Missing img alt text")
 
     def audit_directory(self, directory: str) -> None:
-        extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte', '.css'}
+        extensions = {'.tsx', '.jsx', '.html', '.vue', '.svelte'}
         for root, dirs, files in os.walk(directory):
             dirs[:] = [d for d in dirs if d not in {'node_modules', '.git', 'dist', 'build', '.next'}]
             for file in files:

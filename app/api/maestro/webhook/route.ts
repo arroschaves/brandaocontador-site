@@ -157,7 +157,7 @@ async function handleFile(
         status = 'warning';
     }
 
-    // 6. Gravar no Activity Log (fonte principal para o CRM)
+    // 6. Gravar no Activity Log (agora usando a estrutura correta de audit.logs)
     await logActivity(supabase, {
         cliente_id: clienteId,
         cliente_nome: clienteNome,
@@ -175,21 +175,6 @@ async function handleFile(
             obligation_completed: obligationCompleted,
             is_payment_proof: isPaymentProof,
         }
-    });
-
-    // 7. Gravar no audit.logs (Antigo sync_log)
-    await supabase.schema('audit').from('logs').insert({
-        empresa_id: clienteId,
-        acao: obligationCompleted ? 'OBLIGATION_COMPLETED' : 'FILE_SYNC',
-        descricao: descricao,
-        metadata: {
-            file_name: fileName,
-            drive_url: driveUrl,
-            unidade_fiscal_id: unidadeId,
-        },
-        created_at: new Date().toISOString()
-    }).then(({ error }: any) => {
-        if (error) console.error('[MAESTRO] Erro audit_log:', error.message);
     });
 
     console.log(`[MAESTRO] ✅ ${tipo}: ${descricao}`);
@@ -229,16 +214,19 @@ async function logActivity(supabase: any, data: {
     metadata?: Record<string, any>;
 }) {
     const { error } = await supabase.schema('audit').from('logs').insert({
-        empresa_id: data.cliente_id || null,
-        tipo: data.tipo,
-        categoria: data.categoria || null,
-        descricao: data.descricao,
-        metadata: {
-            ...data.metadata,
+        registro_id: data.cliente_id || null, // Updated mapping for foreign_key/id
+        acao: data.tipo ? data.tipo.toUpperCase() : 'SYSTEM_EVENT',
+        tabela: 'maestro_drive',
+        dados_novos: {
+            tipo: data.tipo,
+            categoria: data.categoria || null,
+            descricao: data.descricao,
+            cliente_nome: data.cliente_nome,
             arquivo_nome: data.arquivo_nome,
             arquivo_url: data.arquivo_url,
             pasta_path: data.pasta_path,
-            status: data.status
+            status: data.status,
+            ...data.metadata
         },
         created_at: new Date().toISOString(),
     });

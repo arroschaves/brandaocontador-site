@@ -15,8 +15,8 @@ export async function GET(request: Request) {
         const supabase = await createClient()
         const { data, error } = await supabase
             .schema('core')
-            .from('certificados_digitais')
-            .select('id, tipo, titular, validade, created_at')
+            .from('certificados')
+            .select('id, tipo, nome_arquivo, data_vencimento, created_at, senha_dados')
             .eq('empresa_id', clientId)
             .order('created_at', { ascending: false })
 
@@ -51,17 +51,25 @@ export async function POST(request: Request) {
 
         const supabase = await createClient()
 
-        // 3. Salvar no Banco
+        // 3. Salvar no Banco (Tabela core.certificados com suporte a Vault)
         const { data, error } = await supabase
             .schema('core')
-            .from('certificados_digitais')
+            .from('certificados')
             .insert({
                 empresa_id: clientId,
                 tipo: tipo || 'A1',
-                titular: file.name,
-                validade: vencimento || new Date().toISOString(),
-                senha_vault_ref: password, // Integrando com a referência soberana
-                status: 'ATIVO'
+                nome_arquivo: file.name,
+                data_vencimento: vencimento || new Date().toISOString(),
+
+                // Dados do Arquivo
+                arquivo_dados: encryptedFile.data,
+                arquivo_iv: encryptedFile.iv,
+                arquivo_tag: encryptedFile.tag,
+
+                // Dados da Senha
+                senha_dados: encryptedPassword.data,
+                senha_iv: encryptedPassword.iv,
+                senha_tag: encryptedPassword.tag
             }).select().single()
 
         if (error) throw error

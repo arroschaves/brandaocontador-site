@@ -27,12 +27,12 @@ export async function logAudit({ cliente_id, acao, detalhes, request }: AuditOpt
                 tabela: 'core.empresas',
                 acao,
                 registro_id: cliente_id,
-                antes: null,
+                dados_antigos: null,
                 dados_novos: {
                     detalhes,
-                    ip_address: ip,
-                    user_agent: userAgent
                 },
+                ip_address: ip,
+                user_agent: userAgent,
                 created_at: new Date().toISOString()
             });
 

@@ -19,7 +19,8 @@ export async function GET(
 
         // 1. Buscar os dados encriptados
         const { data: cert, error } = await supabase
-            .from('cliente_certificados')
+            .schema('core')
+            .from('certificados')
             .select('*')
             .eq('id', certId)
             .single()
@@ -37,7 +38,7 @@ export async function GET(
 
         // 3. AUDITORIA ZERO-TRUST (Logamos ANTES de descriptografar)
         await logAudit({
-            cliente_id: cert.cliente_id,
+            cliente_id: cert.empresa_id,
             acao: 'ACESSO_VAULT',
             detalhes: `ACESSO CRÍTICO: Descriptografia da senha do certificado '${cert.nome_arquivo}' realizada.`,
             request
@@ -75,14 +76,14 @@ export async function DELETE(
             return NextResponse.json({ error: 'ACESSO NEGADO: Apenas administradores podem remover certificados do Vault.' }, { status: 403 })
         }
 
-        const { data: cert } = await supabase.from('cliente_certificados').select('cliente_id, nome_arquivo').eq('id', certId).single()
+        const { data: cert } = await supabase.schema('core').from('certificados').select('empresa_id, nome_arquivo').eq('id', certId).single()
 
-        const { error } = await supabase.from('cliente_certificados').delete().eq('id', certId)
+        const { error } = await supabase.schema('core').from('certificados').delete().eq('id', certId)
         if (error) throw error
 
         if (cert) {
             await logAudit({
-                cliente_id: cert.cliente_id,
+                cliente_id: cert.empresa_id,
                 acao: 'ACESSO_VAULT',
                 detalhes: `Certificado '${cert.nome_arquivo}' removido do Vault.`,
                 request
@@ -112,7 +113,8 @@ export async function PATCH(
 
         // 2. Atualizar no banco
         const { error } = await supabase
-            .from('cliente_certificados')
+            .schema('core')
+            .from('certificados')
             .update({
                 senha_dados: encryptedPassword.data,
                 senha_iv: encryptedPassword.iv,

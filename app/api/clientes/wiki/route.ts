@@ -12,6 +12,7 @@ export async function POST(request: Request) {
         }
 
         const { error } = await supabase
+            .schema('core')
             .from('cliente_wiki')
             .upsert({
                 cliente_id: clientId,
