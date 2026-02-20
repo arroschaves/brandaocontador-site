@@ -327,17 +327,15 @@ function ClientesContent() {
             // 1. Limpeza e Normalização de Dados para o Banco (Schema CORE)
             const cleanData: any = {};
             const ALLOWED_FIELDS = [
-                'razao_social', 'nome', 'cnpj_cpf', 'email', 'telefone',
+                'razao_social', 'nome', 'documento', 'email', 'telefone',
                 'regime_tributario', 'cnae_principal', 'cnaes_secundarios',
                 'logradouro', 'numero', 'bairro', 'cep', 'cidade', 'estado',
                 'inscricao_estadual', 'inscricao_municipal', 'status_rfb',
                 'natureza_juridica', 'porte', 'capital_social', 'inicio_atividade'
             ];
 
-            // Mapeia campos do formulário para colunas do banco
             const raw = { ...formData };
             if (raw.nome_fantasia) raw.nome = raw.nome_fantasia;
-            if (raw.documento) raw.cnpj_cpf = raw.documento;
 
             // Unifica telefone
             const finalTelefone = (raw.telefone || raw.telefone_whatsapp || '').replace(/[^\d]/g, '');
