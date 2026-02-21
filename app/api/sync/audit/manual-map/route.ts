@@ -58,6 +58,17 @@ export async function POST(request: Request) {
             created_at: new Date().toISOString()
         });
 
+        // 4. Mecanismo de Aprendizado AI (Brain Gain)
+        // Extrair padrão significativo do nome: remove números e pega a primeira palavra longa
+        const cleanName = fileName.replace(/[0-9]/g, '').split(/[\s.\-_]/).find((w: string) => w.length > 4)?.toUpperCase();
+        if (cleanName) {
+            await supabase.schema('fiscal').from('maestro_aprendizado').upsert({
+                template_id: template.id,
+                padrao_texto: cleanName,
+                ultima_vez_visto: new Date().toISOString()
+            }, { onConflict: 'template_id,padrao_texto' });
+        }
+
         return NextResponse.json({ success: true });
 
     } catch (error: any) {

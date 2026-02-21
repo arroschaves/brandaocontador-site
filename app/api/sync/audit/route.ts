@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { getRoutinesByClientType } from '@/lib/utils/accounting-intelligence'
+import { analyzeMedia } from '@/lib/utils/ai-service'
 
 export async function POST(request: Request) {
     try {
@@ -100,10 +101,12 @@ export async function POST(request: Request) {
                                 const yearsToIgnore = ['2021', '2022', '2023', '2024', '2025'];
                                 if (yearsToIgnore.some(y => folderName.includes(y)) && !folderName.includes(currentYear)) continue;
 
-                                // Identificar Contexto (RH ou Fiscal)
+                                // Identificar Contexto (RH, Fiscal, Contábil ou Agro)
                                 let nextContext = current.context;
                                 if (folderName.includes('RH') || folderName.includes('PESSOAL') || folderName.includes('FOLHA')) nextContext = 'RH';
                                 else if (folderName.includes('FISCAL') || folderName.includes('IMPOSTO') || folderName.includes('DAS')) nextContext = 'FISCAL';
+                                else if (folderName.includes('CONTABIL') || folderName.includes('BALANCO') || folderName.includes('LIVRO')) nextContext = 'CONTABIL';
+                                else if (folderName.includes('AGRO') || folderName.includes('FAZENDA') || folderName.includes('LCDPR')) nextContext = 'AGRO';
 
                                 const isYear = folderName.includes(currentYear);
                                 const isMonth = folderName.includes(mesStr) || folderName.includes(currentMonthName) || folderName.includes(monthAbbr);
@@ -161,21 +164,37 @@ export async function POST(request: Request) {
 
                 // --- 3. AUDITORIA DE ROTINAS ---
                 const { data: templates } = await supabase.schema('fiscal').from('obrigacoes_templates').select('id, nome');
+                const { data: learned } = await supabase.schema('fiscal').from('maestro_aprendizado').select('*, template:template_id(nome)');
+
                 const rotinas = getRoutinesByClientType(cliente.regime_tributario, !!cliente.cnae_principal?.startsWith('01'));
                 const namePatterns: any = {
                     'DAS': ['DAS', 'PGDAS', 'APURACAO', 'SIMPLES', 'EXTRATO', 'DECLARACAO', 'SIMPLES_NACIONAL'],
                     'FGTS': ['FGTS', 'GFD', 'GUIA_FGTS', 'GRRF', 'DIGITAL', 'SEFIP', 'RELAÇÃO_FGTS'],
                     'INSS': ['INSS', 'GPS', 'DCTFWEB', 'PREVIDENCIA', 'GUIA', 'DARF_PREVIDENCIARIO'],
                     'DCTFWeb': ['DCTFWEB', 'DCTF', 'RECIBO', 'TRANSMISSAO', 'COMPROVANTE_DCTF'],
-                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE', 'RELAÇÃO', 'RELACAO', 'COMPROVANTE', 'EVENTO', 'FOLHA_DE_PAGAMENTO']
+                    'Folha de Pagamento': ['FOLHA', 'RECIBO', 'HOLERITE', 'PAGAMENTO', 'CONTRA-CHEQUE', 'CONTRA CHEQUE', 'LIQUIDACAO', 'S-1200', 'S-1210', 'RESUMO', 'SALARIO', 'CONTRACHEQUE', 'PRO-LABORE', 'PROLABORE', 'RELAÇÃO', 'RELACAO', 'COMPROVANTE', 'EVENTO', 'FOLHA_DE_PAGAMENTO'],
+                    'Balanço Patrimonial': ['BALANCO', 'CONTABIL', 'DEMONSTRACAO', 'PATRIMONIAL', 'BP'],
+                    'DRE': ['DRE', 'RESULTADO', 'DEMONSTRACAO', 'RESULTADO_EXERCICIO'],
+                    'LCDPR': ['LCDPR', 'LIVRO', 'CAIXA', 'PRODUTOR', 'RURAL']
                 };
+
+                // Injetar Aprendizado Dinâmico (Brain)
+                learned?.forEach(lp => {
+                    const tName = lp.template?.nome;
+                    if (tName && lp.padrao_texto) {
+                        if (!namePatterns[tName]) namePatterns[tName] = [tName];
+                        if (!namePatterns[tName].includes(lp.padrao_texto)) {
+                            namePatterns[tName].push(lp.padrao_texto);
+                        }
+                    }
+                });
 
                 const monthNumShort = parseInt(mesStr).toString();
                 const mesRegex = new RegExp(`(?:_|^|[^0-9])(?:0?${monthNumShort})(?:_|$|[^0-9])|${currentMonthName}|${monthAbbr}`, 'i');
 
-                const upsertPromises = rotinas.map(rotina => {
+                const upsertPromises = rotinas.map(async (rotina) => {
                     const patterns = (namePatterns[rotina.name] || [rotina.name]) as string[];
-                    const matchesFound = allFiles.filter((file: any) => {
+                    let matchesFound = allFiles.filter((file: any) => {
                         const fileName = file.name?.toUpperCase() || '';
                         const parentName = file.parentName?.toUpperCase() || '';
                         const matchesPattern = patterns.some((p: string) => fileName.includes(p.toUpperCase()));
@@ -186,6 +205,8 @@ export async function POST(request: Request) {
                         const matchesYear = fileName.includes(currentYear) || parentName.includes(currentYear) || file.depth >= 3;
                         const isRHContext = file.context === 'RH';
                         const isFiscalContext = file.context === 'FISCAL';
+                        const isContabilContext = file.context === 'CONTABIL';
+                        const isAgroContext = file.context === 'AGRO';
 
                         let isMatch = false;
                         if (matchesPattern) {
@@ -195,15 +216,54 @@ export async function POST(request: Request) {
                         if (!isMatch && matchesMonth && matchesYear) {
                             if (rotina.name === 'Folha de Pagamento' && isRHContext) isMatch = true;
                             if (rotina.name === 'DAS' && isFiscalContext) isMatch = true;
+                            if ((rotina.name === 'Balanço Patrimonial' || rotina.name === 'DRE') && isContabilContext) isMatch = true;
+                            if (rotina.name === 'LCDPR' && isAgroContext) isMatch = true;
                         }
                         return isMatch;
                     });
 
+                    // --- FALLBACK: MAESTRO VISION (OCR/IA) ---
+                    // Se não encontrou por padrão, mas temos arquivos "estranhos" em pastas suspeitas, vamos "ler" o conteúdo
+                    if (matchesFound.length === 0 && allFiles.length > 0) {
+                        const suspiciousFiles = allFiles.filter(f =>
+                            f.mimeType === 'application/pdf' &&
+                            f.depth >= 3 &&
+                            (f.context === 'RH' || f.context === 'FISCAL' || f.context === 'CONTABIL' || f.context === 'AGRO')
+                        );
+
+                        for (const sFile of suspiciousFiles) {
+                            try {
+                                const fileRes = await drive.files.get({ fileId: sFile.id, alt: 'media' }, { responseType: 'arraybuffer' });
+                                const buffer = Buffer.from(fileRes.data as ArrayBuffer);
+                                const analysis = await analyzeMedia(buffer, sFile.mimeType || 'application/pdf');
+
+                                if (analysis.toUpperCase().includes(rotina.name.toUpperCase())) {
+                                    maestroLogs.push(`[VISION] IA identificou ${rotina.name} no arquivo ${sFile.name} via leitura de conteúdo.`);
+                                    matchesFound = [sFile];
+
+                                    // Aprender padrão (Brain Gain Automático)
+                                    const cleanName = sFile.name.replace(/[0-9]/g, '').split(/[\s.\-_]/).find((w: string) => w.length > 4)?.toUpperCase();
+                                    const template = templates?.find(t => t.nome === rotina.name);
+                                    if (cleanName && template) {
+                                        await supabase.schema('fiscal').from('maestro_aprendizado').upsert({
+                                            template_id: template.id,
+                                            padrao_texto: cleanName,
+                                            ultima_vez_visto: new Date().toISOString()
+                                        }, { onConflict: 'template_id,padrao_texto' });
+                                    }
+                                    break;
+                                }
+                            } catch (e) {
+                                console.error(`Erro no Maestro Vision para arquivo ${sFile.id}:`, e);
+                            }
+                        }
+                    }
+
                     const found = matchesFound.length > 0;
-                    if (!found) return Promise.resolve(null); // Não criar pendentes aqui, apenas marcar concluídos detectados
+                    if (!found) return null;
 
                     const template = templates?.find(t => t.nome === rotina.name);
-                    if (!template) return Promise.resolve(null);
+                    if (!template) return null;
 
                     return supabase.schema('fiscal').from('calendario').upsert({
                         empresa_id: cliente.id,
@@ -211,7 +271,9 @@ export async function POST(request: Request) {
                         status: 'CONCLUIDO',
                         ano_referencia: refDate.getFullYear(),
                         mes_referencia: refDate.getMonth() + 1,
-                        data_vencimento: new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0), // Último dia do mês
+                        data_vencimento: new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0),
+                        drive_file_id: matchesFound[0].id,
+                        drive_file_name: matchesFound[0].name
                     }, { onConflict: 'empresa_id, template_id, ano_referencia, mes_referencia' });
                 });
 

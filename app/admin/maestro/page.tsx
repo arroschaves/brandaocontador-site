@@ -108,17 +108,24 @@ export default function MaestroPage() {
                 setActivities(actData || []);
             }
 
-            // 3. Obrigações próximas (Schema FISCAL)
+            // 3. Obrigações próximas (Schema FISCAL) - Agora usando VIEW consolidada
             const { data: obData, error: oError } = await supabase
                 .schema('fiscal')
-                .from('calendario')
-                .select('*, empresas:empresa_id(razao_social), template:template_id(nome)')
+                .from('vw_calendario_maestro')
+                .select('*')
                 .order('data_vencimento', { ascending: true })
                 .eq('status', 'PENDENTE')
                 .limit(10);
 
             if (oError && !oError.message?.includes('does not exist')) throw oError;
-            setObrigacoes(obData || []);
+
+            // Normalizando para o formato esperado pelos subcomponentes
+            const normalizedOb = (obData || []).map((ob: any) => ({
+                ...ob,
+                template: { nome: ob.template_nome },
+                empresas: { razao_social: ob.razao_social }
+            }));
+            setObrigacoes(normalizedOb);
 
             // 4. Workflow do Escritório (Tarefas)
             const { data: wfData, error: wfErr } = await supabase
