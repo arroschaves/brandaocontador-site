@@ -70,7 +70,7 @@ export default function AdminLayout({
               <div className="flex items-center gap-3 px-2">
                 <div className="relative w-full h-12">
                   <Image
-                    src="/logo-full.jpg"
+                    src="/logo-wide.jpg"
                     alt="Brandão Contabilidade"
                     width={180}
                     height={48}

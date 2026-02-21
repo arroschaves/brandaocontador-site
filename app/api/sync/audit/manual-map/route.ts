@@ -17,7 +17,7 @@ export async function POST(request: Request) {
         const { data: template } = await supabase
             .schema('fiscal')
             .from('obrigacoes_templates')
-            .select('id')
+            .select('id, dia_vencimento')
             .eq('nome', tipo)
             .single();
 
@@ -29,6 +29,9 @@ export async function POST(request: Request) {
         const mes = compDate.getMonth() + 1;
         const ano = compDate.getFullYear();
 
+        // Calcular data de vencimento (geralmente no dia do template no mês seguinte)
+        const vencimento = new Date(ano, mes, template.dia_vencimento || 20);
+
         // 2. Upsert no Calendário Fiscal
         const { error: upsertErr } = await supabase
             .schema('fiscal')
@@ -39,6 +42,7 @@ export async function POST(request: Request) {
                 mes_referencia: mes,
                 ano_referencia: ano,
                 status: 'CONCLUIDO',
+                data_vencimento: vencimento.toISOString().split('T')[0],
                 drive_file_id: fileId,
                 drive_file_name: fileName,
                 updated_at: new Date().toISOString()
