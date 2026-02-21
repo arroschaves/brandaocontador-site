@@ -29,6 +29,7 @@ export interface EnrichmentData {
     simples_nacional?: boolean;
     regime_tributario?: string;
     quadro_societario?: string;
+    tipo_cadastro?: string;
 }
 
 /**
@@ -79,7 +80,8 @@ async function enrichRuralData(cpf: string): Promise<EnrichmentData> {
     console.log(`[Enrichment] CPF Rural detectado (${cpf}). Aguardando integração com SEFAZ-MS.`);
     return {
         status_rfb: 'Pessoa Física - Consulta Manual Necessária',
-        razao_social: 'REGISTRO DE PRODUTOR RURAL (CPF)'
+        razao_social: 'REGISTRO DE PRODUTOR RURAL (CPF)',
+        tipo_cadastro: 'PF'
     };
 }
 

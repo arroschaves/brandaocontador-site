@@ -15,11 +15,11 @@ export async function POST(
         const { id: clientId } = await params
         const supabase = await createClient()
 
-        // 1. Buscar o CNPJ do cliente no banco
+        // 1. Buscar o documento do cliente no banco
         const { data: client, error: fetchErr } = await supabase
             .schema('core')
             .from('empresas')
-            .select('cnpj_cpf, nome')
+            .select('documento, nome_fantasia, razao_social')
             .eq('id', clientId)
             .single()
 
@@ -28,13 +28,14 @@ export async function POST(
             return NextResponse.json({ error: 'Cliente não encontrado.' }, { status: 404 })
         }
 
-        if (!client.cnpj_cpf) {
-            return NextResponse.json({ error: 'Este cliente não possui CNPJ cadastrado para consulta.' }, { status: 400 })
+        const identifier = client.documento;
+        if (!identifier) {
+            return NextResponse.json({ error: 'Este cliente não possui CNPJ/CPF cadastrado para consulta.' }, { status: 400 })
         }
 
-        // 2. Chamar o service de enriquecimento (CNPJ.ws)
-        console.log(`[Enrichment API] Iniciando consulta para CNPJ: ${client.cnpj_cpf}`)
-        const enrichedData = await enrichCompanyData(client.cnpj_cpf)
+        // 2. Chamar o service de enriquecimento (CNPJ.ws / SEFAZ)
+        console.log(`[Enrichment API] Iniciando consulta para: ${identifier}`)
+        const enrichedData = await enrichCompanyData(identifier)
 
         // 3. Sanitizar dados antes de enviar ao Supabase
         const safeData: Record<string, any> = {};
@@ -81,7 +82,7 @@ export async function POST(
         await logAudit({
             cliente_id: clientId,
             acao: 'ENRIQUECIMENTO',
-            detalhes: `Enriquecimento automático de dados cadastrais realizado via API CNPJ.ws para o cliente ${client.nome}. Campos atualizados: Razão Social, Endereço, CNAE e IE.`,
+            detalhes: `Enriquecimento automático realizado para o cliente ${client.nome_fantasia || client.razao_social}. Campos sincronizados: Dados Cadastrais, Endereço, CNAE, IE, Quadro Societário e Simples Nacional.`,
             request
         })
 

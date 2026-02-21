@@ -86,20 +86,34 @@ function ClientesContent() {
         natureza_juridica: '',
         porte: '',
         capital_social: '',
-        inicio_atividade: ''
+        inicio_atividade: '',
+        tipo_cadastro: 'PJ',
+        simples_nacional: false,
+        quadro_societario: ''
     });
     const [consulting, setConsulting] = useState(false);
 
     useEffect(() => {
         fetchClientes();
+    }, []);
 
-        // Handle deep link via query param
+    useEffect(() => {
         const idFromUrl = searchParams.get('id');
-        if (idFromUrl) {
-            setSelectedClientId(idFromUrl);
-            setIsSidebarOpen(true);
+        const editMode = searchParams.get('edit') === 'true';
+
+        if (idFromUrl && clientes.length > 0) {
+            const clientMatch = clientes.find(c => c.id === idFromUrl);
+
+            if (editMode && clientMatch) {
+                // Open edit modal directly
+                handleOpenModal(clientMatch);
+            } else if (!editMode) {
+                // Open the right sidebar
+                setSelectedClientId(idFromUrl);
+                setIsSidebarOpen(true);
+            }
         }
-    }, [searchParams]);
+    }, [searchParams, clientes]);
 
     async function fetchClientes() {
         try {
@@ -260,7 +274,10 @@ function ClientesContent() {
                 natureza_juridica: client.natureza_juridica || '',
                 porte: client.porte || '',
                 capital_social: client.capital_social || '',
-                inicio_atividade: client.inicio_atividade || ''
+                inicio_atividade: client.inicio_atividade || '',
+                tipo_cadastro: client.tipo_cadastro || 'PJ',
+                simples_nacional: client.simples_nacional || false,
+                quadro_societario: client.quadro_societario || ''
             });
         } else {
             setEditingClient(null);
@@ -270,22 +287,23 @@ function ClientesContent() {
                 logradouro: '', numero: '', bairro: '', cep: '',
                 cidade: 'Sidrolândia', estado: 'MS',
                 inscricao_estadual: '', inscricao_municipal: '',
-                status_rfb: 'ATIVA', natureza_juridica: '', porte: '', capital_social: '', inicio_atividade: ''
+                status_rfb: 'ATIVA', natureza_juridica: '', porte: '', capital_social: '', inicio_atividade: '',
+                tipo_cadastro: 'PJ', simples_nacional: false, quadro_societario: ''
             });
         }
         setIsModalOpen(true);
     };
 
     async function handleConsultarCNPJ(cnpjOverride?: string) {
-        const cnpj = (cnpjOverride || formData.documento).replace(/\D/g, '');
-        if (cnpj.length !== 14) {
-            if (!cnpjOverride) alert('Digite um CNPJ válido com 14 dígitos.');
+        const doc = (cnpjOverride || formData.documento).replace(/\D/g, '');
+        if (doc.length !== 14 && doc.length !== 11) {
+            if (!cnpjOverride) alert('Digite um CNPJ/CPF válido com 11 ou 14 dígitos.');
             return;
         }
         setConsulting(true);
         try {
             // Usa API proxy do servidor para evitar CORS
-            const response = await fetch(`/api/clientes/cnpj?cnpj=${cnpj}`);
+            const response = await fetch(`/api/clientes/cnpj?cnpj=${doc}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -315,6 +333,9 @@ function ClientesContent() {
                 cidade: data.cidade || prev.cidade,
                 estado: data.estado || prev.estado,
                 inscricao_estadual: data.inscricao_estadual || prev.inscricao_estadual,
+                simples_nacional: data.simples_nacional ?? prev.simples_nacional,
+                quadro_societario: data.quadro_societario || prev.quadro_societario,
+                tipo_cadastro: data.documento?.length === 11 || (cnpjOverride && cnpjOverride.length === 11) ? 'PF' : 'PJ'
             }));
         } catch (err: any) {
             alert('Erro ao consultar CNPJ: ' + err.message);
@@ -323,11 +344,11 @@ function ClientesContent() {
         }
     }
 
-    // Consulta Automática ao digitar 14 dígitos
+    // Consulta Automática ao digitar 14 ou 11 dígitos
     useEffect(() => {
-        const cnpj = formData.documento?.replace(/\D/g, '');
-        if (cnpj?.length === 14 && !consulting && !editingClient) {
-            handleConsultarCNPJ(cnpj);
+        const doc = formData.documento?.replace(/\D/g, '');
+        if ((doc?.length === 14 || doc?.length === 11) && !consulting && !editingClient) {
+            handleConsultarCNPJ(doc);
         }
     }, [formData.documento]);
 
@@ -342,7 +363,8 @@ function ClientesContent() {
                 'regime_tributario', 'cnae_principal', 'cnaes_secundarios',
                 'logradouro', 'numero', 'bairro', 'cep', 'cidade', 'estado',
                 'inscricao_estadual', 'inscricao_municipal', 'status_rfb',
-                'natureza_juridica', 'porte', 'capital_social', 'inicio_atividade'
+                'natureza_juridica', 'porte', 'capital_social', 'inicio_atividade',
+                'tipo_cadastro', 'simples_nacional', 'quadro_societario'
             ];
 
             const raw = { ...formData };
@@ -371,14 +393,17 @@ function ClientesContent() {
             });
 
             if (editingClient) {
-                // Edição: direto no Supabase (campos limpos)
-                const { error } = await supabase
-                    .schema('core')
-                    .from('empresas')
-                    .update(cleanData)
-                    .eq('id', editingClient.id);
+                // Edição: via API com Admin Auth bypass (Previne silencioso bloqueio RLS)
+                const response = await fetch(`/api/clientes/${editingClient.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cleanData)
+                });
 
-                if (error) throw new Error(error.message);
+                if (!response.ok) {
+                    const result = await response.json();
+                    throw new Error(result.error || 'Falha ao atualizar cliente');
+                }
                 alert('✅ Cadastro atualizado com sucesso!');
             } else {
                 // Novo cliente: via API que sanitiza campos + dispara n8n
@@ -695,7 +720,22 @@ function ClientesContent() {
 
                             <div className="grid grid-cols-2 gap-5">
                                 <div className="space-y-2 col-span-2">
-                                    <label htmlFor="razao_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Razão Social (Nome Empresarial)</label>
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Tipo de Cliente</label>
+                                    <div className="flex bg-card border border-border/60 rounded-xl p-1 shadow-sm">
+                                        <button type="button" onClick={() => setFormData({ ...formData, tipo_cadastro: 'PJ' })}
+                                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${formData.tipo_cadastro === 'PJ' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted/50'}`}>
+                                            Pessoa Jurídica (CNPJ)
+                                        </button>
+                                        <button type="button" onClick={() => setFormData({ ...formData, tipo_cadastro: 'PF' })}
+                                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${formData.tipo_cadastro === 'PF' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:bg-muted/50'}`}>
+                                            Produtor Rural (CPF)
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="razao_social" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
+                                        {formData.tipo_cadastro === 'PF' ? 'Nome do Produtor Rural' : 'Razão Social (Nome Empresarial)'}
+                                    </label>
                                     <input id="razao_social" required className="w-full bg-card border border-border/60 rounded-xl p-3 text-sm font-semibold text-foreground focus:border-primary/40 outline-none transition-all shadow-sm"
                                         value={formData.razao_social || ''} onChange={e => setFormData({ ...formData, razao_social: e.target.value })} />
                                 </div>
@@ -715,6 +755,14 @@ function ClientesContent() {
                                         <option value="MEI">MEI</option>
                                         <option value="PESSOA_FISICA">PF (AGRO)</option>
                                     </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[11px] font-bold text-primary uppercase tracking-wider pl-1 invisible">Optante Simples</label>
+                                    <label className="flex items-center gap-3 w-full bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-xl p-3 text-sm font-bold text-primary cursor-pointer transition-colors shadow-sm">
+                                        <input type="checkbox" className="w-4 h-4 rounded border-primary bg-primary/20 text-primary focus:ring-primary accent-primary"
+                                            checked={formData.simples_nacional || false} onChange={e => setFormData({ ...formData, simples_nacional: e.target.checked })} />
+                                        Optante pelo Simples
+                                    </label>
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="status_rfb" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Situação RFB</label>
@@ -809,6 +857,12 @@ function ClientesContent() {
                                     <label htmlFor="inicio_atividade" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Data Abertura</label>
                                     <input id="inicio_atividade" type="date" className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none"
                                         value={formData.inicio_atividade || ''} onChange={e => setFormData({ ...formData, inicio_atividade: e.target.value })} />
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                    <label htmlFor="quadro_societario" className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider pl-1">Quadro Societário</label>
+                                    <textarea id="quadro_societario" rows={2} className="w-full bg-card border border-border/60 rounded-xl p-3 text-xs font-semibold text-foreground outline-none resize-none"
+                                        placeholder="Nomes dos Sócios / Representantes (Separados por vírgula)"
+                                        value={formData.quadro_societario || ''} onChange={e => setFormData({ ...formData, quadro_societario: e.target.value })} />
                                 </div>
                             </div>
 

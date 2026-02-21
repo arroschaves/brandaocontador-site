@@ -35,6 +35,8 @@ const CAMPOS_TEXT = [
     'porte',
     'tipo_pessoa',
     'atendimento_automatico',
+    'quadro_societario',
+    'tipo_cadastro',
 ];
 
 // Campos DATE — precisam de validação extra
@@ -113,6 +115,12 @@ function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
             if (!isNaN(num)) {
                 sanitized[key] = num;
             }
+            continue;
+        }
+
+        // Simples Nacional (BOOLEAN)
+        if (key === 'simples_nacional') {
+            sanitized[key] = value === true || value === 'true' || value === 1;
             continue;
         }
 
