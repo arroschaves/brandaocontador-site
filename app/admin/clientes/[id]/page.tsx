@@ -11,7 +11,7 @@ import {
     ChevronRight, ChevronLeft, LayoutDashboard, Settings,
     FileSearch, Activity, Cpu, Trash2, ShieldAlert,
     Zap, RefreshCw, Brain, TrendingUp, AlertCircle,
-    MapPin, Eye, Edit
+    MapPin, Eye, Edit, FolderOpen
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
