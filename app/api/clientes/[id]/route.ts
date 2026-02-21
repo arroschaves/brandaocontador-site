@@ -31,9 +31,9 @@ const CAMPOS_PERMITIDOS = [
     'tipo_cadastro',
 ];
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const rawData = await request.json();
         const supabase = createAdminClient();
 
@@ -72,9 +72,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const id = params.id;
+        const { id } = await params;
         const supabase = createAdminClient();
 
         console.log(`[CLIENT API DELETE] Excluindo cliente ${id}`);
