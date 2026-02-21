@@ -9,6 +9,7 @@ import {
     FileCheck, FileSearch, Landmark, Users, Upload, Monitor, Server,
     Sparkles, MapPin, Fingerprint, CheckCircle2, History
 } from 'lucide-react'
+import ClientDriveExplorer from './ClientDriveExplorer'
 
 interface ClientDetailSidebarProps {
     isOpen: boolean
@@ -26,7 +27,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     const [editedClient, setEditedClient] = useState<any>(null)
     const [unidades, setUnidades] = useState<any[]>([])
     const [historico, setHistorico] = useState<any[]>([])
-    const [activeTab, setActiveTab] = useState<'fiscal' | 'unidades' | 'rh' | 'vencimentos' | 'dados' | 'historico'>('fiscal')
+    const [activeTab, setActiveTab] = useState<'fiscal' | 'unidades' | 'rh' | 'vencimentos' | 'dados' | 'historico' | 'documentos'>('fiscal')
     const [uploading, setUploading] = useState(false)
     const [certificados, setCertificados] = useState<any[]>([])
     const [loadingCerts, setLoadingCerts] = useState(false)
@@ -143,38 +144,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
         }
     }
 
-    async function handleSendWhatsApp(routineName: string) {
-        if (!clientId) return
-        try {
-            const hasConfirmed = confirm(`Deseja enviar a guia de ${routineName} via WhatsApp agora?`)
-            if (!hasConfirmed) return
 
-            setSyncing(true)
-            const res = await fetch('/api/whatsapp/send-pdf', {
-                method: 'POST',
-                body: JSON.stringify({
-                    clientId,
-                    fileName: `${routineName}_${client.nome}.pdf`.replace(/\s+/g, '_'),
-                    caption: `Olá ${client.nome}, aqui está sua guia de ${routineName} referente ao mês atual.`
-                })
-            })
-
-            if (res.ok) {
-                alert('Guia enviada com sucesso via WhatsApp!')
-                getFullClientData()
-                fetchHistorico()
-                if (onUpdate) onUpdate()
-            } else {
-                const errData = await res.json();
-                alert('Falha ao enviar guia: ' + (errData.error || 'Erro desconhecido'))
-            }
-        } catch (err) {
-            console.error(err)
-            alert('Erro ao enviar via WhatsApp.')
-        } finally {
-            setSyncing(false)
-        }
-    }
 
     async function handleAuditIndividual() {
         if (!clientId) return
@@ -195,11 +165,10 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
     }
 
     async function handleOffboarding() {
-        if (!clientId || !client) return
+        const targetName = client.nome_fantasia || client.razao_social
+        const confirmName = prompt(`⚠️ AÇÃO CRÍTICA (LGPD) ⚠️\nO offboarding removerá permanentemente todos os certificados e senhas do cofre para este cliente.\n\nPara confirmar, digite o nome do cliente: "${targetName}"`)
 
-        const confirmName = prompt(`⚠️ AÇÃO CRÍTICA (LGPD) ⚠️\nO offboarding removerá permanentemente todos os certificados e senhas do cofre para este cliente.\n\nPara confirmar, digite o nome do cliente: "${client.nome}"`)
-
-        if (confirmName !== client.nome) {
+        if (confirmName !== targetName) {
             alert('Confirmação falhou. Operação cancelada.')
             return
         }
@@ -332,7 +301,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                         <div className="space-y-0">
                             {/* Banner Informativo Refinado */}
                             <div className="p-8 bg-gradient-to-b from-secondary/20 to-transparent border-b border-border/40">
-                                <h1 className="text-2xl font-bold text-foreground tracking-tight leading-tight">{client?.nome}</h1>
+                                <h1 className="text-2xl font-bold text-foreground tracking-tight leading-tight">{client?.nome_fantasia || client?.razao_social}</h1>
                                 <div className="flex flex-wrap gap-2 mt-5">
                                     <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-tight rounded-xl">
                                         <ShieldAlert className="w-3.5 h-3.5" />
@@ -349,6 +318,7 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                             <div className="flex bg-card border-b border-border/40 overflow-x-auto no-scrollbar px-4 pt-4 sticky top-0 z-10">
                                 {[
                                     { id: 'fiscal', label: 'Auditoria', icon: FileSearch },
+                                    { id: 'documentos', label: 'Google Drive', icon: FolderOpen },
                                     { id: 'unidades', label: 'Unidades', icon: Landmark },
                                     { id: 'rh', label: 'e-Social', icon: Users },
                                     { id: 'vencimentos', label: 'Validades', icon: Clock },
@@ -391,15 +361,6 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                                                 </div>
                                                             </div>
                                                             <div className="flex items-center gap-2">
-                                                                {isConcluido && (
-                                                                    <button
-                                                                        onClick={() => handleSendWhatsApp(rout.name)}
-                                                                        className="p-2.5 bg-card border border-border text-emerald-600 rounded-xl hover:bg-emerald-50 transition-all shadow-sm"
-                                                                        title="Enviar via WhatsApp"
-                                                                    >
-                                                                        <MessageSquare className="w-4 h-4" />
-                                                                    </button>
-                                                                )}
                                                                 <div className={`px-2.5 py-1 text-[10px] font-bold rounded-lg border flex items-center gap-1.5 ${isConcluido ? 'bg-primary/10 text-primary border-primary/20 shadow-sm shadow-primary/5' : 'bg-muted/30 text-muted-foreground border-border/50 shadow-none'}`}>
                                                                     {isConcluido && <CheckCircle2 className="w-3 h-3" />}
                                                                     {isConcluido ? 'AUDITADO' : 'PENDENTE'}
@@ -451,6 +412,10 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                             ))}
                                         </div>
                                     </div>
+                                )}
+
+                                {activeTab === 'documentos' && clientId && (
+                                    <ClientDriveExplorer clientId={clientId} />
                                 )}
 
                                 {activeTab === 'vencimentos' && (
@@ -522,10 +487,10 @@ export default function ClientDetailSidebar({ isOpen, onClose, clientId, onUpdat
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 {[
                                                     { label: 'Razão Social', value: client?.razao_social, icon: Building2 },
-                                                    { label: 'ID Fiscal', value: formatCNPJ(client?.cnpj_cpf), icon: ShieldAlert },
+                                                    { label: 'ID Fiscal', value: formatCNPJ(client?.documento), icon: ShieldAlert },
                                                     { label: 'Inscr. Estadual', value: client?.inscricao_estadual, icon: Fingerprint },
                                                     { label: 'E-mail Fiscal', value: client?.email, icon: Mail },
-                                                    { label: 'WhatsApp', value: formatPhone(client?.telefone_whatsapp), icon: Phone },
+                                                    { label: 'WhatsApp', value: formatPhone(client?.telefone), icon: Phone },
                                                     { label: 'Regime Fiscal', value: client?.regime_tributario?.replace(/_/g, ' '), icon: Landmark },
                                                     { label: 'CNAE', value: client?.cnae_principal, icon: Briefcase },
                                                     { label: 'Localidade', value: client?.cidade ? `${client.cidade}/${client.estado}` : null, icon: MapPin }

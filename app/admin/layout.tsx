@@ -19,7 +19,8 @@ import {
   User as UserIcon,
   ShieldCheck,
   Cpu,
-  Zap
+  Zap,
+  Briefcase
 } from 'lucide-react';
 import WhatsAppRadar from '../components/WhatsAppRadar';
 
@@ -46,9 +47,11 @@ export default function AdminLayout({
     { name: 'Master Control', icon: ShieldCheck, path: '/admin/master' },
     { name: 'Equipe', icon: Users, path: '/admin/equipe' },
     { name: 'Clientes', icon: Users, path: '/admin/clientes' },
+    { name: 'Departamento Pessoal', icon: Briefcase, path: '/admin/departamento-pessoal' },
     { name: 'Cronograma', icon: ClipboardList, path: '/admin/cronograma' },
     { name: 'Calendário', icon: Calendar, path: '/admin/calendario' },
     { name: 'Atendimento', icon: MessageSquare, path: '/admin/atendimento' },
+    { name: 'Financeiro', icon: BarChart3, path: '/admin/financeiro' },
     { name: 'Vencimentos', icon: Bell, path: '/admin/vencimentos' },
     { name: 'Automação', icon: Zap, path: '/admin/automacao' },
     { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' },

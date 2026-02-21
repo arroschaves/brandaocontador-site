@@ -25,7 +25,7 @@ export async function POST(request: Request) {
             throw new Error('Cliente não encontrado')
         }
 
-        if (!cliente.telefone_whatsapp) {
+        if (!cliente.telefone) {
             throw new Error('Cliente sem telefone cadastrado')
         }
 
@@ -58,10 +58,10 @@ export async function POST(request: Request) {
 
         // 6. Enviar via Evolution API
         const whatsappRes = await sendWhatsAppMedia(
-            cliente.telefone_whatsapp,
+            cliente.telefone,
             base64,
             fileName || 'Documento.pdf',
-            caption || `Olá ${cliente.nome}, segue sua guia de contabilidade.`
+            caption || `Olá ${cliente.nome_fantasia || cliente.razao_social}, segue sua guia de contabilidade.`
         );
 
         if (whatsappRes?.status === 'error') {
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
         // 7. Registrar Log de Atendimento
         await supabase.schema('core').from('atendimentos').insert({
             empresa_id: clientId,
-            telefone_whatsapp: cliente.telefone_whatsapp,
-            mensagem: `[Documento Enviado: ${fileName}]`,
+            telefone_whatsapp: cliente.telefone,
+            mensagem: `[Documento Enviado WhatsApp: ${fileName}]`,
             status: 'concluido',
             created_at: new Date().toISOString()
         })
@@ -81,14 +81,14 @@ export async function POST(request: Request) {
         await logAudit({
             cliente_id: clientId,
             acao: 'ENVIO_WA',
-            detalhes: `Guia enviada via WhatsApp: ${fileName}`,
+            detalhes: `Documento enviado via WhatsApp: ${fileName}`,
             request
         });
 
         return NextResponse.json({ success: true })
 
     } catch (error: any) {
-        console.error('[Send PDF Error]:', error)
+        console.error('[Send Document WA Error]:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }

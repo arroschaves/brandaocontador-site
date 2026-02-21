@@ -52,6 +52,8 @@ export default function MaestroPage() {
     const [error, setError] = useState<string | null>(null);
     const [activities, setActivities] = useState<any[]>([]);
     const [obrigacoes, setObrigacoes] = useState<any[]>([]);
+    const [tarefas, setTarefas] = useState<any[]>([]);
+    const [vencimentosSemana, setVencimentosSemana] = useState<any[]>([]);
     const [stats, setStats] = useState({
         totalClientes: 0,
         totalFazendas: 0,
@@ -117,6 +119,29 @@ export default function MaestroPage() {
 
             if (oError && !oError.message?.includes('does not exist')) throw oError;
             setObrigacoes(obData || []);
+
+            // 4. Workflow do Escritório (Tarefas)
+            const { data: wfData, error: wfErr } = await supabase
+                .schema('workflow')
+                .from('tarefas')
+                .select('*, responsavel:responsavel_id(nome)')
+                .neq('status', 'concluido')
+                .order('urgente', { ascending: false })
+                .order('prazo', { ascending: true })
+                .limit(5);
+
+            if (wfErr && !wfErr.message?.includes('does not exist')) console.warn(wfErr);
+            setTarefas(wfData || []);
+
+            // 5. Compliance - Vencimentos da Semana
+            const { data: compData, error: compErr } = await supabase
+                .schema('compliance')
+                .from('vw_vencimentos_semanais')
+                .select('*')
+                .order('vencimento', { ascending: true });
+
+            if (compErr && !compErr.message?.includes('does not exist')) console.warn(compErr);
+            setVencimentosSemana(compData || []);
 
         } catch (err: any) {
             console.error("Erro ao carregar dados do Maestro:", err);
@@ -403,33 +428,58 @@ export default function MaestroPage() {
                         </div>
                     </div>
 
-                    {/* Quick Actions */}
+                    {/* Tarefas Board */}
                     <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
-                        <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-                            <Zap className="w-5 h-5 text-primary" />
-                            Ações Rápidas
-                        </h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                                <Zap className="w-5 h-5 text-indigo-500" />
+                                Workflow Interno
+                            </h3>
+                            <span className="text-xs bg-indigo-500/10 text-indigo-500 px-2 py-1 rounded font-bold">{tarefas.length} pendentes</span>
+                        </div>
+
                         <div className="space-y-3">
-                            <Link href="/admin/clientes" className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
-                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                                    <MapPin className="w-4 h-4" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-foreground">Novo Cliente</p>
-                                    <p className="text-xs text-muted-foreground">Cadastrar + criar pastas automáticas</p>
-                                </div>
-                                <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </Link>
-                            <a href="/admin/vencimentos" className="flex items-center gap-3 p-3 rounded-xl bg-background border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group">
-                                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                                    <LucideCalendar className="w-4 h-4" />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-sm font-medium text-foreground">Vencimentos</p>
-                                    <p className="text-xs text-muted-foreground">Alvarás, CNDs e Certificados</p>
-                                </div>
-                                <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </a>
+                            {tarefas.length === 0 ? (
+                                <p className="text-xs text-muted-foreground italic text-center py-4">Equipe sem pendências críticas.</p>
+                            ) : (
+                                tarefas.map(t => (
+                                    <div key={t.id} className="p-3 bg-background border border-border/50 rounded-xl hover:border-indigo-500/30 transition-all flex justify-between items-center gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-foreground truncate">{t.titulo}</p>
+                                            <p className="text-[10px] text-muted-foreground flex gap-2 mt-1">
+                                                <span>{t.responsavel?.nome || 'Sistema'}</span> • <span>Módulo: {t.modulo || 'Geral'}</span>
+                                            </p>
+                                        </div>
+                                        {t.urgente && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Vencimentos & Faturamento View */}
+                    <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-2xl p-6 shadow-sm">
+                        <h3 className="font-semibold text-lg text-emerald-400 mb-4 flex items-center gap-2">
+                            <FileBox className="w-5 h-5" />
+                            Auditoria Semanal (Compliance)
+                        </h3>
+                        <div className="space-y-4">
+                            {vencimentosSemana.length === 0 ? (
+                                <p className="text-xs text-muted-foreground italic text-center py-4">Sem vencimentos processados pela IA nesta semana.</p>
+                            ) : (
+                                vencimentosSemana.map((v, i) => (
+                                    <div key={i} className="flex justify-between items-center pb-2 border-b border-emerald-900/20 last:border-0">
+                                        <div>
+                                            <p className="text-[11px] font-black tracking-widest text-emerald-500/70 uppercase">{v.tipo}</p>
+                                            <p className="text-sm font-medium text-emerald-100">{v.nome_fantasia || v.razao_social}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-black text-emerald-400">R$ {v.valor?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            <p className="text-[10px] text-emerald-600/60">{new Date(v.vencimento).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

@@ -30,7 +30,8 @@ export default function EquipePage() {
 
             // Stats básicas
             const { count: acoesHoje } = await supabase
-                .from('auditoria_crm')
+                .schema('audit')
+                .from('logs')
                 .select('*', { count: 'exact', head: true })
                 .gte('created_at', new Date().toISOString().split('T')[0])
 

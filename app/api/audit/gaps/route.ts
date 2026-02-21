@@ -44,7 +44,7 @@ export async function GET(request: Request) {
                 if (!exists) {
                     gaps.push({
                         clienteId: cliente.id,
-                        clienteNome: cliente.razao_social || cliente.nome,
+                        clienteNome: cliente.nome_fantasia || cliente.razao_social,
                         regime: cliente.regime_tributario,
                         obrigacao: routine.name,
                         grupo: routine.taxGroup,

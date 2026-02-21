@@ -25,8 +25,9 @@ export default function MasterDashboard() {
         try {
             // 1. Logs de Segurança Recentes
             const { data } = await supabase
-                .from('auditoria_crm')
-                .select('*, clientes(nome), equipe(nome)')
+                .schema('audit')
+                .from('logs')
+                .select('*')
                 .order('created_at', { ascending: false })
                 .limit(50)
 
@@ -122,7 +123,7 @@ export default function MasterDashboard() {
                                     <td className="p-4 font-black">
                                         <div className="flex items-center gap-2">
                                             <Fingerprint className="w-3 h-3 text-emerald-500/50" />
-                                            {log.equipe?.nome || 'ALESSANDRO'}
+                                            {log.dados_novos?.usuario_nome || 'SISTEMA'}
                                         </div>
                                     </td>
                                     <td className="p-4">
@@ -130,7 +131,7 @@ export default function MasterDashboard() {
                                             {log.acao}
                                         </span>
                                     </td>
-                                    <td className="p-4">{log.clientes?.nome || 'SISTEMA'}</td>
+                                    <td className="p-4">{log.dados_novos?.cliente_nome || 'SISTEMA'}</td>
                                     <td className="p-4 text-neutral-500 italic">{log.ip_address}</td>
                                     <td className="p-4 max-w-xs truncate text-[9px]">{JSON.stringify(log.detalhes)}</td>
                                 </tr>

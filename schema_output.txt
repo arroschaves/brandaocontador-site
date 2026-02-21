@@ -1,0 +1,402 @@
+[dotenv@17.3.1] injecting env (15) from .env.local -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+
+================ SCHEMA: CORE ================
+Tabelas (12): escritorios, usuarios_clientes, usuarios_escritorio, empresa_servicos, usuario_empresa, regime_historico, unidades_fiscais, atendimentos, servicos, empresa_contatos, certificados_digitais, empresas
+
+--- core.escritorios ---
+┌─────────┬─────────────────┬────────────────────────────┐
+│ (index) │ column          │ type                       │
+├─────────┼─────────────────┼────────────────────────────┤
+│ 0       │ 'id'            │ 'uuid'                     │
+│ 1       │ 'razao_social'  │ 'text'                     │
+│ 2       │ 'cnpj'          │ 'text'                     │
+│ 3       │ 'email_contato' │ 'text'                     │
+│ 4       │ 'config_drive'  │ 'jsonb'                    │
+│ 5       │ 'plano'         │ 'text'                     │
+│ 6       │ 'created_at'    │ 'timestamp with time zone' │
+└─────────┴─────────────────┴────────────────────────────┘
+
+--- core.usuarios_clientes ---
+┌─────────┬────────────────┬────────────────────────────┐
+│ (index) │ column         │ type                       │
+├─────────┼────────────────┼────────────────────────────┤
+│ 0       │ 'id'           │ 'uuid'                     │
+│ 1       │ 'empresa_id'   │ 'uuid'                     │
+│ 2       │ 'nome'         │ 'text'                     │
+│ 3       │ 'cpf'          │ 'text'                     │
+│ 4       │ 'pode_assinar' │ 'boolean'                  │
+│ 5       │ 'ativo'        │ 'boolean'                  │
+│ 6       │ 'created_at'   │ 'timestamp with time zone' │
+└─────────┴────────────────┴────────────────────────────┘
+
+--- core.usuarios_escritorio ---
+┌─────────┬─────────────────┬────────────────────────────┐
+│ (index) │ column          │ type                       │
+├─────────┼─────────────────┼────────────────────────────┤
+│ 0       │ 'id'            │ 'uuid'                     │
+│ 1       │ 'escritorio_id' │ 'uuid'                     │
+│ 2       │ 'nome'          │ 'text'                     │
+│ 3       │ 'perfil'        │ 'text'                     │
+│ 4       │ 'ativo'         │ 'boolean'                  │
+│ 5       │ 'created_at'    │ 'timestamp with time zone' │
+└─────────┴─────────────────┴────────────────────────────┘
+
+--- core.empresa_servicos ---
+┌─────────┬───────────────┬────────────────────────────┐
+│ (index) │ column        │ type                       │
+├─────────┼───────────────┼────────────────────────────┤
+│ 0       │ 'id'          │ 'uuid'                     │
+│ 1       │ 'empresa_id'  │ 'uuid'                     │
+│ 2       │ 'servico_id'  │ 'uuid'                     │
+│ 3       │ 'data_inicio' │ 'date'                     │
+│ 4       │ 'data_fim'    │ 'date'                     │
+│ 5       │ 'ativo'       │ 'boolean'                  │
+│ 6       │ 'created_at'  │ 'timestamp with time zone' │
+└─────────┴───────────────┴────────────────────────────┘
+
+--- core.usuario_empresa ---
+┌─────────┬──────────────┬────────────────────────────┐
+│ (index) │ column       │ type                       │
+├─────────┼──────────────┼────────────────────────────┤
+│ 0       │ 'id'         │ 'uuid'                     │
+│ 1       │ 'usuario_id' │ 'uuid'                     │
+│ 2       │ 'empresa_id' │ 'uuid'                     │
+│ 3       │ 'role'       │ 'text'                     │
+│ 4       │ 'created_at' │ 'timestamp with time zone' │
+└─────────┴──────────────┴────────────────────────────┘
+
+--- core.regime_historico ---
+┌─────────┬────────────────────┬────────────────────────────┐
+│ (index) │ column             │ type                       │
+├─────────┼────────────────────┼────────────────────────────┤
+│ 0       │ 'id'               │ 'uuid'                     │
+│ 1       │ 'empresa_id'       │ 'uuid'                     │
+│ 2       │ 'regime'           │ 'text'                     │
+│ 3       │ 'inicio'           │ 'date'                     │
+│ 4       │ 'fim'              │ 'date'                     │
+│ 5       │ 'ano_fiscal'       │ 'integer'                  │
+│ 6       │ 'motivo_alteracao' │ 'text'                     │
+│ 7       │ 'alterado_por'     │ 'uuid'                     │
+│ 8       │ 'created_at'       │ 'timestamp with time zone' │
+└─────────┴────────────────────┴────────────────────────────┘
+
+--- core.unidades_fiscais ---
+┌─────────┬──────────────┬────────────────────────────┐
+│ (index) │ column       │ type                       │
+├─────────┼──────────────┼────────────────────────────┤
+│ 0       │ 'id'         │ 'uuid'                     │
+│ 1       │ 'empresa_id' │ 'uuid'                     │
+│ 2       │ 'nome'       │ 'text'                     │
+│ 3       │ 'tipo'       │ 'text'                     │
+│ 4       │ 'created_at' │ 'timestamp with time zone' │
+└─────────┴──────────────┴────────────────────────────┘
+
+--- core.atendimentos ---
+┌─────────┬──────────────────────────┬────────────────────────────┐
+│ (index) │ column                   │ type                       │
+├─────────┼──────────────────────────┼────────────────────────────┤
+│ 0       │ 'id'                     │ 'uuid'                     │
+│ 1       │ 'empresa_id'             │ 'uuid'                     │
+│ 2       │ 'mensagem'               │ 'text'                     │
+│ 3       │ 'pushname'               │ 'text'                     │
+│ 4       │ 'status'                 │ 'text'                     │
+│ 5       │ 'created_at'             │ 'timestamp with time zone' │
+│ 6       │ 'telefone_whatsapp'      │ 'text'                     │
+│ 7       │ 'transcricao_audio'      │ 'text'                     │
+│ 8       │ 'resposta_automatica'    │ 'text'                     │
+│ 9       │ 'motivo_humano'          │ 'text'                     │
+│ 10      │ 'categoria_solicitacao'  │ 'text'                     │
+│ 11      │ 'prioridade'             │ 'text'                     │
+│ 12      │ 'atendimento_automatico' │ 'boolean'                  │
+│ 13      │ 'updated_at'             │ 'timestamp with time zone' │
+└─────────┴──────────────────────────┴────────────────────────────┘
+
+--- core.servicos ---
+┌─────────┬──────────────┬────────────────────────────┐
+│ (index) │ column       │ type                       │
+├─────────┼──────────────┼────────────────────────────┤
+│ 0       │ 'id'         │ 'uuid'                     │
+│ 1       │ 'nome'       │ 'text'                     │
+│ 2       │ 'descricao'  │ 'text'                     │
+│ 3       │ 'ativo'      │ 'boolean'                  │
+│ 4       │ 'created_at' │ 'timestamp with time zone' │
+└─────────┴──────────────┴────────────────────────────┘
+
+--- core.empresa_contatos ---
+┌─────────┬──────────────┬────────────────────────────┐
+│ (index) │ column       │ type                       │
+├─────────┼──────────────┼────────────────────────────┤
+│ 0       │ 'id'         │ 'uuid'                     │
+│ 1       │ 'empresa_id' │ 'uuid'                     │
+│ 2       │ 'nome'       │ 'text'                     │
+│ 3       │ 'cpf'        │ 'text'                     │
+│ 4       │ 'email'      │ 'text'                     │
+│ 5       │ 'telefone'   │ 'text'                     │
+│ 6       │ 'cargo'      │ 'text'                     │
+│ 7       │ 'principal'  │ 'boolean'                  │
+│ 8       │ 'ativo'      │ 'boolean'                  │
+│ 9       │ 'created_at' │ 'timestamp with time zone' │
+└─────────┴──────────────┴────────────────────────────┘
+
+--- core.certificados_digitais ---
+┌─────────┬───────────────────┬────────────────────────────┐
+│ (index) │ column            │ type                       │
+├─────────┼───────────────────┼────────────────────────────┤
+│ 0       │ 'id'              │ 'uuid'                     │
+│ 1       │ 'empresa_id'      │ 'uuid'                     │
+│ 2       │ 'tipo'            │ 'text'                     │
+│ 3       │ 'titular'         │ 'text'                     │
+│ 4       │ 'validade'        │ 'date'                     │
+│ 5       │ 'drive_file_id'   │ 'text'                     │
+│ 6       │ 'senha_vault_ref' │ 'text'                     │
+│ 7       │ 'status'          │ 'text'                     │
+│ 8       │ 'created_at'      │ 'timestamp with time zone' │
+└─────────┴───────────────────┴────────────────────────────┘
+
+--- core.empresas ---
+┌─────────┬──────────────────────────────────────────┬────────────────────────────┐
+│ (index) │ column                                   │ type                       │
+├─────────┼──────────────────────────────────────────┼────────────────────────────┤
+│ 0       │ 'id'                                     │ 'uuid'                     │
+│ 1       │ 'escritorio_id'                          │ 'uuid'                     │
+│ 2       │ 'razao_social'                           │ 'text'                     │
+│ 3       │ 'nome_fantasia'                          │ 'text'                     │
+│ 4       │ 'documento'                              │ 'text'                     │
+│ 5       │ 'regime_tributario'                      │ 'text'                     │
+│ 6       │ 'cnae_principal'                         │ 'text'                     │
+│ 7       │ 'inicio_atividade'                       │ 'date'                     │
+│ 8       │ 'drive_folder_id'                        │ 'text'                     │
+│ 9       │ 'status'                                 │ 'text'                     │
+│ 10      │ 'created_at'                             │ 'timestamp with time zone' │
+│ 11      │ 'deleted_at'                             │ 'timestamp with time zone' │
+│ 12      │ 'tipo_pessoa'                            │ 'text'                     │
+│ 13      │ 'email'                                  │ 'text'                     │
+│ 14      │ 'telefone'                               │ 'text'                     │
+│ 15      │ 'status_analise'                         │ 'text'                     │
+│ 16      │ 'logradouro'                             │ 'text'                     │
+│ 17      │ 'numero'                                 │ 'text'                     │
+│ 18      │ 'bairro'                                 │ 'text'                     │
+│ 19      │ 'cep'                                    │ 'text'                     │
+│ 20      │ 'cidade'                                 │ 'text'                     │
+│ 21      │ 'estado'                                 │ 'text'                     │
+│ 22      │ 'inscricao_estadual'                     │ 'text'                     │
+│ 23      │ 'inscricao_municipal'                    │ 'text'                     │
+│ 24      │ 'status_rfb'                             │ 'text'                     │
+│ 25      │ 'cnaes_secundarios'                      │ 'text'                     │
+│ 26      │ 'capital_social'                         │ 'numeric'                  │
+│ 27      │ 'natureza_juridica'                      │ 'text'                     │
+│ 28      │ 'porte'                                  │ 'text'                     │
+│ 29      │ 'vencimento_alvara_funcionamento'        │ 'date'                     │
+│ 30      │ 'vencimento_alvara_sanitario'            │ 'date'                     │
+│ 31      │ 'vencimento_alvara_bombeiros'            │ 'date'                     │
+│ 32      │ 'vencimento_alvara_ambiental'            │ 'date'                     │
+│ 33      │ 'vencimento_certidao_negativa_federal'   │ 'date'                     │
+│ 34      │ 'vencimento_certidao_negativa_estadual'  │ 'date'                     │
+│ 35      │ 'vencimento_certidao_negativa_municipal' │ 'date'                     │
+│ 36      │ 'vencimento_certidao_fgts'               │ 'date'                     │
+│ 37      │ 'atendimento_automatico'                 │ 'boolean'                  │
+└─────────┴──────────────────────────────────────────┴────────────────────────────┘
+
+================ SCHEMA: FISCAL ================
+Tabelas (6): feriados, obrigacoes_templates, calendario, vw_dashboard_obrigacoes, vw_resumo_empresa, vw_resumo_dashboard
+
+--- fiscal.feriados ---
+┌─────────┬──────────────┬────────────────────────────┐
+│ (index) │ column       │ type                       │
+├─────────┼──────────────┼────────────────────────────┤
+│ 0       │ 'id'         │ 'uuid'                     │
+│ 1       │ 'data'       │ 'date'                     │
+│ 2       │ 'descricao'  │ 'text'                     │
+│ 3       │ 'tipo'       │ 'text'                     │
+│ 4       │ 'uf'         │ 'text'                     │
+│ 5       │ 'created_at' │ 'timestamp with time zone' │
+└─────────┴──────────────┴────────────────────────────┘
+
+--- fiscal.obrigacoes_templates ---
+┌─────────┬─────────────────────┬───────────┐
+│ (index) │ column              │ type      │
+├─────────┼─────────────────────┼───────────┤
+│ 0       │ 'id'                │ 'uuid'    │
+│ 1       │ 'nome'              │ 'text'    │
+│ 2       │ 'departamento'      │ 'text'    │
+│ 3       │ 'regime_tributario' │ 'ARRAY'   │
+│ 4       │ 'dia_vencimento'    │ 'integer' │
+│ 5       │ 'antecipa_fds'      │ 'boolean' │
+│ 6       │ 'antecipa_feriado'  │ 'boolean' │
+│ 7       │ 'active'            │ 'boolean' │
+│ 8       │ 'descricao'         │ 'text'    │
+│ 9       │ 'periodicidade'     │ 'text'    │
+│ 10      │ 'mes_entrega'       │ 'integer' │
+│ 11      │ 'orgao'             │ 'text'    │
+│ 12      │ 'sistema'           │ 'text'    │
+│ 13      │ 'postergavel'       │ 'boolean' │
+└─────────┴─────────────────────┴───────────┘
+
+--- fiscal.calendario ---
+┌─────────┬───────────────────┬────────────────────────────┐
+│ (index) │ column            │ type                       │
+├─────────┼───────────────────┼────────────────────────────┤
+│ 0       │ 'id'              │ 'uuid'                     │
+│ 1       │ 'empresa_id'      │ 'uuid'                     │
+│ 2       │ 'template_id'     │ 'uuid'                     │
+│ 3       │ 'mes_referencia'  │ 'integer'                  │
+│ 4       │ 'ano_referencia'  │ 'integer'                  │
+│ 5       │ 'data_vencimento' │ 'date'                     │
+│ 6       │ 'status'          │ 'text'                     │
+│ 7       │ 'data_conclusao'  │ 'timestamp with time zone' │
+│ 8       │ 'drive_file_id'   │ 'text'                     │
+│ 9       │ 'created_at'      │ 'timestamp with time zone' │
+└─────────┴───────────────────┴────────────────────────────┘
+
+--- fiscal.vw_dashboard_obrigacoes ---
+┌─────────┬─────────────────────┬───────────┐
+│ (index) │ column              │ type      │
+├─────────┼─────────────────────┼───────────┤
+│ 0       │ 'empresa_id'        │ 'uuid'    │
+│ 1       │ 'razao_social'      │ 'text'    │
+│ 2       │ 'regime_tributario' │ 'text'    │
+│ 3       │ 'obrigacao'         │ 'text'    │
+│ 4       │ 'departamento'      │ 'text'    │
+│ 5       │ 'mes_referencia'    │ 'integer' │
+│ 6       │ 'ano_referencia'    │ 'integer' │
+│ 7       │ 'data_vencimento'   │ 'date'    │
+│ 8       │ 'status'            │ 'text'    │
+│ 9       │ 'prioridade_visual' │ 'text'    │
+└─────────┴─────────────────────┴───────────┘
+
+--- fiscal.vw_resumo_empresa ---
+┌─────────┬───────────────────┬──────────┐
+│ (index) │ column            │ type     │
+├─────────┼───────────────────┼──────────┤
+│ 0       │ 'empresa_id'      │ 'uuid'   │
+│ 1       │ 'razao_social'    │ 'text'   │
+│ 2       │ 'pendentes'       │ 'bigint' │
+│ 3       │ 'concluidas'      │ 'bigint' │
+│ 4       │ 'atrasadas'       │ 'bigint' │
+│ 5       │ 'vencendo_semana' │ 'bigint' │
+│ 6       │ 'total'           │ 'bigint' │
+└─────────┴───────────────────┴──────────┘
+
+--- fiscal.vw_resumo_dashboard ---
+┌─────────┬──────────────────┬──────────┐
+│ (index) │ column           │ type     │
+├─────────┼──────────────────┼──────────┤
+│ 0       │ 'total_clientes' │ 'bigint' │
+│ 1       │ 'pendentes_mes'  │ 'bigint' │
+│ 2       │ 'concluidos_mes' │ 'bigint' │
+└─────────┴──────────────────┴──────────┘
+
+================ SCHEMA: DP ================
+Tabelas (2): eventos_templates, eventos
+
+--- dp.eventos_templates ---
+┌─────────┬────────────────┬───────────┐
+│ (index) │ column         │ type      │
+├─────────┼────────────────┼───────────┤
+│ 0       │ 'id'           │ 'uuid'    │
+│ 1       │ 'nome'         │ 'text'    │
+│ 2       │ 'descricao'    │ 'text'    │
+│ 3       │ 'departamento' │ 'text'    │
+│ 4       │ 'prazo_dias'   │ 'integer' │
+│ 5       │ 'ativo'        │ 'boolean' │
+└─────────┴────────────────┴───────────┘
+
+--- dp.eventos ---
+┌─────────┬────────────────────┬────────────────────────────┐
+│ (index) │ column             │ type                       │
+├─────────┼────────────────────┼────────────────────────────┤
+│ 0       │ 'id'               │ 'uuid'                     │
+│ 1       │ 'empresa_id'       │ 'uuid'                     │
+│ 2       │ 'template_id'      │ 'uuid'                     │
+│ 3       │ 'funcionario_nome' │ 'text'                     │
+│ 4       │ 'funcionario_cpf'  │ 'text'                     │
+│ 5       │ 'data_evento'      │ 'date'                     │
+│ 6       │ 'data_limite'      │ 'date'                     │
+│ 7       │ 'status'           │ 'text'                     │
+│ 8       │ 'observacoes'      │ 'text'                     │
+│ 9       │ 'responsavel_id'   │ 'uuid'                     │
+│ 10      │ 'created_at'       │ 'timestamp with time zone' │
+└─────────┴────────────────────┴────────────────────────────┘
+
+================ SCHEMA: WORKFLOW ================
+Tabelas (2): solicitacoes_admin, tarefas
+
+--- workflow.solicitacoes_admin ---
+┌─────────┬──────────────────┬────────────────────────────┐
+│ (index) │ column           │ type                       │
+├─────────┼──────────────────┼────────────────────────────┤
+│ 0       │ 'id'             │ 'uuid'                     │
+│ 1       │ 'solicitante_id' │ 'uuid'                     │
+│ 2       │ 'tipo'           │ 'text'                     │
+│ 3       │ 'empresa_id'     │ 'uuid'                     │
+│ 4       │ 'descricao'      │ 'text'                     │
+│ 5       │ 'status'         │ 'text'                     │
+│ 6       │ 'aprovado_por'   │ 'uuid'                     │
+│ 7       │ 'data_aprovacao' │ 'timestamp with time zone' │
+│ 8       │ 'created_at'     │ 'timestamp with time zone' │
+└─────────┴──────────────────┴────────────────────────────┘
+
+--- workflow.tarefas ---
+┌─────────┬──────────────────┬────────────────────────────┐
+│ (index) │ column           │ type                       │
+├─────────┼──────────────────┼────────────────────────────┤
+│ 0       │ 'id'             │ 'uuid'                     │
+│ 1       │ 'empresa_id'     │ 'uuid'                     │
+│ 2       │ 'calendario_id'  │ 'uuid'                     │
+│ 3       │ 'titulo'         │ 'text'                     │
+│ 4       │ 'descricao'      │ 'text'                     │
+│ 5       │ 'responsavel_id' │ 'uuid'                     │
+│ 6       │ 'status'         │ 'text'                     │
+│ 7       │ 'prioridade'     │ 'integer'                  │
+│ 8       │ 'data_limite'    │ 'date'                     │
+│ 9       │ 'data_conclusao' │ 'timestamp with time zone' │
+│ 10      │ 'created_at'     │ 'timestamp with time zone' │
+└─────────┴──────────────────┴────────────────────────────┘
+
+================ SCHEMA: AUDIT ================
+Tabelas (1): logs
+
+--- audit.logs ---
+┌─────────┬─────────────────┬────────────────────────────┐
+│ (index) │ column          │ type                       │
+├─────────┼─────────────────┼────────────────────────────┤
+│ 0       │ 'id'            │ 'uuid'                     │
+│ 1       │ 'usuario_id'    │ 'uuid'                     │
+│ 2       │ 'tabela'        │ 'text'                     │
+│ 3       │ 'acao'          │ 'text'                     │
+│ 4       │ 'dados_antigos' │ 'jsonb'                    │
+│ 5       │ 'dados_novos'   │ 'jsonb'                    │
+│ 6       │ 'created_at'    │ 'timestamp with time zone' │
+└─────────┴─────────────────┴────────────────────────────┘
+
+================ SCHEMA: COMPLIANCE ================
+Tabelas (2): documentos_processados, vw_vencimentos_semanais
+
+--- compliance.documentos_processados ---
+┌─────────┬────────────────────────┬────────────────────────────┐
+│ (index) │ column                 │ type                       │
+├─────────┼────────────────────────┼────────────────────────────┤
+│ 0       │ 'id'                   │ 'uuid'                     │
+│ 1       │ 'documento_id'         │ 'uuid'                     │
+│ 2       │ 'empresa_id'           │ 'uuid'                     │
+│ 3       │ 'tipo'                 │ 'USER-DEFINED'             │
+│ 4       │ 'competencia'          │ 'date'                     │
+│ 5       │ 'vencimento'           │ 'date'                     │
+│ 6       │ 'valor'                │ 'numeric'                  │
+│ 7       │ 'metadata_ia'          │ 'jsonb'                    │
+│ 8       │ 'status_processamento' │ 'text'                     │
+│ 9       │ 'processado_em'        │ 'timestamp with time zone' │
+│ 10      │ 'criado_por'           │ 'uuid'                     │
+└─────────┴────────────────────────┴────────────────────────────┘
+
+--- compliance.vw_vencimentos_semanais ---
+┌─────────┬─────────────────┬────────────────┐
+│ (index) │ column          │ type           │
+├─────────┼─────────────────┼────────────────┤
+│ 0       │ 'vencimento'    │ 'date'         │
+│ 1       │ 'tipo'          │ 'USER-DEFINED' │
+│ 2       │ 'nome_fantasia' │ 'text'         │
+│ 3       │ 'razao_social'  │ 'text'         │
+│ 4       │ 'valor'         │ 'numeric'      │
+│ 5       │ 'drive_file_id' │ 'text'         │
+└─────────┴─────────────────┴────────────────┘

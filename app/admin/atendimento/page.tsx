@@ -322,7 +322,7 @@ export default function AtendimentoPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                                             <h3 className="text-[12px] font-bold text-neutral-100 truncate">
-                                                {ticket.empresas?.razao_social || ticket.pushName || 'Desconhecido'}
+                                                {ticket.empresas?.razao_social || ticket.pushname || 'Desconhecido'}
                                             </h3>
 
                                             <div className="flex gap-1 items-center ml-1">

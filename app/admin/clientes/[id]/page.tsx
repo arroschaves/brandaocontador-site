@@ -18,6 +18,9 @@ import { useRouter } from 'next/navigation'
 import AgendaCalendar from '../components/AgendaCalendar'
 import AgendaList from '../components/AgendaList'
 import PendenciaModal from '../components/PendenciaModal'
+import ContactsTab from '../components/ContactsTab'
+import ServicesTab from '../components/ServicesTab'
+import { User, Users, ShoppingCart } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
@@ -578,6 +581,8 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     <div className="flex gap-1 border-b border-neutral-900 pb-0.5">
                         {[
                             { id: 'info', label: 'Cadastro', icon: Info },
+                            { id: 'contatos', label: 'Sócios & Contatos', icon: Users },
+                            { id: 'servicos', label: 'Planos & Serviços', icon: ShoppingCart },
                             { id: 'timeline', label: 'Atividade Recente', icon: History },
                             { id: 'wiki', label: 'Dossiê Técnico', icon: FileText },
                             { id: 'docs', label: 'Arquivos Drive', icon: FileCode },
@@ -597,6 +602,14 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     </div>
 
                     <div className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-8 min-h-[600px] shadow-2xl shadow-black/40">
+                        {activeTab === 'contatos' && (
+                            <ContactsTab clientId={clientId} />
+                        )}
+
+                        {activeTab === 'servicos' && (
+                            <ServicesTab clientId={clientId} />
+                        )}
+
                         {activeTab === 'timeline' && (
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between mb-8">

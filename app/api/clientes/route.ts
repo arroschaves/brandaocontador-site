@@ -16,7 +16,7 @@ import { NextResponse, NextRequest } from 'next/server'
 const CAMPOS_TEXT = [
     'documento',
     'razao_social',
-    'nome',
+    'nome_fantasia',
     'email',
     'telefone',
     'regime_tributario',
@@ -136,14 +136,14 @@ async function triggerDriveAutomation(clientData: any): Promise<void> {
         'https://webhook.brandaocontador.com.br/webhook/cadastro-cliente';
 
     try {
-        console.log(`[N8N] Disparando Golden Path para: ${clientData.nome}`);
+        console.log(`[N8N] Disparando Golden Path para: ${clientData.nome_fantasia || clientData.razao_social}`);
         const res = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            // Enviamos um objeto 'body' para o n8n capturar corretamente
-            body: JSON.stringify({ body: clientData }),
+            // Enviamos um objeto 'body' para o n8n capturar corretamente e mantemos compatibilidade de chaves legadas
+            body: JSON.stringify({ body: { ...clientData, nome: clientData.nome_fantasia, cnpj_cpf: clientData.documento } }),
             // Aumentado para 15s para dar tempo do Google Drive responder ao n8n
             signal: AbortSignal.timeout(15000),
         });
@@ -166,16 +166,16 @@ export async function POST(request: NextRequest) {
         // 1. Sanitizar dados — remove campos inválidos, valida datas
         const formData = sanitizeFormData(rawData);
 
-        if (!formData.nome && !formData.razao_social) {
+        if (!formData.nome_fantasia && !formData.razao_social) {
             return NextResponse.json(
-                { error: 'Nome ou Razão Social é obrigatório' },
+                { error: 'Nome Fantasia ou Razão Social é obrigatório' },
                 { status: 400 }
             );
         }
 
         console.log('[CLIENT API] Inserindo cliente:', {
-            nome: formData.nome,
-            cnpj_cpf: formData.cnpj_cpf,
+            nome_fantasia: formData.nome_fantasia,
+            documento: formData.documento,
             campos: Object.keys(formData),
             data_abertura: formData.data_abertura, // Inspecionar campo problemático
             payload: formData // Log completo para debug de data
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
 
                 // Campos mínimos garantidos
                 const minimalData: Record<string, any> = {};
-                const SAFE_FIELDS = ['nome', 'cnpj_cpf', 'razao_social', 'email', 'telefone_whatsapp',
+                const SAFE_FIELDS = ['nome_fantasia', 'documento', 'razao_social', 'email', 'telefone',
                     'regime_tributario', 'status_rfb', 'cidade', 'estado'];
 
                 for (const field of SAFE_FIELDS) {
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
                     .schema('core')
                     .from('empresas')
                     .insert([minimalData])
-                    .select('id, nome, razao_social')
+                    .select('id, nome_fantasia, razao_social')
                     .single();
 
                 if (err2) {
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({
                     success: true,
                     clientId: client2.id,
-                    message: `Cliente "${client2.nome || client2.razao_social || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
+                    message: `Cliente "${client2.nome_fantasia || client2.razao_social || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
                     warning: `Campo ignorado pelo banco: ${insertErr.message}`
                 });
             }
@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log('[CLIENT API] Cliente criado:', client.id, client.nome);
+        console.log('[CLIENT API] Cliente criado:', client.id, client.nome_fantasia);
 
         // 3. Disparar automação n8n (async) com dados completos
         // O N8N vai receber isso, criar pastas e atualizar o drive_folder_id e status_setup
@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             clientId: client.id,
-            message: `Cliente "${client.nome || client.razao_social}" cadastrado com sucesso. Sistema de pastas iniciado.`
+            message: `Cliente "${client.nome_fantasia || client.razao_social}" cadastrado com sucesso. Sistema de pastas iniciado.`
         });
 
     } catch (error: any) {
@@ -268,7 +268,7 @@ export async function GET(request: NextRequest) {
             .order('razao_social', { ascending: true });
 
         if (search) {
-            query = query.or(`nome.ilike.%${search}%,cnpj_cpf.ilike.%${search}%,razao_social.ilike.%${search}%`);
+            query = query.or(`nome_fantasia.ilike.%${search}%,documento.ilike.%${search}%,razao_social.ilike.%${search}%`);
         }
 
         const { data, error } = await query;

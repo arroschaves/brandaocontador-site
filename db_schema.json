@@ -1,0 +1,349 @@
+[dotenv@17.3.1] injecting env (15) from .env.local -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+=== SUPABASE OPENAPI SCHEMA ===
+{
+  "vw_radar_vencimentos": {
+    "properties": {
+      "origem": {
+        "format": "text",
+        "type": "string"
+      },
+      "vencimento": {
+        "format": "date",
+        "type": "string"
+      },
+      "descricao": {
+        "format": "text",
+        "type": "string"
+      },
+      "empresa": {
+        "format": "text",
+        "type": "string"
+      },
+      "valor": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "empresa_id": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "type": "object"
+  },
+  "empresas": {
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "escritorio_id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "razao_social": {
+        "format": "text",
+        "type": "string"
+      },
+      "nome_fantasia": {
+        "format": "text",
+        "type": "string"
+      },
+      "documento": {
+        "format": "text",
+        "type": "string"
+      },
+      "regime_tributario": {
+        "format": "text",
+        "type": "string"
+      },
+      "cnae_principal": {
+        "format": "text",
+        "type": "string"
+      },
+      "inicio_atividade": {
+        "format": "date",
+        "type": "string"
+      },
+      "drive_folder_id": {
+        "format": "text",
+        "type": "string"
+      },
+      "status": {
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "deleted_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "tipo_pessoa": {
+        "format": "text",
+        "type": "string"
+      },
+      "email": {
+        "format": "text",
+        "type": "string"
+      },
+      "telefone": {
+        "format": "text",
+        "type": "string"
+      },
+      "status_analise": {
+        "format": "text",
+        "type": "string"
+      },
+      "logradouro": {
+        "format": "text",
+        "type": "string"
+      },
+      "numero": {
+        "format": "text",
+        "type": "string"
+      },
+      "bairro": {
+        "format": "text",
+        "type": "string"
+      },
+      "cep": {
+        "format": "text",
+        "type": "string"
+      },
+      "cidade": {
+        "format": "text",
+        "type": "string"
+      },
+      "estado": {
+        "format": "text",
+        "type": "string"
+      },
+      "inscricao_estadual": {
+        "format": "text",
+        "type": "string"
+      },
+      "inscricao_municipal": {
+        "format": "text",
+        "type": "string"
+      },
+      "status_rfb": {
+        "format": "text",
+        "type": "string"
+      },
+      "cnaes_secundarios": {
+        "format": "text",
+        "type": "string"
+      },
+      "capital_social": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "natureza_juridica": {
+        "format": "text",
+        "type": "string"
+      },
+      "porte": {
+        "format": "text",
+        "type": "string"
+      },
+      "vencimento_alvara_funcionamento": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_sanitario": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_bombeiros": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_ambiental": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_federal": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_estadual": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_municipal": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_fgts": {
+        "format": "date",
+        "type": "string"
+      },
+      "atendimento_automatico": {
+        "format": "boolean",
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  },
+  "clientes": {
+    "properties": {
+      "id": {
+        "description": "Note:\nThis is a Primary Key.<pk/>",
+        "format": "uuid",
+        "type": "string"
+      },
+      "escritorio_id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "razao_social": {
+        "format": "text",
+        "type": "string"
+      },
+      "nome_fantasia": {
+        "format": "text",
+        "type": "string"
+      },
+      "documento": {
+        "format": "text",
+        "type": "string"
+      },
+      "regime_tributario": {
+        "format": "text",
+        "type": "string"
+      },
+      "cnae_principal": {
+        "format": "text",
+        "type": "string"
+      },
+      "inicio_atividade": {
+        "format": "date",
+        "type": "string"
+      },
+      "drive_folder_id": {
+        "format": "text",
+        "type": "string"
+      },
+      "status": {
+        "format": "text",
+        "type": "string"
+      },
+      "created_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "deleted_at": {
+        "format": "timestamp with time zone",
+        "type": "string"
+      },
+      "tipo_pessoa": {
+        "format": "text",
+        "type": "string"
+      },
+      "email": {
+        "format": "text",
+        "type": "string"
+      },
+      "telefone": {
+        "format": "text",
+        "type": "string"
+      },
+      "status_analise": {
+        "format": "text",
+        "type": "string"
+      },
+      "logradouro": {
+        "format": "text",
+        "type": "string"
+      },
+      "numero": {
+        "format": "text",
+        "type": "string"
+      },
+      "bairro": {
+        "format": "text",
+        "type": "string"
+      },
+      "cep": {
+        "format": "text",
+        "type": "string"
+      },
+      "cidade": {
+        "format": "text",
+        "type": "string"
+      },
+      "estado": {
+        "format": "text",
+        "type": "string"
+      },
+      "inscricao_estadual": {
+        "format": "text",
+        "type": "string"
+      },
+      "inscricao_municipal": {
+        "format": "text",
+        "type": "string"
+      },
+      "status_rfb": {
+        "format": "text",
+        "type": "string"
+      },
+      "cnaes_secundarios": {
+        "format": "text",
+        "type": "string"
+      },
+      "capital_social": {
+        "format": "numeric",
+        "type": "number"
+      },
+      "natureza_juridica": {
+        "format": "text",
+        "type": "string"
+      },
+      "porte": {
+        "format": "text",
+        "type": "string"
+      },
+      "vencimento_alvara_funcionamento": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_sanitario": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_bombeiros": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_alvara_ambiental": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_federal": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_estadual": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_negativa_municipal": {
+        "format": "date",
+        "type": "string"
+      },
+      "vencimento_certidao_fgts": {
+        "format": "date",
+        "type": "string"
+      },
+      "atendimento_automatico": {
+        "format": "boolean",
+        "type": "boolean"
+      }
+    },
+    "type": "object"
+  }
+}

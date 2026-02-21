@@ -62,6 +62,10 @@ export async function POST(request: Request) {
                 const currentYear = refDate.getFullYear().toString();
                 const monthAbbr = currentMonthName.substring(0, 3).toUpperCase();
 
+                // Safety Belt: Evitar que varra o GDrive inteiro se a pasta id for da raiz do escritório
+                let isSuspiciousRoot = false;
+                let childCountCounter = 0;
+
                 while (queue.length > 0) {
                     const current = queue.shift()!;
                     if (current.depth >= maxDepth) continue;
@@ -76,6 +80,21 @@ export async function POST(request: Request) {
                         if (folders.data.files) {
                             for (const f of folders.data.files) {
                                 const folderName = f.name!.toUpperCase();
+                                childCountCounter++;
+
+                                // Bloqueio de Segurança: Se for a primeira iteração (depth=0) e tiver dezenas de pastas com nomes de CNPJs/Clientes, provavelmente amarramos o ID raiz
+                                if (current.depth === 0 && childCountCounter > 15) {
+                                    isSuspiciousRoot = true;
+                                    // Se identificamos que isso é raiz geral, exigiremos que a pasta filha tenha no nome o CNPJ ou Razão Social do cliente
+                                }
+
+                                if (isSuspiciousRoot && current.depth === 0) {
+                                    const cName = (cliente.razao_social || '').toUpperCase();
+                                    const cDoc = (cliente.documento || '').replace(/\D/g, '');
+                                    if (!folderName.includes(cName) && !folderName.includes(cDoc)) {
+                                        continue; // Ignora pasta de outros clientes
+                                    }
+                                }
 
                                 // Filtro de Ano: Ignorar anos passados
                                 const yearsToIgnore = ['2021', '2022', '2023', '2024', '2025'];

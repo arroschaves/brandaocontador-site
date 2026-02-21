@@ -124,7 +124,7 @@ function ClientesContent() {
             const { data: certs } = await supabase
                 .schema('core')
                 .from('certificados_digitais')
-                .select('id, empresa_id, data_vencimento');
+                .select('id, empresa_id, validade');
 
             // 4. Cruzar Dados
             let pendenciasTotal = 0;
@@ -137,8 +137,8 @@ function ClientesContent() {
 
                 const clientCerts = (certs || []).filter((ct: any) => ct.empresa_id === c.id);
                 const isNearExp = clientCerts.some((ct: any) => {
-                    if (!ct.data_vencimento) return false;
-                    const diff = Math.ceil((new Date(ct.data_vencimento).getTime() - agora.getTime()) / (1000 * 60 * 60 * 24));
+                    if (!ct.validade) return false;
+                    const diff = Math.ceil((new Date(ct.validade).getTime() - agora.getTime()) / (1000 * 60 * 60 * 24));
                     return diff <= 30;
                 });
                 if (isNearExp) certsVencendo++;
@@ -235,9 +235,9 @@ function ClientesContent() {
         if (client) {
             setEditingClient(client);
             setFormData({
-                nome: client.nome || '',
+                nome: client.nome_fantasia || client.nome || '',
                 documento: client.documento?.toString() || '',
-                telefone_whatsapp: client.telefone_whatsapp || '',
+                telefone_whatsapp: client.telefone || client.telefone_whatsapp || '',
                 email: client.email || '',
                 razao_social: client.razao_social || '',
                 regime_tributario: client.regime_tributario || '',
@@ -327,7 +327,7 @@ function ClientesContent() {
             // 1. Limpeza e Normalização de Dados para o Banco (Schema CORE)
             const cleanData: any = {};
             const ALLOWED_FIELDS = [
-                'razao_social', 'nome', 'documento', 'email', 'telefone',
+                'razao_social', 'nome_fantasia', 'documento', 'email', 'telefone',
                 'regime_tributario', 'cnae_principal', 'cnaes_secundarios',
                 'logradouro', 'numero', 'bairro', 'cep', 'cidade', 'estado',
                 'inscricao_estadual', 'inscricao_municipal', 'status_rfb',
@@ -335,7 +335,7 @@ function ClientesContent() {
             ];
 
             const raw = { ...formData };
-            if (raw.nome_fantasia) raw.nome = raw.nome_fantasia;
+            if (raw.nome && !raw.nome_fantasia) raw.nome_fantasia = raw.nome;
 
             // Unifica telefone
             const finalTelefone = (raw.telefone || raw.telefone_whatsapp || '').replace(/[^\d]/g, '');
