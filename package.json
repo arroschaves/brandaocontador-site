@@ -20,6 +20,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
+    "consultar-cnpj": "^1.0.21",
     "dotenv": "^17.3.1",
     "googleapis": "^171.0.0",
     "lucide-react": "^0.474.0",

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import consultarCNPJ from 'consultar-cnpj'
 
 /**
  * API Proxy para consulta de CNPJ na Receita Federal
  * 
- * Usa o serviço open.cnpja.com (gratuito, sem API key) como proxy.
- * Isso resolve o problema de CORS ao fazer a consulta no frontend.
- * 
+ * Usa o pacote consultar-cnpj (CNPJ.ws) como fonte primária.
  * Fallback: BrasilAPI (serviço de backup).
  */
 
@@ -20,53 +19,53 @@ export async function GET(request: NextRequest) {
         )
     }
 
-    // Fonte 1: CNPJA.com (open, sem key)
+    // Fonte 1: consultar-cnpj (CNPJ.ws)
     try {
-        console.log(`[CNPJ Proxy] Consultando CNPJA: ${cnpj}`)
-        const res = await fetch(`https://open.cnpja.com/office/${cnpj}`, {
-            signal: AbortSignal.timeout(8000),
-            headers: {
-                'Accept': 'application/json',
-                'User-Agent': 'BrandaoContabilidade/1.0',
-            },
-        })
+        console.log(`[CNPJ Proxy] Consultando CNPJ.ws (via pacote): ${cnpj}`)
+        // Token é opcional na API pública (limite 3/min)
+        const data = await consultarCNPJ(cnpj);
 
-        if (res.ok) {
-            const data = await res.json()
-            console.log(`[CNPJ Proxy] CNPJA OK: ${data.name}`)
+        if (data && data.estabelecimento) {
+            console.log(`[CNPJ Proxy] CNPJ.ws OK: ${data.razao_social}`)
+
+            const est = data.estabelecimento;
+            const porte = data.porte?.descricao || '';
+            const isSimples = (data.simples as any)?.optante ?? false;
+
+            // Format phones if available
+            let telefone = '';
+            if (est.ddd1 && est.telefone1) {
+                telefone = `${est.ddd1}${est.telefone1}`;
+            }
 
             return NextResponse.json({
-                source: 'cnpja',
-                nome_fantasia: data.alias || data.company?.name || data.name,
-                razao_social: data.name,
-                email: data.emails?.[0]?.address || '',
-                telefone: data.phones?.[0] ? `${data.phones[0].area}${data.phones[0].number}` : '',
-                cnae_principal: data.mainActivity
-                    ? `${data.mainActivity.id || data.mainActivity.code} - ${data.mainActivity.text}`
-                    : '',
-                cnaes_secundarios: data.sideActivities
-                    ? data.sideActivities.map((a: any) => `${a.id || a.code} - ${a.text}`).join('; ')
-                    : '',
-                status_rfb: data.status?.text || data.registration?.status || 'ATIVA',
-                natureza_juridica: data.nature?.text || '',
-                porte: data.size?.text || data.company?.size?.text || '',
-                capital_social: data.company?.equity || data.equity || 0,
-                inicio_atividade: data.founded || data.company?.founded || '',
-                logradouro: data.address?.street || '',
-                numero: data.address?.number || '',
-                bairro: data.address?.district || '',
-                cep: data.address?.zip || '',
-                cidade: data.address?.city || '',
-                estado: data.address?.state || '',
-                inscricao_estadual: '',
-                simples_nacional: data.tax?.simples?.optant || false,
-                regime_tributario: data.tax?.simples?.optant ? 'SIMPLES_NACIONAL' : 'LUCRO_PRESUMIDO'
+                source: 'cnpj.ws',
+                nome_fantasia: est.nome_fantasia || data.razao_social,
+                razao_social: data.razao_social,
+                email: est.email || '',
+                telefone: telefone,
+                cnae_principal: est.atividade_principal ? `${est.atividade_principal.id} - ${est.atividade_principal.descricao}` : '',
+                cnaes_secundarios: est.atividades_secundarias ? est.atividades_secundarias.map((a: any) => `${a.id} - ${a.descricao}`).join('; ') : '',
+                status_rfb: est.situacao_cadastral || 'ATIVA',
+                natureza_juridica: data.natureza_juridica?.descricao || '',
+                porte: porte,
+                capital_social: data.capital_social ? parseFloat(data.capital_social) : 0,
+                inicio_atividade: est.data_inicio_atividade || '',
+                logradouro: est.logradouro || '',
+                numero: est.numero || '',
+                complemento: est.complemento || '',
+                bairro: est.bairro || '',
+                cep: est.cep || '',
+                cidade: est.cidade?.nome || '',
+                estado: est.estado?.sigla || '',
+                inscricao_estadual: est.inscricoes_estaduais?.[0]?.inscricao_estadual || '',
+                simples_nacional: isSimples,
+                regime_tributario: isSimples ? 'SIMPLES_NACIONAL' : 'LUCRO_PRESUMIDO', // default assumption if not simples
+                quadro_societario: data.socios ? data.socios.map((s: any) => s.nome).join(', ') : ''
             })
         }
-
-        console.warn(`[CNPJ Proxy] CNPJA falhou: ${res.status}`)
     } catch (err: any) {
-        console.warn(`[CNPJ Proxy] CNPJA timeout/error: ${err.message}`)
+        console.warn(`[CNPJ Proxy] CNPJ.ws falhou: ${err.message || err}`)
     }
 
     // Fonte 2: BrasilAPI (fallback)

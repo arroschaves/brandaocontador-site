@@ -73,6 +73,7 @@ function ClientesContent() {
         razao_social: '',
         regime_tributario: '',
         cnae_principal: '',
+        cnaes_secundarios: '',
         logradouro: '',
         numero: '',
         bairro: '',
@@ -81,7 +82,11 @@ function ClientesContent() {
         estado: 'MS',
         inscricao_estadual: '',
         inscricao_municipal: '',
-        status_rfb: 'ATIVA'
+        status_rfb: 'ATIVA',
+        natureza_juridica: '',
+        porte: '',
+        capital_social: '',
+        inicio_atividade: ''
     });
     const [consulting, setConsulting] = useState(false);
 
@@ -242,6 +247,7 @@ function ClientesContent() {
                 razao_social: client.razao_social || '',
                 regime_tributario: client.regime_tributario || '',
                 cnae_principal: client.cnae_principal || '',
+                cnaes_secundarios: client.cnaes_secundarios || '',
                 logradouro: client.logradouro || '',
                 numero: client.numero || '',
                 bairro: client.bairro || '',
@@ -249,17 +255,22 @@ function ClientesContent() {
                 cidade: client.cidade || 'Sidrolândia',
                 estado: client.estado || 'MS',
                 inscricao_estadual: client.inscricao_estadual || '',
-                status_rfb: client.status_rfb || 'ATIVA'
+                inscricao_municipal: client.inscricao_municipal || '',
+                status_rfb: client.status_rfb || 'ATIVA',
+                natureza_juridica: client.natureza_juridica || '',
+                porte: client.porte || '',
+                capital_social: client.capital_social || '',
+                inicio_atividade: client.inicio_atividade || ''
             });
         } else {
             setEditingClient(null);
             setFormData({
                 nome: '', documento: '', telefone_whatsapp: '', email: '',
-                razao_social: '', regime_tributario: '', cnae_principal: '',
+                razao_social: '', regime_tributario: '', cnae_principal: '', cnaes_secundarios: '',
                 logradouro: '', numero: '', bairro: '', cep: '',
                 cidade: 'Sidrolândia', estado: 'MS',
-                inscricao_estadual: '',
-                status_rfb: 'ATIVA'
+                inscricao_estadual: '', inscricao_municipal: '',
+                status_rfb: 'ATIVA', natureza_juridica: '', porte: '', capital_social: '', inicio_atividade: ''
             });
         }
         setIsModalOpen(true);
