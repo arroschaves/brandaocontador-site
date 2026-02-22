@@ -39,8 +39,8 @@ export default function DepartamentoPessoalPage() {
             .from('eventos')
             .select(`
                 *,
-                empresa:core.empresas(razao_social, nome_fantasia),
-                template:dp.eventos_templates(nome, departamento)
+                empresa:empresas(razao_social, nome_fantasia),
+                template:eventos_templates(nome, departamento)
             `)
             .order('data_limite', { ascending: true })
 

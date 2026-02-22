@@ -34,7 +34,7 @@ export default function CalendarioPage() {
             const { data, error } = await supabase
                 .schema('fiscal')
                 .from('calendario')
-                .select('*, empresas:empresa_id(razao_social), template:template_id(nome)')
+                .select('*, empresas(razao_social), template:templates_obrigacoes(nome)')
                 .gte('data_vencimento', firstDay)
                 .lte('data_vencimento', lastDay);
 

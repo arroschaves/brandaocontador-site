@@ -24,7 +24,7 @@ import {
     Bell,
     ExternalLink
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import AlertasGaps from './components/AlertasGaps';
 import GestaoValidades from './components/GestaoValidades';
 
@@ -42,6 +42,7 @@ const ACT_CONFIG: Record<string, { icon: any; color: string; bg: string; label: 
 export const dynamic = 'force-dynamic';
 
 export default function AdminDashboard() {
+    const supabase = createClient();
     const [stats, setStats] = useState<any>({
         totalClientes: 0,
         concluidosMes: 0,

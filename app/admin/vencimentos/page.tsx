@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import {
     Calendar,
     AlertTriangle,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 export default function VencimentosPage() {
+    const supabase = createClient();
     const [vencimentos, setVencimentos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');

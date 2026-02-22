@@ -512,7 +512,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                             <Link href="/admin/clientes" className="hover:text-neutral-400">CLIENTES</Link>
                         </div>
                         <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">
-                            Hub do Cliente <span className="text-emerald-500">#{client?.nome?.substring(0, 5) || 'MAESTRO'}</span>
+                            Hub do Cliente <span className="text-emerald-500">#{(client?.nome_fantasia || client?.razao_social)?.substring(0, 5) || 'MAESTRO'}</span>
                         </h2>
                     </div>
                 </div>
@@ -554,7 +554,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                     </div>
                     <div className="flex-1 space-y-2">
                         <div className="flex items-center gap-3">
-                            <h1 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none">{client?.razao_social || client?.nome || 'CLIENTE MAESTRO'}</h1>
+                            <h1 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none">{client?.nome_fantasia || client?.razao_social || 'CLIENTE MAESTRO'}</h1>
                             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full">Ativo</span>
                         </div>
                         <div className="flex flex-wrap gap-4 text-[11px] font-bold text-neutral-400 uppercase tracking-wide">
@@ -708,7 +708,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
                                             </div>
                                             <div>
                                                 <p className="text-[11px] text-muted-foreground uppercase font-black tracking-widest mb-1 leading-none">Nome Fantasia</p>
-                                                <p className="text-[15px] text-emerald-500 font-black italic uppercase tracking-tighter truncate" title={client?.nome}>{client?.nome || '-'}</p>
+                                                <p className="text-[15px] text-emerald-500 font-black italic uppercase tracking-tighter truncate" title={client?.nome_fantasia}>{client?.nome_fantasia || '-'}</p>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-3 gap-4">

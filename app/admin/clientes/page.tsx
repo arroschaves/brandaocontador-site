@@ -188,7 +188,7 @@ function ClientesContent() {
     }
 
     const filteredClientes = clientes.filter(c =>
-        c.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (c.nome_fantasia || c.razao_social)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         c.documento?.toString().includes(searchTerm) ||
         c.razao_social?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -254,9 +254,9 @@ function ClientesContent() {
         if (client) {
             setEditingClient(client);
             setFormData({
-                nome: client.nome_fantasia || client.nome || '',
+                nome: client.nome_fantasia || client.razao_social || '',
                 documento: client.documento?.toString() || '',
-                telefone_whatsapp: client.telefone || client.telefone_whatsapp || '',
+                telefone_whatsapp: client.telefone || '',
                 email: client.email || '',
                 razao_social: client.razao_social || '',
                 regime_tributario: client.regime_tributario || '',
