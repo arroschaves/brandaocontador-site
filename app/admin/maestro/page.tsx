@@ -131,7 +131,7 @@ export default function MaestroPage() {
             const { data: wfData, error: wfErr } = await supabase
                 .schema('workflow')
                 .from('tarefas')
-                .select('*, responsavel:equipe!tarefas_responsavel_id_fkey(nome)')
+                .select('*')
                 .neq('status', 'concluido')
                 .order('urgente', { ascending: false })
                 .order('prazo', { ascending: true })
@@ -454,7 +454,7 @@ export default function MaestroPage() {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-bold text-foreground truncate">{t.titulo}</p>
                                             <p className="text-[10px] text-muted-foreground flex gap-2 mt-1">
-                                                <span>{t.responsavel?.nome || 'Sistema'}</span> • <span>Módulo: {t.modulo || 'Geral'}</span>
+                                                <span>{t.responsavel_id ? `User: ${t.responsavel_id.substring(0, 8)}` : 'Sistema'}</span> • <span>Módulo: {t.modulo || 'Geral'}</span>
                                             </p>
                                         </div>
                                         {t.urgente && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>}

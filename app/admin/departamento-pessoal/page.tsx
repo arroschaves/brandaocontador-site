@@ -39,7 +39,6 @@ export default function DepartamentoPessoalPage() {
             .from('eventos')
             .select(`
                 *,
-                empresa:empresas(razao_social, nome_fantasia),
                 template:eventos_templates(nome, departamento)
             `)
             .order('data_limite', { ascending: true })
@@ -77,7 +76,6 @@ export default function DepartamentoPessoalPage() {
     const filteredEventos = eventos.filter(e => {
         const matchesSearch =
             e.funcionario_nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            e.empresa?.razao_social?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             e.funcionario_cpf?.includes(searchTerm);
         const matchesStatus = statusFilter === 'ALL' || e.status === statusFilter;
         return matchesSearch && matchesStatus;
@@ -187,7 +185,7 @@ export default function DepartamentoPessoalPage() {
                             <div className="space-y-3 mb-6">
                                 <div className="flex items-center gap-2 text-[10px] text-neutral-400 font-medium">
                                     <Briefcase className="w-3.5 h-3.5 text-neutral-600" />
-                                    <span className="truncate">{evento.empresa?.razao_social || evento.empresa?.nome_fantasia || 'Empresa Desconhecida'}</span>
+                                    <span className="truncate">{evento.empresa_id ? `Cod Empresa: ${evento.empresa_id.split('-')[0]}` : 'Empresa Desconhecida'}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] text-neutral-400 font-medium">
                                     <div className="flex items-center gap-2">

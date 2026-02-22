@@ -34,7 +34,7 @@ export default function CalendarioPage() {
             const { data, error } = await supabase
                 .schema('fiscal')
                 .from('calendario')
-                .select('*, empresas(razao_social), template:templates_obrigacoes(nome)')
+                .select('*')
                 .gte('data_vencimento', firstDay)
                 .lte('data_vencimento', lastDay);
 
@@ -42,9 +42,9 @@ export default function CalendarioPage() {
 
             const mapped = (data || []).map((d: any) => ({
                 day: new Date(d.data_vencimento).getUTCDate(),
-                type: d.template?.nome || 'Obrigação',
-                title: d.template?.nome || 'Obrigação',
-                client: d.empresas?.razao_social || 'Desconhecido',
+                type: d.template_id ? `Regra (${d.template_id.substring(0, 8)})` : 'Obrigação Manual',
+                title: d.observacoes || 'Sem Template/Nome',
+                client: d.empresa_id ? `Empresa Relacionada (${d.empresa_id.split('-')[0]})` : 'Desconhecido',
                 status: d.status || 'PENDENTE'
             }));
 

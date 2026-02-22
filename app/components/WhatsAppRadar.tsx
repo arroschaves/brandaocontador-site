@@ -63,9 +63,9 @@ export default function WhatsAppRadar() {
                 .eq('status', 'pendente')
                 .order('created_at', { ascending: false })
                 .limit(1)
-                .single()
+                .maybeSingle()
 
-            if (msgErr && msgErr.code !== 'PGRST116') { // Ignora se não houver registros
+            if (msgErr) {
                 console.error('[Radar] Erro ao buscar mensagem:', msgErr.message);
             }
 
