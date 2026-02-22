@@ -56,14 +56,14 @@ export default function FinanceiroPage() {
             const ativos = data || []
 
             // 2. Calcular MRR
-            const totalMrr = ativos.reduce((acc, curr) => acc + (Number(curr.honorario_valor) || 0), 0)
+            const totalMrr = ativos.reduce((acc: number, curr: any) => acc + (Number(curr.honorario_valor) || 0), 0)
             setMrr(totalMrr)
 
             // 3. Simular "Geração de Faturas/Lançamentos" baseada nos honorários do Mês
             const month = new Date().toLocaleString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase()
             const generatedTransactions = ativos
-                .filter(a => Number(a.honorario_valor) > 0)
-                .map((empresa, index) => ({
+                .filter((a: any) => Number(a.honorario_valor) > 0)
+                .map((empresa: any, index: number) => ({
                     id: `HON-${month}-${empresa.id.substring(0, 4).toUpperCase()}`,
                     client: empresa.razao_social,
                     amount: Number(empresa.honorario_valor),
@@ -74,7 +74,7 @@ export default function FinanceiroPage() {
                 }))
 
             // Ordena os pendentes no topo
-            generatedTransactions.sort((a, b) => {
+            generatedTransactions.sort((a: any, b: any) => {
                 if (a.status === 'PENDING' && b.status === 'PAID') return -1;
                 if (a.status === 'PAID' && b.status === 'PENDING') return 1;
                 return 0;
@@ -90,7 +90,7 @@ export default function FinanceiroPage() {
             setTransactions(amostral)
 
             // Calc Pendencias (Amostral de Honorarios Atrasados)
-            const pend = generatedTransactions.filter(t => t.status === 'PENDING').reduce((acc, curr) => acc + curr.amount, 0)
+            const pend = generatedTransactions.filter((t: any) => t.status === 'PENDING').reduce((acc: number, curr: any) => acc + curr.amount, 0)
             setPending(pend)
 
             // Calc Gastos
@@ -107,10 +107,10 @@ export default function FinanceiroPage() {
         fetchFinancialData()
     }, [fetchFinancialData])
 
-    const growth = totalMrr => totalMrr > 0 ? 12.5 : 0; // Estático para UI
+    const growth = (totalMrr: number) => totalMrr > 0 ? 12.5 : 0; // Estático para UI
     const lucro = ((mrr - expenses) / (mrr || 1)) * 100
 
-    const filteredTransactions = transactions.filter(t =>
+    const filteredTransactions = transactions.filter((t: any) =>
         t.client.toLowerCase().includes(search.toLowerCase()) ||
         t.id.toLowerCase().includes(search.toLowerCase())
     )
