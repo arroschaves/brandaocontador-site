@@ -291,30 +291,75 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         if (!file) return
 
         setUploading(true)
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('clientId', clientId)
-
-        // Inferência básica de rotina pelo nome do arquivo
-        const fileName = file.name.toUpperCase()
-        let routine = ''
-        if (fileName.includes('DAS')) routine = 'DAS'
-        else if (fileName.includes('FGTS')) routine = 'FGTS'
-        else if (fileName.includes('INSS')) routine = 'INSS'
-        else if (fileName.includes('DCTF')) routine = 'DCTFWeb'
-        else if (fileName.includes('FOLHA')) routine = 'Folha de Pagamento'
-
-        if (routine) formData.append('routineName', routine)
 
         try {
+            // 1. Fase de Inteligência Maestro (OCR PDF-Parse)
+            const visionData = new FormData()
+            visionData.append('file', file)
+
+            console.log('[Maestro Vision] Lendo arquivo em memória...')
+
+            const visionRes = await fetch('/api/maestro/upload-inteligente', {
+                method: 'POST',
+                body: visionData
+            })
+
+            const visionResult = await visionRes.json()
+
+            // 2. Montar Dados para o Upload Final (Google Drive) com a Renomeação Opcional
+            const uploadData = new FormData()
+            let routineToSave = ''
+
+            // Se o motor reconheceu o PDF como um documento contábil
+            if (visionRes.ok && visionResult.metadata?.tipo_documento !== 'Outros') {
+                const meta = visionResult.metadata
+                const newName = `${meta.tipo_documento}_${meta.competencia ? meta.competencia.replace('/', '-') : 'SemData'}_${meta.razao_social.substring(0, 15).trim()}.pdf`
+
+                // Reconstrói o arquivo com nome sanitizado e preenche metadados
+                const renamedFile = new File([file], newName, { type: file.type })
+                uploadData.append('file', renamedFile)
+
+                // Mapeamento OCR para as Templates Padrão (necessário pro histórico do Calendário)
+                if (meta.tipo_documento === 'DAS') routineToSave = 'DAS'
+                if (meta.tipo_documento === 'FGTS') routineToSave = 'FGTS'
+                if (meta.tipo_documento === 'DARF') routineToSave = 'DARF'
+                if (meta.tipo_documento === 'DCTFWeb') routineToSave = 'DCTFWeb'
+
+                console.log(`[Maestro Vision] Sucesso! PDF LIDO. Identificado CNPJ: ${meta.cnpj_encontrado}. Tipo: ${meta.tipo_documento}`)
+            } else {
+                // Upload comum sem mutação
+                uploadData.append('file', file)
+                const fileName = file.name.toUpperCase()
+                if (fileName.includes('DAS')) routineToSave = 'DAS'
+                else if (fileName.includes('FGTS')) routineToSave = 'FGTS'
+                else if (fileName.includes('INSS')) routineToSave = 'INSS'
+                else if (fileName.includes('DCTF')) routineToSave = 'DCTFWeb'
+                else if (fileName.includes('FOLHA')) routineToSave = 'Folha de Pagamento'
+            }
+
+            uploadData.append('clientId', clientId)
+            if (routineToSave) {
+                uploadData.append('routineName', routineToSave)
+            }
+
+            // 3. Fase Final: Enviar pro Drive e Banco
             const res = await fetch('/api/drive/upload', {
                 method: 'POST',
-                body: formData
+                body: uploadData
             })
+
             const result = await res.json()
-            if (!res.ok) throw new Error(result.error || 'Falha no upload')
+            if (!res.ok) throw new Error(result.error || 'Falha no upload do Drive')
 
             await fetchClientData()
+
+            // Re-render Maestro
+            if (fetchMaestroVision) {
+                await fetchMaestroVision()
+            }
+
+            alert(visionRes.ok && visionResult.metadata?.tipo_documento !== 'Outros' ? `🤖 MAESTRO VISION: Documento identificado como [${visionResult.metadata.tipo_documento}] e arquivado automaticamente!` : 'Arquivo enviado com sucesso.')
+
         } catch (err: any) {
             console.error('Erro no upload:', err)
             alert(`Erro: ${err.message}`)

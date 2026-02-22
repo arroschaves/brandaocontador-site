@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     Activity,
     ArrowDownRight,
@@ -12,27 +12,108 @@ import {
     PieChart,
     Search,
     TrendingUp,
-    Wallet
+    Wallet,
+    RefreshCw,
+    AlertCircle
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export const dynamic = 'force-dynamic';
 
 export default function FinanceiroPage() {
     const [search, setSearch] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [mrr, setMrr] = useState(0)
+    const [pending, setPending] = useState(0)
+    const [expenses, setExpenses] = useState(0)
+    const [transactions, setTransactions] = useState<any[]>([])
+    const [setupRequired, setSetupRequired] = useState(false)
+    const supabase = createClient()
 
-    // Dados de demonstração para UX Showcase
-    const mrr = 84500.00
-    const pending = 12400.00
-    const expenses = 4120.00
-    const growth = 12.5
+    const fetchFinancialData = useCallback(async () => {
+        setLoading(true)
+        setSetupRequired(false)
+        try {
+            // 1. Tentar buscar empresas com status Ativa e honorario_valor
+            // Se a coluna honorario_valor não existir, o PostgREST lança erro
+            const { data, error } = await supabase
+                .schema('core')
+                .from('empresas')
+                .select('id, razao_social, status, honorario_valor')
+                .eq('status', 'Ativa')
 
-    const transactions = [
-        { id: 'T-1042', client: 'Tech Solutions LTDA', amount: 3500.00, type: 'INCOME', status: 'PAID', date: '2026-02-21' },
-        { id: 'T-1043', client: 'Mercado Silva', amount: 1200.00, type: 'INCOME', status: 'PENDING', date: '2026-02-20' },
-        { id: 'T-1044', client: 'AWS Cloud Services', amount: 850.00, type: 'EXPENSE', status: 'PAID', date: '2026-02-19' },
-        { id: 'T-1045', client: 'Construtora Horizonte', amount: 5000.00, type: 'INCOME', status: 'PAID', date: '2026-02-18' },
-        { id: 'T-1046', client: 'Folha de Pagamento', amount: 15400.00, type: 'EXPENSE', status: 'PENDING', date: '2026-02-18' }
-    ]
+            if (error) {
+                // Se o erro for PGRST200 e referenciar honorario_valor, significa que a coluna falta
+                if (error.message.includes('honorario_valor')) {
+                    setSetupRequired(true)
+                    setMrr(0)
+                    setTransactions([])
+                    return
+                }
+                throw error
+            }
+
+            const ativos = data || []
+
+            // 2. Calcular MRR
+            const totalMrr = ativos.reduce((acc, curr) => acc + (Number(curr.honorario_valor) || 0), 0)
+            setMrr(totalMrr)
+
+            // 3. Simular "Geração de Faturas/Lançamentos" baseada nos honorários do Mês
+            const month = new Date().toLocaleString('pt-BR', { month: 'short', year: 'numeric' }).toUpperCase()
+            const generatedTransactions = ativos
+                .filter(a => Number(a.honorario_valor) > 0)
+                .map((empresa, index) => ({
+                    id: `HON-${month}-${empresa.id.substring(0, 4).toUpperCase()}`,
+                    client: empresa.razao_social,
+                    amount: Number(empresa.honorario_valor),
+                    type: 'INCOME',
+                    // Simula alguns PIXs como pendentes ou pagos de forma estática apenas visual (enquanto não criamos Tabela Real de Lançamentos)
+                    status: index % 3 === 0 ? 'PENDING' : 'PAID',
+                    date: new Date().toISOString()
+                }))
+
+            // Ordena os pendentes no topo
+            generatedTransactions.sort((a, b) => {
+                if (a.status === 'PENDING' && b.status === 'PAID') return -1;
+                if (a.status === 'PAID' && b.status === 'PENDING') return 1;
+                return 0;
+            });
+
+            // Adiciona despesas mockadas para fechar o Dashboard MVP
+            const amostral = [
+                ...generatedTransactions,
+                { id: 'DESP-FOLHA', client: 'Folha de Pagamento', amount: 15400.00, type: 'EXPENSE', status: 'PENDING', date: new Date().toISOString() },
+                { id: 'AWS-CLOUD', client: 'Amazon Web Services', amount: 850.00, type: 'EXPENSE', status: 'PAID', date: new Date(Date.now() - 86400000).toISOString() }
+            ]
+
+            setTransactions(amostral)
+
+            // Calc Pendencias (Amostral de Honorarios Atrasados)
+            const pend = generatedTransactions.filter(t => t.status === 'PENDING').reduce((acc, curr) => acc + curr.amount, 0)
+            setPending(pend)
+
+            // Calc Gastos
+            setExpenses(15400 + 850)
+
+        } catch (err) {
+            console.error('Falha Financeiro:', err)
+        } finally {
+            setLoading(false)
+        }
+    }, [supabase])
+
+    useEffect(() => {
+        fetchFinancialData()
+    }, [fetchFinancialData])
+
+    const growth = totalMrr => totalMrr > 0 ? 12.5 : 0; // Estático para UI
+    const lucro = ((mrr - expenses) / (mrr || 1)) * 100
+
+    const filteredTransactions = transactions.filter(t =>
+        t.client.toLowerCase().includes(search.toLowerCase()) ||
+        t.id.toLowerCase().includes(search.toLowerCase())
+    )
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
@@ -47,6 +128,9 @@ export default function FinanceiroPage() {
                     </p>
                 </div>
                 <div className="flex gap-4">
+                    <button onClick={fetchFinancialData} className="h-12 px-4 bg-secondary text-muted-foreground hover:bg-card hover:text-foreground transition-all rounded-xl shadow-sm">
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-500' : ''}`} />
+                    </button>
                     <button className="h-12 px-6 bg-secondary text-muted-foreground font-bold text-[11px] uppercase tracking-widest flex items-center gap-2 border border-border/50 hover:bg-card hover:text-foreground transition-all rounded-xl shadow-sm">
                         <Filter className="w-4 h-4" /> Filtros
                     </button>
@@ -56,13 +140,26 @@ export default function FinanceiroPage() {
                 </div>
             </div>
 
+            {setupRequired && (
+                <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex gap-4 items-start shadow-sm">
+                    <AlertCircle className="w-6 h-6 text-red-500 shrink-0 mt-1" />
+                    <div>
+                        <h3 className="text-red-500 font-black text-sm uppercase tracking-tight">Setup Necessário</h3>
+                        <p className="text-xs text-neutral-400 mt-1">
+                            A coluna <code className="bg-red-500/20 px-1 py-0.5 rounded text-red-400">honorario_valor</code> do tipo numérico não foi encontrada na tabela <code className="bg-red-500/20 px-1 py-0.5 rounded text-red-400">core.empresas</code>.
+                            Vá ao painel do Supabase, edite a tabela Empresas e adicione essa coluna para habilitar a inteligência do fluxo de caixa e cálculo do MRR.
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* KPI Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 {[
-                    { label: 'MRR Atual', value: mrr, icon: Wallet, color: 'text-emerald-500', trend: '+12.5%', isPos: true },
+                    { label: 'MRR Atual', value: mrr, icon: Wallet, color: 'text-emerald-500', trend: mrr > 0 ? '+12.5%' : '0%', isPos: true },
                     { label: 'Inadimplência', value: pending, icon: DollarSign, color: 'text-amber-500', trend: '-2.1%', isPos: true },
                     { label: 'Despesas Fixas', value: expenses, icon: Activity, color: 'text-red-500', trend: '+5.0%', isPos: false },
-                    { label: 'Margem de Lucro', value: 68.4, icon: Percent, color: 'text-blue-500', trend: '+1.2%', isPos: true, isPercent: true },
+                    { label: 'Margem de Lucro', value: isNaN(lucro) || mrr === 0 ? 0 : lucro, icon: Percent, color: 'text-blue-500', trend: '+1.2%', isPos: true, isPercent: true },
                 ].map((kpi, i) => (
                     <div key={i} className="lucid-card p-6 flex flex-col justify-between group hover:border-emerald-500/30 transition-all shadow-sm border-l-4 border-l-border hover:border-l-emerald-500">
                         <div className="flex justify-between items-start mb-4">
@@ -76,7 +173,7 @@ export default function FinanceiroPage() {
                         </div>
                         <div>
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{kpi.label}</p>
-                            <p className="text-3xl font-black text-foreground italic mt-1 tracking-tighter">
+                            <p className={`text-3xl font-black italic mt-1 tracking-tighter ${kpi.value < 0 ? 'text-red-500' : 'text-foreground'}`}>
                                 {kpi.isPercent ? '' : 'R$ '}
                                 {kpi.value.toLocaleString('pt-BR', { minimumFractionDigits: kpi.isPercent ? 1 : 2 })}
                                 {kpi.isPercent ? '%' : ''}
@@ -118,10 +215,25 @@ export default function FinanceiroPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border/30">
-                                {transactions.map((tx, i) => (
+                                {loading && transactions.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="p-8 text-center text-muted-foreground text-xs uppercase tracking-widest font-black">
+                                            Lendo Livro Caixa...
+                                        </td>
+                                    </tr>
+                                ) : filteredTransactions.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={5} className="p-8 text-center text-muted-foreground text-xs uppercase tracking-widest font-black">
+                                            Nenhum lançamento encontrado
+                                        </td>
+                                    </tr>
+                                ) : filteredTransactions.map((tx, i) => (
                                     <tr key={i} className="hover:bg-secondary/40 transition-colors group">
                                         <td className="p-4 pl-6 font-mono text-xs text-muted-foreground/60 group-hover:text-emerald-500 transition-colors">{tx.id}</td>
-                                        <td className="p-4 text-sm font-bold">{tx.client}</td>
+                                        <td className="p-4 text-sm font-bold flex items-center gap-2">
+                                            {tx.client}
+                                            {tx.id.startsWith('HON') && <span className="px-2 py-0.5 bg-neutral-800 text-[9px] uppercase tracking-widest rounded text-neutral-400">Mensal</span>}
+                                        </td>
                                         <td className="p-4 text-xs font-mono text-muted-foreground">{new Date(tx.date).toLocaleDateString('pt-BR')}</td>
                                         <td className="p-4">
                                             {tx.status === 'PAID' ? (
@@ -155,20 +267,20 @@ export default function FinanceiroPage() {
                         <div className="space-y-4">
                             <div>
                                 <div className="flex justify-between text-xs font-bold mb-2">
-                                    <span className="text-emerald-500">Entradas (85%)</span>
-                                    <span>R$ 84.500,00</span>
+                                    <span className="text-emerald-500">Entradas ({mrr > 0 ? ((mrr / (mrr + expenses)) * 100).toFixed(0) : 0}%)</span>
+                                    <span>R$ {mrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                                    <div className="h-full bg-emerald-500 w-[85%] rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                    <div className="h-full bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)] transition-all" style={{ width: `${mrr > 0 ? ((mrr / (mrr + expenses)) * 100) : 0}%` }}></div>
                                 </div>
                             </div>
                             <div>
                                 <div className="flex justify-between text-xs font-bold mb-2">
-                                    <span className="text-red-500">Saídas (15%)</span>
-                                    <span>R$ 15.200,00</span>
+                                    <span className="text-red-500">Saídas ({expenses > 0 ? ((expenses / (mrr + expenses)) * 100).toFixed(0) : 0}%)</span>
+                                    <span>R$ {expenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                                    <div className="h-full bg-red-500 w-[15%] rounded-full"></div>
+                                    <div className="h-full bg-red-500 rounded-full transition-all" style={{ width: `${expenses > 0 ? ((expenses / (mrr + expenses)) * 100) : 0}%` }}></div>
                                 </div>
                             </div>
                         </div>
@@ -178,7 +290,7 @@ export default function FinanceiroPage() {
                         <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay"></div>
                         <Activity className="w-12 h-12 text-emerald-500 mx-auto mb-4 opacity-50 group-hover:scale-110 group-hover:opacity-100 transition-all duration-500" />
                         <h3 className="text-base font-black uppercase italic tracking-tight mb-2">Integração Bancária</h3>
-                        <p className="text-xs text-muted-foreground mb-6">Em breve: Conciliação automática via Open Finance e emissão de boletos.</p>
+                        <p className="text-xs text-muted-foreground mb-6">Em breve: Conciliação automática via Open Finance e emissão de boletos via ASAAS.</p>
                         <button className="w-full py-3 bg-card border border-border text-foreground text-xs font-bold uppercase tracking-wider rounded-xl shadow-sm hover:border-emerald-500/50 transition-colors">
                             Ver Roadmap
                         </button>
