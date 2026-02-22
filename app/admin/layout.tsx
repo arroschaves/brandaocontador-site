@@ -97,6 +97,7 @@ export default function AdminLayout({
               <Link
                 key={item.path}
                 href={item.path}
+                prefetch={false}
                 className={`flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative ${isActive
                   ? 'bg-primary/10 text-primary shadow-sm shadow-primary/5'
                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
