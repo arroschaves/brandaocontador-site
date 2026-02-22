@@ -23,6 +23,7 @@ import {
   Briefcase
 } from 'lucide-react';
 import WhatsAppRadar from '../components/WhatsAppRadar';
+import ThemeSwitcher from './components/ThemeSwitcher';
 
 export default function AdminLayout({
   children,
@@ -138,6 +139,7 @@ export default function AdminLayout({
           </div>
 
           <div className="flex items-center space-x-6">
+            <ThemeSwitcher />
             <WhatsAppRadar />
             <div className="flex items-center space-x-4">
               <button className="p-2.5 relative text-muted-foreground hover:text-primary transition-all hover:bg-primary/5 rounded-xl">

@@ -65,6 +65,13 @@
     --ring: 160 84% 39%;
   }
 
+  .dark-light {
+    --background: 220 15% 10%;
+    --card: 220 15% 13%;
+    --border: 220 15% 20%;
+    --muted-foreground: 220 10% 60%;
+  }
+
   * {
     border-color: hsl(var(--border));
     box-sizing: border-box;
