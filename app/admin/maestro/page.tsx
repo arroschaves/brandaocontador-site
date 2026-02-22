@@ -131,7 +131,7 @@ export default function MaestroPage() {
             const { data: wfData, error: wfErr } = await supabase
                 .schema('workflow')
                 .from('tarefas')
-                .select('*, responsavel:equipe(nome)')
+                .select('*, responsavel:equipe!tarefas_responsavel_id_fkey(nome)')
                 .neq('status', 'concluido')
                 .order('urgente', { ascending: false })
                 .order('prazo', { ascending: true })

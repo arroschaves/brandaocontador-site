@@ -58,7 +58,7 @@ export default function WhatsAppRadar() {
                     mensagem,
                     pushname,
                     created_at,
-                    empresas:empresa_id ( razao_social )
+                    empresas:empresas!atendimentos_empresa_id_fkey ( razao_social )
                 `)
                 .eq('status', 'pendente')
                 .order('created_at', { ascending: false })

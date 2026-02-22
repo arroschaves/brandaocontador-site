@@ -63,7 +63,7 @@ export default function AtendimentoPage() {
                 .from('atendimentos')
                 .select(`
                     *,
-                    empresas ( razao_social, email )
+                    empresas!atendimentos_empresa_id_fkey ( razao_social, email )
                 `)
                 .order('created_at', { ascending: false });
 
