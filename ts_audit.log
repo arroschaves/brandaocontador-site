@@ -1,0 +1,53 @@
+==================================================
+­ƒöì TypeScript Project Diagnostic Report
+==================================================
+
+­ƒôª Versions:
+----------------------------------------
+  TypeScript: O sistema n├åo pode encontrar o caminho especificado.
+  Node.js: O sistema n├åo pode encontrar o caminho especificado.
+
+ÔÜÖ´©Å TSConfig Analysis:
+----------------------------------------
+Ô£à Strict mode enabled
+  ÔÜ¬ Unchecked index access protection: not set
+  ÔÜ¬ Implicit override protection: not set
+  Ô£à Skip lib check (performance): True
+  Ô£à Incremental compilation: True
+
+  Module: esnext
+  Module Resolution: node
+  Target: es2017
+
+­ƒøá´©Å Tooling Detection:
+----------------------------------------
+  Ô£à ESLint
+  Ô£à Vitest (testing)
+  Ô£à Jest (testing)
+
+­ƒôª Monorepo Check:
+----------------------------------------
+  ÔÜ¬ No monorepo configuration detected
+
+ÔÜá´©Å 'any' Type Usage:
+----------------------------------------
+  ÔÜá´©Å Found O sistema n├åo pode encontrar o caminho especificado. occurrences of ': any'
+O sistema n├åo pode encontrar o caminho especificado.
+
+
+ÔÜá´©Å Type Assertions (as):
+----------------------------------------
+  ÔÜá´©Å Found O sistema n├åo pode encontrar o caminho especificado. type assertions
+
+­ƒöì Type Check:
+----------------------------------------
+  Ô£à No type errors
+
+ÔÅ▒´©Å Type Check Performance:
+----------------------------------------
+  'grep' n├åo ÔÇÜ reconhecido como um comando interno
+  ou externo, um programa oper┬ável ou um arquivo em lotes.
+
+==================================================
+Ô£à Diagnostic Complete
+==================================================

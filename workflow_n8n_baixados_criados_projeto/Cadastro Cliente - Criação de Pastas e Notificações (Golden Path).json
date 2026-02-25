@@ -20,11 +20,24 @@
     {
       "parameters": {
         "resource": "folder",
-        "name": "={{$json.body.nome}} - {{$json.body.cnpj_cpf}}",
+        "name": "={{ $json.body.nome_fantasia || $json.body.nome }} ({{ $json.body.cnpj_cpf || $json.body.documento }})",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP",
+          "mode": "list",
+          "cachedResultName": "BRANDAO CONTABILIDADE CRM",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP"
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 2,
+      "typeVersion": 3,
       "position": [
         288,
         -288
@@ -41,16 +54,26 @@
     {
       "parameters": {
         "resource": "folder",
-        "name": "Documentos Fiscais",
+        "name": "01_Societario_Legal",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $node['Criar Pasta Cliente'].json.id }}",
+          "mode": "id"
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 2,
+      "typeVersion": 3,
       "position": [
         496,
-        -400
+        -500
       ],
-      "name": "Pasta Documentos",
+      "name": "Pasta 01 Societario",
       "id": "6477eb62-270d-4f1e-a497-713cd5ac78e9",
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -62,17 +85,89 @@
     {
       "parameters": {
         "resource": "folder",
-        "name": "Contabilidade",
+        "name": "02_Fiscal_Tributos",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $node['Criar Pasta Cliente'].json.id }}",
+          "mode": "id"
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 2,
+      "typeVersion": 3,
       "position": [
         496,
-        -192
+        -360
       ],
-      "name": "Pasta Contabilidade",
-      "id": "34fd6bcb-de59-44fa-a714-9dbc959a3ac3",
+      "name": "Pasta 02 Fiscal",
+      "id": "34fd6bcb-de59-44fa-a714-9dbc959a3ac3a",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "03_Contabil_Financeiro",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $node['Criar Pasta Cliente'].json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        496,
+        -220
+      ],
+      "name": "Pasta 03 Contabil",
+      "id": "8a5d1234-aaaa-4b2c-c123-abc123456789",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "04_Folha_RH",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $node['Criar Pasta Cliente'].json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        496,
+        -80
+      ],
+      "name": "Pasta 04 RH",
+      "id": "9b6e2345-bbbb-5c3d-d234-bcd234567890",
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "b4mywljyK2WCSlSG",
@@ -83,15 +178,32 @@
     {
       "parameters": {
         "operation": "update",
-        "tableId": "core.empresas"
+        "tableId": "core.empresas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node['Webhook Cadastro'].json.body.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "drive_folder_id",
+              "fieldValue": "={{ $node['Criar Pasta Cliente'].json.id }}"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        688,
+        720,
         -288
       ],
-      "name": "Atualizar Supabase",
+      "name": "Atualizar Supabase - drive_folder_id",
       "id": "3ff6187a-3448-4c85-b7e2-6c703091a238",
       "credentials": {
         "supabaseApi": {
@@ -103,13 +215,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{$env.EVOLUTION_API_URL}}/message/sendText/{{$env.EVOLUTION_INSTANCE}}",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "apikey",
-              "value": "={{$env.EVOLUTION_API_KEY}}"
+              "value": "={{ $env.EVOLUTION_API_KEY }}"
             }
           ]
         },
@@ -118,11 +230,11 @@
           "parameters": [
             {
               "name": "number",
-              "value": "={{$node[\"Webhook Cadastro\"].json.body.telefone_whatsapp}}"
+              "value": "={{ $node['Webhook Cadastro'].json.body.telefone_whatsapp }}"
             },
             {
               "name": "text",
-              "value": "Olá {{$node[\"Webhook Cadastro\"].json.body.nome}}! Bem-vindo à Brandão Contabilidade. Seu cadastro foi realizado com sucesso."
+              "value": "Olá {{ $node['Webhook Cadastro'].json.body.nome_fantasia }}! Bem-vindo à Brandão Contabilidade. Seu cadastro foi realizado com sucesso e sua pasta de documentos foi criada."
             }
           ]
         },
@@ -132,7 +244,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        896,
+        960,
         -288
       ],
       "id": "7e7b79b1-bd91-430c-927c-45c951a7dd1d"
@@ -155,24 +267,34 @@
       "main": [
         [
           {
-            "node": "Pasta Documentos",
+            "node": "Pasta 01 Societario",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Pasta Contabilidade",
+            "node": "Pasta 02 Fiscal",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Atualizar Supabase",
+            "node": "Pasta 03 Contabil",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pasta 04 RH",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Atualizar Supabase - drive_folder_id",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Atualizar Supabase": {
+    "Atualizar Supabase - drive_folder_id": {
       "main": [
         [
           {

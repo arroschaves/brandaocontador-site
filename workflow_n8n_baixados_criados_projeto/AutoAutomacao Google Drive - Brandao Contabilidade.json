@@ -61,8 +61,55 @@
     },
     {
       "parameters": {
+        "operation": "list",
+        "options": {
+          "queryString": "='1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP' in parents and name='{{ $json.nome }} ({{ $json.cnpj_cpf }})' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+          "fields": [
+            "id",
+            "name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 2,
+      "position": [
+        620,
+        -100
+      ],
+      "id": "check-folder-exists-001",
+      "name": "Verificar Pasta Existente",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "b4mywljyK2WCSlSG",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.files ? $json.files.length : 0 }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Pasta Já Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        820,
+        -100
+      ],
+      "id": "check-if-exists-002"
+    },
+    {
+      "parameters": {
         "resource": "folder",
-        "name": "{{ $json.nome }} ({{ $json.cnpj_cpf }})",
+        "name": "={{ $('Loop Over Items').item.json.nome }} ({{ $('Loop Over Items').item.json.cnpj_cpf }})",
         "driveId": {
           "__rl": true,
           "value": "My Drive",
@@ -72,18 +119,18 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "1qYZ1pLbgsb7SI-AOKYjAUP_oxY32ATj9",
+          "value": "1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP",
           "mode": "list",
           "cachedResultName": "BRANDAO CONTABILIDADE CRM",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/1qYZ1pLbgsb7SI-AOKYjAUP_oxY32ATj9"
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        672,
-        -96
+        1020,
+        -200
       ],
       "id": "304128e3-ad16-4e3d-ad25-9231f3f9fab6",
       "name": "Create folder",
@@ -119,11 +166,48 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        880,
-        16
+        1220,
+        -100
       ],
       "id": "44876551-067f-472e-86af-2eedf38fd240",
       "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "tvymDvbKT2vFr50N",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "core.empresas",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Items').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "drive_folder_id",
+              "fieldValue": "={{ $('Verificar Pasta Existente').item.json.files[0].id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        0
+      ],
+      "id": "update-existing-folder-003",
+      "name": "Salvar ID Pasta Existente",
       "credentials": {
         "supabaseApi": {
           "id": "tvymDvbKT2vFr50N",
@@ -161,17 +245,36 @@
         [],
         [
           {
+            "node": "Verificar Pasta Existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Pasta Existente": {
+      "main": [
+        [
+          {
+            "node": "Pasta Já Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pasta Já Existe?": {
+      "main": [
+        [
+          {
             "node": "Create folder",
             "type": "main",
             "index": 0
-          },
+          }
+        ],
+        [
           {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Update a row",
+            "node": "Salvar ID Pasta Existente",
             "type": "main",
             "index": 0
           }
@@ -199,9 +302,20 @@
           }
         ]
       ]
+    },
+    "Salvar ID Pasta Existente": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": true,

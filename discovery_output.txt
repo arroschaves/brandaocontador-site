@@ -1,0 +1,1070 @@
+🔍 Iniciando Discovery do Google Drive...
+
+============================================================
+🏢 MAPEANDO PJ (Empresa): MAQUITA ()
+============================================================
+├── 📁 01 - CND (Certidões Negativas)
+├── 📁 02 - PENDÊNCIAS FISCAIS (Federal, Estadual, Municipal)
+├── 📁 03 - DOCUMENTOS PESSOAIS
+├── 📁 04 - CERTIFICADO DIGITAL
+├── 📁 05 - DOCUMENTOS TERRA
+├── 📁 06 - IRPF
+├── 📁 07 - JUNTA COMERCIAL
+├── 📁 08 - FATURAMENTO
+├── 📁 09 - CAEPF
+├── 📁 10 - RH - ESCRITA - CONTABILIDADE
+│   └── 📁 01 - FAZENDA MAQUITA
+│       ├── 📁 01 - FISCAL
+│       │   ├── 📁 2024
+│       │   │   ├── 📁 01_Janeiro
+│       │   │   ├── 📁 02_Fevereiro
+│       │   │   ├── 📁 03_Marca
+│       │   │   ├── 📁 03_Marco
+│       │   │   ├── 📁 04_Abril
+│       │   │   ├── 📁 05_Maio
+│       │   │   ├── 📁 06_Junho
+│       │   │   ├── 📁 07_Julho
+│       │   │   ├── 📁 08_Agosto
+│       │   │   ├── 📁 09_Setembro
+│       │   │   ├── 📁 10_Outubro
+│       │   │   ├── 📁 11_Novembro
+│       │   │   ├── 📁 12_Dezembro
+│       │   │   └── 📁 13_Salario
+│       │   ├── 📁 2025
+│       │   │   ├── 📁 01_Janeiro
+│       │   │   ├── 📁 02_Fevereiro
+│       │   │   ├── 📁 03_Marca
+│       │   │   ├── 📁 03_Marco
+│       │   │   ├── 📁 04_Abril
+│       │   │   ├── 📁 05_Maio
+│       │   │   ├── 📁 06_Junho
+│       │   │   ├── 📁 07_Julho
+│       │   │   ├── 📁 08_Agosto
+│       │   │   ├── 📁 09_Setembro
+│       │   │   ├── 📁 10_Outubro
+│       │   │   ├── 📁 11_Novembro
+│       │   │   ├── 📁 12_Dezembro
+│       │   │   └── 📁 13_Salario
+│       │   └── 📁 2026
+│       │       ├── 📁 01_Janeiro
+│       │       ├── 📁 02_Fevereiro
+│       │       ├── 📁 03_Marca
+│       │       ├── 📁 03_Marco
+│       │       ├── 📁 04_Abril
+│       │       ├── 📁 05_Maio
+│       │       ├── 📁 06_Junho
+│       │       ├── 📁 07_Julho
+│       │       ├── 📁 08_Agosto
+│       │       ├── 📁 09_Setembro
+│       │       ├── 📁 10_Outubro
+│       │       ├── 📁 11_Novembro
+│       │       ├── 📁 12_Dezembro
+│       │       └── 📁 13_Salario
+│       ├── 📁 02 - RH
+│       │   ├── 📁 AVISO_PREVIO
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       └── 📁 12_Dezembro
+│       │   ├── 📁 FGTS
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       └── 📁 12_Dezembro
+│       │   ├── 📁 FICHAS_EMPREGADOS
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       └── 📁 12_Dezembro
+│       │   ├── 📁 INSS
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       └── 📁 12_Dezembro
+│       │   ├── 📁 PEDIDO_REGISTRO
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   └── 📁 12_Dezembro
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       └── 📁 12_Dezembro
+│       │   ├── 📁 RECIBO_FERIAS
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   ├── 📁 12_Dezembro
+│       │   │   │   └── 📁 13_Salario
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   ├── 📁 12_Dezembro
+│       │   │   │   └── 📁 13_Salario
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       ├── 📁 12_Dezembro
+│       │   │       └── 📁 13_Salario
+│       │   ├── 📁 RECIBO_FOLHA
+│       │   │   ├── 📁 2024
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   ├── 📁 12_Dezembro
+│       │   │   │   └── 📁 13_Salario
+│       │   │   ├── 📁 2025
+│       │   │   │   ├── 📁 01_Janeiro
+│       │   │   │   ├── 📁 02_Fevereiro
+│       │   │   │   ├── 📁 03_Marca
+│       │   │   │   ├── 📁 03_Marco
+│       │   │   │   ├── 📁 04_Abril
+│       │   │   │   ├── 📁 05_Maio
+│       │   │   │   ├── 📁 06_Junho
+│       │   │   │   ├── 📁 07_Julho
+│       │   │   │   ├── 📁 08_Agosto
+│       │   │   │   ├── 📁 09_Setembro
+│       │   │   │   ├── 📁 10_Outubro
+│       │   │   │   ├── 📁 11_Novembro
+│       │   │   │   ├── 📁 12_Dezembro
+│       │   │   │   └── 📁 13_Salario
+│       │   │   └── 📁 2026
+│       │   │       ├── 📁 01_Janeiro
+│       │   │       ├── 📁 02_Fevereiro
+│       │   │       ├── 📁 03_Marca
+│       │   │       ├── 📁 03_Marco
+│       │   │       ├── 📁 04_Abril
+│       │   │       ├── 📁 05_Maio
+│       │   │       ├── 📁 06_Junho
+│       │   │       ├── 📁 07_Julho
+│       │   │       ├── 📁 08_Agosto
+│       │   │       ├── 📁 09_Setembro
+│       │   │       ├── 📁 10_Outubro
+│       │   │       ├── 📁 11_Novembro
+│       │   │       ├── 📁 12_Dezembro
+│       │   │       └── 📁 13_Salario
+│       │   └── 📁 RECIBO_RESCISAO
+│       │       ├── 📁 2024
+│       │       │   ├── 📁 01_Janeiro
+│       │       │   ├── 📁 02_Fevereiro
+│       │       │   ├── 📁 03_Marca
+│       │       │   ├── 📁 03_Marco
+│       │       │   ├── 📁 04_Abril
+│       │       │   ├── 📁 05_Maio
+│       │       │   ├── 📁 06_Junho
+│       │       │   ├── 📁 07_Julho
+│       │       │   ├── 📁 08_Agosto
+│       │       │   ├── 📁 09_Setembro
+│       │       │   ├── 📁 10_Outubro
+│       │       │   ├── 📁 11_Novembro
+│       │       │   └── 📁 12_Dezembro
+│       │       ├── 📁 2025
+│       │       │   ├── 📁 01_Janeiro
+│       │       │   ├── 📁 02_Fevereiro
+│       │       │   ├── 📁 03_Marca
+│       │       │   ├── 📁 03_Marco
+│       │       │   ├── 📁 04_Abril
+│       │       │   ├── 📁 05_Maio
+│       │       │   ├── 📁 06_Junho
+│       │       │   ├── 📁 07_Julho
+│       │       │   ├── 📁 08_Agosto
+│       │       │   ├── 📁 09_Setembro
+│       │       │   ├── 📁 10_Outubro
+│       │       │   ├── 📁 11_Novembro
+│       │       │   └── 📁 12_Dezembro
+│       │       └── 📁 2026
+│       │           ├── 📁 01_Janeiro
+│       │           ├── 📁 02_Fevereiro
+│       │           ├── 📁 03_Marca
+│       │           ├── 📁 03_Marco
+│       │           ├── 📁 04_Abril
+│       │           ├── 📁 05_Maio
+│       │           ├── 📁 06_Junho
+│       │           ├── 📁 07_Julho
+│       │           ├── 📁 08_Agosto
+│       │           ├── 📁 09_Setembro
+│       │           ├── 📁 10_Outubro
+│       │           ├── 📁 11_Novembro
+│       │           └── 📁 12_Dezembro
+│       └── 📁 03 - IMPOSTOS E GUIAS
+│           ├── 📁 2024
+│           │   ├── 📁 01_Janeiro
+│           │   ├── 📁 02_Fevereiro
+│           │   ├── 📁 03_Marca
+│           │   ├── 📁 03_Marco
+│           │   ├── 📁 04_Abril
+│           │   ├── 📁 05_Maio
+│           │   ├── 📁 06_Junho
+│           │   ├── 📁 07_Julho
+│           │   ├── 📁 08_Agosto
+│           │   ├── 📁 09_Setembro
+│           │   ├── 📁 10_Outubro
+│           │   ├── 📁 11_Novembro
+│           │   └── 📁 12_Dezembro
+│           ├── 📁 2025
+│           │   ├── 📁 01_Janeiro
+│           │   ├── 📁 02_Fevereiro
+│           │   ├── 📁 03_Marca
+│           │   ├── 📁 03_Marco
+│           │   ├── 📁 04_Abril
+│           │   ├── 📁 05_Maio
+│           │   ├── 📁 06_Junho
+│           │   ├── 📁 07_Julho
+│           │   ├── 📁 08_Agosto
+│           │   ├── 📁 09_Setembro
+│           │   ├── 📁 10_Outubro
+│           │   ├── 📁 11_Novembro
+│           │   └── 📁 12_Dezembro
+│           └── 📁 2026
+│               ├── 📁 01_Janeiro
+│               ├── 📁 02_Fevereiro
+│               ├── 📁 03_Marca
+│               ├── 📁 03_Marco
+│               ├── 📁 04_Abril
+│               ├── 📁 05_Maio
+│               ├── 📁 06_Junho
+│               ├── 📁 07_Julho
+│               ├── 📁 08_Agosto
+│               ├── 📁 09_Setembro
+│               ├── 📁 10_Outubro
+│               ├── 📁 11_Novembro
+│               └── 📁 12_Dezembro
+└── 📁 FAZENDA MAQUITA
+    ├── 📁 AVISO_PREVIO
+    ├── 📁 FGTS
+    ├── 📁 FICHAS_EMPREGADOS
+    ├── 📁 INSS
+    ├── 📁 PEDIDO_REGISTRO
+    ├── 📁 RECIBO_FERIAS
+    ├── 📁 RECIBO_FOLHA
+    └── 📁 RECIBO_RESCISAO
+
+
+============================================================
+🏢 MAPEANDO PF (Produtor/Pessoa): AROLDO FERREIRA CORREA JUNIOR (63922258115)
+============================================================
+├── 📁 01 - CND (Certidões Negativas)
+│   └── 📄 Certidao-63922258115-20260107.pdf
+├── 📁 02 - PENDÊNCIAS FISCAIS (Federal, Estadual, Municipal)
+├── 📁 03 - DOCUMENTOS PESSOAIS
+│   ├── 📄 Autentica FAZ MATA SECA A1.pdf
+│   ├── 📄 Autentica FAZ MENINA DE DEUS A1.pdf
+│   ├── 📄 Autentica FAZ SANTO EXPEDITO A3.pdf
+│   ├── 📄 Autentica FAZ SANTO EXPEDITO.pdf
+│   ├── 📄 Autentica FAZENDA TRIUNFO A1.pdf
+│   ├── 📄 CARTÃO CNPJ.pdf
+│   ├── 📄 ComprovanteInscricao_63922258100131.pdf
+│   ├── 📄 ComprovanteInscricao_63922258100220.pdf
+│   ├── 📄 ComprovanteInscricao_63922258100392.pdf
+│   ├── 📄 ComprovanteInscricao_63922258100473.pdf
+│   ├── 📄 ComprovanteSituacaoCadastral_63922258100131.pdf
+│   ├── 📄 ComprovanteSituacaoCadastral_63922258100220.pdf
+│   ├── 📄 ComprovanteSituacaoCadastral_63922258100392.pdf
+│   ├── 📄 ComprovanteSituacaoCadastral_63922258100473.pdf
+│   ├── 📄 ConsultaPublicaExibir.asp.pdf
+│   ├── 📄 CRLV Digital.pdf
+│   ├── 📄 DOSSIE AROLDO MATA SECA.pdf
+│   ├── 📄 DOSSIE AROLDO MENINA DE DEUS.pdf
+│   ├── 📄 DOSSIE AROLDO TRIUNFO.pdf
+│   ├── 📄 DOSSIE SANTO EXPEDITO.pdf
+│   ├── 📄 Portal de Serviços SENATRAN.pdf
+│   ├── 📄 REQUERIMENTO AROLDO JUNIOR.pdf
+│   └── 📄 SAL - Sistema de Acréscimos Legais - Cálculo de Contribuições de Empresa e Órgão Público - Identificação do Contribuinte - Dados Cadastrais.pdf
+├── 📁 04 - CERTIFICADO DIGITAL
+│   ├── 📄 210924020246058E000639222581151707144972668.pem
+│   ├── 📄 6D8C2502056CED36000639222581151738788564419.pem
+│   ├── 📄 AROLDO FERREIRA CORREA JUNIOR63922258115.pfx
+│   ├── 📄 PORTAL CERTIFICACAO DIGITAL - 210924020245BD8C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   ├── 📄 PORTAL CERTIFICACAO DIGITAL - 210924020245EFD5 - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA a3.pdf
+│   ├── 📄 PORTAL CERTIFICACAO DIGITAL - 210924020246058E - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   ├── 📄 PORTAL CERTIFICACAO DIGITAL - 2109240202461A7C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   ├── 📄 PORTAL CERTIFICACAO DIGITAL - 210924020246399C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   ├── 📄 SOLUTI - 210924020245BD8C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA A1.pdf
+│   ├── 📄 SOLUTI - 210924020245EFD5 - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA A3.pdf
+│   ├── 📄 SOLUTI - 210924020246058E - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   ├── 📄 SOLUTI - 2109240202461A7C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+│   └── 📄 SOLUTI - 210924020246399C - TERMO DE TITULARIDADE DE CERTIFICADO DIGITAL DE PESSOA FÍSICA.pdf
+├── 📁 05 - DOCUMENTOS TERRA
+├── 📁 06 - IRPF
+├── 📁 07 - JUNTA COMERCIAL
+├── 📁 08 - FATURAMENTO
+├── 📁 09 - CAEPF
+│   ├── 📄 CAEPF_63922258100131.pdf
+│   ├── 📄 CAEPF_63922258100220.pdf
+│   ├── 📄 CAEPF_63922258100392.pdf
+│   └── 📄 CAEPF_63922258100473.pdf
+└── 📁 10 - RH - ESCRITA - CONTABILIDADE
+    ├── 📁 01 - FISCAL
+    │   ├── 📁 2024
+    │   │   ├── 📁 01_Janeiro
+    │   │   ├── 📁 02_Fevereiro
+    │   │   ├── 📁 03_Marca
+    │   │   ├── 📁 03_Marco
+    │   │   ├── 📁 04_Abril
+    │   │   ├── 📁 05_Maio
+    │   │   ├── 📁 06_Junho
+    │   │   ├── 📁 07_Julho
+    │   │   ├── 📁 08_Agosto
+    │   │   ├── 📁 09_Setembro
+    │   │   ├── 📁 10_Outubro
+    │   │   ├── 📁 11_Novembro
+    │   │   ├── 📁 12_Dezembro
+    │   │   └── 📁 13_Salario
+    │   ├── 📁 2025
+    │   │   ├── 📁 01_Janeiro
+    │   │   ├── 📁 02_Fevereiro
+    │   │   ├── 📁 03_Marca
+    │   │   ├── 📁 03_Marco
+    │   │   ├── 📁 04_Abril
+    │   │   ├── 📁 05_Maio
+    │   │   ├── 📁 06_Junho
+    │   │   ├── 📁 07_Julho
+    │   │   ├── 📁 08_Agosto
+    │   │   ├── 📁 09_Setembro
+    │   │   ├── 📁 10_Outubro
+    │   │   ├── 📁 11_Novembro
+    │   │   ├── 📁 12_Dezembro
+    │   │   └── 📁 13_Salario
+    │   └── 📁 2026
+    │       ├── 📁 01_Janeiro
+    │       │   ├── 📄 35260121023400000192550020000443001878726849-nfe.xml
+    │       │   ├── 📄 35260126327995000193550010000025691000024024-nfe.xml
+    │       │   ├── 📄 35260126327995000193550010000025701000024033-nfe.xml
+    │       │   ├── 📄 35260130827500000162550020000168731194307838-nfe.xml
+    │       │   ├── 📄 35260131598882000162550020004346681661201973-nfe.xml
+    │       │   ├── 📄 35260161868052000179550010000003851000004252-nfe.xml
+    │       │   ├── 📄 35260168985209000195550010000325471322389178-nfe.xml
+    │       │   ├── 📄 43260139467233000134550030000072991483469169-nfe.xml
+    │       │   ├── 📄 50260100769702000134550010003501541673092090-nfe.xml
+    │       │   ├── 📄 50260100769702000134550010003501601554842939-nfe.xml
+    │       │   ├── 📄 50260101227430000103550010000020411000226474-nfe.xml
+    │       │   ├── 📄 50260101227430000103550010000020461000228813-nfe.xml
+    │       │   ├── 📄 50260101576940000609550010000080601001135480-nfe.xml
+    │       │   ├── 📄 50260103067759000180550010003280591184520891-nfe.xml
+    │       │   ├── 📄 50260103067759000180550010003280601713353331-nfe.xml
+    │       │   ├── 📄 50260103326315000111550010000981181811890776-nfe.xml
+    │       │   ├── 📄 50260103583836000154550000006307951487764717-nfe.xml
+    │       │   ├── 📄 50260104520595000167550010000192361000236604-nfe.xml
+    │       │   ├── 📄 50260104683101000165550010000042631999957360-nfe.xml
+    │       │   ├── 📄 50260105808085000233550010001257411592222269-nfe.xml
+    │       │   ├── 📄 50260109379617000134550020000229721001736028-nfe.xml
+    │       │   ├── 📄 50260121564846000205550010000472221488232500-nfe.xml
+    │       │   ├── 📄 50260126831727000104550020001537021136895135-nfe.xml
+    │       │   ├── 📄 50260129316596000620550010000788891027154211-nfe.xml
+    │       │   ├── 📄 50260133102641000106550010001891521299895114-nfe.xml
+    │       │   ├── 📄 50260133102641000106550010001892511199895218-nfe.xml
+    │       │   ├── 📄 50260134503046000226550010000002931000002467-nfe.xml
+    │       │   ├── 📄 50260141488114000100550010000027251000829530-nfe.xml
+    │       │   ├── 📄 50260147277625000169550010000013761000013857-nfe.xml
+    │       │   ├── 📄 50260150780697000139550010000032101607063224-nfe.xml
+    │       │   ├── 📄 50260150780697000139550010000032201320591620-nfe.xml
+    │       │   ├── 📄 50260161649810005399550010000108891790787668-nfe.xml
+    │       │   ├── 📄 50260184943067000745550060000333281321462161-nfe.xml
+    │       │   └── 📄 50260184943067000745550060000333511400590837-nfe.xml
+    │       ├── 📁 02_Fevereiro
+    │       ├── 📁 03_Marca
+    │       ├── 📁 03_Marco
+    │       ├── 📁 04_Abril
+    │       ├── 📁 05_Maio
+    │       ├── 📁 06_Junho
+    │       ├── 📁 07_Julho
+    │       ├── 📁 08_Agosto
+    │       ├── 📁 09_Setembro
+    │       ├── 📁 10_Outubro
+    │       ├── 📁 11_Novembro
+    │       ├── 📁 12_Dezembro
+    │       └── 📁 13_Salario
+    ├── 📁 02 - RH
+    │   ├── 📁 AVISO_PREVIO
+    │   │   ├── 📁 2024
+    │   │   │   ├── 📁 01_Janeiro
+    │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   ├── 📁 03_Marca
+    │   │   │   ├── 📁 03_Marco
+    │   │   │   ├── 📁 04_Abril
+    │   │   │   ├── 📁 05_Maio
+    │   │   │   ├── 📁 06_Junho
+    │   │   │   ├── 📁 07_Julho
+    │   │   │   ├── 📁 08_Agosto
+    │   │   │   ├── 📁 09_Setembro
+    │   │   │   ├── 📁 10_Outubro
+    │   │   │   ├── 📁 11_Novembro
+    │   │   │   └── 📁 12_Dezembro
+    │   │   ├── 📁 2025
+    │   │   │   ├── 📁 01_Janeiro
+    │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   ├── 📁 03_Marca
+    │   │   │   ├── 📁 03_Marco
+    │   │   │   ├── 📁 04_Abril
+    │   │   │   ├── 📁 05_Maio
+    │   │   │   ├── 📁 06_Junho
+    │   │   │   ├── 📁 07_Julho
+    │   │   │   ├── 📁 08_Agosto
+    │   │   │   ├── 📁 09_Setembro
+    │   │   │   ├── 📁 10_Outubro
+    │   │   │   ├── 📁 11_Novembro
+    │   │   │   └── 📁 12_Dezembro
+    │   │   └── 📁 2026
+    │   │       ├── 📁 01_Janeiro
+    │   │       ├── 📁 02_Fevereiro
+    │   │       ├── 📁 03_Marca
+    │   │       ├── 📁 03_Marco
+    │   │       ├── 📁 04_Abril
+    │   │       ├── 📁 05_Maio
+    │   │       ├── 📁 06_Junho
+    │   │       ├── 📁 07_Julho
+    │   │       ├── 📁 08_Agosto
+    │   │       ├── 📁 09_Setembro
+    │   │       ├── 📁 10_Outubro
+    │   │       ├── 📁 11_Novembro
+    │   │       └── 📁 12_Dezembro
+    │   ├── 📁 AVISO_PREVIO - Copia
+    │   │   ├── 📁 2024
+    │   │   │   ├── 📁 01_Janeiro
+    │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   ├── 📁 03_Marco
+    │   │   │   ├── 📁 04_Abril
+    │   │   │   ├── 📁 05_Maio
+    │   │   │   ├── 📁 06_Junho
+    │   │   │   ├── 📁 07_Julho
+    │   │   │   ├── 📁 08_Agosto
+    │   │   │   ├── 📁 09_Setembro
+    │   │   │   ├── 📁 10_Outubro
+    │   │   │   ├── 📁 11_Novembro
+    │   │   │   └── 📁 12_Dezembro
+    │   │   ├── 📁 2025
+    │   │   │   ├── 📁 01_Janeiro
+    │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   ├── 📁 03_Marco
+    │   │   │   ├── 📁 04_Abril
+    │   │   │   ├── 📁 05_Maio
+    │   │   │   ├── 📁 06_Junho
+    │   │   │   ├── 📁 07_Julho
+    │   │   │   ├── 📁 08_Agosto
+    │   │   │   ├── 📁 09_Setembro
+    │   │   │   ├── 📁 10_Outubro
+    │   │   │   ├── 📁 11_Novembro
+    │   │   │   └── 📁 12_Dezembro
+    │   │   └── 📁 2026
+    │   │       ├── 📁 01_Janeiro
+    │   │       ├── 📁 02_Fevereiro
+    │   │       ├── 📁 03_Marco
+    │   │       ├── 📁 04_Abril
+    │   │       ├── 📁 05_Maio
+    │   │       ├── 📁 06_Junho
+    │   │       ├── 📁 07_Julho
+    │   │       ├── 📁 08_Agosto
+    │   │       ├── 📁 09_Setembro
+    │   │       ├── 📁 10_Outubro
+    │   │       ├── 📁 11_Novembro
+    │   │       └── 📁 12_Dezembro
+    │   ├── 📁 FAZENDA MATA SECA
+    │   │   ├── 📁 AVISO_PREVIO
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       └── 📁 12_Dezembro
+    │   │   ├── 📁 FGTS
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       └── 📁 12_Dezembro
+    │   │   ├── 📁 FICHAS_EMPREGADOS
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       │   ├── 📄 Ficha de EmpregadoGISLAINE.pdf
+    │   │   │       │   └── 📄 Ficha de EmpregadoJOSSIKLEI.pdf
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       └── 📁 12_Dezembro
+    │   │   ├── 📁 INSS
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       └── 📁 12_Dezembro
+    │   │   ├── 📁 PEDIDO_REGISTRO
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       └── 📁 12_Dezembro
+    │   │   ├── 📁 RECIBO_FERIAS
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   ├── 📁 12_Dezembro
+    │   │   │   │   └── 📁 13_Salario
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   ├── 📁 12_Dezembro
+    │   │   │   │   └── 📁 13_Salario
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       ├── 📁 12_Dezembro
+    │   │   │       └── 📁 13_Salario
+    │   │   ├── 📁 RECIBO_FOLHA
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 01-2024.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 02-2024.pdf
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 03-2024.pdf
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 04-2024.pdf
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 05-2024.pdf
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 06-2024.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 07-2024.pdf
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   │   └── 📄 Recibo de Pagamento EDERSON.pdf
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 08-2024.pdf
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 09-2024.pdf
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 10-2024.pdf
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 11-2024.pdf
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 13º INTEGRAL 2024.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 1ª PARC 13º 2024.pdf
+    │   │   │   │   ├── 📁 12_Dezembro
+    │   │   │   │   └── 📁 13_Salario
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 01-2025.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 12-2024.pdf
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 02-2025.pdf
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 03-2025.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 04-2025.pdf
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   │   └── 📄 Recibo de Pagamento 05-2025.pdf
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   │   └── 📄 Recibo de Pagamento07-2025.pdf
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   │   └── 📄 Recibo de Pagamento08-2025.pdf
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   │   └── 📄 GuiaPagamento09-2025_63922258115_021020250948572394.pdf
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   │   ├── 📄 fgts 10-2025.pdf
+    │   │   │   │   │   ├── 📄 FGTS 11-2025.pdf
+    │   │   │   │   │   ├── 📄 GuiaPagamento10-2025_63922258115_041120251539127899.pdf
+    │   │   │   │   │   ├── 📄 GuiaPagamento11-2025_63922258115_281120250834066916.pdf
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 1° 13° 2025 .pdf
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento10-2025.pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento11-2025.pdf
+    │   │   │   │   ├── 📁 12_Dezembro
+    │   │   │   │   │   ├── 📄 FGTS 13° 2025.pdf
+    │   │   │   │   │   ├── 📄 GuiaPagamento13° 2025_63922258115_021220251743055651.pdf
+    │   │   │   │   │   ├── 📄 Recibo de Pagamento 2° parc 13° 2025 .pdf
+    │   │   │   │   │   └── 📄 Recibo de Pagamento2° PARCELA 13° 2025.pdf
+    │   │   │   │   └── 📁 13_Salario
+    │   │   │   └── 📁 2026
+    │   │   │       ├── 📁 01_Janeiro
+    │   │   │       │   ├── 📄 FGTS 12-2025.pdf
+    │   │   │       │   ├── 📄 GuiaPagamento12-2025_63922258115_060120261146582612.pdf
+    │   │   │       │   ├── 📄 Recibo de Pagamento01-2026-.pdf
+    │   │   │       │   └── 📄 Recibo de Pagamento01-2026.pdf
+    │   │   │       ├── 📁 02_Fevereiro
+    │   │   │       ├── 📁 03_Marco
+    │   │   │       ├── 📁 04_Abril
+    │   │   │       ├── 📁 05_Maio
+    │   │   │       ├── 📁 06_Junho
+    │   │   │       ├── 📁 07_Julho
+    │   │   │       ├── 📁 08_Agosto
+    │   │   │       ├── 📁 09_Setembro
+    │   │   │       ├── 📁 10_Outubro
+    │   │   │       ├── 📁 11_Novembro
+    │   │   │       ├── 📁 12_Dezembro
+    │   │   │       └── 📁 13_Salario
+    │   │   └── 📁 RECIBO_RESCISAO
+    │   │       ├── 📁 2024
+    │   │       │   ├── 📁 01_Janeiro
+    │   │       │   ├── 📁 02_Fevereiro
+    │   │       │   ├── 📁 03_Marco
+    │   │       │   ├── 📁 04_Abril
+    │   │       │   ├── 📁 05_Maio
+    │   │       │   ├── 📁 06_Junho
+    │   │       │   ├── 📁 07_Julho
+    │   │       │   ├── 📁 08_Agosto
+    │   │       │   ├── 📁 09_Setembro
+    │   │       │   ├── 📁 10_Outubro
+    │   │       │   ├── 📁 11_Novembro
+    │   │       │   └── 📁 12_Dezembro
+    │   │       ├── 📁 2025
+    │   │       │   ├── 📁 01_Janeiro
+    │   │       │   ├── 📁 02_Fevereiro
+    │   │       │   ├── 📁 03_Marco
+    │   │       │   ├── 📁 04_Abril
+    │   │       │   ├── 📁 05_Maio
+    │   │       │   ├── 📁 06_Junho
+    │   │       │   ├── 📁 07_Julho
+    │   │       │   ├── 📁 08_Agosto
+    │   │       │   ├── 📁 09_Setembro
+    │   │       │   ├── 📁 10_Outubro
+    │   │       │   ├── 📁 11_Novembro
+    │   │       │   └── 📁 12_Dezembro
+    │   │       └── 📁 2026
+    │   │           ├── 📁 01_Janeiro
+    │   │           ├── 📁 02_Fevereiro
+    │   │           ├── 📁 03_Marco
+    │   │           ├── 📁 04_Abril
+    │   │           ├── 📁 05_Maio
+    │   │           ├── 📁 06_Junho
+    │   │           ├── 📁 07_Julho
+    │   │           ├── 📁 08_Agosto
+    │   │           ├── 📁 09_Setembro
+    │   │           ├── 📁 10_Outubro
+    │   │           ├── 📁 11_Novembro
+    │   │           └── 📁 12_Dezembro
+    │   ├── 📁 FAZENDA SANTO EXPEDITO
+    │   │   ├── 📁 AVISO_PREVIO
+    │   │   │   ├── 📁 2024
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro
+    │   │   │   │   ├── 📁 03_Marco
+    │   │   │   │   ├── 📁 04_Abril
+    │   │   │   │   ├── 📁 05_Maio
+    │   │   │   │   ├── 📁 06_Junho
+    │   │   │   │   ├── 📁 07_Julho
+    │   │   │   │   ├── 📁 08_Agosto
+    │   │   │   │   ├── 📁 09_Setembro
+    │   │   │   │   ├── 📁 10_Outubro
+    │   │   │   │   ├── 📁 11_Novembro
+    │   │   │   │   └── 📁 12_Dezembro
+    │   │   │   ├── 📁 2025
+    │   │   │   │   ├── 📁 01_Janeiro
+    │   │   │   │   ├── 📁 02_Fevereiro

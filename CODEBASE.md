@@ -92,7 +92,8 @@ app/onboarding/page.tsx              ← Onboarding novos clientes
 | `lib/utils/drive-automation.ts` | Google Drive | Maestro, clientes |
 | `lib/utils/evolution-api.ts` | WhatsApp API | Automações, atendimento |
 | `lib/utils/email-service.ts` | Email | Notificações |
-| `lib/utils/ai-service.ts` | IA/OpenAI | Classificação fiscal |
+| `lib/utils/gemini-service.ts` | ⭐ Gemini AI SDK novo (@google/genai) | Brain Maestro, classificação fiscal |
+| `lib/utils/ai-service.ts` | Re-exporta gemini-service.ts (compatibilidade retroativa) | Código legado |
 | `lib/utils/accounting-intelligence.ts` | Inteligência contábil | Auditoria |
 | `lib/vault.ts` | Gerenciamento de segredos | Configurações |
 | `lib/services/enrichment-service.ts` | Enriquecimento de dados | Cadastro de clientes |

@@ -1,16 +1,20 @@
 # Antigravity Kit Architecture
 
 > Comprehensive AI Agent Capability Expansion Toolkit
+> **Stack do Projeto:** Next.js 14 • Supabase • Vercel • N8N • Google Drive • WhatsApp
+
+> 📖 **Ver também:** [RECOMENDACOES.md](RECOMENDACOES.md) — guia de skills, agents e workflows priorizados para este projeto.
 
 ---
 
 ## 📋 Overview
 
-Antigravity Kit is a modular system consisting of:
+Antigravity Kit é um sistema modular composto por:
 
-- **19 Specialist Agents** - Role-based AI personas
-- **36 Skills** - Domain-specific knowledge modules
-- **11 Workflows** - Slash command procedures
+- **19 Specialist Agents** - Personas IA especializadas por domínio
+- **72 Skills** - Módulos de conhecimento (inclui `gemini-api-dev` do google-gemini/gemini-skills)
+- **13 Workflows** - Procedimentos de slash command
+- **4 Rules** - Regras globais + específicas do projeto (LGPD, integrações)
 
 ---
 
@@ -18,12 +22,13 @@ Antigravity Kit is a modular system consisting of:
 
 ```plaintext
 .agent/
-├── ARCHITECTURE.md          # This file
-├── agents/                  # 19 Specialist Agents
-├── skills/                  # 36 Skills
-├── workflows/               # 11 Slash Commands
-├── rules/                   # Global Rules
-└── scripts/                 # Master Validation Scripts
+├── ARCHITECTURE.md          # Este arquivo
+├── RECOMENDACOES.md         # 🆕 Guia de prioridades para o projeto
+├── agents/                  # 19 Agentes especializados
+├── skills/                  # 72 Skills (incluindo gemini-api-dev)
+├── workflows/               # 13 Workflows (inclui /migrate)
+├── rules/                   # 4 Rules (2 globais + 2 específicas do projeto)
+└── scripts/                 # Scripts de validação master
 ```
 
 ---
@@ -262,15 +267,16 @@ For details, see [scripts/README.md](scripts/README.md)
 
 ---
 
-## 📊 Statistics
+## 📊 Estatísticas do Projeto
 
-| Metric | Value |
-| ------ | ----- |
-| **Total Agents** | 19 |
-| **Total Skills** | 36 |
-| **Total Workflows** | 11 |
-| **Total Scripts** | 2 (master) + 18 (skill-level) |
-| **Coverage** | ~90% web/mobile development |
+| Métrica | Valor | Notas |
+| ------- | ----- | ----- |
+| **Total Agents** | 19 | Todos ativos |
+| **Total Skills** | 72 | Inclui gemini-api-dev (google-gemini/gemini-skills) |
+| **Total Workflows** | 13 | Inclui /migrate para Supabase |
+| **Total Rules** | 4 | 2 globais + LGPD + Integrações |
+| **Total Scripts** | 2 (master) + 18 (skill-level) | checklist.py, verify_all.py |
+| **Cobertura** | ~95% web/mobile + AI | Next.js, Supabase, N8N, Gemini |
 
 ---
 

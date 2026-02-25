@@ -4,9 +4,11 @@ import { google } from 'googleapis';
  * Drive Automation - Auto-criação de estrutura de pastas para clientes
  * Cria a árvore completa de pastas padrão do escritório Brandão Contabilidade.
  * 
+ * ⚠️ PROTEÇÃO ANTI-DUPLICATA: Verifica se a pasta já existe ANTES de criar.
+ * Causa raiz de duplicatas: chamar esta função múltiplas vezes sem salvar drive_folder_id.
+ * 
+ * ID da pasta raiz CRM: 1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP
  * Estrutura baseada nos 76 clientes existentes em C:\Brandao_Contabilidade.
- * PJ (CNPJ): Estrutura completa com ALVARAS
- * PF (CPF): Estrutura base sem ALVARAS
  */
 
 // --- Definição de tipos ---
@@ -38,71 +40,75 @@ const ANO_ATUAL: FolderDef = {
     children: [...MESES]
 };
 
-// --- Subpastas de RH (dentro de 02 - RH) ---
-// Algumas têm Ano/Mês, outras são flat
-const RH_SUBFOLDERS: FolderDef[] = [
-    { name: 'AVISO_PREVIO' },
-    { name: 'FGTS', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
-    { name: 'FICHAS_EMPREGADOS' },
-    { name: 'INSS', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
-    { name: 'PEDIDO_REGISTRO' },
-    { name: 'RECIBO_FERIAS', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
-    { name: 'RECIBO_FOLHA', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
-    { name: 'RECIBO_RESCISAO', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
-];
-
-// --- Estrutura BASE para TODOS os clientes ---
-const BASE_FOLDERS: FolderDef[] = [
-    { name: '01 - CND (Certidões Negativas)' },
-    { name: '02 - PENDÊNCIAS FISCAIS (Federal, Estadual, Municipal)' },
-    { name: '03 - DOCUMENTOS PESSOAIS' },
-    { name: '04 - CERTIFICADO DIGITAL' },
-    { name: '05 - DOCUMENTOS TERRA' },
-    { name: '06 - IRPF' },
-    { name: '07 - JUNTA COMERCIAL' },
-    { name: '08 - FATURAMENTO' },
-    { name: '09 - CAEPF' },
+// --- Estrutura BASE PJ (Empresas Ouro) ---
+const PJ_FOLDERS: FolderDef[] = [
     {
-        name: '10 - RH - ESCRITA - CONTABILIDADE',
+        name: '01_Societario_Legal',
         children: [
-            {
-                name: '01 - FISCAL',
-                children: [{ ...ANO_ATUAL, children: [...MESES] }]
-            },
-            {
-                name: '02 - RH',
-                children: RH_SUBFOLDERS
-            },
-            {
-                name: '03 - IMPOSTOS E GUIAS',
-                children: [{ ...ANO_ATUAL, children: [...MESES] }]
-            },
+            { name: 'Alvaras' },
+            { name: 'Certidoes_Negativas' },
+            { name: 'Certificado_Digital' },
+            { name: 'Contratos_e_Alteracoes' }
         ]
     },
     {
-        name: 'GERAL',
+        name: '02_Fiscal_Tributos',
         children: [
-            { name: 'AVISO_PREVIO' },
-            { name: 'FGTS' },
-            { name: 'FICHAS_EMPREGADOS' },
-            { name: 'INSS' },
-            { name: 'PEDIDO_REGISTRO' },
-            { name: 'RECIBO_FERIAS' },
-            { name: 'RECIBO_FOLHA' },
-            { name: 'RECIBO_RESCISAO' },
+            { name: 'Declaracoes_Fiscais_DCTF_Etc' },
+            { name: 'Impostos_e_Guias', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
+            { name: 'Notas_Fiscais_XML' }
+        ]
+    },
+    {
+        name: '03_Contabil_Financeiro',
+        children: [
+            { name: 'Balancetes_DRE' },
+            { name: 'Extratos_Bancarios', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
+            { name: 'Recibos_Faturamento' }
+        ]
+    },
+    {
+        name: '04_Folha_RH',
+        children: [
+            { name: 'Ferias_Rescisoes' },
+            { name: 'Guias_INSS_FGTS', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
+            { name: 'Recibos_Folha_Pagamento', children: [{ ...ANO_ATUAL, children: [...MESES] }] }
         ]
     }
 ];
 
-// --- Pastas adicionais somente para PJ (CNPJ) ---
-const PJ_EXTRA_FOLDERS: FolderDef[] = [
+// --- Estrutura BASE PF (Produtor Rural / Especiales) ---
+const PF_FOLDERS: FolderDef[] = [
     {
-        name: '11 - ALVARAS',
+        name: '01_Pessoal_Legal',
         children: [
-            { name: 'BOMBEIRO' },
-            { name: 'SANITARIO' },
-            { name: 'MEIO AMBIENTE' },
-            { name: 'FUNCIONAMENTO' },
+            { name: 'Certidoes_Negativas' },
+            { name: 'Certificado_Digital' },
+            { name: 'Documentos_Pessoais' },
+            { name: 'IRPF_Declaracao' }
+        ]
+    },
+    {
+        name: '02_Produtor_Rural',
+        children: [
+            { name: 'CAEPF_NIRF_CCIR' },
+            { name: 'ITR_Guia_Anual' },
+            { name: 'Notas_Bovinos', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
+            { name: 'Vacina_Gado' }
+        ]
+    },
+    {
+        name: '03_Livro_Caixa_LCDPR',
+        children: [
+            { name: 'Despesas_Receitas_Fazenda', children: [{ ...ANO_ATUAL, children: [...MESES] }] }
+        ]
+    },
+    {
+        name: '04_Folha_RH',
+        children: [
+            { name: 'Ferias_Rescisoes' },
+            { name: 'Guias_INSS_FGTS', children: [{ ...ANO_ATUAL, children: [...MESES] }] },
+            { name: 'Recibos_Folha_Pagamento', children: [{ ...ANO_ATUAL, children: [...MESES] }] }
         ]
     }
 ];
@@ -128,13 +134,40 @@ function getDriveClient() {
 }
 
 /**
- * Cria uma pasta no Google Drive e retorna o ID
+ * Verifica se uma pasta já existe no Drive e retorna o ID, ou null
+ */
+async function findExistingFolder(
+    drive: any,
+    name: string,
+    parentId: string
+): Promise<string | null> {
+    const res = await drive.files.list({
+        q: `'${parentId}' in parents and name='${name}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        fields: 'files(id, name)',
+        pageSize: 1,
+    });
+    const files = res.data.files;
+    if (files && files.length > 0) {
+        return files[0].id!;
+    }
+    return null;
+}
+
+/**
+ * Cria uma pasta no Google Drive — verificando ANTES se já existe (anti-duplicata)
  */
 async function createDriveFolder(
     drive: any,
     name: string,
     parentId: string
 ): Promise<string> {
+    // PROTEÇÃO ANTI-DUPLICATA: verificar se já existe antes de criar
+    const existente = await findExistingFolder(drive, name, parentId);
+    if (existente) {
+        console.log(`[DRIVE] ℹ️ Pasta já existe (anti-duplicata): ${name} (${existente})`);
+        return existente;
+    }
+
     const res = await drive.files.create({
         requestBody: {
             name,
@@ -181,7 +214,9 @@ export async function createClientDriveStructure(
 ): Promise<string> {
     try {
         const drive = getDriveClient();
-        const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID;
+        // ID CORRETO da pasta raiz CRM (use sempre este)
+        const ROOT_FOLDER_ID = '1iioIcacOKwBKxM7Y0vgevT1YKwjTc1FP';
+        const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID || ROOT_FOLDER_ID;
 
         if (!rootFolderId) {
             throw new Error('GOOGLE_DRIVE_ROOT_FOLDER_ID não configurado no .env');
@@ -209,13 +244,14 @@ export async function createClientDriveStructure(
         const clientFolderId = await createDriveFolder(drive, folderName, rootFolderId);
         console.log(`[DRIVE] Pasta criada: ${folderName} (${clientFolderId})`);
 
-        // 4. Montar a lista de pastas (base + extras PJ)
-        const allFolders = [...BASE_FOLDERS];
+        // 4. Montar a lista de pastas exclusiva de PF ou PJ
+        let allFolders: FolderDef[] = [];
         if (isCNPJ(cnpjCpf)) {
-            allFolders.push(...PJ_EXTRA_FOLDERS);
-            console.log(`[DRIVE] Cliente PJ (CNPJ) → incluindo ALVARAS`);
+            allFolders = [...PJ_FOLDERS];
+            console.log(`[DRIVE] Cliente PJ (CNPJ) → Estrutura Empresarial Departamentalizada (Ouro)`);
         } else {
-            console.log(`[DRIVE] Cliente PF (CPF) → estrutura base`);
+            allFolders = [...PF_FOLDERS];
+            console.log(`[DRIVE] Cliente PF (CPF/Produtor Rural) → Estrutura Rural de Caepf/Livro Caixa`);
         }
 
         // 5. Criar toda a árvore de subpastas
