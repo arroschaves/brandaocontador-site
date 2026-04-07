@@ -85,18 +85,18 @@ export default function NoticiasPage() {
   const restantes = noticias.filter(n => !n.destaque);
 
   return (
-    <main className="min-h-screen bg-obsidian text-neutral-100 pt-24">
+    <main className="min-h-screen bg-background text-foreground pt-24">
       {/* Hero */}
-      <section className="py-16 border-b border-neutral-800">
+      <section className="py-16 border-b border-border">
         <div className="container-custom">
           <div className="flex items-center gap-4 mb-4">
-            <span className="w-12 h-[1px] bg-amber-electric"></span>
-            <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Central de Informações</span>
+            <span className="w-12 h-[1px] bg-primary"></span>
+            <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Central de Informações</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-4">
-            NOTÍCIAS <span className="text-amber-electric italic font-display">CONTÁBEIS</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
+            NOTÍCIAS <span className="text-primary italic font-display">CONTÁBEIS</span>
           </h1>
-          <p className="text-neutral-400 max-w-2xl font-sans text-lg">
+          <p className="text-muted-foreground max-w-2xl font-sans text-lg">
             Informações atualizadas sobre legislação, tributação, obrigações e mercado — combinando fontes oficiais com análise inteligente.
           </p>
 
@@ -113,17 +113,17 @@ export default function NoticiasPage() {
       </section>
 
       {/* Filtros */}
-      <section className="py-6 border-b border-neutral-800 bg-neutral-900/30 sticky top-24 z-40 backdrop-blur-sm">
+      <section className="py-6 border-b border-border bg-muted/20 sticky top-24 z-40 backdrop-blur-sm">
         <div className="container-custom">
           <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
-            <Filter className="w-4 h-4 text-neutral-600 shrink-0" />
+            <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
             {CATEGORIAS.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setFiltroAtivo(cat.id)}
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-all border ${filtroAtivo === cat.id
-                  ? 'bg-amber-electric text-obsidian border-amber-electric font-bold'
-                  : 'bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600'
+                  ? 'bg-primary text-primary-foreground border-primary font-bold'
+                  : 'bg-transparent text-muted-foreground border-border hover:border-neutral-600'
                   }`}
               >
                 <cat.icon className="w-3.5 h-3.5" />
@@ -139,8 +139,8 @@ export default function NoticiasPage() {
         <div className="container-custom">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <RefreshCw className="w-8 h-8 text-amber-electric animate-spin" />
-              <span className="text-xs font-mono text-neutral-600 uppercase tracking-widest">Carregando notícias...</span>
+              <RefreshCw className="w-8 h-8 text-primary animate-spin" />
+              <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Carregando notícias...</span>
             </div>
           ) : (
             <div className="space-y-8">
@@ -150,22 +150,22 @@ export default function NoticiasPage() {
                   href={destaque.link !== '#' ? destaque.link : undefined}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block group p-10 bg-gradient-to-br from-amber-electric/10 to-transparent border-2 border-amber-electric/30 hover:border-amber-electric/60 transition-all duration-500"
+                  className="block group p-10 bg-gradient-to-br from-amber-electric/10 to-transparent border-2 border-primary/30 hover:border-primary/60 transition-all duration-500"
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-2xl">{destaque.icone}</span>
-                    <span className="px-3 py-1 bg-amber-electric text-obsidian text-[10px] font-mono font-bold uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-primary text-primary-foreground text-[10px] font-mono font-bold uppercase tracking-widest">
                       Destaque
                     </span>
-                    <span className="text-[10px] font-mono text-neutral-600 uppercase">{destaque.data}</span>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{destaque.data}</span>
                   </div>
-                  <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-4 group-hover:text-amber-electric transition-colors">
+                  <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight mb-4 group-hover:text-primary transition-colors">
                     {destaque.titulo}
                   </h2>
-                  <p className="text-neutral-400 font-sans text-lg max-w-3xl leading-relaxed">
+                  <p className="text-muted-foreground font-sans text-lg max-w-3xl leading-relaxed">
                     {destaque.resumo}
                   </p>
-                  <div className="flex items-center gap-2 mt-6 text-xs font-mono text-neutral-600 uppercase">
+                  <div className="flex items-center gap-2 mt-6 text-xs font-mono text-muted-foreground uppercase">
                     Fonte: {destaque.fonte}
                     {destaque.link !== '#' && <ExternalLink className="w-3 h-3" />}
                   </div>
@@ -180,24 +180,24 @@ export default function NoticiasPage() {
                     href={noticia.link !== '#' ? noticia.link : undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group block p-6 border transition-all duration-300 hover:translate-y-[-2px] ${categoriaCores[noticia.categoria] || 'border-neutral-800 bg-neutral-900/40'
+                    className={`group block p-6 border transition-all duration-300 hover:translate-y-[-2px] ${categoriaCores[noticia.categoria] || 'border-border bg-muted/30'
                       }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xl">{noticia.icone}</span>
-                      <span className="text-[9px] font-mono text-neutral-600 uppercase">
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase">
                         {categoriaLabels[noticia.categoria] || noticia.categoria}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold uppercase tracking-tight mb-3 group-hover:text-amber-electric transition-colors leading-tight">
+                    <h3 className="text-lg font-bold uppercase tracking-tight mb-3 group-hover:text-primary transition-colors leading-tight">
                       {noticia.titulo}
                     </h3>
-                    <p className="text-sm text-neutral-500 font-sans leading-relaxed mb-4 line-clamp-3">
+                    <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-4 line-clamp-3">
                       {noticia.resumo}
                     </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-neutral-800/30">
-                      <span className="text-[9px] font-mono text-neutral-700 uppercase">{noticia.fonte}</span>
-                      <span className="text-[9px] font-mono text-neutral-700 uppercase">{noticia.data}</span>
+                    <div className="flex items-center justify-between pt-3 border-t border-border/30">
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase">{noticia.fonte}</span>
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase">{noticia.data}</span>
                     </div>
                   </a>
                 ))}
@@ -205,8 +205,8 @@ export default function NoticiasPage() {
 
               {noticias.length === 0 && !loading && (
                 <div className="text-center py-20">
-                  <span className="text-neutral-700 text-4xl">📭</span>
-                  <p className="text-neutral-600 font-mono text-sm mt-4 uppercase tracking-wider">Nenhuma notícia encontrada para esta categoria.</p>
+                  <span className="text-muted-foreground text-4xl">📭</span>
+                  <p className="text-muted-foreground font-mono text-sm mt-4 uppercase tracking-wider">Nenhuma notícia encontrada para esta categoria.</p>
                 </div>
               )}
             </div>

@@ -164,61 +164,61 @@ const regrasMSEspecificas = [
 
 export default function ReformaTributariaPage() {
   return (
-    <main className="min-h-screen bg-obsidian text-neutral-100 pt-24">
+    <main className="min-h-screen bg-background text-foreground pt-24">
       {/* Hero */}
-      <section className="py-20 border-b border-neutral-800 relative overflow-hidden">
+      <section className="py-20 border-b border-border relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-electric/5 via-transparent to-transparent pointer-events-none"></div>
         <div className="container-custom relative">
           <div className="flex items-center gap-4 mb-6">
-            <span className="w-12 h-[1px] bg-amber-electric"></span>
-            <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Atualizado 2026</span>
+            <span className="w-12 h-[1px] bg-primary"></span>
+            <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Atualizado 2026</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.8] mb-6">
-            REFORMA <span className="text-amber-electric italic font-display">TRIBUTÁRIA</span>
+          <h1 className="text-5xl md:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.8] mb-6">
+            REFORMA <span className="text-primary italic font-display">TRIBUTÁRIA</span>
           </h1>
-          <p className="text-xl text-neutral-400 max-w-3xl font-sans leading-relaxed mb-8">
+          <p className="text-xl text-muted-foreground max-w-3xl font-sans leading-relaxed mb-8">
             Guia completo da nova tributação brasileira: IBS, CBS e Imposto Seletivo.
-            Cronograma de transição, impactos por setor e regras específicas para <strong className="text-amber-electric">Mato Grosso do Sul</strong>.
+            Cronograma de transição, impactos por setor e regras específicas para <strong className="text-primary">Mato Grosso do Sul</strong>.
           </p>
           <div className="flex flex-wrap gap-3">
-            <span className="px-4 py-2 bg-amber-electric/10 border border-amber-electric/30 text-amber-electric text-xs font-mono uppercase tracking-wider">EC 132/2023</span>
-            <span className="px-4 py-2 bg-amber-electric/10 border border-amber-electric/30 text-amber-electric text-xs font-mono uppercase tracking-wider">LC 214/2025</span>
+            <span className="px-4 py-2 bg-primary/10 border border-primary/30 text-primary text-xs font-mono uppercase tracking-wider">EC 132/2023</span>
+            <span className="px-4 py-2 bg-primary/10 border border-primary/30 text-primary text-xs font-mono uppercase tracking-wider">LC 214/2025</span>
             <span className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono uppercase tracking-wider">Transição 2026–2033</span>
           </div>
         </div>
       </section>
 
       {/* Novos Impostos */}
-      <section className="py-16 border-b border-neutral-800">
+      <section className="py-16 border-b border-border">
         <div className="container-custom">
-          <h2 className="text-3xl font-black uppercase tracking-tight mb-4">
-            Os <span className="text-amber-electric">Novos Impostos</span>
+          <h2 className="text-3xl font-display font-bold uppercase tracking-tight mb-4">
+            Os <span className="text-primary">Novos Impostos</span>
           </h2>
-          <p className="text-neutral-400 font-sans mb-12 max-w-2xl">
+          <p className="text-muted-foreground font-sans mb-12 max-w-2xl">
             O sistema tributário brasileiro perde 5 impostos (PIS, Cofins, IPI, ICMS, ISS) e ganha 3 novos:
           </p>
 
           <div className="grid lg:grid-cols-3 gap-6">
             {novosImpostos.map((imposto, i) => (
-              <div key={i} className="p-8 bg-neutral-900/40 border border-neutral-800 hover:border-amber-electric/30 transition-all group">
+              <div key={i} className="p-8 bg-muted/30 border border-border hover:border-primary/30 transition-all group">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-obsidian border border-neutral-800 flex items-center justify-center text-amber-electric group-hover:bg-amber-electric group-hover:text-obsidian transition-all">
+                  <div className="w-12 h-12 bg-background border border-border flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
                     <imposto.icone className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-amber-electric">{imposto.sigla}</h3>
-                    <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-wider">{imposto.ambito}</span>
+                    <h3 className="text-2xl font-display font-bold text-primary">{imposto.sigla}</h3>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{imposto.ambito}</span>
                   </div>
                 </div>
                 <p className="text-sm font-bold text-neutral-300 mb-2 uppercase tracking-tight">{imposto.nome}</p>
-                <p className="text-sm text-neutral-500 font-sans leading-relaxed mb-4">{imposto.descricao}</p>
-                <div className="flex items-center gap-2 pt-4 border-t border-neutral-800/50">
-                  <Receipt className="w-3.5 h-3.5 text-amber-electric/60" />
-                  <span className="text-[10px] font-mono text-neutral-600">Substitui: {imposto.substitui}</span>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-4">{imposto.descricao}</p>
+                <div className="flex items-center gap-2 pt-4 border-t border-border/50">
+                  <Receipt className="w-3.5 h-3.5 text-primary/60" />
+                  <span className="text-[10px] font-mono text-muted-foreground">Substitui: {imposto.substitui}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <TrendingUp className="w-3.5 h-3.5 text-amber-electric/60" />
-                  <span className="text-[10px] font-mono text-amber-electric/60">{imposto.aliquotaRef}</span>
+                  <TrendingUp className="w-3.5 h-3.5 text-primary/60" />
+                  <span className="text-[10px] font-mono text-primary/60">{imposto.aliquotaRef}</span>
                 </div>
               </div>
             ))}
@@ -227,11 +227,11 @@ export default function ReformaTributariaPage() {
       </section>
 
       {/* Cronograma */}
-      <section className="py-16 border-b border-neutral-800">
+      <section className="py-16 border-b border-border">
         <div className="container-custom">
           <div className="flex items-center gap-3 mb-8">
-            <Calendar className="w-6 h-6 text-amber-electric" />
-            <h2 className="text-3xl font-black uppercase tracking-tight">Cronograma de Transição</h2>
+            <Calendar className="w-6 h-6 text-primary" />
+            <h2 className="text-3xl font-display font-bold uppercase tracking-tight">Cronograma de Transição</h2>
           </div>
 
           <div className="relative">
@@ -243,33 +243,33 @@ export default function ReformaTributariaPage() {
                 <div key={i} className="relative pl-16 pb-10 group">
                   {/* Marker */}
                   <div className={`absolute left-3 top-1 w-6 h-6 rounded-full flex items-center justify-center border-2 ${item.status === 'concluido' ? 'bg-emerald-500/20 border-emerald-500' :
-                      item.status === 'atual' ? 'bg-amber-electric border-amber-electric animate-pulse' :
-                        'bg-neutral-900 border-neutral-700'
+                      item.status === 'atual' ? 'bg-primary border-primary animate-pulse' :
+                        'bg-muted border-neutral-700'
                     }`}>
                     {item.status === 'concluido' && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
-                    {item.status === 'atual' && <Clock className="w-3 h-3 text-obsidian" />}
+                    {item.status === 'atual' && <Clock className="w-3 h-3 text-primary-foreground" />}
                   </div>
 
                   {/* Content */}
                   <div className={`p-6 border transition-all ${item.status === 'atual'
-                      ? 'bg-amber-electric/5 border-amber-electric/40'
+                      ? 'bg-primary/5 border-primary/40'
                       : item.status === 'concluido'
                         ? 'bg-emerald-500/5 border-emerald-500/20'
-                        : 'bg-neutral-900/40 border-neutral-800'
+                        : 'bg-muted/30 border-border'
                     }`}>
                     <div className="flex items-center gap-3 mb-2">
-                      <span className={`text-lg font-black font-mono ${item.status === 'atual' ? 'text-amber-electric' :
+                      <span className={`text-lg font-display font-bold font-mono ${item.status === 'atual' ? 'text-primary' :
                           item.status === 'concluido' ? 'text-emerald-400' :
-                            'text-neutral-600'
+                            'text-muted-foreground'
                         }`}>{item.ano}</span>
                       {item.status === 'atual' && (
-                        <span className="px-2 py-0.5 bg-amber-electric text-obsidian text-[9px] font-mono font-bold uppercase tracking-widest">
+                        <span className="px-2 py-0.5 bg-primary text-primary-foreground text-[9px] font-mono font-bold uppercase tracking-widest">
                           Ano Atual
                         </span>
                       )}
                     </div>
                     <h3 className="text-lg font-bold uppercase tracking-tight mb-2">{item.titulo}</h3>
-                    <p className="text-sm text-neutral-400 font-sans leading-relaxed">{item.descricao}</p>
+                    <p className="text-sm text-muted-foreground font-sans leading-relaxed">{item.descricao}</p>
                   </div>
                 </div>
               ))}
@@ -279,24 +279,24 @@ export default function ReformaTributariaPage() {
       </section>
 
       {/* Impactos por Setor */}
-      <section className="py-16 border-b border-neutral-800">
+      <section className="py-16 border-b border-border">
         <div className="container-custom">
           <div className="flex items-center gap-3 mb-4">
-            <Scale className="w-6 h-6 text-amber-electric" />
-            <h2 className="text-3xl font-black uppercase tracking-tight">Impactos por Setor</h2>
+            <Scale className="w-6 h-6 text-primary" />
+            <h2 className="text-3xl font-display font-bold uppercase tracking-tight">Impactos por Setor</h2>
           </div>
-          <p className="text-neutral-400 font-sans mb-12 max-w-2xl">
+          <p className="text-muted-foreground font-sans mb-12 max-w-2xl">
             Como a reforma afeta cada área de atuação — com foco em Mato Grosso do Sul.
           </p>
 
           <div className="space-y-8">
             {impactosMS.map((setor, i) => (
-              <div key={i} className="p-8 bg-neutral-900/40 border border-neutral-800">
+              <div key={i} className="p-8 bg-muted/30 border border-border">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-amber-electric flex items-center justify-center text-obsidian">
+                  <div className="w-12 h-12 bg-primary flex items-center justify-center text-primary-foreground">
                     <setor.icone className="w-6 h-6" />
                   </div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight">{setor.setor}</h3>
+                  <h3 className="text-2xl font-display font-bold uppercase tracking-tight">{setor.setor}</h3>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
@@ -319,7 +319,7 @@ export default function ReformaTributariaPage() {
                     </h4>
                     <ul className="space-y-3">
                       {setor.atencao.map((a, j) => (
-                        <li key={j} className="flex items-start gap-3 text-sm text-neutral-400 font-sans">
+                        <li key={j} className="flex items-start gap-3 text-sm text-muted-foreground font-sans">
                           <XCircle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-1" />
                           {a}
                         </li>
@@ -334,27 +334,27 @@ export default function ReformaTributariaPage() {
       </section>
 
       {/* Regras Específicas MS */}
-      <section className="py-16 border-b border-neutral-800">
+      <section className="py-16 border-b border-border">
         <div className="container-custom">
           <div className="flex items-center gap-3 mb-4">
-            <FileText className="w-6 h-6 text-amber-electric" />
-            <h2 className="text-3xl font-black uppercase tracking-tight">
-              Regras Específicas — <span className="text-amber-electric">Mato Grosso do Sul</span>
+            <FileText className="w-6 h-6 text-primary" />
+            <h2 className="text-3xl font-display font-bold uppercase tracking-tight">
+              Regras Específicas — <span className="text-primary">Mato Grosso do Sul</span>
             </h2>
           </div>
-          <p className="text-neutral-400 font-sans mb-12 max-w-2xl">
+          <p className="text-muted-foreground font-sans mb-12 max-w-2xl">
             Como a transição afeta especificamente as empresas sediadas em MS.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {regrasMSEspecificas.map((regra, i) => (
-              <div key={i} className="p-6 bg-neutral-900/40 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+              <div key={i} className="p-6 bg-muted/30 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
                 <div className="flex items-center gap-2 mb-1">
                   <Info className="w-4 h-4 text-cyan-400" />
                   <span className="text-[9px] font-mono text-cyan-400/60 uppercase tracking-widest">MS</span>
                 </div>
-                <h3 className="text-base font-bold uppercase tracking-tight mb-3 text-neutral-100">{regra.titulo}</h3>
-                <p className="text-sm text-neutral-500 font-sans leading-relaxed">{regra.descricao}</p>
+                <h3 className="text-base font-bold uppercase tracking-tight mb-3 text-foreground">{regra.titulo}</h3>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed">{regra.descricao}</p>
               </div>
             ))}
           </div>
@@ -364,17 +364,17 @@ export default function ReformaTributariaPage() {
       {/* CTA */}
       <section className="py-20">
         <div className="container-custom text-center">
-          <h2 className="text-3xl font-black uppercase tracking-tight mb-4">
-            Sua empresa está preparada para <span className="text-amber-electric italic font-display">2026</span>?
+          <h2 className="text-3xl font-display font-bold uppercase tracking-tight mb-4">
+            Sua empresa está preparada para <span className="text-primary italic font-display">2026</span>?
           </h2>
-          <p className="text-neutral-400 font-sans mb-10 max-w-2xl mx-auto">
+          <p className="text-muted-foreground font-sans mb-10 max-w-2xl mx-auto">
             A transição exige planejamento tributário antecipado. Nossa equipe está pronta para orientar sua empresa nesta nova era fiscal.
           </p>
           <a
             href="https://wa.me/5567996011356?text=Olá! Gostaria de saber mais sobre como a Reforma Tributária impacta minha empresa."
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-brutal inline-flex items-center gap-3 !px-12 !py-5 text-lg"
+            className="btn-primary inline-flex items-center gap-3 !px-12 !py-5 text-lg"
           >
             <Scale className="w-6 h-6" />
             CONSULTAR ESPECIALISTA

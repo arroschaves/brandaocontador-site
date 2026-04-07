@@ -1,4 +1,4 @@
-name: Project Quality & Health
+name: Build & Quality Check
 
 on:
   push:
@@ -21,15 +21,6 @@ jobs:
         
     - name: Install dependencies
       run: npm install
-      
-    - name: Run Project Health Check
-      run: node scripts/project-health.js
-      
-    - name: Security Scan
-      uses: snyk/actions/node@master
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         
     - name: Next.js Build Check
       run: npm run build

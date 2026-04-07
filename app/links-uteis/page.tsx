@@ -290,28 +290,28 @@ const tipoIcones = {
 
 export default function LinksUteisPage() {
     return (
-        <main className="min-h-screen bg-obsidian text-neutral-100 pt-24">
+        <main className="min-h-screen bg-background text-foreground pt-24">
             {/* Hero */}
-            <section className="py-16 border-b border-neutral-800">
+            <section className="py-16 border-b border-border">
                 <div className="container-custom">
                     <div className="flex items-center gap-4 mb-4">
-                        <span className="w-12 h-[1px] bg-amber-electric"></span>
-                        <span className="text-xs font-mono text-amber-electric tracking-[0.4em] uppercase">Acesso Rápido</span>
+                        <span className="w-12 h-[1px] bg-primary"></span>
+                        <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Acesso Rápido</span>
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-4">
-                        LINKS ÚTEIS E <span className="text-amber-electric italic font-display">CERTIDÕES</span>
+                    <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
+                        LINKS ÚTEIS E <span className="text-primary italic font-display">CERTIDÕES</span>
                     </h1>
-                    <p className="text-neutral-400 max-w-3xl font-sans text-lg">
+                    <p className="text-muted-foreground max-w-3xl font-sans text-lg">
                         Todos os portais governamentais, certidões negativas e ferramentas de consulta que sua empresa precisa — em um só lugar.
                     </p>
 
                     {/* Alerta importante */}
-                    <div className="mt-8 p-4 bg-amber-electric/5 border border-amber-electric/20 flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-amber-electric shrink-0 mt-0.5" />
-                        <p className="text-xs text-neutral-400 font-sans">
-                            <strong className="text-amber-electric">Importante:</strong> Alguns portais exigem certificado digital (e-CNPJ/e-CPF) ou senha Gov.br nível prata/ouro.
+                    <div className="mt-8 p-4 bg-primary/5 border border-primary/20 flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <p className="text-xs text-muted-foreground font-sans">
+                            <strong className="text-primary">Importante:</strong> Alguns portais exigem certificado digital (e-CNPJ/e-CPF) ou senha Gov.br nível prata/ouro.
                             Em caso de dúvida, entre em contato conosco via{' '}
-                            <a href="https://wa.me/5567996011356" className="text-amber-electric hover:underline">WhatsApp</a>.
+                            <a href="https://wa.me/5567996011356" className="text-primary hover:underline">WhatsApp</a>.
                         </p>
                     </div>
                 </div>
@@ -324,11 +324,11 @@ export default function LinksUteisPage() {
                         <div key={gi}>
                             {/* Cabeçalho do grupo */}
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="w-10 h-10 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-amber-electric">
+                                <div className="w-10 h-10 bg-muted border border-border flex items-center justify-center text-primary">
                                     <grupo.icone className="w-5 h-5" />
                                 </div>
-                                <h2 className="text-2xl font-black uppercase tracking-tight">{grupo.titulo}</h2>
-                                <span className="text-[10px] font-mono text-neutral-700 uppercase tracking-wider">{grupo.links.length} links</span>
+                                <h2 className="text-2xl font-display font-bold uppercase tracking-tight">{grupo.titulo}</h2>
+                                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{grupo.links.length} links</span>
                             </div>
 
                             {/* Grid de Links */}
@@ -341,19 +341,19 @@ export default function LinksUteisPage() {
                                             href={link.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className={`group flex items-start gap-5 p-6 bg-neutral-900/40 border transition-all duration-300 hover:translate-y-[-1px] hover:shadow-lg ${grupo.cor}`}
+                                            className={`group flex items-start gap-5 p-6 bg-muted/30 border transition-all duration-300 hover:translate-y-[-1px] hover:shadow-lg ${grupo.cor}`}
                                         >
                                             <div className="shrink-0 mt-1">
                                                 <tipoInfo.icon className={`w-5 h-5 ${tipoInfo.cor}`} />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h3 className="font-bold text-neutral-100 group-hover:text-amber-electric transition-colors text-sm leading-tight">
+                                                    <h3 className="font-bold text-foreground group-hover:text-primary transition-colors text-sm leading-tight">
                                                         {link.nome}
                                                     </h3>
-                                                    <ExternalLink className="w-3 h-3 text-neutral-700 group-hover:text-amber-electric transition-colors shrink-0" />
+                                                    <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
                                                 </div>
-                                                <p className="text-xs text-neutral-500 font-sans leading-relaxed">
+                                                <p className="text-xs text-muted-foreground font-sans leading-relaxed">
                                                     {link.descricao}
                                                 </p>
                                                 <span className={`inline-block mt-2 text-[9px] font-mono uppercase tracking-widest ${tipoInfo.cor}`}>
@@ -370,16 +370,16 @@ export default function LinksUteisPage() {
             </section>
 
             {/* CTA */}
-            <section className="py-16 border-t border-neutral-800">
+            <section className="py-16 border-t border-border">
                 <div className="container-custom text-center">
-                    <p className="text-neutral-600 font-mono text-xs uppercase tracking-wider mb-6">
+                    <p className="text-muted-foreground font-mono text-xs uppercase tracking-wider mb-6">
                         Precisa de ajuda para emitir certidões ou acessar portais?
                     </p>
                     <a
                         href="https://wa.me/5567996011356"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="btn-brutal inline-flex items-center gap-3 !px-12 !py-5"
+                        className="btn-primary inline-flex items-center gap-3 !px-12 !py-5"
                     >
                         <CreditCard className="w-5 h-5" />
                         SOLICITAR SUPORTE
