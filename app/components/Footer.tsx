@@ -1,60 +1,142 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShieldCheck, Instagram, Facebook } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, ArrowUpRight } from 'lucide-react';
 
+/**
+ * Footer moderno e profissional com informações de contato,
+ * links rápidos e identidade visual premium.
+ */
 export default function Footer() {
-    const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear();
 
-    return (
-        <footer className="bg-obsidian border-t border-neutral-800 pt-20 pb-10">
-            <div className="container-custom">
-                <div className="grid md:grid-cols-12 gap-16 mb-20">
-                    <div className="md:col-span-5">
-                        <Link href="/" className="inline-block mb-8">
-                            <Image src="/logo-full.jpg" alt="Brandão Logo" width={180} height={48} className="h-12 w-auto contrast-125 brightness-110 group-hover:scale-105 transition-all" />
-                        </Link>
-                        <p className="text-neutral-500 font-sans text-sm leading-relaxed max-w-sm mb-8 uppercase tracking-tight">
-                            Desde 1993, transformando a complexidade contábil em vantagem estratégica para o agronegócio e empresas em Mato Grosso do Sul.
-                        </p>
-                        <div className="flex gap-6">
-                            <a href="https://www.instagram.com/bcbrandaocontabilidade/" target="_blank" rel="noopener noreferrer" aria-label="Instagram da Brandão Contabilidade" className="text-neutral-600 hover:text-amber-electric transition-colors"><Instagram size={20} /></a>
-                            <a href="https://www.facebook.com/profile.php?id=61583096446223" target="_blank" rel="noopener noreferrer" aria-label="Facebook da Brandão Contabilidade" className="text-neutral-600 hover:text-amber-electric transition-colors"><Facebook size={20} /></a>
-                        </div>
-                    </div>
-
-                    <div className="md:col-span-3">
-                        <h4 className="text-xs font-mono text-amber-electric uppercase tracking-widest mb-8">Navegação</h4>
-                        <ul className="space-y-4">
-                            <li><Link href="/" className="text-neutral-400 hover:text-neutral-50 text-sm font-sans uppercase transition-colors">Início</Link></li>
-                            <li><Link href="/servicos" className="text-neutral-400 hover:text-neutral-50 text-sm font-sans uppercase transition-colors">Serviços</Link></li>
-                            <li><Link href="/noticias-contabeis" className="text-neutral-400 hover:text-neutral-50 text-sm font-sans uppercase transition-colors">Notícias</Link></li>
-                            <li><Link href="/contato" className="text-neutral-400 hover:text-neutral-50 text-sm font-sans uppercase transition-colors">Contato</Link></li>
-                        </ul>
-                    </div>
-
-                    <div className="md:col-span-4">
-                        <h4 className="text-xs font-mono text-amber-electric uppercase tracking-widest mb-8">Segurança & Conformidade</h4>
-                        <div className="bg-neutral-900/40 border border-neutral-800 p-6">
-                            <div className="flex items-center gap-4 mb-4 text-emerald-500/80">
-                                <ShieldCheck size={28} />
-                                <span className="text-[10px] font-mono leading-tight tracking-widest uppercase">Conexão Criptografada <br /> Protocolo SSL Ativo</span>
-                            </div>
-                            <p className="text-[10px] text-neutral-600 font-mono leading-relaxed uppercase">
-                                Seus dados estão protegidos por criptografia de ponta a ponta em conformidade com a LGPD.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex flex-col md:flex-row justify-between items-center pt-10 border-t border-neutral-900 gap-6">
-                    <p className="text-[10px] font-mono text-neutral-700 uppercase tracking-widest">
-                        © {currentYear} BRANDÃO CONTABILIDADE. TODOS OS DIREITOS RESERVADOS.
-                    </p>
-                    <p className="text-[10px] font-mono text-neutral-800 uppercase tracking-widest">
-                        SDR // MS // 20.9391° S, 54.9658° W
-                    </p>
-                </div>
+  return (
+    <footer className="bg-card border-t border-border">
+      {/* Conteúdo principal */}
+      <div className="container-custom py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Coluna 1: Marca */}
+          <div className="space-y-5">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-primary/20">
+                <Image src="/logo-icon.jpg" alt="Logo" fill className="object-cover" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-foreground">Brandão</p>
+                <p className="text-[10px] font-semibold text-primary tracking-wider uppercase">Contabilidade</p>
+              </div>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Mais de 30 anos transformando números em decisões estratégicas para empresas e produtores rurais em Sidrolândia e região.
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs text-muted-foreground font-medium">Online — Respondemos em minutos</span>
             </div>
-        </footer>
-    );
+          </div>
+
+          {/* Coluna 2: Serviços */}
+          <div className="space-y-5">
+            <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Serviços</h3>
+            <nav className="flex flex-col gap-2.5">
+              {[
+                'Contabilidade Empresarial',
+                'Departamento Pessoal',
+                'Legalização de Empresas',
+                'Agronegócio & Rural',
+                'Planejamento Tributário',
+                'Certificado Digital',
+              ].map((item) => (
+                <Link key={item} href="/servicos" className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 group">
+                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                  {item}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Coluna 3: Links */}
+          <div className="space-y-5">
+            <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Links Rápidos</h3>
+            <nav className="flex flex-col gap-2.5">
+              {[
+                { name: 'Portal do Cliente', href: '/login' },
+                { name: 'Notícias Contábeis', href: '/noticias-contabeis' },
+                { name: 'Links Úteis', href: '/links-uteis' },
+                { name: 'Reforma Tributária', href: '/reforma-tributaria' },
+                { name: 'Política de Privacidade', href: '#' },
+              ].map((link) => (
+                <Link key={link.name} href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 group">
+                  <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Coluna 4: Contato */}
+          <div className="space-y-5">
+            <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Contato</h3>
+            <div className="space-y-4">
+              <a href="tel:+556733411356" className="flex items-start gap-3 group">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">(67) 3341-1356</p>
+                  <p className="text-xs text-muted-foreground">Telefone fixo</p>
+                </div>
+              </a>
+              <a href="https://wa.me/5567996011356" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">(67) 99601-1356</p>
+                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                </div>
+              </a>
+              <a href="mailto:contato@brandaocontador.com.br" className="flex items-start gap-3 group">
+                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground break-all">contato@brandaocontador.com.br</p>
+                </div>
+              </a>
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground">R. Cmte. Salgado, 647</p>
+                  <p className="text-xs text-muted-foreground">Centro, Sidrolândia - MS</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-purple-500/10 text-purple-600">
+                  <Clock className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-sm text-foreground">Seg - Sex: 7h30 às 17h30</p>
+                  <p className="text-xs text-muted-foreground">Sáb: 7h30 às 11h30</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Rodapé legal */}
+      <div className="border-t border-border">
+        <div className="container-custom py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-muted-foreground">
+            © {currentYear} Brandão Contabilidade. Todos os direitos reservados. CRC/MS 003218
+          </p>
+          <p className="text-[10px] text-muted-foreground/60 font-mono">
+            Ecossistema Maestro v4.0
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
 }

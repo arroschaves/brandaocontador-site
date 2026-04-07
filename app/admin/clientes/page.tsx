@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import {
     Search,
     Plus,
@@ -37,7 +37,9 @@ import EnrichmentProgressModal from './components/EnrichmentProgressModal';
 export const dynamic = 'force-dynamic';
 
 function ClientesContent() {
-    const supabase = createClient();
+    // useRef garante uma única instância do cliente por montagem do componente
+    const supabaseRef = useRef(createClient());
+    const supabase = supabaseRef.current;
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -95,7 +97,7 @@ function ClientesContent() {
 
     useEffect(() => {
         fetchClientes();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps -- executado apenas na montagem
 
     useEffect(() => {
         const idFromUrl = searchParams.get('id');

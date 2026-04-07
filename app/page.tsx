@@ -1,145 +1,313 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Phone, Mail, MapPin, Users, Shield, Award, Calculator, FileText, TrendingUp, ChevronRight, ArrowUpRight } from 'lucide-react';
-import TerminalInformativo from './components/TerminalInformativo';
+import {
+  Phone, Mail, MapPin, Users, Shield, Award, Calculator,
+  FileText, TrendingUp, ChevronRight, ArrowUpRight, Leaf,
+  CheckCircle2, Star, Clock, Building2, Tractor
+} from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Início | Brandão Contabilidade',
-  description: 'Tradição rústica e tecnologia de ponta em serviços contábeis, gestão de DP, legalização e agro.',
+  title: 'Início | Brandão Contabilidade — Soluções Contábeis em Sidrolândia',
+  description: 'Mais de 30 anos de tradição em contabilidade empresarial, agronegócio e gestão de pessoas. Tecnologia e experiência a serviço do seu crescimento.',
   openGraph: {
     title: 'Início | Brandão Contabilidade',
-    description: 'Tradição rústica e tecnologia de ponta em serviços contábeis, gestão de DP, legalização e agro.',
+    description: 'Tradição e tecnologia em serviços contábeis para empresas e produtores rurais.',
   }
 };
 
 /**
- * HOME PAGE - BRANDÃO CONTABILIDADE
- * Design: High-End Brutalism (State of the Art)
+ * HOME PAGE — BRANDÃO CONTABILIDADE
+ * Design: Moderno, acolhedor, profissional
+ * Paleta: Verde Esmeralda + Dourado
  */
 export default function Home() {
   return (
-    <main className="min-h-screen bg-obsidian selection:bg-amber-electric selection:text-obsidian">
-      {/* HERO SECTION - O Impacto Inicial */}
-      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
-        {/* Geometria Brutalista de Fundo */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-neutral-900/40 -skew-x-12 translate-x-1/4 pointer-events-none"></div>
+    <main className="min-h-screen bg-background">
 
-        <div className="container-custom relative z-10 py-20">
-          <div className="grid lg:grid-cols-12 gap-16 items-center">
-            <div className="lg:col-span-7 space-y-12">
-              <div className="inline-flex items-center gap-4 animate-in fade-in slide-in-from-left-4 duration-1000">
-                <span className="w-16 h-[2px] bg-amber-electric"></span>
-                <span className="font-mono text-[10px] font-black tracking-[0.5em] text-amber-electric uppercase">ESTRUTURA SÓLIDA // DESDE 1993</span>
+      {/* ═══════════════════════════════════════════
+          HERO SECTION
+          ═══════════════════════════════════════════ */}
+      <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
+        {/* Gradiente de fundo decorativo */}
+        <div className="absolute inset-0 gradient-hero pointer-events-none" />
+        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-10 left-10 w-72 h-72 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container-custom relative z-10 py-16 md:py-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Texto */}
+            <div className="space-y-8 animate-fade-in-up">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                <span className="text-xs font-semibold text-primary tracking-wide">Desde 1993 • Sidrolândia - MS</span>
               </div>
 
-              <h1 className="leading-[0.85] uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-                EXCELÊNCIA <br />
-                <span className="text-amber-electric italic font-display tracking-tightest">CONTÁBIL</span> <br />
-                DE ALTA PERFORMANCE.
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground leading-[1.1]">
+                Sua contabilidade com{' '}
+                <span className="text-primary">excelência</span> e{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-500">tradição</span>.
               </h1>
 
-              <p className="text-2xl text-neutral-400 max-w-2xl leading-relaxed font-sans animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-400">
-                Blindamos seu patrimônio com <strong className="text-neutral-100">tradição rústica</strong> e <span className="text-amber-electric">tecnologia de ponta</span>. Onde números se transformam em poder de decisão.
+              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
+                Mais de <strong className="text-foreground">30 anos</strong> transformando números em estratégias de crescimento para empresas e produtores rurais.
+                Conte com quem entende o campo e a cidade.
               </p>
 
-              <div className="flex flex-wrap gap-8 pt-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-600">
-                <Link href="/login" className="btn-brutal px-12 py-6">
-                  ACESSAR PORTAL
-                </Link>
-                <a href="https://wa.me/5567996011356" target="_blank" className="btn-brutal-outline px-12 py-6 group">
-                  SOLICITAR AUDITORIA <ArrowUpRight className="ml-3 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              <div className="flex flex-wrap gap-4 pt-2">
+                <a
+                  href="https://wa.me/5567996011356"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary px-8 py-4 text-sm"
+                >
+                  <Phone className="w-4 h-4" />
+                  Fale no WhatsApp
                 </a>
+                <Link href="/servicos" className="btn-secondary px-8 py-4 text-sm">
+                  Nossos Serviços
+                  <ArrowUpRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Confiança */}
+              <div className="flex items-center gap-6 pt-4">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 border-2 border-background flex items-center justify-center">
+                      <Users className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    <strong className="text-foreground">500+</strong> clientes confiam em nós
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="lg:col-span-5 relative animate-in fade-in zoom-in-95 duration-1000 delay-500">
-              <TerminalInformativo />
-              {/* Marker decorativo */}
-              <div className="absolute -bottom-10 -left-10 w-20 h-20 border-l-4 border-b-4 border-amber-electric opacity-20 hidden xl:block"></div>
+            {/* Card visual decorativo */}
+            <div className="hidden lg:block animate-fade-in delay-300">
+              <div className="relative">
+                {/* Card principal */}
+                <div className="glass-card p-8 space-y-6 shine-effect">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+                      <Shield className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-foreground text-lg">Ecossistema Completo</h3>
+                      <p className="text-sm text-muted-foreground">Tudo num só lugar, com tecnologia</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {[
+                      { icon: FileText, text: 'Obrigações fiscais automatizadas', status: 'ok' },
+                      { icon: Users, text: 'RH e folha de pagamento digital', status: 'ok' },
+                      { icon: Tractor, text: 'Especialistas em agronegócio', status: 'ok' },
+                      { icon: Building2, text: 'Abertura e legalização de empresas', status: 'ok' },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-primary/5 transition-colors">
+                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                        <span className="text-sm text-foreground font-medium">{item.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card flutuante decorativo */}
+                <div className="absolute -top-6 -right-6 glass-card p-4 animate-float shadow-glow-gold">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-500/10">
+                      <Award className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">CRC Ativo</p>
+                      <p className="text-[10px] text-muted-foreground">MS 003218</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card flutuante esquerda */}
+                <div className="absolute -bottom-4 -left-4 glass-card p-4 animate-float delay-500 shadow-glow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">31 anos</p>
+                      <p className="text-[10px] text-muted-foreground">de mercado</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SEÇÃO DE NÚMEROS - Autoridade Brutalista */}
-      <section className="bg-amber-electric py-12 border-y-4 border-obsidian">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {/* ═══════════════════════════════════════════
+          NÚMEROS — BARRA DE AUTORIDADE
+          ═══════════════════════════════════════════ */}
+      <section className="py-12 bg-primary text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-90" />
+        <div className="container-custom relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { label: "ANOS DE MERCADO", value: "31" },
-              { label: "CLIENTES ATIVOS", value: "500+" },
-              { label: "PRECISÃO FISCAL", value: "100%" },
-              { label: "TIME ESPECIALISTA", value: "15" }
+              { value: '31+', label: 'Anos de Mercado' },
+              { value: '500+', label: 'Clientes Ativos' },
+              { value: '100%', label: 'Precisão Fiscal' },
+              { value: '15', label: 'Especialistas' },
             ].map((stat, i) => (
-              <div key={i} className="text-obsidian text-center md:text-left border-r last:border-none border-obsidian/10 pr-4">
-                <div className="text-5xl font-black font-display leading-none">{stat.value}</div>
-                <div className="text-[10px] font-black uppercase tracking-widest mt-2">{stat.label}</div>
+              <div key={i} className="space-y-1 reveal">
+                <p className="text-4xl md:text-5xl font-display font-bold">{stat.value}</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{stat.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* GRID DE SERVIÇOS - A Engenharia do Negócio */}
-      <section className="py-32 bg-obsidian">
+      {/* ═══════════════════════════════════════════
+          SERVIÇOS — GRID INTERATIVO
+          ═══════════════════════════════════════════ */}
+      <section className="py-24 bg-background">
         <div className="container-custom">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-12">
-            <div className="max-w-3xl">
-              <span className="mono-label mb-4 block underline decoration-amber-electric underline-offset-8">Capacidades Estratégicas</span>
-              <h2 className="uppercase">SOLUÇÕES QUE <br /><span className="text-amber-electric italic">IMPULSIONAM</span> VALOR.</h2>
-            </div>
-            <p className="text-neutral-500 max-w-xs text-right font-sans italic opacity-70">
-              Cada operação é processada com rigor técnico e visão analítica superior.
+          <div className="text-center max-w-2xl mx-auto mb-16 reveal">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold text-primary mb-4">
+              <Leaf className="w-3 h-3" /> O que fazemos de melhor
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+              Soluções completas para o seu <span className="text-primary">crescimento</span>
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Do campo à cidade, combinamos expertise contábil com tecnologia para simplificar sua gestão.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: "FISCAL INTELIGENTE", icon: FileText, desc: "Planejamento tributário agressivo dentro da conformidade legal." },
-              { title: "GESTÃO DE ATIVOS", icon: Calculator, desc: "Controle patrimonial rigoroso para empresas e produtores rurais." },
-              { title: "DP ESTRATÉGICO", icon: Users, desc: "Gestão inteligente de capital humano e obrigações trabalhistas." },
-              { title: "LEGALIZAÇÃO", icon: Shield, desc: "Estruturação societária e blindagem jurídica para novos negócios." },
-              { title: "ANÁLISE DE DADOS", icon: TrendingUp, desc: "Dashboards e indicadores financeiros em tempo real." },
-              { title: "AGRONEGÓCIO", icon: Award, desc: "Especialização em contabilidade rural e tributação de commodities." }
+              { title: 'Contabilidade Empresarial', icon: Calculator, desc: 'Escrituração, balanços e demonstrativos com visão estratégica para o seu negócio crescer.', color: 'from-emerald-500 to-teal-500' },
+              { title: 'Departamento Pessoal', icon: Users, desc: 'Folha de pagamento, eSocial, admissão, rescisão e toda a gestão trabalhista digital.', color: 'from-blue-500 to-indigo-500' },
+              { title: 'Legalização de Empresas', icon: Shield, desc: 'Abertura, alteração e encerramento. Estruturação societária simplificada.', color: 'from-purple-500 to-violet-500' },
+              { title: 'Agronegócio', icon: Tractor, desc: 'Contabilidade rural, LCDPR, tributação de commodities e gestão patrimonial rural.', color: 'from-green-500 to-lime-500' },
+              { title: 'Planejamento Tributário', icon: TrendingUp, desc: 'Análise inteligente de regime tributário para reduzir carga fiscal legalmente.', color: 'from-amber-500 to-orange-500' },
+              { title: 'Certificado Digital', icon: FileText, desc: 'Emissão e renovação de e-CNPJ, e-CPF com agilidade e suporte completo.', color: 'from-rose-500 to-pink-500' },
             ].map((service, i) => (
-              <div key={i} className="brutalist-card group hover:border-amber-electric transition-all">
-                <service.icon className="w-12 h-12 text-amber-electric mb-8 group-hover:scale-110 transition-transform duration-500" />
-                <h3 className="text-2xl font-black uppercase mb-4 tracking-tighter">{service.title}</h3>
-                <p className="text-neutral-500 text-sm leading-relaxed mb-8">
+              <Link
+                key={i}
+                href="/servicos"
+                className="glass-card p-7 group cursor-pointer reveal"
+                style={{ animationDelay: `${i * 100}ms` }}
+              >
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${service.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                  <service.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-display font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  {service.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                   {service.desc}
                 </p>
-                <Link href="/servicos" className="text-xs font-black text-amber-electric flex items-center gap-2 group-hover:gap-4 transition-all uppercase tracking-widest">
-                  Explorar Detalhes <ChevronRight size={14} />
-                </Link>
-              </div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  Saiba mais <ChevronRight className="w-3.5 h-3.5" />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA SEÇÃO - O Chamado para a Elite */}
-      <section className="py-40 relative overflow-hidden bg-neutral-900">
-        <div className="absolute inset-0 bg-noise pointer-events-none"></div>
-        <div className="container-custom text-center relative z-10">
-          <h2 className="text-6xl md:text-[10rem] font-black text-neutral-800/20 uppercase absolute -top-10 left-1/2 -translate-x-1/2 select-none pointer-events-none tracking-tighter">
-            CONTABILIDADE
-          </h2>
-          <div className="max-w-4xl mx-auto space-y-12">
-            <h2 className="text-neutral-100 uppercase leading-[0.9] italic">
-              Sua empresa merece <br />
-              <span className="text-amber-electric not-italic tracking-tighter">SEGURANÇA DE ELITE.</span>
-            </h2>
-            <p className="text-xl text-neutral-500 max-w-2xl mx-auto uppercase tracking-tighter font-bold">
-              Saia do amadorismo contábil e entre para o ecossistema Brandão.
-            </p>
-            <div className="flex justify-center gap-8 pt-8">
-              <a href="https://wa.me/5567996011356" target="_blank" className="btn-brutal px-16 py-8 text-xl">
-                QUERO SER CLIENTE
-              </a>
+      {/* ═══════════════════════════════════════════
+          POR QUE NOS ESCOLHER
+          ═══════════════════════════════════════════ */}
+      <section className="py-24 bg-muted/30">
+        <div className="container-custom">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8 reveal">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/10 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                <Award className="w-3 h-3" /> Confiança comprovada
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground">
+                Por que mais de 500 empresas <span className="text-primary">confiam</span> na Brandão?
+              </h2>
+              <div className="space-y-5">
+                {[
+                  { title: '31 anos de experiência', desc: 'Fundada em 1993, acompanhamos a evolução de Sidrolândia e região.' },
+                  { title: 'Especialistas em agro', desc: 'Entendemos as particularidades do agronegócio e do produtor rural.' },
+                  { title: 'Tecnologia de ponta', desc: 'Sistemas digitais, automação e IA para agilidade na sua gestão.' },
+                  { title: 'Atendimento pessoal', desc: 'Cada cliente é único. Oferecemos suporte dedicado e personalizado.' },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 items-start">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Grid de cards informativos */}
+            <div className="grid grid-cols-2 gap-4 reveal">
+              {[
+                { icon: Clock, label: 'Horário', value: '7h30 — 17h30', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                { icon: MapPin, label: 'Localização', value: 'Centro, Sidrolândia', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                { icon: Phone, label: 'Contato', value: '(67) 3341-1356', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                { icon: Star, label: 'Avaliação', value: '5.0 estrelas', color: 'text-amber-500', bg: 'bg-amber-500/10' },
+              ].map((card, i) => (
+                <div key={i} className="glass-card p-6 text-center space-y-3">
+                  <div className={`w-12 h-12 rounded-2xl ${card.bg} flex items-center justify-center mx-auto`}>
+                    <card.icon className={`w-5 h-5 ${card.color}`} />
+                  </div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{card.label}</p>
+                  <p className="text-sm font-bold text-foreground">{card.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════
+          CTA FINAL
+          ═══════════════════════════════════════════ */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 gradient-hero pointer-events-none" />
+        <div className="container-custom text-center relative z-10 reveal">
+          <div className="max-w-2xl mx-auto space-y-8">
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground">
+              Pronto para ter uma contabilidade de <span className="text-primary">verdade</span>?
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Pare de se preocupar com burocracia. Deixe que a Brandão Contabilidade cuide dos números enquanto você foca no que realmente importa: <strong className="text-foreground">o seu negócio</strong>.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a
+                href="https://wa.me/5567996011356"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary px-10 py-4 text-base shadow-glow-sm"
+              >
+                <Phone className="w-5 h-5" />
+                Quero ser Cliente
+              </a>
+              <Link href="/contato" className="btn-ghost px-10 py-4 text-base">
+                <Mail className="w-5 h-5" />
+                Enviar Mensagem
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </main>
   );
 }

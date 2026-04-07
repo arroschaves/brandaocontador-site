@@ -1,24 +1,19 @@
 /**
- * Última atualização: 2026-02-12 10:10 (Forçando Deploy)
+ * Última atualização: 2026-03-02 (AIOS ADE - Epic 4 Execution Engine)
+ * Rota Totalmente Desacoplada: Salva os dados massivos fiscais no Supabase e "Atira" o N8N de forma silenciosa para que o Google Drive processe quando quiser.
  */
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse, NextRequest } from 'next/server'
 
-/**
- * API de Gestão de Clientes - Criação e Listagem
- * 
- * POST: Insere no Supabase e dispara automação n8n para criar pastas no Drive.
- * GET: Lista todos os clientes (com filtros opcionais).
- */
-
-// Campos TEXT seguros — correspondentes ao domínio oficial do banco de dados
+// Campos TEXT seguros — O Supabase é a Fonte da Verdade. Entrarão todos os cadastrais importantes.
 const CAMPOS_TEXT = [
     'documento',
     'razao_social',
     'nome_fantasia',
     'email',
     'telefone',
+    'telefone_whatsapp',
     'regime_tributario',
     'cnae_principal',
     'cnaes_secundarios',
@@ -37,9 +32,10 @@ const CAMPOS_TEXT = [
     'atendimento_automatico',
     'quadro_societario',
     'tipo_cadastro',
+    'status',
 ];
 
-// Campos DATE — precisam de validação extra
+// Campos DATE — Foco em Certidões e Alvarás Contábeis
 const CAMPOS_DATE = [
     'inicio_atividade',
     'data_situacao_cadastral',
@@ -53,117 +49,92 @@ const CAMPOS_DATE = [
     'vencimento_certidao_fgts',
 ];
 
-// Campos NUMBER
 const CAMPOS_NUMBER = [
     'capital_social',
 ];
 
-/**
- * Valida se uma string é uma data válida no formato YYYY-MM-DD
- */
 function isValidDate(dateStr: string): boolean {
     if (!dateStr || typeof dateStr !== 'string') return false;
     const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!match) return false;
-
     const year = parseInt(match[1]);
     const month = parseInt(match[2]);
     const day = parseInt(match[3]);
-
-    // Verifica se é uma data válida usando Date
     const date = new Date(year, month - 1, day);
-    return (
-        date.getFullYear() === year &&
-        date.getMonth() === month - 1 &&
-        date.getDate() === day
-    );
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
 
-/**
- * Filtra e sanitiza o formData antes do insert.
- * - Remove campos não reconhecidos
- * - Remove valores vazios
- * - Valida datas
- */
 function sanitizeFormData(raw: Record<string, any>): Record<string, any> {
     const sanitized: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(raw)) {
-        // Ignora valores vazios
         if (value === '' || value === null || value === undefined) continue;
 
-        // Campos TEXT
         if (CAMPOS_TEXT.includes(key)) {
             sanitized[key] = String(value).trim();
             continue;
         }
 
-        // Campos DATE — validação rigorosa
         if (CAMPOS_DATE.includes(key)) {
-            const dateStr = String(value).trim().substring(0, 10); // Pega só YYYY-MM-DD
+            const dateStr = String(value).trim().substring(0, 10);
             if (isValidDate(dateStr)) {
                 sanitized[key] = dateStr;
             } else {
-                console.warn(`[SANITIZE] Data inválida ignorada: ${key}=${value}`);
+                console.warn(`[SANITIZE] Data inválida ignorada na entrada: ${key}=${value}`);
             }
             continue;
         }
 
-        // Campos NUMBER
         if (CAMPOS_NUMBER.includes(key)) {
             const num = parseFloat(value);
-            if (!isNaN(num)) {
-                sanitized[key] = num;
-            }
+            if (!isNaN(num)) sanitized[key] = num;
             continue;
         }
 
-        // Simples Nacional (BOOLEAN)
         if (key === 'simples_nacional') {
             sanitized[key] = value === true || value === 'true' || value === 1;
             continue;
         }
 
-        // Campo drive_folder_id — nunca enviar vazio no insert
         if (key === 'drive_folder_id' && value) {
             sanitized[key] = String(value).trim();
         }
-        // Todos os outros campos são IGNORADOS (segurança)
     }
-
     return sanitized;
 }
 
 /**
- * Dispara o webhook do n8n para criar pastas no Google Drive.
- * Agora envia o payload completo do cliente para permitir a criação inteligente de pastas.
+ * Disparo Fire-and-Forget: Envia a requisição pro n8n e NÃO ESPERA a lógica dele acabar. 
+ * O Next.js não segura a tela do usuário travada por causa do N8N ou do Google Drive.
  */
-async function triggerDriveAutomation(clientData: any): Promise<void> {
-    // URL correta do workflow "Cadastro Cliente - Criação de Pastas e Notificações (Golden Path)"
+function triggerDriveAutomation(clientData: any): void {
     const webhookUrl = process.env.N8N_CADASTRO_WEBHOOK ||
         'https://webhook.brandaocontador.com.br/webhook/cadastro-cliente';
 
-    try {
-        console.log(`[N8N] Disparando Golden Path para: ${clientData.nome_fantasia || clientData.razao_social}`);
-        const res = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            // Enviamos um objeto 'body' para o n8n capturar corretamente e mantemos compatibilidade de chaves legadas
-            body: JSON.stringify({ body: { ...clientData, nome: clientData.nome_fantasia, cnpj_cpf: clientData.documento } }),
-            // Aumentado para 15s para dar tempo do Google Drive responder ao n8n
-            signal: AbortSignal.timeout(15000),
+    console.log(`[N8N] Disparando em background o Cadastro para: ${clientData.nome_fantasia || clientData.razao_social}`);
+
+    // Assegura que passamos telefone_whatsapp preenchido caso N8N Precise mandar msg
+    const phoneToN8n = clientData.telefone_whatsapp || clientData.telefone;
+
+    fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            body: {
+                ...clientData,
+                nome: clientData.nome_fantasia,
+                cnpj_cpf: clientData.documento,
+                telefone_whatsapp: phoneToN8n
+            }
+        }),
+        // Somente um pequeno timer de segurança da rede de 3s
+        signal: AbortSignal.timeout(3000),
+    })
+        .then(res => console.log(`[N8N] Webhook postado com sucesso. HTTP: ${res.status}`))
+        .catch(err => {
+            // Nós simplesmente logamos o erro e o sistema segue. Assim o painel nunca trava para você.
+            console.warn('[N8N] Aviso de background:', err.name === 'TimeoutError' ? 'O N8N vai processar, conexão fechada pós 3s.' : err.message);
         });
-        const status = res.status;
-        console.log(`[N8N] Resposta do webhook: ${status}`);
-    } catch (err: any) {
-        if (err.name === 'TimeoutError') {
-            console.warn('[N8N] O Webhook demorou muito, mas o n8n deve processar em background.');
-        } else {
-            console.error('[N8N] Erro ao chamar automação:', err.message);
-        }
-    }
 }
 
 export async function POST(request: NextRequest) {
@@ -171,25 +142,16 @@ export async function POST(request: NextRequest) {
         const rawData = await request.json();
         const supabase = createAdminClient();
 
-        // 1. Sanitizar dados — remove campos inválidos, valida datas
+        // 1. O Supabase é a Fonte Única da Verdade. O Frontend cadastra tudo da matriz Fiscal/Cadastral.
         const formData = sanitizeFormData(rawData);
 
         if (!formData.nome_fantasia && !formData.razao_social) {
-            return NextResponse.json(
-                { error: 'Nome Fantasia ou Razão Social é obrigatório' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Nome Fantasia ou Razão Social é obrigatório' }, { status: 400 });
         }
 
-        console.log('[CLIENT API] Inserindo cliente:', {
-            nome_fantasia: formData.nome_fantasia,
-            documento: formData.documento,
-            campos: Object.keys(formData),
-            data_abertura: formData.data_abertura, // Inspecionar campo problemático
-            payload: formData // Log completo para debug de data
-        });
+        console.log('[CLIENT API] Gravando matriz fiscal do cliente:', formData.documento);
 
-        // 2. Inserir o cliente no Supabase
+        // 2. Inserir Cliente Físico e Fiscal Seguro
         const { data: client, error: insertErr } = await supabase
             .schema('core')
             .from('empresas')
@@ -198,16 +160,15 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (insertErr) {
-            console.error('[CLIENT API] Erro no insert:', insertErr);
+            console.error('[CLIENT API] Erro no Supabase:', insertErr);
 
-            // Se o erro for de coluna inexistente, tenta sem o campo problemático
+            // Redução inteligente se tentamos injetar um campo inexistente 
             if (insertErr.message?.includes('column') || insertErr.message?.includes('field')) {
-                console.log('[CLIENT API] Tentando insert com campos mínimos...');
+                console.log('[CLIENT API] Reduzindo pacote de dados por conflito de tabela (Segurança RLS)...');
 
-                // Campos mínimos garantidos
                 const minimalData: Record<string, any> = {};
                 const SAFE_FIELDS = ['nome_fantasia', 'documento', 'razao_social', 'email', 'telefone',
-                    'regime_tributario', 'status_rfb', 'cidade', 'estado'];
+                    'telefone_whatsapp', 'regime_tributario', 'status_rfb', 'cidade', 'estado'];
 
                 for (const field of SAFE_FIELDS) {
                     if (formData[field]) minimalData[field] = formData[field];
@@ -217,55 +178,42 @@ export async function POST(request: NextRequest) {
                     .schema('core')
                     .from('empresas')
                     .insert([minimalData])
-                    .select('id, nome_fantasia, razao_social')
+                    .select('*')
                     .single();
 
                 if (err2) {
-                    return NextResponse.json(
-                        { error: `Erro ao salvar: ${err2.message}` },
-                        { status: 400 }
-                    );
+                    return NextResponse.json({ error: `Erro base do banco de dados: ${err2.message}` }, { status: 400 });
                 }
 
                 triggerDriveAutomation(client2);
                 return NextResponse.json({
                     success: true,
                     clientId: client2.id,
-                    message: `Cliente "${client2.nome_fantasia || client2.razao_social || 'Desconhecido'}" cadastrado (modo seguro). Pastas sendo criadas...`,
-                    warning: `Campo ignorado pelo banco: ${insertErr.message}`
+                    message: `Cliente salvo no sistema de segurança (sem alguns campos conflitantes). Pastas na nuvem iniciarão sozinhas...`
                 });
             }
 
-            return NextResponse.json(
-                { error: `Erro ao salvar: ${insertErr.message}` },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: `Houve um bloqueio ao salvar: ${insertErr.message}` }, { status: 400 });
         }
 
-        console.log('[CLIENT API] Cliente criado:', client.id, client.nome_fantasia);
-
-        // 3. Disparar automação n8n (async) com dados completos
-        // O N8N vai receber isso, criar pastas e atualizar o drive_folder_id e status_setup
+        // 3. Cadastrou limpo? Disprama a Esteira N8N em background para as Duplicatas sumirem da tela.
         triggerDriveAutomation(client);
 
         return NextResponse.json({
             success: true,
             clientId: client.id,
-            message: `Cliente "${client.nome_fantasia || client.razao_social}" cadastrado com sucesso. Sistema de pastas iniciado.`
+            message: `Ficha cadastral salva 100%. O Sistema GDrive do cliente está sendo gerado remotamente sem travas.`
         });
 
     } catch (error: any) {
-        console.error('[CLIENT API] Erro inesperado:', error);
-        return NextResponse.json(
-            { error: error.message || 'Erro interno ao cadastrar cliente' },
-            { status: 500 }
-        );
+        console.error('[CLIENT API] Quebra fatal na API:', error);
+        return NextResponse.json({ error: error.message || 'Falha de comunicação global no servidor.' }, { status: 500 });
     }
 }
 
 export async function GET(request: NextRequest) {
     try {
-        const supabase = await createClient();
+        const supabase = await createClient(); // Para listagens usa a sessão cliente amarrada no Browser
         const { searchParams } = new URL(request.url);
         const search = searchParams.get('search');
 
@@ -284,10 +232,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json(data);
     } catch (error: any) {
-        console.error('[CLIENT API] Erro ao listar:', error);
-        return NextResponse.json(
-            { error: error.message },
-            { status: 500 }
-        );
+        console.error('[CLIENT API] Erro ao listar a malha de clientes:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import {
     Users,
@@ -42,7 +42,9 @@ const ACT_CONFIG: Record<string, { icon: any; color: string; bg: string; label: 
 export const dynamic = 'force-dynamic';
 
 export default function AdminDashboard() {
-    const supabase = createClient();
+    // useRef garante uma única instância do cliente por montagem do componente
+    const supabaseRef = useRef(createClient());
+    const supabase = supabaseRef.current;
     const [stats, setStats] = useState<any>({
         totalClientes: 0,
         concluidosMes: 0,

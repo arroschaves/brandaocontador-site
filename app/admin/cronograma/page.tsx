@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import {
     Calendar,
@@ -16,7 +16,9 @@ import {
 } from 'lucide-react';
 
 export default function CronogramaPage() {
-    const supabase = createClient();
+    // useRef garante uma única instância do cliente por montagem do componente
+    const supabaseRef = useRef(createClient());
+    const supabase = supabaseRef.current;
     const [loading, setLoading] = useState(true);
     const [clientes, setClientes] = useState<any[]>([]);
     const [obrigacoes, setObrigacoes] = useState<any[]>([]);

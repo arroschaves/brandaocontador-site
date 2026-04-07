@@ -166,7 +166,17 @@ export async function GET() {
                             const data = await res.json();
                             if (res.ok) {
                                 msg.className = 'success';
-                                msg.innerHTML = '<strong>' + data.message + '</strong><br><br>' + data.details;
+                                // Composição segura — evita XSS com textContent em vez de innerHTML
+                                msg.textContent = '';
+                                var strong = document.createElement('strong');
+                                strong.textContent = data.message || '';
+                                var br1 = document.createElement('br');
+                                var br2 = document.createElement('br');
+                                var detailsNode = document.createTextNode(data.details || '');
+                                msg.appendChild(strong);
+                                msg.appendChild(br1);
+                                msg.appendChild(br2);
+                                msg.appendChild(detailsNode);
                                 document.getElementById('setupForm').style.display = 'none';
                             } else {
                                 msg.className = 'error';

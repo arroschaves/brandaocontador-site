@@ -53,7 +53,9 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
     const [showPendenciaModal, setShowPendenciaModal] = useState(false)
     const [agendamentoEditando, setAgendamentoEditando] = useState<any | null>(null)
 
-    const supabase = createClient()
+    // useRef garante uma única instância do cliente por montagem do componente
+    const supabaseRef = useRef(createClient())
+    const supabase = supabaseRef.current
 
     const [selectedDate, setSelectedDate] = useState(new Date())
 
@@ -119,7 +121,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoading(false)
         }
-    }, [clientId, supabase, selectedDate])
+    }, [clientId, selectedDate])
 
     const fetchCertificados = useCallback(async () => {
         setLoadingCerts(true)
@@ -138,7 +140,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoadingCerts(false)
         }
-    }, [clientId, supabase])
+    }, [clientId])
 
     const fetchAgendamentos = useCallback(async () => {
         setLoadingAgendamentos(true)
@@ -162,7 +164,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoadingAgendamentos(false)
         }
-    }, [clientId, supabase, selectedDate])
+    }, [clientId, selectedDate])
 
     const [maestroDocs, setMaestroDocs] = useState<any[]>([])
     const [loadingMaestro, setLoadingMaestro] = useState(false)
@@ -193,7 +195,7 @@ export default function ClientHubPage({ params }: { params: Promise<{ id: string
         } finally {
             setLoadingMaestro(false)
         }
-    }, [clientId, supabase, selectedDate])
+    }, [clientId, selectedDate])
 
     useEffect(() => {
         if (clientId) {

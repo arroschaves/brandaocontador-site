@@ -1,30 +1,33 @@
 import { Metadata } from 'next'
-import { Inter, Playfair_Display, JetBrains_Mono } from 'next/font/google'
+import { Outfit, DM_Sans, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import ClientWrapper from './components/ClientWrapper'
-import ScrollReveal from './components/ScrollReveal'
 import JsonLd from './components/JsonLd'
 
-const inter = Inter({
+// Fontes modernas e premium
+const outfit = Outfit({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-outfit',
+  display: 'swap',
 })
 
-const playfair = Playfair_Display({
+const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  variable: '--font-dm-sans',
+  display: 'swap',
 })
 
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
   title: 'Brandão Contabilidade | Soluções Contábeis em Sidrolândia - MS',
   description: 'Mais de 30 anos de experiência em assessoria contábil, fiscal e pessoal. Especialistas em impulsionar seu negócio com estratégia e segurança.',
-  keywords: 'contabilidade, contador, Sidrolândia, MS, fiscal, abertura de empresas, imposto de renda, Brandão Contabilidade',
+  keywords: 'contabilidade, contador, Sidrolândia, MS, fiscal, abertura de empresas, imposto de renda, Brandão Contabilidade, agronegócio',
   authors: [{ name: 'Brandão Contabilidade' }],
   openGraph: {
     title: 'Brandão Contabilidade | Sua Gestão em Boas Mãos',
@@ -36,7 +39,7 @@ export const metadata: Metadata = {
         url: 'https://www.brandaocontador.com.br/api/og',
         width: 1200,
         height: 630,
-        alt: 'Brandão Contabilidade Logo',
+        alt: 'Brandão Contabilidade',
       },
     ],
     locale: 'pt-BR',
@@ -50,11 +53,27 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${playfair.variable} ${jetbrains.variable}`}>
-      <body className="font-sans antialiased bg-obsidian text-neutral-200">
+    <html lang="pt-BR" className={`${outfit.variable} ${dmSans.variable} ${jetbrains.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Script para evitar flash de tema incorreto */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var theme = localStorage.getItem('theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch(e) {}
+            })();
+          `
+        }} />
+      </head>
+      <body className="font-sans antialiased bg-background text-foreground">
         <JsonLd />
         <SpeedInsights />
-        <ScrollReveal />
         <ClientWrapper>
           {children}
         </ClientWrapper>

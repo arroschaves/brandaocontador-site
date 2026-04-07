@@ -1,22 +1,24 @@
 "use client";
 
-import { usePathname } from 'next/navigation';
 import Header from './Header';
 import Footer from './Footer';
+import { usePathname } from 'next/navigation';
 
+/**
+ * Wrapper de cliente que envolve o conteúdo com Header e Footer.
+ * Esconde Header/Footer em rotas admin e login.
+ */
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
-    const pathname = usePathname();
-    const isAdmin = pathname?.startsWith('/admin');
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin');
+  const isLogin = pathname?.startsWith('/login');
+  const hideChrome = isAdmin || isLogin;
 
-    return (
-        <>
-            {!isAdmin && <Header />}
-            <main className={!isAdmin ? "pt-16" : ""}>
-                <div key={pathname} className="page-transition">
-                    {children}
-                </div>
-            </main>
-            {!isAdmin && <Footer />}
-        </>
-    );
+  return (
+    <>
+      {!hideChrome && <Header />}
+      {children}
+      {!hideChrome && <Footer />}
+    </>
+  );
 }

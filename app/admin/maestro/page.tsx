@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { StatsGrid } from "./components/StatsGrid";
 import Link from 'next/link';
@@ -47,7 +47,9 @@ const ACTIVITY_LABELS: Record<string, string> = {
 export const dynamic = 'force-dynamic';
 
 export default function MaestroPage() {
-    const supabase = createClient();
+    // useRef garante uma única instância do cliente por montagem do componente
+    const supabaseRef = useRef(createClient());
+    const supabase = supabaseRef.current;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activities, setActivities] = useState<any[]>([]);
@@ -156,9 +158,9 @@ export default function MaestroPage() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps -- supabase é estável via useRef
 
-    useEffect(() => {
+    useEffect(() => { // eslint-disable-line react-hooks/exhaustive-deps -- supabase é estável via useRef
         fetchData();
 
         // Realtime subscription para audit.logs
@@ -181,7 +183,7 @@ export default function MaestroPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [fetchData]);
+    }, [fetchData]); // eslint-disable-line react-hooks/exhaustive-deps -- supabase é estável via useRef
 
     // Formatar tempo relativo
     function timeAgo(dateStr: string): string {

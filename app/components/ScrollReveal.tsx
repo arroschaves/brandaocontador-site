@@ -1,30 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
+/**
+ * Componente que ativa animações de scroll reveal
+ * usando Intersection Observer para performance.
+ */
 export default function ScrollReveal() {
-    useEffect(() => {
-        const observerOptions = {
-            root: null,
-            rootMargin: "0px",
-            threshold: 0.1,
-        };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("active");
-                }
-            });
-        }, observerOptions);
+    // Observa todos os elementos com classe .reveal
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach((el) => observer.observe(el));
 
-        const revealElements = document.querySelectorAll(".text-reveal");
-        revealElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-        return () => {
-            revealElements.forEach((el) => observer.unobserve(el));
-        };
-    }, []);
-
-    return null;
+  return null;
 }

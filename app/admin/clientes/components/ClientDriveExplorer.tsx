@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { File, FileText, Image, FileSpreadsheet, Download, ExternalLink, Loader2, FolderOpen, RefreshCw, MessageCircle, Mail } from 'lucide-react'
+import React, { useState, useEffect, useCallback } from 'react'
+import { File, FileText, Image as ImageIcon, FileSpreadsheet, Download, ExternalLink, Loader2, FolderOpen, RefreshCw, MessageCircle, Mail } from 'lucide-react'
 
 interface DriveFile {
     id: string;
@@ -60,7 +60,7 @@ export default function ClientDriveExplorer({ clientId }: ClientDriveExplorerPro
         }
     }
 
-    const fetchFiles = async () => {
+    const fetchFiles = useCallback(async () => {
         try {
             setLoading(true)
             setError(null)
@@ -80,13 +80,13 @@ export default function ClientDriveExplorer({ clientId }: ClientDriveExplorerPro
         } finally {
             setLoading(false)
         }
-    }
+    }, [clientId, currentFolderId])
 
     useEffect(() => {
         if (clientId) {
             fetchFiles()
         }
-    }, [clientId, currentFolderId])
+    }, [clientId, currentFolderId, fetchFiles])
 
     const handleFolderClick = (folderId: string, folderName: string) => {
         setCurrentFolderId(folderId)
@@ -101,7 +101,7 @@ export default function ClientDriveExplorer({ clientId }: ClientDriveExplorerPro
 
     const getFileIcon = (mimeType: string) => {
         if (mimeType.includes('pdf')) return <FileText className="w-8 h-8 text-red-500" />
-        if (mimeType.includes('image')) return <Image className="w-8 h-8 text-blue-500" />
+        if (mimeType.includes('image')) return <ImageIcon className="w-8 h-8 text-blue-500" aria-hidden="true" />
         if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-8 h-8 text-emerald-500" />
         if (mimeType.includes('folder')) return <FolderOpen className="w-8 h-8 text-amber-500" />
         return <File className="w-8 h-8 text-gray-400" />

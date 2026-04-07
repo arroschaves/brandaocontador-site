@@ -79,7 +79,7 @@ export default function NoticiasPage() {
     }
   }
 
-  useEffect(() => { fetchNoticias(); }, [filtroAtivo]);
+  useEffect(() => { fetchNoticias(); }, [filtroAtivo]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchNoticias é seguro sem memoização aqui
 
   const destaque = noticias.find(n => n.destaque);
   const restantes = noticias.filter(n => !n.destaque);
@@ -122,8 +122,8 @@ export default function NoticiasPage() {
                 key={cat.id}
                 onClick={() => setFiltroAtivo(cat.id)}
                 className={`flex items-center gap-2 px-4 py-2 text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-all border ${filtroAtivo === cat.id
-                    ? 'bg-amber-electric text-obsidian border-amber-electric font-bold'
-                    : 'bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600'
+                  ? 'bg-amber-electric text-obsidian border-amber-electric font-bold'
+                  : 'bg-transparent text-neutral-400 border-neutral-800 hover:border-neutral-600'
                   }`}
               >
                 <cat.icon className="w-3.5 h-3.5" />

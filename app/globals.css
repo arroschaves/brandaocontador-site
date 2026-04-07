@@ -2,74 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   BRANDÃO CONTABILIDADE — Design System v4.0
+   Paleta: Verde Esmeralda + Dourado Premium
+   ============================================ */
+
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* === Cores do tema claro === */
+    --background: 0 0% 99%;
+    --foreground: 220 20% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 20% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 220 20% 14%;
 
     --primary: 160 84% 39%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11.2%;
+    --secondary: 160 20% 96%;
+    --secondary-foreground: 220 20% 14%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 40 60% 55%;
+    --accent-foreground: 40 80% 20%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11.2%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 160 84% 39%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
+
+    /* === Cores especiais === */
+    --gold: 40 60% 55%;
+    --gold-light: 40 70% 92%;
+    --emerald: 160 84% 39%;
+    --emerald-light: 160 70% 95%;
+    --success: 152 69% 41%;
+    --warning: 38 92% 50%;
+    --info: 217 91% 60%;
   }
 
   .dark {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
+    --background: 224 28% 7%;
+    --foreground: 210 20% 95%;
 
-    --card: 222 47% 6%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 28% 9%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 222 47% 6%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 28% 9%;
+    --popover-foreground: 210 20% 95%;
 
     --primary: 160 84% 45%;
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 12.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 224 20% 14%;
+    --secondary-foreground: 210 20% 95%;
 
-    --muted: 217.2 32.6% 12.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 40 55% 50%;
+    --accent-foreground: 40 80% 90%;
 
-    --accent: 217.2 32.6% 12.5%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 224 20% 14%;
+    --muted-foreground: 220 15% 60%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 160 84% 39%;
-  }
+    --border: 224 20% 18%;
+    --input: 224 20% 18%;
+    --ring: 160 84% 45%;
 
-  .dark-light {
-    --background: 220 15% 10%;
-    --card: 220 15% 13%;
-    --border: 220 15% 20%;
-    --muted-foreground: 220 10% 60%;
+    --gold: 40 55% 50%;
+    --gold-light: 40 40% 15%;
+    --emerald-light: 160 40% 12%;
   }
 
   * {
@@ -84,81 +96,270 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
-    line-height: 1.5;
+    line-height: 1.6;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-sans font-semibold tracking-tight text-foreground/90;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight text-foreground;
   }
 }
 
+/* ============================================
+   COMPONENTES REUTILIZÁVEIS
+   ============================================ */
 @layer components {
-  .lucid-card {
-    @apply bg-card border text-card-foreground shadow-sm rounded-2xl p-6 transition-all duration-300;
-    border-color: hsl(var(--border) / 0.5);
-  }
-
-  .lucid-card:hover {
-    @apply shadow-md border-primary/20 bg-card/80;
-  }
-
-  .btn-modern {
-    @apply inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-xl border border-transparent transition-all duration-200 active:scale-[0.98] outline-none hover:shadow-lg hover:shadow-primary/20;
-  }
-
-  .btn-modern-outline {
-    @apply inline-flex items-center justify-center px-6 py-3 bg-transparent text-primary font-semibold rounded-xl border border-primary/20 transition-all duration-200 hover:bg-primary/5 active:scale-[0.98];
-  }
-
+  /* Contêiner padrão */
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  /* Cards */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/60 rounded-2xl shadow-sm;
+    @apply hover:shadow-lg hover:border-primary/20 transition-all duration-300;
+  }
+
+  .glass-card-static {
+    @apply bg-card/80 backdrop-blur-xl border border-border/60 rounded-2xl shadow-sm;
+  }
+
+  /* Botões */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-primary text-primary-foreground font-semibold rounded-xl
+           border border-transparent shadow-md shadow-primary/20
+           hover:shadow-lg hover:shadow-primary/30 hover:brightness-110
+           active:scale-[0.98] transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-secondary text-secondary-foreground font-semibold rounded-xl
+           border border-border/60
+           hover:bg-secondary/80 hover:border-primary/20
+           active:scale-[0.98] transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2;
+  }
+
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-semibold rounded-xl
+           shadow-md shadow-amber-500/20
+           hover:shadow-lg hover:shadow-amber-500/30 hover:brightness-110
+           active:scale-[0.98] transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-transparent text-foreground font-semibold rounded-xl
+           hover:bg-muted active:scale-[0.98] transition-all duration-200;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  .badge-info {
+    @apply badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+
+  /* Inputs */
+  .input-modern {
+    @apply w-full bg-background border border-border rounded-xl px-4 py-3 text-sm
+           placeholder:text-muted-foreground/50
+           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40
+           transition-all duration-200;
+  }
+
+  /* Navbar transparente → sólida */
+  .navbar-glass {
+    @apply fixed top-0 w-full z-50 transition-all duration-500;
+    @apply bg-background/70 backdrop-blur-xl border-b border-transparent;
+  }
+
+  .navbar-glass.scrolled {
+    @apply bg-background/95 border-border/60 shadow-sm;
+  }
 }
 
+/* ============================================
+   UTILITÁRIOS & ANIMAÇÕES
+   ============================================ */
 @layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  /* Gradientes premium */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700;
   }
 
-  .dark .glass {
-    @apply bg-black/40 backdrop-blur-md border border-white/5;
+  .gradient-gold {
+    @apply bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600;
   }
 
-  .page-fade-in {
-    animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  .gradient-hero {
+    background: linear-gradient(135deg,
+      hsl(160 84% 39% / 0.08) 0%,
+      hsl(40 60% 55% / 0.05) 50%,
+      transparent 100%
+    );
+  }
+
+  .dark .gradient-hero {
+    background: linear-gradient(135deg,
+      hsl(160 84% 39% / 0.12) 0%,
+      hsl(40 60% 55% / 0.06) 50%,
+      transparent 100%
+    );
+  }
+
+  /* Efeito de brilho sutil */
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    );
+    transform: rotate(30deg);
+    animation: shine 6s ease-in-out infinite;
+  }
+
+  @keyframes shine {
+    0%, 100% { transform: translateX(-100%) rotate(30deg); }
+    50% { transform: translateX(100%) rotate(30deg); }
+  }
+
+  /* Fade in com slide */
+  .animate-fade-in {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-fade-in-down {
+    animation: fadeInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* Delay helpers */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
+
+  /* Counter animado */
+  .animate-count-up {
+    animation: countUp 1.5s ease-out forwards;
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/60 backdrop-blur-xl border border-white/30;
+  }
+
+  .dark .glass {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  }
+
+  /* Scroll reveal (ativado via JS) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Glow suave para elementos em destaque */
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(160 84% 39% / 0.15),
+                0 0 60px hsl(160 84% 39% / 0.05);
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px hsl(40 60% 55% / 0.15),
+                0 0 60px hsl(40 60% 55% / 0.05);
   }
 }
 
-/* Custom Scrollbar Modern */
+/* ============================================
+   SCROLLBAR MODERNA
+   ============================================ */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-background;
+  @apply bg-transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted rounded-full border-2 border-background;
+  @apply bg-muted-foreground/20 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary/40;
+}
+
+/* Esconde scrollbar para feeds */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

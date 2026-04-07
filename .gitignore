@@ -110,3 +110,25 @@ debug-deploy.md
 MaestroSync.spec
 mcp-config-recommendation.json
 TECH_SPECS_DATA_ENRICHMENT.md
+
+# Environment & Secrets (AIOS)
+.env
+.env.local
+.env.*.local
+
+# Dependencies (AIOS)
+node_modules/
+
+# Build & Logs (AIOS)
+*.log
+logs/
+
+# IDE & OS (AIOS)
+Thumbs.db
+.idea/
+*.swp
+
+# AIOS Local (AIOS)
+.aios-core/local/
+.claude/settings.local.json
+.aios/install-log.txt
