@@ -156,6 +156,29 @@
            hover:bg-muted active:scale-[0.98] transition-all duration-200;
   }
 
+  /* Cards Admin (Lucid Design) */
+  .lucid-card {
+    @apply bg-card border border-border/50 rounded-2xl p-6
+           shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  /* Botões Admin */
+  .btn-modern {
+    @apply inline-flex items-center justify-center gap-2
+           bg-primary text-primary-foreground font-bold text-[11px] uppercase tracking-tight
+           rounded-2xl px-6 py-3 border border-transparent
+           shadow-md hover:shadow-lg hover:brightness-110
+           active:scale-[0.98] transition-all duration-200;
+  }
+
+  .btn-modern-outline {
+    @apply inline-flex items-center justify-center gap-2
+           bg-card text-foreground font-bold text-[11px] uppercase tracking-tight
+           rounded-2xl px-6 py-3 border border-border/60
+           hover:bg-secondary hover:border-primary/20
+           active:scale-[0.98] transition-all duration-200;
+  }
+
   /* Badges */
   .badge {
     @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full;
@@ -301,6 +324,28 @@
   @keyframes scaleIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Animações de página admin */
+  .page-fade-in {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .animate-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .slide-in-from-right {
+    animation: slideInRight 0.5s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 
   /* Glassmorphism */
