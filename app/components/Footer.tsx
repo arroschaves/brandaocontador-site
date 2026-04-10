@@ -77,15 +77,7 @@ export default function Footer() {
           <div className="space-y-5">
             <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Contato</h3>
             <div className="space-y-4">
-              <a href="tel:+556733411356" className="flex items-start gap-3 group">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                  <Phone className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">(67) 3341-1356</p>
-                  <p className="text-xs text-muted-foreground">Telefone fixo</p>
-                </div>
-              </a>
+
               <a href="https://wa.me/5567996011356" target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 group">
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                   <Phone className="w-4 h-4" />
@@ -95,12 +87,12 @@ export default function Footer() {
                   <p className="text-xs text-muted-foreground">WhatsApp</p>
                 </div>
               </a>
-              <a href="mailto:contato@brandaocontador.com.br" className="flex items-start gap-3 group">
+              <a href="mailto:adm@brandaocontador.com.br" className="flex items-start gap-3 group">
                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white transition-all">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground break-all">contato@brandaocontador.com.br</p>
+                  <p className="text-sm font-medium text-foreground break-all">adm@brandaocontador.com.br</p>
                 </div>
               </a>
               <div className="flex items-start gap-3">
@@ -108,8 +100,8 @@ export default function Footer() {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm text-foreground">R. Cmte. Salgado, 647</p>
-                  <p className="text-xs text-muted-foreground">Centro, Sidrolândia - MS</p>
+                  <p className="text-sm text-foreground">Rua Santa Catarina, 1010</p>
+                  <p className="text-xs text-muted-foreground">Centro - Sidrolândia/MS - CEP: 79.170-000</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -117,8 +109,7 @@ export default function Footer() {
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm text-foreground">Seg - Sex: 7h30 às 17h30</p>
-                  <p className="text-xs text-muted-foreground">Sáb: 7h30 às 11h30</p>
+                  <p className="text-sm text-foreground">Seg - Sex: 07:30 às 17:00</p>
                 </div>
               </div>
             </div>

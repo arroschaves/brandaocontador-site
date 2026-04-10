@@ -32,33 +32,96 @@ export default function VencimentosPage() {
     const fetchVencimentos = useCallback(async () => {
         try {
             setLoading(true);
-            // View Soberana — unifica Certificados + Obrigações + IA
-            const { data, error } = await supabase
+
+            // Estratégia resiliente: tenta view primeiro, fallback para tabelas diretas
+            let events: any[] = [];
+
+            // Tentativa 1: View Soberana (se existir no Supabase)
+            const { data: viewData, error: viewError } = await supabase
                 .from('vw_radar_vencimentos')
                 .select('*')
                 .order('vencimento', { ascending: true });
 
-            if (error) throw error;
+            if (!viewError && viewData && viewData.length > 0) {
+                events = viewData.map((v: any) => {
+                    const due = new Date(v.vencimento);
+                    const today = new Date();
+                    const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                    return {
+                        id: `${v.origem}-${v.vencimento}-${v.empresa}`,
+                        cliente: v.empresa || 'Sem nome',
+                        tipo: v.descricao || 'Obrigação',
+                        data: v.vencimento,
+                        valor: v.valor || 0,
+                        origem: v.origem,
+                        diffDays,
+                        folder: null
+                    };
+                });
+            } else {
+                // Tentativa 2: Busca direta nas tabelas fiscais
+                const { data: certData } = await supabase
+                    .schema('core')
+                    .from('certificados_digitais')
+                    .select('id, empresa_id, tipo, validade, empresas:empresa_id(razao_social)')
+                    .order('validade', { ascending: true })
+                    .limit(100);
 
-            const events = data?.map((v: any) => {
-                const due = new Date(v.vencimento);
-                const today = new Date();
-                const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                return {
-                    id: `${v.origem}-${v.vencimento}-${v.empresa}`,
-                    cliente: v.empresa,
-                    tipo: v.descricao,
-                    data: v.vencimento,
-                    valor: v.valor,
-                    origem: v.origem,
-                    diffDays,
-                    folder: null
-                };
-            }) || [];
+                if (certData && certData.length > 0) {
+                    events = certData.map((c: any) => {
+                        const due = new Date(c.validade);
+                        const today = new Date();
+                        const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                        return {
+                            id: `cert-${c.id}`,
+                            cliente: (c.empresas as any)?.razao_social || 'Empresa não identificada',
+                            tipo: `Certificado Digital - ${c.tipo || 'A1'}`,
+                            data: c.validade,
+                            valor: 0,
+                            origem: 'certificado',
+                            diffDays,
+                            folder: null
+                        };
+                    });
+                }
 
+                // Também tenta obrigações/calendário fiscal
+                const { data: calData } = await supabase
+                    .schema('fiscal')
+                    .from('calendario')
+                    .select('id, empresa_id, data_vencimento, status, template:template_id(nome)')
+                    .order('data_vencimento', { ascending: true })
+                    .limit(100);
+
+                if (calData && calData.length > 0) {
+                    const calEvents = calData
+                        .filter((c: any) => c.data_vencimento)
+                        .map((c: any) => {
+                            const due = new Date(c.data_vencimento);
+                            const today = new Date();
+                            const diffDays = Math.ceil((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                            return {
+                                id: `cal-${c.id}`,
+                                cliente: `Empresa #${c.empresa_id}`,
+                                tipo: (c.template as any)?.nome || 'Obrigação Fiscal',
+                                data: c.data_vencimento,
+                                valor: 0,
+                                origem: 'calendario',
+                                diffDays,
+                                folder: null
+                            };
+                        });
+                    events = [...events, ...calEvents];
+                }
+            }
+
+            // Ordena por data de vencimento (mais urgente primeiro)
+            events.sort((a, b) => a.diffDays - b.diffDays);
             setVencimentos(events);
         } catch (err) {
-            console.error('Erro ao buscar radar de vencimentos:', err);
+            // Falha silenciosa — exibe estado vazio em vez de erro
+            console.warn('Radar de vencimentos: nenhuma fonte de dados disponível ainda.', err);
+            setVencimentos([]);
         } finally {
             setLoading(false);
         }

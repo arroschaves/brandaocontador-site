@@ -74,8 +74,8 @@ export default function ContatoPage() {
               {[
                 { icon: Phone, title: 'WhatsApp', data: ['(67) 99601-1356'], color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                 { icon: Mail, title: 'E-mail', data: ['adm@brandaocontador.com.br'], color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                { icon: MapPin, title: 'Endereço', data: ['R. Cmte. Salgado, 647', 'Centro — Sidrolândia/MS'], color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                { icon: Clock, title: 'Horário', data: ['Seg - Sex: 7h30 — 17h30', 'Sáb: 7h30 — 11h30'], color: 'text-purple-500', bg: 'bg-purple-500/10' },
+                { icon: MapPin, title: 'Endereço', data: ['Rua Santa Catarina, 1010', 'Centro — Sidrolândia/MS — CEP: 79.170-000'], color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                { icon: Clock, title: 'Horário de Atendimento', data: ['Segunda à Sexta', '07:30 às 17:00 hs'], color: 'text-purple-500', bg: 'bg-purple-500/10' },
               ].map((item, i) => (
                 <div key={i} className="glass-card p-6 group">
                   <div className={`w-12 h-12 rounded-xl ${item.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
