@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * API de Notícias Contábeis
  * Fontes: RSS Público (G1 Economia, G1 Agro, Tributário)
@@ -34,7 +37,7 @@ export async function GET(request: Request) {
 
         for (const feed of feeds) {
             try {
-                const response = await fetch(feed.url, { next: { revalidate: 3600 } });
+                const response = await fetch(feed.url, { cache: 'no-store' });
                 const text = await response.text();
                 
                 const items = text.match(/<item>([\s\S]*?)<\/item>/gi) || [];

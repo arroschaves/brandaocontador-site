@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 /**
  * API de Cotações do Mercado Agro + Dólar
  * Atualizado para buscar Dólar Real Time na AwesomeAPI
@@ -10,7 +13,7 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 min
 
 async function fetchAwesomeDolar() {
     try {
-        const res = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL');
+        const res = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL', { cache: 'no-store' });
         const data = await res.json();
         const info = data.USDBRL;
         return {
@@ -27,7 +30,7 @@ async function fetchAwesomeDolar() {
 async function fetchSelic() {
     try {
         const url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json';
-        const response = await fetch(url);
+        const response = await fetch(url, { cache: 'no-store' });
         const data = await response.json();
         return parseFloat(data[0].valor);
     } catch { return 13.25; }
@@ -36,7 +39,7 @@ async function fetchSelic() {
 async function fetchIPCA() {
     try {
         const url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados/ultimos/1?formato=json';
-        const response = await fetch(url);
+        const response = await fetch(url, { cache: 'no-store' });
         const data = await response.json();
         return parseFloat(data[0].valor);
     } catch { return 4.83; }
