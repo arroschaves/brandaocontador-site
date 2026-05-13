@@ -11,11 +11,14 @@ import { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-    title: 'Links Úteis e Certidões Negativas | Brandão Contabilidade',
-    description: 'Acesse portais governamentais, emita certidões negativas (FGTS CRF, CND Federal, SEFAZ MS, TRT, Polícia Federal, INSS) e consulte serviços online. Tudo em um só lugar.',
+    title: 'Links Úteis e Certidões Negativas em MS | Brandão Contabilidade',
+    description: 'Acesse links úteis, certidões negativas, Receita Federal, SEFAZ MS, eSocial, INSS e portais para empresas em Sidrolândia - MS e região.',
+    alternates: {
+        canonical: '/links-uteis',
+    },
     openGraph: {
-        title: 'Links Úteis e Certidões — Brandão Contabilidade',
-        description: 'Portais governamentais e certidões negativas. SEFAZ MS, Receita Federal, INSS, TRT, FGTS e mais.',
+        title: 'Links Úteis e Certidões Negativas em MS | Brandão Contabilidade',
+        description: 'Portais governamentais, certidões negativas e acessos importantes para empresas de Sidrolândia, MS e região.',
     },
 }
 

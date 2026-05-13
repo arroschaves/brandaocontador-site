@@ -10,14 +10,15 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-card border-t border-border">
+    <footer className="bg-card/70 border-t border-border relative overflow-hidden">
+      <div className="absolute inset-0 gradient-hero pointer-events-none opacity-70" />
       {/* Conteúdo principal */}
-      <div className="container-custom py-16">
+      <div className="container-custom py-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Coluna 1: Marca */}
           <div className="space-y-5">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-primary/20">
+              <div className="relative w-10 h-10 rounded-2xl overflow-hidden border border-primary/20">
                 <Image src="/logo-icon.jpg" alt="Logo" fill className="object-cover" />
               </div>
               <div>
@@ -59,11 +60,10 @@ export default function Footer() {
             <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Links Rápidos</h3>
             <nav className="flex flex-col gap-2.5">
               {[
-                { name: 'Portal do Cliente', href: '/login' },
                 { name: 'Notícias Contábeis', href: '/noticias-contabeis' },
                 { name: 'Links Úteis', href: '/links-uteis' },
                 { name: 'Reforma Tributária', href: '/reforma-tributaria' },
-                { name: 'Política de Privacidade', href: '#' },
+                { name: 'Contato', href: '/contato' },
               ].map((link) => (
                 <Link key={link.name} href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 group">
                   <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
@@ -118,13 +118,13 @@ export default function Footer() {
       </div>
 
       {/* Rodapé legal */}
-      <div className="border-t border-border">
+      <div className="border-t border-border relative z-10">
         <div className="container-custom py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
             © {currentYear} Brandão Contabilidade. Todos os direitos reservados. CRC/MS 003218
           </p>
           <p className="text-[10px] text-muted-foreground/60 font-mono">
-            Ecossistema Maestro v4.0
+            Site institucional Brandão Contabilidade
           </p>
         </div>
       </div>

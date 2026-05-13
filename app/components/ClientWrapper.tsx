@@ -11,9 +11,7 @@ import { usePathname } from 'next/navigation';
  */
 export default function ClientWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith('/admin');
-  const isLogin = pathname?.startsWith('/login');
-  const hideChrome = isAdmin || isLogin;
+  const hideChrome = pathname?.startsWith('/api/og');
 
   return (
     <>

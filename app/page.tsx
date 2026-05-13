@@ -7,11 +7,14 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Início | Brandão Contabilidade — Soluções Contábeis em Sidrolândia',
-  description: 'Mais de 30 anos de tradição em contabilidade empresarial, agronegócio e gestão de pessoas. Tecnologia e experiência a serviço do seu crescimento.',
+  title: 'Contabilidade em Sidrolândia - MS | Brandão Contabilidade',
+  description: 'Contabilidade para empresas e agronegócio em Sidrolândia - MS, com apoio fiscal, trabalhista, societário e atendimento consultivo.',
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'Início | Brandão Contabilidade',
-    description: 'Tradição e tecnologia em serviços contábeis para empresas e produtores rurais.',
+    title: 'Contabilidade em Sidrolândia - MS | Brandão Contabilidade',
+    description: 'Mais clareza, menos risco e atendimento contábil próximo para empresas e produtores rurais em Sidrolândia e região.',
   }
 };
 
@@ -27,9 +30,10 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           HERO SECTION
           ═══════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
+      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden">
         {/* Gradiente de fundo decorativo */}
         <div className="absolute inset-0 gradient-hero pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-72 editorial-grid opacity-40 pointer-events-none" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-72 h-72 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -42,16 +46,26 @@ export default function Home() {
                 <span className="text-xs font-semibold text-primary tracking-wide">Desde 1993 • Sidrolândia - MS</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground leading-[1.1]">
-                Sua contabilidade com{' '}
-                <span className="text-primary">excelência</span> e{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-500">tradição</span>.
+              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-display font-bold text-foreground leading-[1.02] text-balance">
+                Mais clareza, menos risco e uma contabilidade que{' '}
+                <span className="text-primary">faz sua empresa avançar</span>.
               </h1>
 
-              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-                Mais de <strong className="text-foreground">30 anos</strong> transformando números em estratégias de crescimento para empresas e produtores rurais.
-                Conte com quem entende o campo e a cidade.
+              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed text-balance">
+                Há mais de <strong className="text-foreground">30 anos</strong>, ajudamos empresas e produtores rurais a organizar rotinas fiscais, trabalhistas e societárias com segurança, agilidade e visão estratégica.
               </p>
+
+              <div className="flex flex-wrap gap-3 text-xs font-semibold text-muted-foreground">
+                {[
+                  'Atendimento próximo e consultivo',
+                  'Especialistas em agronegócio',
+                  'Suporte para empresas em crescimento',
+                ].map((item) => (
+                  <span key={item} className="rounded-full border border-border/70 bg-card/70 px-3 py-2">
+                    {item}
+                  </span>
+                ))}
+              </div>
 
               <div className="flex flex-wrap gap-4 pt-2">
                 <a
@@ -61,10 +75,10 @@ export default function Home() {
                   className="btn-primary px-8 py-4 text-sm"
                 >
                   <Phone className="w-4 h-4" />
-                  Fale no WhatsApp
+                  Solicitar atendimento
                 </a>
                 <Link href="/servicos" className="btn-secondary px-8 py-4 text-sm">
-                  Nossos Serviços
+                  Ver soluções
                   <ArrowUpRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -87,6 +101,19 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-3 gap-3 max-w-xl pt-4">
+                {[
+                  { value: '31+', label: 'anos de história' },
+                  { value: '500+', label: 'clientes ativos' },
+                  { value: 'MS', label: 'foco regional' },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-[1.5rem] border border-border/70 bg-card/70 px-4 py-4 backdrop-blur">
+                    <p className="text-2xl font-display font-bold text-foreground">{item.value}</p>
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Card visual decorativo */}
@@ -94,22 +121,31 @@ export default function Home() {
               <div className="relative">
                 {/* Card principal */}
                 <div className="glass-card p-8 space-y-6 shine-effect">
+                  <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-5">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Consultoria de alta confiança</p>
+                      <h3 className="font-display font-bold text-foreground text-lg mt-2">Rotina contábil organizada para você decidir melhor</h3>
+                    </div>
+                    <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                      Desde 1993
+                    </div>
+                  </div>
                   <div className="flex items-center gap-4">
                     <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
                       <Shield className="w-6 h-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="font-display font-bold text-foreground text-lg">Ecossistema Completo</h3>
-                      <p className="text-sm text-muted-foreground">Tudo num só lugar, com tecnologia</p>
+                      <p className="text-sm text-muted-foreground">Fiscal, pessoal, societário e agro no mesmo atendimento</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     {[
-                      { icon: FileText, text: 'Obrigações fiscais automatizadas', status: 'ok' },
-                      { icon: Users, text: 'RH e folha de pagamento digital', status: 'ok' },
-                      { icon: Tractor, text: 'Especialistas em agronegócio', status: 'ok' },
-                      { icon: Building2, text: 'Abertura e legalização de empresas', status: 'ok' },
+                      { icon: FileText, text: 'Calendário fiscal sob controle e menos risco de atraso', status: 'ok' },
+                      { icon: Users, text: 'Folha, admissões e rotinas trabalhistas com mais previsibilidade', status: 'ok' },
+                      { icon: Tractor, text: 'Acompanhamento especializado para empresas e produtores rurais', status: 'ok' },
+                      { icon: Building2, text: 'Abertura, ajuste e regularização societária com orientação prática', status: 'ok' },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-primary/5 transition-colors">
                         <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
@@ -175,7 +211,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           SERVIÇOS — GRID INTERATIVO
           ═══════════════════════════════════════════ */}
-      <section className="py-24 bg-background">
+      <section className="py-24 bg-background section-shell">
         <div className="container-custom">
           <div className="text-center max-w-2xl mx-auto mb-16 reveal">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold text-primary mb-4">
@@ -185,18 +221,18 @@ export default function Home() {
               Soluções completas para o seu <span className="text-primary">crescimento</span>
             </h2>
             <p className="text-muted-foreground leading-relaxed">
-              Do campo à cidade, combinamos expertise contábil com tecnologia para simplificar sua gestão.
+              Do campo à cidade, entregamos apoio contábil para reduzir retrabalho, manter conformidade e dar mais tranquilidade à gestão.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: 'Contabilidade Empresarial', icon: Calculator, desc: 'Escrituração, balanços e demonstrativos com visão estratégica para o seu negócio crescer.', color: 'from-emerald-500 to-teal-500' },
-              { title: 'Departamento Pessoal', icon: Users, desc: 'Folha de pagamento, eSocial, admissão, rescisão e toda a gestão trabalhista digital.', color: 'from-blue-500 to-indigo-500' },
-              { title: 'Legalização de Empresas', icon: Shield, desc: 'Abertura, alteração e encerramento. Estruturação societária simplificada.', color: 'from-purple-500 to-violet-500' },
-              { title: 'Agronegócio', icon: Tractor, desc: 'Contabilidade rural, LCDPR, tributação de commodities e gestão patrimonial rural.', color: 'from-green-500 to-lime-500' },
-              { title: 'Planejamento Tributário', icon: TrendingUp, desc: 'Análise inteligente de regime tributário para reduzir carga fiscal legalmente.', color: 'from-amber-500 to-orange-500' },
-              { title: 'Certificado Digital', icon: FileText, desc: 'Emissão e renovação de e-CNPJ, e-CPF com agilidade e suporte completo.', color: 'from-rose-500 to-pink-500' },
+              { title: 'Contabilidade Empresarial', icon: Calculator, desc: 'Mais organização financeira, demonstrativos confiáveis e apoio para sua empresa crescer com segurança.', color: 'from-emerald-500 to-teal-500' },
+              { title: 'Departamento Pessoal', icon: Users, desc: 'Folha, eSocial e rotinas trabalhistas conduzidas com atenção técnica e menos risco operacional.', color: 'from-blue-500 to-indigo-500' },
+              { title: 'Legalização de Empresas', icon: Shield, desc: 'Abertura, alteração e regularização com orientação clara para você avançar sem burocracia desnecessária.', color: 'from-purple-500 to-violet-500' },
+              { title: 'Agronegócio', icon: Tractor, desc: 'Atendimento contábil pensado para a realidade do produtor rural e das empresas do agro.', color: 'from-green-500 to-lime-500' },
+              { title: 'Planejamento Tributário', icon: TrendingUp, desc: 'Leitura tributária estratégica para enquadrar melhor sua operação e proteger margem.', color: 'from-amber-500 to-orange-500' },
+              { title: 'Certificado Digital', icon: FileText, desc: 'Emissão e renovação com suporte direto para não travar obrigações e assinaturas importantes.', color: 'from-rose-500 to-pink-500' },
             ].map((service, i) => (
               <Link
                 key={i}
@@ -213,8 +249,8 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                   {service.desc}
                 </p>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
-                  Saiba mais <ChevronRight className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                  Quero entender melhor <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </Link>
             ))}
@@ -225,7 +261,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           POR QUE NOS ESCOLHER
           ═══════════════════════════════════════════ */}
-      <section className="py-24 bg-muted/30">
+      <section className="py-24 bg-muted/30 section-shell">
         <div className="container-custom">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8 reveal">
@@ -237,10 +273,10 @@ export default function Home() {
               </h2>
               <div className="space-y-5">
                 {[
-                  { title: '31 anos de experiência', desc: 'Fundada em 1993, acompanhamos a evolução de Sidrolândia e região.' },
-                  { title: 'Especialistas em agro', desc: 'Entendemos as particularidades do agronegócio e do produtor rural.' },
-                  { title: 'Tecnologia de ponta', desc: 'Sistemas digitais, automação e IA para agilidade na sua gestão.' },
-                  { title: 'Atendimento pessoal', desc: 'Cada cliente é único. Oferecemos suporte dedicado e personalizado.' },
+                  { title: '31 anos de experiência prática', desc: 'Acompanhamos empresas e produtores em diferentes fases de crescimento, mudança e regularização.' },
+                  { title: 'Especialização em agro e empresa', desc: 'Entendemos as rotinas do campo e da cidade, sem tratamento genérico.' },
+                  { title: 'Processo mais claro e ágil', desc: 'Tecnologia entra para reduzir ruído, organizar entregas e melhorar sua resposta.' },
+                  { title: 'Contato humano de verdade', desc: 'Você fala com quem acompanha sua operação e entende o impacto de cada decisão.' },
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 items-start">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -281,13 +317,14 @@ export default function Home() {
           ═══════════════════════════════════════════ */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 gradient-hero pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-64 editorial-grid opacity-35 pointer-events-none" />
         <div className="container-custom text-center relative z-10 reveal">
           <div className="max-w-2xl mx-auto space-y-8">
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground">
-              Pronto para ter uma contabilidade de <span className="text-primary">verdade</span>?
+              Pronto para trocar improviso por uma contabilidade que <span className="text-primary">acompanha seu ritmo</span>?
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Pare de se preocupar com burocracia. Deixe que a Brandão Contabilidade cuide dos números enquanto você foca no que realmente importa: <strong className="text-foreground">o seu negócio</strong>.
+              Se você quer mais organização, menos risco e atendimento próximo para tomar decisões com confiança, vamos conversar e entender o que sua operação precisa hoje.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
@@ -297,11 +334,11 @@ export default function Home() {
                 className="btn-primary px-10 py-4 text-base shadow-glow-sm"
               >
                 <Phone className="w-5 h-5" />
-                Quero ser Cliente
+                Falar com um especialista
               </a>
               <Link href="/contato" className="btn-ghost px-10 py-4 text-base">
                 <Mail className="w-5 h-5" />
-                Enviar Mensagem
+                Pedir proposta
               </Link>
             </div>
           </div>

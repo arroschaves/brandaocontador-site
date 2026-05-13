@@ -1,11 +1,14 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Notícias Contábeis | Tributária, Fiscal, Trabalhista — Brandão Contabilidade',
-    description: 'Notícias atualizadas sobre contabilidade, tributação, eSocial, SPED, Reforma Tributária, Simples Nacional e SEFAZ MS. Fontes oficiais + análise com IA.',
+    title: 'Notícias Contábeis, Fiscais e Trabalhistas | Brandão Contabilidade',
+    description: 'Acompanhe notícias contábeis, fiscais, trabalhistas, eSocial, Receita Federal e SEFAZ MS com leitura prática para empresas e agronegócio.',
+    alternates: {
+        canonical: '/noticias-contabeis',
+    },
     openGraph: {
-        title: 'Notícias Contábeis — Brandão Contabilidade',
-        description: 'Acompanhe as principais notícias contábeis, fiscais e trabalhistas do Brasil e MS.',
+        title: 'Notícias Contábeis, Fiscais e Trabalhistas | Brandão Contabilidade',
+        description: 'Painel com fontes reais, notícias recentes e leitura prática para empresas, departamento pessoal e agronegócio.',
     },
 }
 

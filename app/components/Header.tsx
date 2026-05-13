@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Phone, ChevronRight, Sun, Moon } from 'lucide-react';
+import { Menu, X, Phone, Sun, Moon } from 'lucide-react';
 
 /**
  * Header moderno — transparente que fica sólido no scroll.
@@ -46,20 +46,17 @@ export default function Header() {
     { name: 'Contato', path: '/contato' },
   ];
 
-  // Verifica se está numa rota do admin — se sim, não renderiza o header público
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/login')) return null;
-
   return (
     <>
       <header className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrolled
-        ? 'bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-sm'
+        ? 'bg-background/85 backdrop-blur-2xl border-b border-border/60 shadow-sm'
         : 'bg-transparent'
       }`}>
         <div className="container-custom">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-primary/20 shadow-sm group-hover:shadow-glow-sm transition-all ">
+              <div className="relative w-10 h-10 rounded-2xl overflow-hidden border border-primary/20 shadow-sm group-hover:-translate-y-0.5 group-hover:shadow-glow-sm transition-all">
                 <Image
                   src="/logo-icon.jpg"
                   alt="Brandão Contabilidade"
@@ -98,7 +95,7 @@ export default function Header() {
               {/* Toggle dark mode */}
               <button
                 onClick={toggleDarkMode}
-                className="p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                className="p-2.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
                 aria-label="Alternar tema"
               >
                 {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -115,16 +112,10 @@ export default function Header() {
                 Fale Conosco
               </a>
 
-              {/* Portal */}
-              <Link href="/login" className="hidden md:inline-flex btn-secondary text-xs py-2.5 px-5">
-                Portal
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
-
               {/* Menu mobile */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
-                className="lg:hidden p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                className="lg:hidden p-2.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
                 aria-label="Menu"
               >
                 {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -138,7 +129,7 @@ export default function Header() {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute top-20 left-0 right-0 bg-background border-b border-border shadow-glass-lg animate-fade-in-down mx-4 rounded-2xl p-4">
+          <div className="absolute top-20 left-0 right-0 bg-background/95 border border-border shadow-glass-lg animate-fade-in-down mx-4 rounded-[1.75rem] p-4 backdrop-blur-2xl">
             <nav className="flex flex-col gap-1">
               {navLinks.map((link) => {
                 const isActive = pathname === link.path;
@@ -161,9 +152,6 @@ export default function Header() {
               <a href="https://wa.me/5567996011356" target="_blank" rel="noopener noreferrer" className="btn-primary text-xs py-2.5 px-4 flex-1 justify-center">
                 <Phone className="w-3.5 h-3.5" /> WhatsApp
               </a>
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="btn-secondary text-xs py-2.5 px-4 flex-1 justify-center">
-                Portal <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
             </div>
           </div>
         </div>

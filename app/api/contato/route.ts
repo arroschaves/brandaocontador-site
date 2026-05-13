@@ -85,15 +85,36 @@ export async function POST(request: NextRequest) {
         };
 
         const subjectLabel = subjectMap[safeSubject] || safeSubject;
+        const whatsappMessage = encodeURIComponent(
+            `Nova mensagem do site%0A%0A` +
+            `Nome: ${safeName}%0A` +
+            `Email: ${safeEmail}%0A` +
+            `Assunto: ${subjectLabel}%0A` +
+            `Mensagem: ${safeMessage.substring(0, 400)}${safeMessage.length > 400 ? '...' : ''}`
+        );
+        const whatsappLink = `https://wa.me/5567996011356?text=${whatsappMessage}`;
 
-        // Configuração do transporte de email
+        const smtpUser = process.env.SMTP_USER;
+        const smtpPass = process.env.SMTP_PASS;
+        const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+        const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+
+        if (!smtpUser || !smtpPass) {
+            return NextResponse.json({
+                success: true,
+                fallback: true,
+                message: 'Recebemos sua mensagem. Para concluir o contato agora, continue pelo WhatsApp.',
+                whatsappLink,
+            });
+        }
+
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: false,
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpPort === 465,
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: smtpUser,
+                pass: smtpPass,
             },
         });
 
@@ -138,22 +159,12 @@ export async function POST(request: NextRequest) {
 
         // Enviar email
         await transporter.sendMail({
-            from: `"Site Brandão Contabilidade" <${process.env.SMTP_USER}>`,
+            from: `"Site Brandão Contabilidade" <${smtpUser}>`,
             to: 'adm@brandaocontador.com.br',
             replyTo: safeEmail,
             subject: `[Site] ${subjectLabel} — ${safeName}`,
             html: htmlContent,
         });
-
-        // Gerar link de notificação WhatsApp
-        const whatsappMessage = encodeURIComponent(
-            `📩 *Nova mensagem do site!*\n\n` +
-            `👤 *Nome:* ${safeName}\n` +
-            `📧 *Email:* ${safeEmail}\n` +
-            `📋 *Assunto:* ${subjectLabel}\n` +
-            `💬 *Mensagem:* ${safeMessage.substring(0, 200)}${safeMessage.length > 200 ? '...' : ''}`
-        );
-        const whatsappLink = `https://wa.me/5567996011356?text=${whatsappMessage}`;
 
         return NextResponse.json({
             success: true,

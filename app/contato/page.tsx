@@ -13,6 +13,7 @@ export default function ContatoPage() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [status, setStatus] = useState<FormStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [whatsAppFallback, setWhatsAppFallback] = useState('');
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
@@ -22,6 +23,7 @@ export default function ContatoPage() {
     e.preventDefault();
     setStatus('sending');
     setErrorMessage('');
+    setWhatsAppFallback('');
 
     try {
       const response = await fetch('/api/contato', {
@@ -38,6 +40,7 @@ export default function ContatoPage() {
       }
 
       setStatus('success');
+      setWhatsAppFallback(data.whatsappLink || '');
       setFormData({ name: '', email: '', subject: '', message: '' });
       setTimeout(() => setStatus('idle'), 8000);
     } catch {
@@ -59,7 +62,7 @@ export default function ContatoPage() {
             Fale <span className="text-primary">conosco</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Atendimento de excelência. Escolha o canal mais conveniente ou envie uma mensagem diretamente.
+            Conte um pouco do seu momento e nossa equipe retorna com a melhor orientação para sua empresa, sua rotina fiscal ou sua operação no agro.
           </p>
         </div>
       </section>
@@ -70,6 +73,13 @@ export default function ContatoPage() {
 
           {/* Informações de Contato */}
           <div className="space-y-8">
+            <div className="rounded-[1.75rem] border border-primary/15 bg-primary/5 px-6 py-6">
+              <p className="text-sm font-semibold text-foreground">Atendimento inicial sem complicação</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Você pode falar por WhatsApp agora ou enviar uma mensagem com seu contexto. Assim conseguimos direcionar mais rápido o atendimento ideal.
+              </p>
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-4">
               {[
                 { icon: Phone, title: 'WhatsApp', data: ['(67) 99601-1356'], color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
@@ -89,8 +99,8 @@ export default function ContatoPage() {
 
             {/* CTA WhatsApp */}
             <div className="p-8 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white relative overflow-hidden">
-              <h3 className="text-xl font-display font-bold mb-2">Atendimento via WhatsApp</h3>
-              <p className="text-white/70 text-sm mb-6">Fale com um de nossos consultores agora mesmo.</p>
+              <h3 className="text-xl font-display font-bold mb-2">Prefere resolver mais rápido?</h3>
+              <p className="text-white/70 text-sm mb-6">Fale no WhatsApp e explique sua necessidade para receber um direcionamento inicial com mais agilidade.</p>
               <a
                 href="https://wa.me/5567996011356"
                 target="_blank"
@@ -106,6 +116,9 @@ export default function ContatoPage() {
           {/* Formulário */}
           <div className="glass-card-static p-8 md:p-10">
             <h2 className="text-2xl font-display font-bold text-foreground mb-8">Envie sua mensagem</h2>
+            <div className="mb-6 rounded-2xl border border-border/70 bg-card/70 px-5 py-4 text-sm text-muted-foreground">
+              Preencha os dados abaixo e, se quiser, descreva sua empresa, segmento ou a principal dúvida. Isso ajuda nossa equipe a responder com mais contexto.
+            </div>
 
             {/* Sucesso */}
             {status === 'success' && (
@@ -113,9 +126,23 @@ export default function ContatoPage() {
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Mensagem enviada!</p>
-                  <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Retornaremos em breve.</p>
+                  <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">
+                    {whatsAppFallback ? 'Se preferir agilizar o atendimento, continue também pelo WhatsApp.' : 'Retornaremos em breve.'}
+                  </p>
                 </div>
               </div>
+            )}
+
+            {status === 'success' && whatsAppFallback && (
+              <a
+                href={whatsAppFallback}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-6 inline-flex items-center gap-3 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Continuar no WhatsApp
+              </a>
             )}
 
             {/* Erro */}
@@ -142,27 +169,27 @@ export default function ContatoPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="subject" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assunto</label>
-                <select id="subject" value={formData.subject} onChange={handleChange} className="input-modern" required>
-                  <option value="">Selecione um Assunto</option>
-                  <option value="contabilidade">Serviços Contábeis</option>
-                  <option value="fiscal">Planejamento Fiscal</option>
-                  <option value="trabalhista">Departamento Pessoal</option>
-                  <option value="consultoria">Consultoria Estratégica</option>
-                  <option value="outros">Outros Assuntos</option>
-                </select>
+                  <label htmlFor="subject" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assunto</label>
+                  <select id="subject" value={formData.subject} onChange={handleChange} className="input-modern" required>
+                  <option value="">Selecione um assunto</option>
+                  <option value="contabilidade">Quero trocar ou contratar contabilidade</option>
+                  <option value="fiscal">Preciso de apoio fiscal ou tributário</option>
+                  <option value="trabalhista">Preciso de apoio trabalhista / folha</option>
+                  <option value="consultoria">Quero orientação estratégica</option>
+                  <option value="outros">Tenho outra necessidade</option>
+                  </select>
               </div>
 
               <div className="space-y-2">
                 <label htmlFor="message" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mensagem</label>
-                <textarea id="message" rows={5} value={formData.message} onChange={handleChange} className="input-modern resize-none" placeholder="Como podemos ajudar?" required />
+                <textarea id="message" rows={5} value={formData.message} onChange={handleChange} className="input-modern resize-none" placeholder="Ex.: preciso organizar a parte fiscal da empresa, revisar folha ou entender o melhor enquadramento." required />
               </div>
 
               <button type="submit" disabled={status === 'sending'} className="btn-primary w-full py-4 text-sm disabled:opacity-60 disabled:cursor-not-allowed">
                 {status === 'sending' ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
                 ) : (
-                  <><Send className="w-4 h-4" /> Enviar Mensagem</>
+                  <><Send className="w-4 h-4" /> Solicitar Contato</>
                 )}
               </button>
             </form>

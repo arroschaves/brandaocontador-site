@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  TrendingUp, TrendingDown, DollarSign, Wheat, Beef,
+  DollarSign, Wheat, Beef,
   RefreshCw, BarChart3, ArrowUpRight, ArrowDownRight, Minus,
   Activity, Percent, Tractor
 } from 'lucide-react';
@@ -14,18 +14,24 @@ import {
 
 interface CommodityPrice {
   nome: string;
-  preco: number;
+  valor: number;
+  codigo: string;
   unidade: string;
   variacao: number;
   fonte: string;
   atualizado: string;
-  regiao: string;
+  referencia: string;
+  descricao: string;
 }
 
 interface MarketData {
   dolar: { compra: number; venda: number; variacao: number; atualizado: string };
-  commodities: CommodityPrice[];
-  indices: { selic: number; ipca: number; igpm: number };
+  agroIndices: CommodityPrice[];
+  macro: {
+    selic: { valor: number; atualizado: string };
+    ipca: { valor: number; atualizado: string };
+  };
+  observacao: string;
 }
 
 function VariacaoTag({ valor }: { valor: number }) {
@@ -69,8 +75,8 @@ export default function MercadoAgroPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const graos = data?.commodities.filter(c => ['Soja', 'Milho'].includes(c.nome)) || [];
-  const pecuaria = data?.commodities.filter(c => !['Soja', 'Milho'].includes(c.nome)) || [];
+  const graos = data?.agroIndices.filter(c => c.codigo === 'IFMILHO') || [];
+  const pecuaria = data?.agroIndices.filter(c => c.codigo === 'IFBOI') || [];
 
   return (
     <main className="min-h-screen bg-background pt-24">
@@ -81,13 +87,13 @@ export default function MercadoAgroPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
             <div>
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-xs font-semibold text-green-600 dark:text-green-400 mb-4">
-                <Tractor className="w-3 h-3" /> Mercado em Tempo Real
+                <Tractor className="w-3 h-3" /> Indicadores e Referências de Mercado
               </span>
               <h1 className="text-4xl sm:text-5xl font-display font-bold text-foreground">
                 Painel <span className="text-primary">Agro</span>
               </h1>
               <p className="text-muted-foreground mt-3 max-w-lg">
-                Cotações diárias de commodities, pecuária e índices econômicos com foco em Mato Grosso do Sul.
+                Indicadores oficiais para acompanhar câmbio, juros, inflação e índices agro divulgados por Banco Central e B3.
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -149,8 +155,9 @@ export default function MercadoAgroPage() {
                 <Percent className="w-4 h-4 text-emerald-500" />
                 <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">SELIC</span>
               </div>
-              <div className="text-2xl font-display font-bold font-mono text-foreground">{data?.indices.selic.toFixed(2) || '-'}%</div>
+              <div className="text-2xl font-display font-bold font-mono text-foreground">{data?.macro.selic.valor.toFixed(2) || '-'}%</div>
               <div className="text-[9px] text-muted-foreground font-mono mt-1">Taxa anual</div>
+              <div className="text-[9px] text-muted-foreground font-mono mt-1">Ref.: {data?.macro.selic.atualizado || '-'}</div>
             </div>
 
             {/* IPCA */}
@@ -159,18 +166,19 @@ export default function MercadoAgroPage() {
                 <Activity className="w-4 h-4 text-amber-500" />
                 <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">IPCA</span>
               </div>
-              <div className="text-2xl font-display font-bold font-mono text-foreground">{data?.indices.ipca.toFixed(2) || '-'}%</div>
+              <div className="text-2xl font-display font-bold font-mono text-foreground">{data?.macro.ipca.valor.toFixed(2) || '-'}%</div>
               <div className="text-[9px] text-muted-foreground font-mono mt-1">Acum. 12 meses</div>
+              <div className="text-[9px] text-muted-foreground font-mono mt-1">Ref.: {data?.macro.ipca.atualizado || '-'}</div>
             </div>
 
-            {/* IGP-M */}
+            {/* Painel estrito */}
             <div className="glass-card p-5">
               <div className="flex items-center gap-2 mb-3">
                 <BarChart3 className="w-4 h-4 text-blue-500" />
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">IGP-M</span>
+                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Modo do Painel</span>
               </div>
-              <div className="text-2xl font-display font-bold font-mono text-foreground">{data?.indices.igpm.toFixed(2) || '-'}%</div>
-              <div className="text-[9px] text-muted-foreground font-mono mt-1">Acum. 12 meses</div>
+              <div className="text-base font-display font-bold text-foreground">Estrito oficial</div>
+              <div className="text-[9px] text-muted-foreground font-mono mt-1">Sem dados simulados</div>
             </div>
           </div>
         </div>
@@ -192,17 +200,18 @@ export default function MercadoAgroPage() {
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-2xl font-display font-bold text-foreground">{item.nome}</h3>
-                    <span className="text-[10px] text-muted-foreground font-mono">{item.regiao}</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">{item.codigo}</span>
                   </div>
                   <VariacaoTag valor={item.variacao} />
                 </div>
                 <div className="text-3xl font-display font-bold text-primary font-mono mb-1">
-                  R$ {item.preco.toFixed(2)}
+                  {item.valor.toFixed(2)}
                 </div>
                 <div className="text-xs text-muted-foreground font-mono">{item.unidade}</div>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-4">{item.descricao}</p>
                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
                   <span className="text-[9px] text-muted-foreground font-mono">Fonte: {item.fonte}</span>
-                  <span className="text-[9px] text-muted-foreground font-mono">{item.atualizado}</span>
+                  <span className="text-[9px] text-muted-foreground font-mono">Ref.: {item.referencia}</span>
                 </div>
               </div>
             ))}
@@ -228,12 +237,13 @@ export default function MercadoAgroPage() {
                   <VariacaoTag valor={item.variacao} />
                 </div>
                 <div className="text-2xl font-display font-bold text-primary font-mono">
-                  R$ {item.preco.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  {item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </div>
                 <div className="text-[10px] text-muted-foreground font-mono mt-1">{item.unidade}</div>
+                <p className="text-sm text-muted-foreground leading-relaxed mt-3">{item.descricao}</p>
                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-border/50">
                   <span className="text-[9px] text-muted-foreground font-mono">{item.fonte}</span>
-                  <span className="text-[9px] text-muted-foreground font-mono">{item.regiao}</span>
+                  <span className="text-[9px] text-muted-foreground font-mono">Ref.: {item.referencia}</span>
                 </div>
               </div>
             ))}
@@ -245,8 +255,7 @@ export default function MercadoAgroPage() {
       <section className="py-8 border-t border-border">
         <div className="container-custom">
           <p className="text-[10px] text-muted-foreground font-mono text-center max-w-3xl mx-auto leading-relaxed">
-            Cotações de referência. Valores podem variar conforme região e negociação. Dólar: Banco Central (PTAX).
-            Grãos: CEPEA/ESALQ. Pecuária: Indicadores regionais MS/BR. Consulte seu contador para decisões financeiras.
+            {data?.observacao || 'Painel em modo estrito: exibe apenas dados de fontes oficiais públicas integradas no momento.'} Dólar: AwesomeAPI com referência PTAX. SELIC e IPCA: Banco Central. Milho e boi: índices oficiais da B3 divulgados em planilhas públicas diárias.
           </p>
         </div>
       </section>

@@ -12,8 +12,8 @@ export default function JsonLd() {
                 name: 'Brandão Contabilidade',
                 alternateName: 'Brandão Contador',
                 url: 'https://www.brandaocontador.com.br',
-                logo: 'https://www.brandaocontador.com.br/logo-full.jpg',
-                image: 'https://www.brandaocontador.com.br/og-image.jpg',
+                logo: 'https://www.brandaocontador.com.br/logo-wide.jpg',
+                image: 'https://www.brandaocontador.com.br/api/og',
                 description: 'Mais de 30 anos de experiência em assessoria contábil, fiscal e pessoal em Sidrolândia - MS. Especialistas em contabilidade rural e agronegócio.',
                 foundingDate: '1993',
                 telephone: '+55-67-99601-1356',
@@ -35,14 +35,8 @@ export default function JsonLd() {
                     {
                         '@type': 'OpeningHoursSpecification',
                         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-                        opens: '08:00',
-                        closes: '18:00',
-                    },
-                    {
-                        '@type': 'OpeningHoursSpecification',
-                        dayOfWeek: 'Saturday',
-                        opens: '08:00',
-                        closes: '12:00',
+                        opens: '07:30',
+                        closes: '17:00',
                     },
                 ],
                 sameAs: [

@@ -1,27 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Ignora erros de ESLint durante o build (tratados separadamente no CI)
     eslint: {
         ignoreDuringBuilds: true,
     },
-    // Ignora erros de TypeScript durante o build (tratados separadamente no CI)
     typescript: {
         ignoreBuildErrors: false,
     },
-    // Otimizações de imagem
-    images: {
-        remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: '**.supabase.co',
-            },
-            {
-                protocol: 'https',
-                hostname: '**.googleapis.com',
-            },
-        ],
-    },
-    // Headers de segurança
     async headers() {
         return [
             {

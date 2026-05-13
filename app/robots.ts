@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/admin/', '/cliente/', '/api/'],
+            disallow: ['/api/'],
         },
         sitemap: 'https://www.brandaocontador.com.br/sitemap.xml',
     }

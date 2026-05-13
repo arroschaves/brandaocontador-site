@@ -9,79 +9,77 @@
 
 @layer base {
   :root {
-    /* === Cores do tema claro === */
-    --background: 0 0% 99%;
-    --foreground: 220 20% 14%;
+    --background: 42 33% 98%;
+    --foreground: 210 24% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 14%;
+    --card-foreground: 210 24% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 14%;
+    --popover-foreground: 210 24% 15%;
 
-    --primary: 160 84% 39%;
+    --primary: 156 71% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 20% 96%;
-    --secondary-foreground: 220 20% 14%;
+    --secondary: 42 25% 94%;
+    --secondary-foreground: 210 24% 15%;
 
-    --accent: 40 60% 55%;
-    --accent-foreground: 40 80% 20%;
+    --accent: 36 78% 56%;
+    --accent-foreground: 28 62% 18%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 42 20% 95%;
+    --muted-foreground: 212 10% 40%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 160 84% 39%;
+    --border: 35 23% 86%;
+    --input: 35 23% 86%;
+    --ring: 156 71% 30%;
 
-    --radius: 0.875rem;
+    --radius: 1rem;
 
-    /* === Cores especiais === */
-    --gold: 40 60% 55%;
-    --gold-light: 40 70% 92%;
-    --emerald: 160 84% 39%;
-    --emerald-light: 160 70% 95%;
+    --gold: 36 78% 56%;
+    --gold-light: 39 100% 95%;
+    --emerald: 156 71% 30%;
+    --emerald-light: 152 44% 94%;
     --success: 152 69% 41%;
     --warning: 38 92% 50%;
     --info: 217 91% 60%;
   }
 
   .dark {
-    --background: 224 28% 7%;
-    --foreground: 210 20% 95%;
+    --background: 210 24% 8%;
+    --foreground: 42 20% 94%;
 
-    --card: 224 28% 9%;
-    --card-foreground: 210 20% 95%;
+    --card: 210 24% 10%;
+    --card-foreground: 42 20% 94%;
 
-    --popover: 224 28% 9%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 210 24% 10%;
+    --popover-foreground: 42 20% 94%;
 
-    --primary: 160 84% 45%;
+    --primary: 154 68% 44%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 224 20% 14%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 210 18% 15%;
+    --secondary-foreground: 42 20% 94%;
 
-    --accent: 40 55% 50%;
-    --accent-foreground: 40 80% 90%;
+    --accent: 39 75% 58%;
+    --accent-foreground: 32 55% 12%;
 
-    --muted: 224 20% 14%;
-    --muted-foreground: 220 15% 60%;
+    --muted: 210 18% 15%;
+    --muted-foreground: 38 10% 68%;
 
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 224 20% 18%;
-    --input: 224 20% 18%;
-    --ring: 160 84% 45%;
+    --border: 210 18% 20%;
+    --input: 210 18% 20%;
+    --ring: 154 68% 44%;
 
-    --gold: 40 55% 50%;
-    --gold-light: 40 40% 15%;
-    --emerald-light: 160 40% 12%;
+    --gold: 39 75% 58%;
+    --gold-light: 39 35% 18%;
+    --emerald-light: 154 30% 16%;
   }
 
   * {
@@ -97,10 +95,18 @@
   body {
     @apply font-sans antialiased bg-background text-foreground overflow-x-hidden;
     line-height: 1.6;
+    background-image:
+      radial-gradient(circle at top left, hsl(var(--gold) / 0.11), transparent 24rem),
+      radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 28rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight text-foreground;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
   }
 }
 
@@ -110,36 +116,52 @@
 @layer components {
   /* Contêiner padrão */
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl mx-auto px-5 sm:px-7 lg:px-10;
   }
 
   /* Cards */
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/60 rounded-2xl shadow-sm;
-    @apply hover:shadow-lg hover:border-primary/20 transition-all duration-300;
+    @apply backdrop-blur-xl border rounded-[1.75rem];
+    background-color: hsl(var(--card) / 0.78);
+    border-color: hsl(var(--border) / 0.7);
+    box-shadow: 0 18px 45px hsl(210 24% 15% / 0.06);
+    @apply transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    border-color: hsl(var(--primary) / 0.2);
   }
 
   .glass-card-static {
-    @apply bg-card/80 backdrop-blur-xl border border-border/60 rounded-2xl shadow-sm;
+    @apply backdrop-blur-xl border rounded-[1.75rem];
+    background-color: hsl(var(--card) / 0.82);
+    border-color: hsl(var(--border) / 0.7);
+    box-shadow: 0 18px 45px hsl(210 24% 15% / 0.06);
   }
 
   /* Botões */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3
-           bg-primary text-primary-foreground font-semibold rounded-xl
+           bg-primary text-primary-foreground font-semibold rounded-full
            border border-transparent shadow-md shadow-primary/20
-           hover:shadow-lg hover:shadow-primary/30 hover:brightness-110
+           hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30 hover:brightness-110
            active:scale-[0.98] transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3
-           bg-secondary text-secondary-foreground font-semibold rounded-xl
-           border border-border/60
-           hover:bg-secondary/80 hover:border-primary/20
-           active:scale-[0.98] transition-all duration-200
+           text-secondary-foreground font-semibold rounded-full
+           border active:scale-[0.98] transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2;
+    background-color: hsl(var(--card) / 0.8);
+    border-color: hsl(var(--border) / 0.6);
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-0.125rem);
+    background-color: hsl(var(--secondary) / 0.8);
+    border-color: hsl(var(--primary) / 0.2);
   }
 
   .btn-gold {
@@ -152,7 +174,7 @@
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3
-           bg-transparent text-foreground font-semibold rounded-xl
+           bg-transparent text-foreground font-semibold rounded-full
            hover:bg-muted active:scale-[0.98] transition-all duration-200;
   }
 
@@ -202,20 +224,24 @@
 
   /* Inputs */
   .input-modern {
-    @apply w-full bg-background border border-border rounded-xl px-4 py-3 text-sm
+    @apply w-full border border-border rounded-2xl px-4 py-3.5 text-sm
            placeholder:text-muted-foreground/50
            focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40
            transition-all duration-200;
+    background-color: hsl(var(--background) / 0.8);
   }
 
   /* Navbar transparente → sólida */
   .navbar-glass {
     @apply fixed top-0 w-full z-50 transition-all duration-500;
-    @apply bg-background/70 backdrop-blur-xl border-b border-transparent;
+    @apply backdrop-blur-xl border-b border-transparent;
+    background-color: hsl(var(--background) / 0.7);
   }
 
   .navbar-glass.scrolled {
-    @apply bg-background/95 border-border/60 shadow-sm;
+    @apply shadow-sm;
+    background-color: hsl(var(--background) / 0.95);
+    border-color: hsl(var(--border) / 0.6);
   }
 }
 
@@ -234,18 +260,39 @@
 
   .gradient-hero {
     background: linear-gradient(135deg,
-      hsl(160 84% 39% / 0.08) 0%,
-      hsl(40 60% 55% / 0.05) 50%,
-      transparent 100%
+      hsl(var(--gold) / 0.12) 0%,
+      hsl(var(--primary) / 0.08) 38%,
+      hsl(var(--background)) 100%
     );
   }
 
   .dark .gradient-hero {
     background: linear-gradient(135deg,
-      hsl(160 84% 39% / 0.12) 0%,
-      hsl(40 60% 55% / 0.06) 50%,
-      transparent 100%
+      hsl(var(--gold) / 0.12) 0%,
+      hsl(var(--primary) / 0.14) 38%,
+      hsl(var(--background)) 100%
     );
+  }
+
+  .editorial-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent);
+  }
+
+  .section-shell {
+    position: relative;
+  }
+
+  .section-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 4.5rem;
+    height: 1px;
+    background: hsl(var(--primary) / 0.4);
   }
 
   /* Efeito de brilho sutil */
@@ -378,6 +425,10 @@
   .glow-gold {
     box-shadow: 0 0 20px hsl(40 60% 55% / 0.15),
                 0 0 60px hsl(40 60% 55% / 0.05);
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
 

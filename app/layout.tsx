@@ -25,13 +25,17 @@ const jetbrains = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Brandão Contabilidade | Soluções Contábeis em Sidrolândia - MS',
-  description: 'Mais de 30 anos de experiência em assessoria contábil, fiscal e pessoal. Especialistas em impulsionar seu negócio com estratégia e segurança.',
-  keywords: 'contabilidade, contador, Sidrolândia, MS, fiscal, abertura de empresas, imposto de renda, Brandão Contabilidade, agronegócio',
+  metadataBase: new URL('https://www.brandaocontador.com.br'),
+  title: 'Brandão Contabilidade | Contabilidade em Sidrolândia - MS',
+  description: 'Escritório de contabilidade em Sidrolândia - MS com atendimento para empresas, produtores rurais e rotinas fiscais, trabalhistas e societárias.',
+  keywords: 'contabilidade em Sidrolândia, contador em Sidrolândia MS, escritório de contabilidade MS, contabilidade para agronegócio, departamento pessoal, abertura de empresa, Brandão Contabilidade',
   authors: [{ name: 'Brandão Contabilidade' }],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: 'Brandão Contabilidade | Sua Gestão em Boas Mãos',
-    description: 'Soluções contábeis completas para empresas em Sidrolândia e região. Transformamos números em estratégias de crescimento.',
+    title: 'Brandão Contabilidade | Contabilidade em Sidrolândia - MS',
+    description: 'Atendimento contábil para empresas e agronegócio em Sidrolândia e região, com mais clareza fiscal, trabalhista e societária.',
     url: 'https://www.brandaocontador.com.br',
     siteName: 'Brandão Contabilidade',
     images: [
@@ -45,10 +49,17 @@ export const metadata: Metadata = {
     locale: 'pt-BR',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Brandão Contabilidade | Contabilidade em Sidrolândia - MS',
+    description: 'Atendimento contábil para empresas, produtores rurais e rotinas fiscais em Sidrolândia e região.',
+    images: ['https://www.brandaocontador.com.br/api/og'],
+  },
   robots: {
     index: true,
     follow: true,
   },
+  category: 'business',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

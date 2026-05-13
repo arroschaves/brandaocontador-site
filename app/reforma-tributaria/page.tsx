@@ -13,9 +13,12 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Reforma Tributária 2026 | IBS CBS IS — Brandão Contabilidade',
   description: 'Guia completo da Reforma Tributária 2026: IBS, CBS, IS, cronograma de transição, impactos para empresas, agronegócio e MEI em Mato Grosso do Sul. Atualizado.',
+  alternates: {
+    canonical: '/reforma-tributaria',
+  },
   openGraph: {
     title: 'Reforma Tributária 2026 — Guia Completo',
-    description: 'Tudo sobre a Reforma Tributária: novos impostos IBS e CBS, cronograma, impactos para sua empresa e regras específicas de MS.',
+    description: 'Guia da Reforma Tributária com impactos para empresas e agronegócio em Mato Grosso do Sul.',
   },
 };
 
