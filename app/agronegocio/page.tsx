@@ -56,18 +56,23 @@ export default function MercadoAgroPage() {
   const [data, setData] = useState<MarketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState('');
+  const [error, setError] = useState('');
 
   async function fetchData() {
     setLoading(true);
+    setError('');
     try {
       const response = await fetch('/api/mercado/cotacoes');
       if (response.ok) {
         const result = await response.json();
         setData(result);
         setLastUpdate(new Date().toLocaleString('pt-BR'));
+      } else {
+        setError('Não foi possível carregar os indicadores oficiais agora.');
       }
     } catch (error) {
       console.error('Erro ao buscar cotações:', error);
+      setError('Não foi possível carregar os indicadores oficiais agora.');
     } finally {
       setLoading(false);
     }
@@ -118,6 +123,11 @@ export default function MercadoAgroPage() {
       {/* Dólar + Índices */}
       <section className="py-6 bg-muted/30 border-y border-border">
         <div className="container-custom">
+          {error && (
+            <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm text-amber-700 dark:text-amber-300">
+              {error}
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {/* Dólar */}
             <div className="col-span-2 glass-card p-6 border-primary/20">
@@ -216,6 +226,11 @@ export default function MercadoAgroPage() {
               </div>
             ))}
           </div>
+          {!loading && graos.length === 0 && (
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-6 text-sm text-muted-foreground">
+              Nenhum índice oficial de grãos disponível no momento.
+            </div>
+          )}
         </div>
       </section>
 
@@ -248,6 +263,11 @@ export default function MercadoAgroPage() {
               </div>
             ))}
           </div>
+          {!loading && pecuaria.length === 0 && (
+            <div className="rounded-2xl border border-border/70 bg-card/70 p-6 text-sm text-muted-foreground">
+              Nenhum índice oficial de pecuária disponível no momento.
+            </div>
+          )}
         </div>
       </section>
 
@@ -255,7 +275,7 @@ export default function MercadoAgroPage() {
       <section className="py-8 border-t border-border">
         <div className="container-custom">
           <p className="text-[10px] text-muted-foreground font-mono text-center max-w-3xl mx-auto leading-relaxed">
-            {data?.observacao || 'Painel em modo estrito: exibe apenas dados de fontes oficiais públicas integradas no momento.'} Dólar: AwesomeAPI com referência PTAX. SELIC e IPCA: Banco Central. Milho e boi: índices oficiais da B3 divulgados em planilhas públicas diárias.
+            {data?.observacao || 'Painel em modo estrito: exibe apenas dados de fontes oficiais públicas integradas no momento.'} Dólar PTAX, SELIC e IPCA: Banco Central. Milho e boi: índices oficiais da B3 divulgados em planilhas públicas diárias.
           </p>
         </div>
       </section>

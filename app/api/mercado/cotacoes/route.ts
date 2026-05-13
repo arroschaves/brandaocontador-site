@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const runtime = 'nodejs';
 
 interface MacroIndicator {
     valor: number;
@@ -44,18 +45,33 @@ async function fetchJson<T>(url: string) {
     return response.json() as Promise<T>;
 }
 
-async function fetchAwesomeDolar(): Promise<MacroIndicator & { compra: number; venda: number }> {
-    const data = await fetchJson<{ USDBRL: { bid: string; ask: string; pctChange: string; create_date: string } }>(
-        'https://economia.awesomeapi.com.br/last/USD-BRL'
-    );
+async function fetchOfficialDolar(): Promise<MacroIndicator & { compra: number; venda: number }> {
+    for (let offset = 0; offset < 5; offset++) {
+        const date = new Date();
+        date.setDate(date.getDate() - offset);
 
-    return {
-        compra: parseFloat(data.USDBRL.bid),
-        venda: parseFloat(data.USDBRL.ask),
-        variacao: parseFloat(data.USDBRL.pctChange),
-        atualizado: data.USDBRL.create_date,
-        valor: parseFloat(data.USDBRL.bid),
-    };
+        const formatted = date.toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+        });
+
+        const url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${formatted}'&$top=1&$format=json`;
+        const data = await fetchJson<{ value: Array<{ cotacaoCompra: number; cotacaoVenda: number; dataHoraCotacao: string }> }>(url);
+        const latest = data.value?.[0];
+
+        if (latest) {
+            return {
+                compra: latest.cotacaoCompra,
+                venda: latest.cotacaoVenda,
+                variacao: 0,
+                atualizado: latest.dataHoraCotacao,
+                valor: latest.cotacaoCompra,
+            };
+        }
+    }
+
+    throw new Error('Não foi possível obter a cotação oficial PTAX no Banco Central.');
 }
 
 async function fetchBCBSeries(code: string) {
@@ -110,7 +126,7 @@ export async function GET() {
         }
 
         const [dolar, selic, ipca, milho, boi] = await Promise.all([
-            fetchAwesomeDolar(),
+            fetchOfficialDolar(),
             fetchBCBSeries('432'),
             fetchBCBSeries('13522'),
             fetchB3Index(
