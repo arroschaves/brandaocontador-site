@@ -1,125 +1,119 @@
 import { NextRequest, NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { validateInput, contatoSchema } from '@/lib/validation';
+import { globalRateLimiter, sanitizeText } from '@/lib/security';
 
 /**
  * API de Contato - Brandão Contabilidade
- * Envia email e gera link de notificação WhatsApp
+ * Versão segurançada com validação robusta
  */
 
-// Rate limiting simples em memória
-const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minuto
-const RATE_LIMIT_MAX = 3; // máximo 3 envios por minuto
-
-function isRateLimited(ip: string): boolean {
-    const now = Date.now();
-    const entry = rateLimitMap.get(ip);
-
-    if (!entry || now - entry.lastReset > RATE_LIMIT_WINDOW) {
-        rateLimitMap.set(ip, { count: 1, lastReset: now });
-        return false;
-    }
-
-    if (entry.count >= RATE_LIMIT_MAX) {
-        return true;
-    }
-
-    entry.count++;
-    return false;
-}
-
-// Sanitização básica contra XSS
-function sanitize(input: string): string {
-    return input
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .trim();
-}
-
 export async function POST(request: NextRequest) {
+  try {
+    // 1. Rate Limiting Global
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown';
+
+    if (!globalRateLimiter.isAllowed(ip)) {
+      return NextResponse.json(
+        { error: 'Muitas tentativas. Aguarde um momento.' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
+    // 2. Parse e validação com Zod
+    let body;
     try {
-        // Rate limiting
-        const ip = request.headers.get('x-forwarded-for') || 'unknown';
-        if (isRateLimited(ip)) {
-            return NextResponse.json(
-                { error: 'Muitas tentativas. Aguarde um momento antes de enviar novamente.' },
-                { status: 429 }
-            );
-        }
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Formato de requisição inválido.' },
+        { status: 400 }
+      );
+    }
 
-        const body = await request.json();
-        const { name, email, subject, message } = body;
+    // 3. Validar entrada com schema
+    const validation = validateInput(contatoSchema, body);
 
-        // Validação dos campos obrigatórios
-        if (!name || !email || !subject || !message) {
-            return NextResponse.json(
-                { error: 'Todos os campos são obrigatórios.' },
-                { status: 400 }
-            );
-        }
+    if (!validation.valid) {
+      return NextResponse.json(
+        {
+          error: 'Dados inválidos.',
+          details: validation.errors.map(e => `${e.field}: ${e.message}`),
+        },
+        { status: 400 }
+      );
+    }
 
-        // Validação de email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return NextResponse.json(
-                { error: 'E-mail inválido.' },
-                { status: 400 }
-            );
-        }
+    const { name, email, subject, message, phone } = validation.data!;
 
-        // Sanitização
-        const safeName = sanitize(name);
-        const safeEmail = sanitize(email);
-        const safeSubject = sanitize(subject);
-        const safeMessage = sanitize(message);
+    // 4. Sanitização adicional (backup)
+    const safeName = sanitizeText(name, 100);
+    const safeEmail = email.toLowerCase().trim();
+    const safeSubject = subject;
+    const safeMessage = sanitizeText(message, 2000);
 
-        // Mapeamento de assuntos
-        const subjectMap: Record<string, string> = {
-            contabilidade: 'Serviços Contábeis',
-            fiscal: 'Inteligência Fiscal',
-            trabalhista: 'Recursos Humanos',
-            consultoria: 'Estratégia e Dados',
-            outros: 'Outros Assuntos',
-        };
+    // 5. Verificar tamanho da mensagem (prevenir DoS)
+    if (JSON.stringify(body).length > 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'Requisição muito grande.' },
+        { status: 413 }
+      );
+    }
 
-        const subjectLabel = subjectMap[safeSubject] || safeSubject;
-        const whatsappMessage = encodeURIComponent(
-            `Nova mensagem do site%0A%0A` +
-            `Nome: ${safeName}%0A` +
-            `Email: ${safeEmail}%0A` +
-            `Assunto: ${subjectLabel}%0A` +
-            `Mensagem: ${safeMessage.substring(0, 400)}${safeMessage.length > 400 ? '...' : ''}`
-        );
-        const whatsappLink = `https://wa.me/5567996011356?text=${whatsappMessage}`;
+    // 6. Mapeamento de assuntos
+    const subjectMap: Record<string, string> = {
+      contabilidade: 'Serviços Contábeis',
+      fiscal: 'Inteligência Fiscal',
+      trabalhista: 'Recursos Humanos',
+      consultoria: 'Estratégia e Dados',
+      outros: 'Outros Assuntos',
+    };
 
-        const smtpUser = process.env.SMTP_USER;
-        const smtpPass = process.env.SMTP_PASS;
-        const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-        const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+    const subjectLabel = subjectMap[safeSubject] || safeSubject;
 
-        if (!smtpUser || !smtpPass) {
-            return NextResponse.json({
-                success: true,
-                fallback: true,
-                message: 'Recebemos sua mensagem. Para concluir o contato agora, continue pelo WhatsApp.',
-                whatsappLink,
-            });
-        }
+    // 7. Criar link WhatsApp (sanitizado)
+    const whatsappMessage = encodeURIComponent(
+      `Nova mensagem do site%0A%0A` +
+      `Nome: ${safeName}%0A` +
+      `Email: ${safeEmail}${phone ? `%0ATelefone: ${phone}` : ''}%0A` +
+      `Assunto: ${subjectLabel}%0A` +
+      `Mensagem: ${safeMessage.substring(0, 400)}${safeMessage.length > 400 ? '...' : ''}`
+    );
+    const whatsappLink = `https://wa.me/5567996011356?text=${whatsappMessage}`;
 
-        const transporter = nodemailer.createTransport({
-            host: smtpHost,
-            port: smtpPort,
-            secure: smtpPort === 465,
-            auth: {
-                user: smtpUser,
-                pass: smtpPass,
-            },
-        });
+    // 8. Configuração do email
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+    const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
 
-        // Template do email em HTML
-        const htmlContent = `
+    // Fallback se SMTP não configurado
+    if (!smtpUser || !smtpPass) {
+      console.warn('[CONTATO] SMTP não configurado, usando fallback WhatsApp');
+      return NextResponse.json({
+        success: true,
+        fallback: true,
+        message: 'Recebemos sua mensagem. Continue pelo WhatsApp.',
+        whatsappLink,
+      });
+    }
+
+    // 9. Enviar email com timeout
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+      connectionTimeout: 10000,
+    });
+
+    // Template HTML seguro
+    const htmlContent = `
       <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0A0A0B; color: #e5e5e5; padding: 40px;">
         <div style="border-bottom: 3px solid #FFB000; padding-bottom: 20px; margin-bottom: 30px;">
           <h1 style="color: #FFB000; font-size: 24px; margin: 0; text-transform: uppercase; letter-spacing: 2px;">
@@ -129,7 +123,7 @@ export async function POST(request: NextRequest) {
             Formulário de Contato — brandaocontador.com.br
           </p>
         </div>
-        
+
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 12px 0; color: #FFB000; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; vertical-align: top; width: 120px;">Nome</td>
@@ -139,6 +133,12 @@ export async function POST(request: NextRequest) {
             <td style="padding: 12px 0; color: #FFB000; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; vertical-align: top;">E-mail</td>
             <td style="padding: 12px 0;"><a href="mailto:${safeEmail}" style="color: #FFB000; text-decoration: none;">${safeEmail}</a></td>
           </tr>
+          ${phone ? `
+          <tr>
+            <td style="padding: 12px 0; color: #FFB000; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; vertical-align: top;">Telefone</td>
+            <td style="padding: 12px 0; color: #e5e5e5; font-size: 15px;">${phone}</td>
+          </tr>
+          ` : ''}
           <tr>
             <td style="padding: 12px 0; color: #FFB000; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; vertical-align: top;">Assunto</td>
             <td style="padding: 12px 0; color: #e5e5e5; font-size: 15px;">${subjectLabel}</td>
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
             <td style="padding: 12px 0; color: #e5e5e5; font-size: 15px; line-height: 1.6;">${safeMessage.replace(/\n/g, '<br>')}</td>
           </tr>
         </table>
-        
+
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; text-align: center;">
           <p style="color: #555; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">
             Brandão Contabilidade © ${new Date().getFullYear()}
@@ -157,26 +157,46 @@ export async function POST(request: NextRequest) {
       </div>
     `;
 
-        // Enviar email
-        await transporter.sendMail({
-            from: `"Site Brandão Contabilidade" <${smtpUser}>`,
-            to: 'adm@brandaocontador.com.br',
-            replyTo: safeEmail,
-            subject: `[Site] ${subjectLabel} — ${safeName}`,
-            html: htmlContent,
-        });
+    // Enviar com timeout
+    const sendPromise = transporter.sendMail({
+      from: `"Site Brandão Contabilidade" <${smtpUser}>`,
+      to: 'adm@brandaocontador.com.br',
+      replyTo: safeEmail,
+      subject: `[Site] ${subjectLabel} — ${safeName}`,
+      html: htmlContent,
+    });
 
-        return NextResponse.json({
-            success: true,
-            message: 'Mensagem enviada com sucesso! Retornaremos em breve.',
-            whatsappLink,
-        });
+    // Timeout de 10 segundos para envio
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout sending email')), 10000)
+    );
 
-    } catch (error) {
-        console.error('Erro ao enviar mensagem de contato:', error);
-        return NextResponse.json(
-            { error: 'Erro ao enviar mensagem. Tente novamente ou entre em contato via WhatsApp.' },
-            { status: 500 }
-        );
-    }
+    await Promise.race([sendPromise, timeoutPromise]);
+
+    console.log(`[CONTATO] Mensagem enviada com sucesso de ${safeEmail}`);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Mensagem enviada com sucesso!',
+      whatsappLink,
+    });
+
+  } catch (error: unknown) {
+    console.error('[CONTATO] Erro:', error);
+
+    // Não expor detalhes do erro ao cliente
+    return NextResponse.json(
+      { error: 'Erro ao enviar mensagem. Tente novamente.' },
+      { status: 500 }
+    );
+  }
+}
+
+// GET handler para health check
+export async function GET() {
+  return NextResponse.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    rateLimitRemaining: 'N/A via GET',
+  });
 }
