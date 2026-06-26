@@ -40,11 +40,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://vercel.live",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://www.googletagmanager.com https://vercel.live",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://ycgwmwmcyxwflkaehwds.supabase.co https://api.brandaocontador.com.br https://evolution.brandaocontador.com.br wss:",
+              "connect-src 'self' https://ycgwmwmcyxwflkaehwds.supabase.co https://api.brandaocontador.com.br https://evolution.brandaocontador.com.br https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com wss:",
               "frame-ancestors 'none'",
               "form-action 'self'",
               "base-uri 'self'",
