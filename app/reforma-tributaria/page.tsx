@@ -384,6 +384,90 @@ export default function ReformaTributariaPage() {
           </a>
         </div>
       </section>
+
+      {/* FAQ */}
+      <section className="py-16 border-t border-border">
+        <div className="container-custom">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold text-primary mb-4">
+              <Info className="w-3 h-3" /> Dúvidas Frequentes
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+              Perguntas sobre a <span className="text-primary">Reforma</span>
+            </h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-4">
+            {[
+              {
+                pergunta: 'Quando a reforma começa a valer?',
+                resposta: 'A CBS começa em 2026 com alíquota de 0,9% (em teste). O IBS começa com 0,1%. A transição completa ocorre até 2033, quando ICMS, ISS, PIS e Cofins serão extintos.',
+              },
+              {
+                pergunta: 'O Simples Nacional acaba?',
+                resposta: 'Não. O Simples Nacional continua existindo, mas empresas optantes podem escolher migrar para o novo IVA (CBS+IBS) a partir de 2027. A decisão deve ser analisada caso a caso.',
+              },
+              {
+                pergunta: 'Como fica o agronegócio?',
+                resposta: 'O agro terá tratamento diferenciado: cesta básica com alíquota 0%, insumos com redução de 60%, e crédito presumido para produtores. Cooperativas mantêm regime específico.',
+              },
+              {
+                pergunta: 'O que é o Imposto Seletivo?',
+                resposta: 'É um imposto federal que incide sobre produtos prejudiciais à saúde ou meio ambiente: cigarros, bebidas alcoólicas, combustíveis fósseis, veículos poluentes e açúcar em excesso.',
+              },
+              {
+                pergunta: 'Como fica a guerra fiscal entre estados?',
+                resposta: 'Acaba. O IBS será cobrado no destino (onde o consumo acontece), com alíquota uniforme nacional. Benefícios fiscais como o MS Competitivo serão extintos gradualmente até 2032.',
+              },
+              {
+                pergunta: 'Preciso adequar meu ERP/sistema?',
+                resposta: 'Sim. Os sistemas precisarão emitir notas com os novos campos CBS/IBS. Em 2026, a convivência com os impostos antigos e novos exige dupla configuração.',
+              },
+            ].map((faq, i) => (
+              <div key={i} className="glass-card p-6">
+                <h3 className="text-lg font-display font-bold text-foreground mb-2">{faq.pergunta}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{faq.resposta}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Checklist de Preparação */}
+      <section className="py-16 border-t border-border">
+        <div className="container-custom">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold text-primary mb-4">
+              <CheckCircle2 className="w-3 h-3" /> Preparação
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
+              Checklist para se <span className="text-primary">preparar</span>
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Ações que sua empresa deve tomar agora para estar pronta para a transição.
+            </p>
+          </div>
+
+          <div className="max-w-2xl mx-auto space-y-3">
+            {[
+              'Revisar contratos com fornecedores e clientes para incluir cláusulas de reajuste tributário',
+              'Adequar o sistema fiscal/ERP para emissão de notas com CBS e IBS',
+              'Treinar a equipe contábil e fiscal sobre as novas regras',
+              'Mapear os créditos tributários atuais e simular o impacto no novo modelo',
+              'Avaliar se o Simples Nacional continua vantajoso ou se vale migrar para o IVA',
+              'Acompanhar as publicações do Comitê Gestor do IBS e da Receita Federal',
+              'Consultar um contador especializado para planejamento tributário personalizado',
+            ].map((item, i) => (
+              <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-background border border-border/50 hover:border-primary/30 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-sm font-bold text-primary">{i + 1}</span>
+                </div>
+                <p className="text-sm font-medium text-foreground">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

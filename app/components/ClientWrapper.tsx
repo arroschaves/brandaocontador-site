@@ -3,6 +3,7 @@
 import Header from './Header';
 import Footer from './Footer';
 import ScrollReveal from './ScrollReveal';
+import WhatsAppFloat from './WhatsAppFloat';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -19,6 +20,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
       <ScrollReveal />
       {children}
       {!hideChrome && <Footer />}
+      {!hideChrome && <WhatsAppFloat />}
     </>
   );
 }

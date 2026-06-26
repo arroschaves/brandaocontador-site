@@ -84,20 +84,48 @@ export function PerformanceMonitor({ enabled = true }: PerformanceMonitorProps) 
 }
 
 /**
- * Analytics Component
+ * Analytics Component - Google Analytics 4
  */
 export function Analytics() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Google Analytics (se configurado)
-    // Substitua pelo seu GA4 Measurement ID
     const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
-    if (GA_ID) {
-      // Script de GA4 seria carregado aqui
-      console.log('[Analytics] GA4 configured:', GA_ID);
-    }
+    if (!GA_ID) return;
+
+    // Carregar gtag.js
+    const script1 = document.createElement('script');
+    script1.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    script1.async = true;
+    document.head.appendChild(script1);
+
+    // Configurar gtag
+    const script2 = document.createElement('script');
+    script2.innerHTML = `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${GA_ID}', {
+        page_path: window.location.pathname,
+      });
+    `;
+    document.head.appendChild(script2);
+
+    // Track page views on route change
+    const handleRouteChange = () => {
+      if (typeof window.gtag === 'function') {
+        window.gtag('config', GA_ID, {
+          page_path: window.location.pathname,
+        });
+      }
+    };
+
+    window.addEventListener('popstate', handleRouteChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   return null;
