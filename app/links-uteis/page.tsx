@@ -45,7 +45,7 @@ const gruposLinks: LinkGroup[] = [
             {
                 nome: 'CND Federal — Certidão Conjunta (RFB + PGFN)',
                 descricao: 'Certidão Negativa de Débitos relativos a Tributos Federais e Dívida Ativa da União.',
-                url: 'https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PJ/Emitir',
+                url: 'https://servicos.receitafederal.gov.br/',
                 tipo: 'certidao',
             },
             {
@@ -63,7 +63,7 @@ const gruposLinks: LinkGroup[] = [
             {
                 nome: 'CND INSS — Certidão de Regularidade Previdenciária',
                 descricao: 'Certidão de regularidade previdenciária via e-CAC da Receita Federal.',
-                url: 'https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PJ/Emitir',
+                url: 'https://servicos.receitafederal.gov.br/',
                 tipo: 'certidao',
             },
             {
@@ -118,7 +118,7 @@ const gruposLinks: LinkGroup[] = [
             {
                 nome: 'PGMEI — Programa Gerador do MEI',
                 descricao: 'Emissão de DAS MEI, declaração anual (DASN-SIMEI) e consulta de débitos.',
-                url: 'https://www8.receita.fazenda.gov.br/SimplesNacional/Aplicacoes/ATSPO/pgmei.app/',
+                url: 'https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atspo/pgmei.app/',
                 tipo: 'portal',
             },
             {
@@ -180,7 +180,7 @@ const gruposLinks: LinkGroup[] = [
             {
                 nome: 'FGTS Digital',
                 descricao: 'Nova plataforma de recolhimento do FGTS integrada ao eSocial.',
-                url: 'https://www.fgtsdigital.gov.br/',
+                url: 'https://fgtsdigital.sistema.gov.br/',
                 tipo: 'portal',
             },
             {
