@@ -120,50 +120,45 @@ export default function Home() {
             <div className="hidden lg:block animate-fade-in delay-300">
               <div className="relative">
                 {/* Card principal */}
-                <div className="glass-card p-8 space-y-6 shine-effect">
-                  <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-5">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Consultoria de alta confiança</p>
-                      <h3 className="font-display font-bold text-foreground text-lg mt-2">Rotina contábil organizada para você decidir melhor</h3>
+                <div className="glass-card p-6 space-y-5">
+                  <div className="flex items-center gap-3 pb-4 border-b border-border/60">
+                    <div className="p-2.5 rounded-xl bg-primary/10 border border-primary/20">
+                      <Shield className="w-5 h-5 text-primary" />
                     </div>
-                    <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Ecossistema Completo</p>
+                      <p className="text-[10px] text-muted-foreground">Fiscal, pessoal, societário e agro</p>
+                    </div>
+                    <div className="ml-auto rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-primary">
                       Desde 1993
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
-                      <Shield className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-bold text-foreground text-lg">Ecossistema Completo</h3>
-                      <p className="text-sm text-muted-foreground">Fiscal, pessoal, societário e agro no mesmo atendimento</p>
-                    </div>
-                  </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[
-                      { icon: FileText, text: 'Calendário fiscal sob controle e menos risco de atraso', status: 'ok' },
-                      { icon: Users, text: 'Folha, admissões e rotinas trabalhistas com mais previsibilidade', status: 'ok' },
-                      { icon: Tractor, text: 'Acompanhamento especializado para empresas e produtores rurais', status: 'ok' },
-                      { icon: Building2, text: 'Abertura, ajuste e regularização societária com orientação prática', status: 'ok' },
+                      { icon: FileText, text: 'Calendário fiscal sob controle' },
+                      { icon: Users, text: 'Folha e rotinas trabalhistas' },
+                      { icon: Tractor, text: 'Acompanhamento para agro' },
+                      { icon: Building2, text: 'Regularização societária' },
                     ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-primary/5 transition-colors">
-                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-sm text-foreground font-medium">{item.text}</span>
+                      <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/40 hover:bg-primary/5 transition-colors">
+                        <item.icon className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="text-xs text-foreground font-medium">{item.text}</span>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-primary/60 ml-auto flex-shrink-0" />
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Card flutuante esquerda */}
-                <div className="absolute -bottom-4 -left-4 glass-card p-4 animate-float delay-500 shadow-glow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <TrendingUp className="w-5 h-5 text-primary" />
+                {/* Card flutuante */}
+                <div className="absolute -bottom-3 -left-3 glass-card p-3 animate-float delay-500 shadow-glow-sm">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <TrendingUp className="w-4 h-4 text-primary" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-foreground">31 anos</p>
-                      <p className="text-[10px] text-muted-foreground">de mercado</p>
+                      <p className="text-[11px] font-bold text-foreground">31 anos</p>
+                      <p className="text-[9px] text-muted-foreground">de mercado</p>
                     </div>
                   </div>
                 </div>
