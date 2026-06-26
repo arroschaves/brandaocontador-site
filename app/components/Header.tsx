@@ -40,7 +40,9 @@ export default function Header() {
   // Links do menu
   const navLinks = [
     { name: 'Início', path: '/' },
+    { name: 'Sobre', path: '/sobre' },
     { name: 'Serviços', path: '/servicos' },
+    { name: 'Ferramentas', path: '/ferramentas' },
     { name: 'Agronegócio', path: '/agronegocio' },
     { name: 'Notícias', path: '/noticias-contabeis' },
     { name: 'Contato', path: '/contato' },

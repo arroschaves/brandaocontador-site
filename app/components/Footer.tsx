@@ -60,6 +60,8 @@ export default function Footer() {
             <h3 className="text-sm font-display font-bold text-foreground uppercase tracking-wider">Links Rápidos</h3>
             <nav className="flex flex-col gap-2.5">
               {[
+                { name: 'Sobre Nós', href: '/sobre' },
+                { name: 'Ferramentas', href: '/ferramentas' },
                 { name: 'Notícias Contábeis', href: '/noticias-contabeis' },
                 { name: 'Links Úteis', href: '/links-uteis' },
                 { name: 'Reforma Tributária', href: '/reforma-tributaria' },

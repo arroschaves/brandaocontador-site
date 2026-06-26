@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Newspaper, Filter, ExternalLink, Sparkles, Building2,
-  Tractor, Calculator, FileText, Landmark, RefreshCw, ShieldAlert, Clock3
+  Tractor, Calculator, FileText, Landmark, RefreshCw, ShieldAlert, Clock3,
+  Search, X, TrendingUp, AlertTriangle
 } from 'lucide-react';
 
 /**
@@ -68,6 +69,7 @@ export default function NoticiasPage() {
   const [analise, setAnalise] = useState<NewsAnalysis | null>(null);
   const [filtroAtivo, setFiltroAtivo] = useState('todos');
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
 
   async function fetchNoticias() {
     setLoading(true);
@@ -90,8 +92,27 @@ export default function NoticiasPage() {
 
   useEffect(() => { fetchNoticias(); }, [filtroAtivo]); // eslint-disable-line react-hooks/exhaustive-deps -- fetchNoticias é seguro sem memoização aqui
 
-  const destaque = noticias.find(n => n.destaque);
-  const restantes = noticias.filter(n => !n.destaque);
+  const noticiasFiltradas = useMemo(() => {
+    if (!busca.trim()) return noticias;
+    const termo = busca.toLowerCase();
+    return noticias.filter(n =>
+      n.titulo.toLowerCase().includes(termo) ||
+      n.resumo.toLowerCase().includes(termo) ||
+      n.analise.toLowerCase().includes(termo) ||
+      n.fonte.toLowerCase().includes(termo)
+    );
+  }, [noticias, busca]);
+
+  const destaque = noticiasFiltradas.find(n => n.destaque);
+  const restantes = noticiasFiltradas.filter(n => !n.destaque);
+
+  const contagemPorCategoria = useMemo(() => {
+    const contagem: Record<string, number> = { todos: noticias.length };
+    noticias.forEach(n => {
+      contagem[n.categoria] = (contagem[n.categoria] || 0) + 1;
+    });
+    return contagem;
+  }, [noticias]);
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-24">
@@ -121,22 +142,46 @@ export default function NoticiasPage() {
         </div>
       </section>
 
-      {/* Filtros */}
+      {/* Filtros e Busca */}
       <section className="py-6 border-b border-border bg-muted/20 sticky top-24 z-40 backdrop-blur-sm">
-        <div className="container-custom">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1">
+        <div className="container-custom space-y-4">
+          {/* Barra de busca */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Buscar notícias..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="w-full pl-10 pr-10 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+            />
+            {busca && (
+              <button
+                onClick={() => setBusca('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Categorias */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
             <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
             {CATEGORIAS.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setFiltroAtivo(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-all border ${filtroAtivo === cat.id
+                className={`flex items-center gap-2 px-4 py-2 text-xs font-mono uppercase tracking-wider whitespace-nowrap transition-all border rounded-full ${filtroAtivo === cat.id
                   ? 'bg-primary text-primary-foreground border-primary font-bold'
                   : 'bg-transparent text-muted-foreground border-border hover:border-neutral-600'
                   }`}
               >
                 <cat.icon className="w-3.5 h-3.5" />
                 {cat.label}
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${filtroAtivo === cat.id ? 'bg-primary-foreground/20' : 'bg-muted'}`}>
+                  {contagemPorCategoria[cat.id] || 0}
+                </span>
               </button>
             ))}
           </div>
@@ -225,6 +270,14 @@ export default function NoticiasPage() {
                 </a>
               )}
 
+              {/* Contador de resultados */}
+              {busca && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Search className="w-4 h-4" />
+                  <span>{noticiasFiltradas.length} resultado{noticiasFiltradas.length !== 1 ? 's' : ''} para &ldquo;{busca}&rdquo;</span>
+                </div>
+              )}
+
               {/* Lista de Notícias */}
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {restantes.map((noticia) => (
@@ -233,12 +286,12 @@ export default function NoticiasPage() {
                     href={noticia.link !== '#' ? noticia.link : undefined}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`group block p-6 border transition-all duration-300 hover:translate-y-[-2px] ${categoriaCores[noticia.categoria] || 'border-border bg-muted/30'
+                    className={`group block p-6 border transition-all duration-300 hover:translate-y-[-2px] hover:shadow-lg rounded-2xl ${categoriaCores[noticia.categoria] || 'border-border bg-muted/30'
                       }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-xl">{noticia.icone}</span>
-                      <span className="text-[9px] font-mono text-muted-foreground uppercase">
+                      <span className="text-[9px] font-mono text-muted-foreground uppercase px-2 py-1 bg-muted rounded-full">
                         {categoriaLabels[noticia.categoria] || noticia.categoria}
                       </span>
                     </div>
@@ -248,9 +301,12 @@ export default function NoticiasPage() {
                     <p className="text-sm text-muted-foreground font-sans leading-relaxed mb-4 line-clamp-3">
                       {noticia.resumo}
                     </p>
-                    <p className="text-xs text-foreground/75 leading-relaxed mb-4">
-                      {noticia.analise}
-                    </p>
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-background/50 mb-4">
+                      <TrendingUp className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                      <p className="text-xs text-foreground/75 leading-relaxed">
+                        {noticia.analise}
+                      </p>
+                    </div>
                     <div className="flex items-center justify-between pt-3 border-t border-border/30">
                       <span className="text-[9px] font-mono text-muted-foreground uppercase">{noticia.fonte}</span>
                       <span className="text-[9px] font-mono text-muted-foreground uppercase">{noticia.data}</span>
@@ -259,10 +315,28 @@ export default function NoticiasPage() {
                 ))}
               </div>
 
-              {noticias.length === 0 && !loading && (
+              {noticiasFiltradas.length === 0 && !loading && (
                 <div className="text-center py-20">
-                  <span className="text-muted-foreground text-4xl">📭</span>
-                  <p className="text-muted-foreground font-mono text-sm mt-4 uppercase tracking-wider">Nenhuma notícia encontrada para esta categoria.</p>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    {busca ? <Search className="w-8 h-8 text-muted-foreground" /> : <AlertTriangle className="w-8 h-8 text-muted-foreground" />}
+                  </div>
+                  <p className="text-foreground font-display font-bold text-lg mb-2">
+                    {busca ? 'Nenhum resultado encontrado' : 'Nenhuma notícia disponível'}
+                  </p>
+                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                    {busca
+                      ? `Não encontramos notícias para "${busca}". Tente outro termo ou limpe a busca.`
+                      : 'Não há notícias disponíveis para esta categoria no momento.'
+                    }
+                  </p>
+                  {busca && (
+                    <button
+                      onClick={() => setBusca('')}
+                      className="mt-4 px-4 py-2 text-sm text-primary hover:text-primary-foreground hover:bg-primary transition-all border border-primary rounded-full"
+                    >
+                      Limpar busca
+                    </button>
+                  )}
                 </div>
               )}
             </div>
