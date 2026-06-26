@@ -155,19 +155,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Card flutuante decorativo */}
-                <div className="absolute -top-6 -right-6 glass-card p-4 animate-float shadow-glow-gold">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-500/10">
-                      <Award className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-foreground">CRC Ativo</p>
-                      <p className="text-[10px] text-muted-foreground">MS 003218</p>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Card flutuante esquerda */}
                 <div className="absolute -bottom-4 -left-4 glass-card p-4 animate-float delay-500 shadow-glow-sm">
                   <div className="flex items-center gap-3">

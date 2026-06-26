@@ -93,7 +93,6 @@ const diferenciais = [
   'Equipe de 15 profissionais qualificados',
   'Tecnologia integrada para mais agilidade',
   'Acompanhamento completo: fiscal, trabalhista e societário',
-  'CRC ativo MS 003218',
   'Presença consolidada no mercado regional',
 ];
 

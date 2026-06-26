@@ -123,7 +123,7 @@ export default function Footer() {
       <div className="border-t border-border relative z-10">
         <div className="container-custom py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © {currentYear} Brandão Contabilidade. Todos os direitos reservados. CRC/MS 003218
+            © {currentYear} Brandão Contabilidade. Todos os direitos reservados.
           </p>
           <p className="text-[10px] text-muted-foreground/60 font-mono">
             Site institucional Brandão Contabilidade
