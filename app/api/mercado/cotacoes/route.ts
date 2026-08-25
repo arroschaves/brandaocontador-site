@@ -30,6 +30,16 @@ const PTAX_BUDGET_MS = 6000; // orçamento total para tentar o PTAX antes de cai
 
 let cachedData: { data: unknown; timestamp: number } | null = null;
 
+// Últimos valores conhecidos por indicador — usados quando uma fonte falha,
+// para nunca exibir zeros ou deixar o painel vazio.
+let lastKnown: {
+  dolar?: MarketData['dolar'];
+  selic?: MacroIndicator;
+  ipca?: MacroIndicator;
+  milho?: AgroIndex;
+  boi?: AgroIndex;
+} = {};
+
 interface MacroIndicator {
   valor: number;
   variacao?: number;
@@ -179,11 +189,11 @@ async function withBudget<T>(promise: Promise<T>, budgetMs: number): Promise<T> 
   }
 }
 
-async function fetchDolar(): Promise<MarketData['dolar']> {
+async function fetchDolar(): Promise<MarketData['dolar'] | null> {
   // AwesomeAPI é rápido e confiável (0.3s); PTAX é oficial mas instável em datacenter.
   // Dispara os dois em paralelo: se o PTAX responder dentro do orçamento, usa o oficial;
   // caso contrário, usa a AwesomeAPI (que já resolveu).
-  const awesomePromise = fetchAwesomeDolar();
+  const awesomePromise = fetchAwesomeDolar().catch(() => null);
   try {
     const ptax = await withBudget(fetchOfficialDolar(), PTAX_BUDGET_MS);
     return ptax;
@@ -337,47 +347,41 @@ export async function GET() {
     fetchB3Index(B3_SHEETS.boi),
   ]);
 
-  const failures: string[] = [];
-  const dolar = dolarResult.status === 'fulfilled' ? dolarResult.value : (failures.push('dólar'), null);
-  const selic = selicResult.status === 'fulfilled' ? selicResult.value : (failures.push('SELIC'), null);
-  const ipca = ipcaResult.status === 'fulfilled' ? ipcaResult.value : (failures.push('IPCA'), null);
-  const milho = milhoResult.status === 'fulfilled' ? milhoResult.value : (failures.push('milho'), null);
-  const boi = boiResult.status === 'fulfilled' ? boiResult.value : (failures.push('boi'), null);
+  // Cada fonte: sucesso → usa valor novo e guarda em lastKnown; falha → usa lastKnown
+  const usouCacheAntigo: string[] = [];
 
-  for (const failure of failures) {
-    console.error(`[COTACOES] Fonte falhou: ${failure}`);
+  const dolar = dolarResult.status === 'fulfilled' && dolarResult.value
+    ? ((lastKnown.dolar = dolarResult.value), dolarResult.value)
+    : ((usouCacheAntigo.push('dólar'), lastKnown.dolar ?? null));
+  const selic = selicResult.status === 'fulfilled' && selicResult.value
+    ? ((lastKnown.selic = selicResult.value), selicResult.value)
+    : ((usouCacheAntigo.push('SELIC'), lastKnown.selic ?? null));
+  const ipca = ipcaResult.status === 'fulfilled' && ipcaResult.value
+    ? ((lastKnown.ipca = ipcaResult.value), ipcaResult.value)
+    : ((usouCacheAntigo.push('IPCA'), lastKnown.ipca ?? null));
+  const milho = milhoResult.status === 'fulfilled' && milhoResult.value
+    ? ((lastKnown.milho = milhoResult.value), milhoResult.value)
+    : ((usouCacheAntigo.push('milho'), lastKnown.milho ?? null));
+  const boi = boiResult.status === 'fulfilled' && boiResult.value
+    ? ((lastKnown.boi = boiResult.value), boiResult.value)
+    : ((usouCacheAntigo.push('boi'), lastKnown.boi ?? null));
+
+  for (const failure of usouCacheAntigo) {
+    console.warn(`[COTACOES] Fonte falhou e usou último valor conhecido: ${failure}`);
   }
 
-  // Se alguma fonte falhou mas temos cache antigo → serve dados antigos marcados como stale
-  const hasFresh = dolar && selic && ipca && milho && boi;
-  if (!hasFresh && cachedData) {
-    const cached = cachedData.data as MarketData;
-    return NextResponse.json(
-      {
-        ...cached,
-        atualizadoEm: new Date().toISOString(),
-        stale: true,
-        observacao:
-          'Algumas fontes externas estavam indisponíveis. Exibindo último painel válido (dados podem estar defasados).',
-      },
-      {
-        headers: {
-          'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=86400, stale-if-error=86400',
-        },
-      }
-    );
-  }
-
-  // Se nada funcionou e não há cache → erro honesto com detalhes
+  // Nenhuma fonte nova funcionou E nenhum valor conhecido → erro honesto
   if (!dolar && !selic && !ipca && !milho && !boi) {
     return NextResponse.json(
       {
         error: 'Erro ao buscar cotações oficiais',
-        detalhes: 'Todas as fontes externas falharam (BCB, BrasilAPI, AwesomeAPI, B3). Tente novamente em alguns minutos.',
+        detalhes: 'Todas as fontes externas falharam (BCB, BrasilAPI, AwesomeAPI, B3) e não há dados anteriores. Tente novamente em alguns minutos.',
       },
       { status: 503 }
     );
   }
+
+  const parcial = usouCacheAntigo.length > 0;
 
   const marketData: MarketData = {
     dolar: dolar ?? {
@@ -392,10 +396,11 @@ export async function GET() {
       ipca: ipca ?? { valor: 0, atualizado: '-', fonte: 'indisponível' },
     },
     agroIndices: [milho, boi].filter((item): item is AgroIndex => item !== null),
-    observacao:
-      'Painel com dados oficiais de fontes públicas (Banco Central, BrasilAPI e B3). Milho e boi exibem preços reais de contratos futuros (R$/saca e R$/@).',
+    observacao: parcial
+      ? `Algumas fontes externas estavam indisponíveis (${usouCacheAntigo.join(', ')}). Exibindo último valor conhecido para esses indicadores.`
+      : 'Painel com dados oficiais de fontes públicas (Banco Central, BrasilAPI e B3). Milho e boi exibem preços reais de contratos futuros (R$/saca e R$/@).',
     atualizadoEm: new Date().toISOString(),
-    stale: false,
+    stale: parcial,
   };
 
   cachedData = { data: marketData, timestamp: Date.now() };

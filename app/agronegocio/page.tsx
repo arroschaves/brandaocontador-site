@@ -160,13 +160,13 @@ export default function MercadoAgroPage() {
                 <div>
                   <div className="text-[10px] font-semibold text-muted-foreground uppercase">Compra</div>
                   <div className="text-2xl font-display font-bold text-foreground font-mono">
-                    {data ? `R$ ${data.dolar.compra.toFixed(4)}` : '-.----'}
+                    {data && data.dolar.compra > 0 ? `R$ ${data.dolar.compra.toFixed(4)}` : '-.----'}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold text-muted-foreground uppercase">Venda</div>
                   <div className="text-xl font-bold text-foreground/70 font-mono">
-                    {data ? `R$ ${data.dolar.venda.toFixed(4)}` : '-.----'}
+                    {data && data.dolar.venda > 0 ? `R$ ${data.dolar.venda.toFixed(4)}` : '-.----'}
                   </div>
                 </div>
                 <div className="ml-auto">
