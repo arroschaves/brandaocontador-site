@@ -189,18 +189,36 @@ async function withBudget<T>(promise: Promise<T>, budgetMs: number): Promise<T> 
   }
 }
 
+async function fetchFrankfurterDolar(): Promise<MarketData['dolar']> {
+  // ECB (Banco Central Europeu) — taxa de referência diária, estável em datacenter
+  const data = await fetchJson<{ date: string; rates: { BRL: number } }>(
+    'https://api.frankfurter.dev/v1/latest?base=USD&symbols=BRL'
+  );
+  return {
+    compra: data.rates.BRL,
+    venda: data.rates.BRL,
+    variacao: 0, // taxa diária de referência (variação é calculada no handler via lastKnown)
+    atualizado: data.date,
+    fonte: 'Frankfurter/ECB (fallback)',
+  };
+}
+
 async function fetchDolar(): Promise<MarketData['dolar'] | null> {
-  // AwesomeAPI é rápido e confiável (0.3s); PTAX é oficial mas instável em datacenter.
-  // Dispara os dois em paralelo: se o PTAX responder dentro do orçamento, usa o oficial;
-  // caso contrário, usa a AwesomeAPI (que já resolveu).
+  // Cadeia de fontes, da mais oficial à mais estável em datacenter:
+  // 1) PTAX (Banco Central) — oficial, com orçamento de 6s
+  // 2) AwesomeAPI — tempo real, inclui variação
+  // 3) Frankfurter/ECB — referência diária (funciona em redes de datacenter)
   const awesomePromise = fetchAwesomeDolar().catch(() => null);
+  const frankfurterPromise = fetchFrankfurterDolar().catch(() => null);
   try {
     const ptax = await withBudget(fetchOfficialDolar(), PTAX_BUDGET_MS);
-    return ptax;
+    if (ptax) return ptax;
   } catch (error) {
-    console.warn('[COTACOES] PTAX lento/indisponível, usando AwesomeAPI:', error);
-    return awesomePromise;
+    console.warn('[COTACOES] PTAX lento/indisponível:', error);
   }
+  const awesome = await awesomePromise;
+  if (awesome) return awesome;
+  return frankfurterPromise;
 }
 
 /* ════════════════════════════════════════════
@@ -347,24 +365,31 @@ export async function GET() {
     fetchB3Index(B3_SHEETS.boi),
   ]);
 
-  // Cada fonte: sucesso → usa valor novo e guarda em lastKnown; falha → usa lastKnown
-  const usouCacheAntigo: string[] = [];
+  // Resolve cada indicador: valor novo → usa; falha → último valor conhecido
+  const resolveSource = <T,>(result: PromiseSettledResult<T | null>, fallback: T | undefined, nome: string, usouCache: string[]): T | null => {
+    if (result.status === 'fulfilled' && result.value) return result.value;
+    if (fallback) usouCache.push(nome);
+    return fallback ?? null;
+  };
 
-  const dolar = dolarResult.status === 'fulfilled' && dolarResult.value
-    ? ((lastKnown.dolar = dolarResult.value), dolarResult.value)
-    : ((usouCacheAntigo.push('dólar'), lastKnown.dolar ?? null));
-  const selic = selicResult.status === 'fulfilled' && selicResult.value
-    ? ((lastKnown.selic = selicResult.value), selicResult.value)
-    : ((usouCacheAntigo.push('SELIC'), lastKnown.selic ?? null));
-  const ipca = ipcaResult.status === 'fulfilled' && ipcaResult.value
-    ? ((lastKnown.ipca = ipcaResult.value), ipcaResult.value)
-    : ((usouCacheAntigo.push('IPCA'), lastKnown.ipca ?? null));
-  const milho = milhoResult.status === 'fulfilled' && milhoResult.value
-    ? ((lastKnown.milho = milhoResult.value), milhoResult.value)
-    : ((usouCacheAntigo.push('milho'), lastKnown.milho ?? null));
-  const boi = boiResult.status === 'fulfilled' && boiResult.value
-    ? ((lastKnown.boi = boiResult.value), boiResult.value)
-    : ((usouCacheAntigo.push('boi'), lastKnown.boi ?? null));
+  const usouCacheAntigo: string[] = [];
+  let dolar = resolveSource(dolarResult, lastKnown.dolar, 'dólar', usouCacheAntigo);
+  const selic = resolveSource(selicResult, lastKnown.selic, 'SELIC', usouCacheAntigo);
+  const ipca = resolveSource(ipcaResult, lastKnown.ipca, 'IPCA', usouCacheAntigo);
+  const milho = resolveSource(milhoResult, lastKnown.milho, 'milho', usouCacheAntigo);
+  const boi = resolveSource(boiResult, lastKnown.boi, 'boi', usouCacheAntigo);
+
+  // Quando a fonte de dólar não fornece variação (ex.: ECB diária), calcula vs último valor
+  if (dolar && dolar.variacao === 0 && lastKnown.dolar && lastKnown.dolar.compra > 0 && Math.abs(lastKnown.dolar.compra - dolar.compra) > 0.0001) {
+    dolar = { ...dolar, variacao: ((dolar.compra - lastKnown.dolar.compra) / lastKnown.dolar.compra) * 100 };
+  }
+
+  // Atualiza últimos valores conhecidos (novos ou reciclados)
+  if (dolar) lastKnown.dolar = dolar;
+  if (selic) lastKnown.selic = selic;
+  if (ipca) lastKnown.ipca = ipca;
+  if (milho) lastKnown.milho = milho;
+  if (boi) lastKnown.boi = boi;
 
   for (const failure of usouCacheAntigo) {
     console.warn(`[COTACOES] Fonte falhou e usou último valor conhecido: ${failure}`);
