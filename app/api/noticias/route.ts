@@ -43,7 +43,19 @@ interface NewsSource {
 }
 
 const CACHE_DURATION = 60 * 60 * 1000;
+const FETCH_TIMEOUT_MS = 10000;
 let cachedNews: { data: NewsItem[]; analysis: NewsAnalysis; timestamp: number } | null = null;
+
+/** Fetch com timeout — impede que uma fonte lenta trave todo o painel */
+async function fetchWithTimeout(url: string, timeoutMs: number = FETCH_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { cache: 'no-store', signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 const SOURCES: NewsSource[] = [
     { type: 'rss', url: 'https://g1.globo.com/rss/g1/economia/', categoria: 'fiscal', icon: '💰', fonte: 'G1 Economia' },
@@ -170,7 +182,7 @@ function buildAnalysis(items: NewsItem[]): NewsAnalysis {
 }
 
 async function fetchRssSource(source: NewsSource) {
-    const response = await fetch(source.url, { cache: 'no-store' });
+    const response = await fetchWithTimeout(source.url);
     const text = await response.text();
     const items = text.match(/<item>([\s\S]*?)<\/item>/gi) || [];
 
@@ -201,7 +213,7 @@ async function fetchRssSource(source: NewsSource) {
 }
 
 async function fetchESocialNews(source: NewsSource) {
-    const response = await fetch(source.url, { cache: 'no-store' });
+    const response = await fetchWithTimeout(source.url);
     const html = await response.text();
     const pattern = /##\s+\[(\d+)†([^\]]+)\][\s\S]*?\n([\s\S]*?)\n\s*publicado\s+(\d{2}\/\d{2}\/\d{4})/g;
     const news: NewsItem[] = [];
@@ -238,7 +250,7 @@ async function fetchESocialNews(source: NewsSource) {
 }
 
 async function fetchSefazNews(source: NewsSource) {
-    const response = await fetch(source.url, { cache: 'no-store' });
+    const response = await fetchWithTimeout(source.url);
     const html = await response.text();
     const itemPattern = /<h2 class="entry-title[^"]*">\s*<a href="([^"]+)"[^>]*>([\s\S]*?)<\/a>\s*<\/h2>[\s\S]*?<time class="entry-date published" datetime="([^"]+)"/g;
     const news: NewsItem[] = [];

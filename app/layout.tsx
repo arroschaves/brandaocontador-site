@@ -7,6 +7,9 @@ import JsonLd from './components/JsonLd'
 import { SecurityMeta } from './components/SecurityMeta'
 import { Analytics, ErrorLogger } from './components/PerformanceMonitor'
 
+// Google Analytics — configuração via env (NEXT_PUBLIC_GA_ID), com fallback
+const gaId = process.env.NEXT_PUBLIC_GA_ID || 'G-9DJG24BV6D'
+
 // Fontes modernas e premium
 const outfit = Outfit({
   subsets: ['latin'],
@@ -47,7 +50,7 @@ export const metadata: Metadata = {
     'contabilidade em Sidrolândia',
     'contador em Sidrolândia MS',
     'escritório de contabilidade MS',
-    'contabilidade para agronegóHighlights',
+    'contabilidade para agronegócio',
     'departamento pessoal',
     'abertura de empresa',
     'Brandão Contabilidade',
@@ -73,7 +76,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Brandão Contabilidade | Contabilidade em Sidrolândia - MS',
-    description: 'Atendimento contábil para empresas e agronegóHighlights em Sidrolândia e região, com mais clareza fiscal, trabalhista e societária.',
+    description: 'Atendimento contábil para empresas e agronegócio em Sidrolândia e região, com mais clareza fiscal, trabalhista e societária.',
     url: 'https://www.brandaocontador.com.br',
     siteName: 'Brandão Contabilidade',
     images: [
@@ -108,8 +111,8 @@ export const metadata: Metadata = {
   },
   category: 'business',
   verification: {
-    google: 'google-site-verification-code',
-    yandex: 'yandex-verification-code',
+    // Preencha no Vercel (NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION) e ajuste abaixo
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || '',
   },
 }
 
@@ -118,11 +121,11 @@ const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'AccountingService',
   name: 'Brandão Contabilidade',
-  description: 'Serviços contábeis para empresas e agronegóHighlights',
+  description: 'Serviços contábeis para empresas e agronegócio em Sidrolândia - MS',
   url: 'https://www.brandaocontador.com.br',
-  logo: 'https://www.brandaocontador.com.br/logo.png',
+  logo: 'https://www.brandaocontador.com.br/logo-square.jpg',
   telephone: '+55-67-99601-1356',
-  email: 'contato@brandaocontador.com.br',
+  email: 'adm@brandaocontador.com.br',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Sidrolândia',
@@ -135,6 +138,8 @@ const organizationSchema = {
   },
   sameAs: [
     'https://wa.me/5567996011356',
+    'https://www.facebook.com/brandaocontador',
+    'https://www.instagram.com/brandaocontador',
   ],
 }
 
@@ -174,13 +179,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://www.googletagmanager.com" />
 
         {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9DJG24BV6D" />
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
         <script dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-9DJG24BV6D');
+            gtag('config', '${gaId}');
           `
         }} />
       </head>

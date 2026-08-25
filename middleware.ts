@@ -51,6 +51,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/webhooks') ||
+    pathname === '/api/health' ||
     pathname.includes('.') ||
     pathname.startsWith('/static')
   ) {
@@ -86,9 +87,10 @@ export function middleware(request: NextRequest) {
   }
 
   // 4. Adicionar headers de segurança adicionais
+  // NOTA: COEP (Cross-Origin-Embedder-Policy: require-corp) foi removido porque
+  // bloqueia recursos de terceiros sem CORS (ex.: Google Analytics) — risco sem benefício real.
   const response = NextResponse.next();
   response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
-  response.headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
   return response;
