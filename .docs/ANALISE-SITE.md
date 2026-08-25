@@ -154,18 +154,22 @@ Os scrapers (eSocial gov.br com regex frágil, SEFAZ MS por HTML) e os RSS usam 
 
 **Novo fluxo de dados:**
 ```
-Dólar:   PTAX (BCB) ──falhou──▶ AwesomeAPI
-SELIC:   BCB SGS 4390 ──falhou──▶ BrasilAPI
-IPCA:    BCB SGS 13522 ──falhou──▶ BrasilAPI
+Dólar:   PTAX (BCB) ──falhou──▶ AwesomeAPI ──falhou──▶ Frankfurter/ECB
+SELIC:   BrasilAPI ──falhou──▶ BCB SGS 4189 (Selic anualizada)
+IPCA:    BrasilAPI ──falhou──▶ BCB SGS 13522
 Milho:   B3 XLSX (Carteira → R$/saca 60kg + Índice Completo → variação)
 Boi:     B3 XLSX (Carteira → R$/@ + Índice Completo → variação)
 ```
+Além dos fallbacks, cada indicador mantém um **"último valor conhecido"** em memória: se a fonte falhar, o painel exibe o último valor válido daquele indicador (nunca zeros), com aviso.
 
 **Fontes validadas nesta análise (testes reais):**
 - B3 IFMILHO/IFBOI XLSX → ✅ 200 OK, parsing OK, preço real extraído
-- AwesomeAPI USD-BRL → ✅ 200 OK em 0.27s
+- AwesomeAPI USD-BRL → ✅ OK na rede local; ⚠️ instável de datacenter (falhou no primeiro teste em produção)
+- Frankfurter/ECB USD-BRL → ✅ OK (usado em produção como fallback final)
 - BrasilAPI taxas → ✅ 200 OK em 0.25s (SELIC + IPCA)
 - BCB PTAX/SGS → ❌ bloqueado de datacenter (por isso o fallback)
+
+**Validação em produção (2026-08-25):** `GET /api/mercado/cotacoes` → **200 em ~2,5s** com Dólar R$ 5,158 (ECB), SELIC 14%, IPCA 4,44%, Milho R$ 71,79/saca, Boi R$ 355,70/@.
 
 ### ✅ Correção 2 — Página Agronegócio atualizada
 

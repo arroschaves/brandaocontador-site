@@ -9,11 +9,12 @@
   - Isolamento por fonte (`Promise.allSettled` em vez de `Promise.all`) — uma falha não derruba mais o painel
   - Timeout de 8s por chamada externa (AbortController)
   - **Preços reais** de milho (R$/saca 60kg) e boi gordo (R$/@) extraídos da planilha Carteira da B3 (antes: apenas índices em pontos)
-  - **SELIC corrigida:** série 4390 (Meta Copom anual) no lugar da 432 (acumulada mensal exibida como anual)
-  - **Variação do dólar real** (cálculo entre dias PTAX; fallback AwesomeAPI com pctChange)
-  - **Fallbacks:** BCB → BrasilAPI (SELIC/IPCA) e AwesomeAPI (dólar)
-  - **Stale-while-revalidate:** se fontes falharem, serve último painel válido marcado como `stale`
-  - Nunca mais 500 genérico (503 apenas se todas as fontes falharem)
+  - **SELIC corrigida:** BrasilAPI (taxa anual 14%) como fonte primária; fallback BCB SGS 4189 (anualizada base 252) — antes usava série 432 (acumulada mensal exibida como anual)
+  - **Variação do dólar real:** PTAX entre dias; AwesomeAPI `pctChange`; Frankfurter/ECB com variação calculada vs último valor
+  - **Cadeia de dólar com 3 fontes:** PTAX (BCB) → AwesomeAPI → Frankfurter/ECB (usada em produção, pois BCB e AwesomeAPI estão instáveis em datacenter)
+  - **Último valor conhecido por indicador:** fonte falhou → usa o último valor válido daquele indicador (nunca zeros)
+  - **Stale/parcial:** `stale: true` + observação detalhando quais indicadores usaram valores anteriores
+  - Nunca mais 500 genérico (503 apenas se todas as fontes falharem e não houver histórico)
 - **Metadados (`app/layout.tsx`):** strings corrompidas "agronegóHighlights" → "agronegócio" (3 ocorrências); verification via env var; logo schema → arquivo real; email unificado (`adm@`); GA via env var; sameAs com redes sociais
 - **Middleware:** removido `Cross-Origin-Embedder-Policy: require-corp` (bloqueava recursos de terceiros sem CORS, ex.: Google Analytics)
 - **API de notícias:** timeout de 10s por fonte (evita travamento do painel com fonte lenta)
@@ -28,6 +29,11 @@
   - `SEGURANCA.md` — postura de segurança
   - `ROADMAP.md` — backlog priorizado
   - `CHANGELOG.md` — este arquivo
+
+### Validado em produção (2026-08-25)
+- `GET /api/mercado/cotacoes` → **200 em ~2,5s** com: Dólar R$ 5,158 (ECB), SELIC 14%, IPCA 4,44%, Milho R$ 71,79/saca, Boi R$ 355,70/@
+- Páginas: Home, Agronegócio, Notícias, Ferramentas, Contato → 200
+- `GET /api/noticias` → 200, 23 notícias (G1 Economia, G1 Agro, CFC)
 
 ---
 

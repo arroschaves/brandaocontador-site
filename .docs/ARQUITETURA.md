@@ -29,15 +29,15 @@ GET /api/mercado/cotacoes
         ├─ Cache em memória válido (< 30 min)? ──▶ responde cache
         │
         ├─ Promise.allSettled (5 fontes paralelas, timeout 8s cada):
-        │     ├─ Dólar:  PTAX/BCB ─falhou─▶ AwesomeAPI (USDBRL bid/ask/pctChange)
-        │     ├─ SELIC:  BCB SGS 4390 ─falhou─▶ BrasilAPI /taxas/v1 (nome=Selic)
-        │     ├─ IPCA:   BCB SGS 13522 ─falhou─▶ BrasilAPI /taxas/v1 (nome=IPCA)
+        │     ├─ Dólar:  PTAX/BCB ─falhou─▶ AwesomeAPI ─falhou─▶ Frankfurter/ECB
+        │     ├─ SELIC:  BrasilAPI /taxas/v1 ─falhou─▶ BCB SGS 4189 (Selic anualizada)
+        │     ├─ IPCA:   BrasilAPI /taxas/v1 ─falhou─▶ BCB SGS 13522
         │     └─ Milho/Boi: B3 XLSX
         │            ├─ aba "Carteira"  → preço real (AdjstdQt) R$/saca e R$/@
         │            └─ aba "Índice Completo" → variação % entre dias
         │
-        ├─ Alguma falhou + tem cache? ──▶ responde cache marcado stale:true
-        ├─ Todas falharam + sem cache? ──▶ 503 com detalhe
+        ├─ Alguma falhou? ──▶ usa "último valor conhecido" daquele indicador
+        ├─ Todas falharam + sem histórico? ──▶ 503 com detalhe
         └─ Monta resposta com fonte de cada indicador
 ```
 
@@ -46,9 +46,10 @@ GET /api/mercado/cotacoes
 | Fonte | Uso | URL | Estado (2026-08) |
 |---|---|---|---|
 | BCB PTAX | Dólar oficial | `olinda.bcb.gov.br/.../CotacaoDolarDia` | ⚠️ Bloqueado de datacenter |
-| BCB SGS | SELIC/IPCA | `api.bcb.gov.br/dados/serie/bcdata.sgs.{code}` | ⚠️ Bloqueado de datacenter |
-| AwesomeAPI | Dólar fallback | `economia.awesomeapi.com.br/json/last/USD-BRL` | ✅ OK |
-| BrasilAPI | SELIC/IPCA fallback | `brasilapi.com.br/api/taxas/v1` | ✅ OK |
+| BCB SGS | SELIC/IPCA fallback | `api.bcb.gov.br/dados/serie/bcdata.sgs.{code}` | ⚠️ Bloqueado de datacenter |
+| AwesomeAPI | Dólar fallback 2 | `economia.awesomeapi.com.br/json/last/USD-BRL` | ⚠️ Instável de datacenter |
+| Frankfurter/ECB | Dólar fallback 3 (usado em prod) | `api.frankfurter.dev/v1/latest?base=USD&symbols=BRL` | ✅ OK |
+| BrasilAPI | SELIC/IPCA primário | `brasilapi.com.br/api/taxas/v1` | ✅ OK |
 | B3 | Milho/Boi preços | `sistemaswebb3-listados.b3.com.br/.../IFMILHO.xlsx` e `IFBOI.xlsx` | ✅ OK |
 | G1/CFC/Receita/eSocial/SEFAZ | Notícias | RSS + HTML | ✅ OK (com timeout) |
 
