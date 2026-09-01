@@ -144,3 +144,9 @@ Thumbs.db
 .aios-core/local/
 .claude/settings.local.json
 .aios/install-log.txt
+
+# Memória de sessão (local only — não versionar)
+.opencode/
+
+# Análises/relatórios gerados localmente
+ANALISE_PROJETO_*.html

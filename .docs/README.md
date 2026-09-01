@@ -13,6 +13,8 @@
 | [SEGURANCA.md](./SEGURANCA.md) | Postura de segurança, headers, credenciais, rotação de secrets |
 | [ROADMAP.md](./ROADMAP.md) | Backlog de melhorias futuras priorizado |
 
+> 🧠 **Memória do projeto:** o histórico/contexto entre sessões fica em `.opencode/memory/MEMORY.md` (snapshot vivo) e `.opencode/memory/sessions/` (histórico por sessão). É a fonte de verdade do que está sendo feito.
+
 ## Stack Atual (resumo)
 
 - **Framework:** Next.js 15 (App Router) + React 19 + TypeScript
@@ -39,4 +41,4 @@ npm run type-check   # validação TypeScript
 
 ---
 
-_Última atualização: 2026-08-25_
+_Última atualização: 2026-09-01_

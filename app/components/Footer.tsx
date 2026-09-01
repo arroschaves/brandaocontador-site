@@ -18,12 +18,12 @@ export default function Footer() {
           {/* Coluna 1: Marca */}
           <div className="space-y-5">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-2xl overflow-hidden border border-primary/20">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-black ring-2 ring-primary/40">
                 <Image src="/logo-icon.jpg" alt="Logo" fill className="object-cover" />
               </div>
               <div>
                 <p className="font-display font-bold text-foreground">Brandão</p>
-                <p className="text-[10px] font-semibold text-primary tracking-wider uppercase">Contabilidade</p>
+                <p className="text-[11px] font-semibold text-primary tracking-wider uppercase">Contabilidade</p>
               </div>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">

@@ -58,7 +58,7 @@ export default function Header() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 rounded-2xl overflow-hidden border border-primary/20 shadow-sm group-hover:-translate-y-0.5 group-hover:shadow-glow-sm transition-all">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-black ring-2 ring-primary/40 shadow-sm group-hover:-translate-y-0.5 group-hover:shadow-glow-sm transition-all">
                 <Image
                   src="/logo-icon.jpg"
                   alt="Brandão Contabilidade"
@@ -68,8 +68,8 @@ export default function Header() {
                 />
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-display font-bold text-foreground leading-none">Brandão</p>
-                <p className="text-[10px] font-semibold text-primary tracking-wider uppercase">Contabilidade</p>
+                <p className="text-base font-display font-bold text-foreground leading-none">Brandão</p>
+                <p className="text-[11px] font-semibold text-primary tracking-[0.22em] uppercase">Contabilidade</p>
               </div>
             </Link>
 

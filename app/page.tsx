@@ -30,14 +30,14 @@ export default function Home() {
       {/* ═══════════════════════════════════════════
           HERO SECTION
           ═══════════════════════════════════════════ */}
-      <section className="relative min-h-[92vh] flex items-center pt-20 overflow-hidden">
+      <section className="relative min-h-[84vh] flex items-center pt-20 overflow-hidden">
         {/* Gradiente de fundo decorativo */}
         <div className="absolute inset-0 gradient-hero pointer-events-none" />
         <div className="absolute inset-x-0 top-0 h-72 editorial-grid opacity-40 pointer-events-none" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-10 left-10 w-72 h-72 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="container-custom relative z-10 py-16 md:py-24">
+        <div className="container-custom relative z-10 py-10 md:py-14">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Texto */}
             <div className="space-y-8 animate-fade-in-up">
@@ -151,7 +151,7 @@ export default function Home() {
                 </div>
 
                 {/* Card flutuante */}
-                <div className="absolute -bottom-3 -left-3 glass-card p-3 animate-float delay-500 shadow-glow-sm">
+                <div className="absolute -bottom-5 -right-4 glass-card p-3 animate-float delay-500 shadow-glow-sm">
                   <div className="flex items-center gap-2.5">
                     <div className="p-1.5 rounded-lg bg-primary/10">
                       <TrendingUp className="w-4 h-4 text-primary" />
@@ -278,7 +278,7 @@ export default function Home() {
               {[
                 { icon: Clock, label: 'Horário', value: '7h30 — 17h30', color: 'text-purple-500', bg: 'bg-purple-500/10' },
                 { icon: MapPin, label: 'Localização', value: 'Centro, Sidrolândia', color: 'text-blue-500', bg: 'bg-blue-500/10' },
-                { icon: Phone, label: 'Contato', value: '(67) 3341-1356', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+                { icon: Phone, label: 'Contato', value: '(67) 99601-1356', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
                 { icon: Star, label: 'Avaliação', value: '5.0 estrelas', color: 'text-amber-500', bg: 'bg-amber-500/10' },
               ].map((card, i) => (
                 <div key={i} className="glass-card p-6 text-center space-y-3">

@@ -2,6 +2,28 @@
 
 > Registro de mudanças do site. Formato baseado em [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] — 2026-09-01 — Análise completa + Documentação (sem mudanças de código)
+
+### Análise em produção (verificada ao vivo)
+- **9 páginas → 200** (home, sobre, serviços, agronegócio, ferramentas, notícias, reforma, links úteis, contato).
+- **APIs OK:** `/api/health`, `/api/mercado/cotacoes` (fallback Frankfurter/ECB + BrasilAPI), `/api/noticias` (mas ~10s em cache frio).
+- **Bug de SEO confirmado:** título duplicado ("... | Brandão Contabilidade | Brandão Contabilidade") em 7 páginas, por concorrência entre o template do `layout.tsx` (`%s | Brandão Contabilidade`) e o título já com marca nas páginas.
+- **`/ferramentas`** usa o título default da marca (sem título/description próprio).
+- **`app_painel_contabil.remote.py`** órfão na raiz; **cópia duplicada** do site em `E:\PROJETOS\brandaocontador-site`.
+
+### Documentado
+- Criada memória do projeto em `.opencode/memory/MEMORY.md` + histórico de sessão em `.opencode/memory/sessions/2026-09-01-analise-e-documentacao.md`.
+- Atualizado `PRD.md` (v1.1): escopo do site explicitado como **100% institucional**; CRM/leads movido para Fora de Escopo.
+
+### Decisões
+- **Site = somente institucional/marketing.** Remover material de CRM/integrações que não seja site (pendente de aplicação).
+- Nenhuma alteração de código foi feita (aguardando aval). Nada commitado/pushado — documentação mantida local.
+
+### Nota de versão
+- `package.json` está em `0.2.0`, mas o `CHANGELOG.md` registra `0.3.0` (o `/api/health` retorna `0.2.0`) — sincronizar versão na próxima mudança de código.
+
+---
+
 ## [0.3.0] — 2026-08-25 — Correção do Painel Agro + Documentação
 
 ### Corrigido

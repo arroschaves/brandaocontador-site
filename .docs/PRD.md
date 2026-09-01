@@ -5,8 +5,8 @@
 |---|---|
 | **Produto** | Site institucional do escritório Brandão Contabilidade |
 | **Domínio** | brandaocontador.com.br |
-| **Versão do documento** | 1.0 |
-| **Data** | 2026-08-25 |
+| **Versão do documento** | 1.1 |
+| **Data** | 2026-09-01 |
 | **Responsável** | Equipe Brandão Contabilidade |
 
 ---
@@ -117,6 +117,12 @@ Site institucional que posiciona a Brandão Contabilidade como o escritório de 
 
 ---
 
+## 5.1 Foco do Produto (Site 100% Institucional)
+
+> Decisão de escopo (2026-09-01): o site é **exclusivamente institucional/marketing**. NÃO inclui área do cliente, CRM, backend próprio além das rotas Next.js, nem integrações de leads para CRM nesta versão. Tudo que não seja site (ex.: Supabase/CRM, scripts órfãos) deve ser removido ou mantido fora do escopo do site.
+
+---
+
 ## 6. Critérios de Aceite (Checklist de Qualidade)
 
 - [ ] `/api/mercado/cotacoes` responde 200 com dados reais em < 5s (com fontes disponíveis)
@@ -149,6 +155,7 @@ Site institucional que posiciona a Brandão Contabilidade como o escritório de 
 - Pagamentos online
 - Chatbot com IA (v2 — depende de GEMINI_API_KEY)
 - Backend próprio além das rotas Next.js
+- **Integração com CRM / leads** (ex.: N8N + Evolution + Supabase) — removido do escopo; o site é apenas a vitrine institucional e o contato cai direto no WhatsApp/e-mail
 
 ---
 
@@ -157,3 +164,4 @@ Site institucional que posiciona a Brandão Contabilidade como o escritório de 
 | Data | Versão | Mudança |
 |---|---|---|
 | 2026-08-25 | 1.0 | Criação inicial (análise + PRD) |
+| 2026-09-01 | 1.1 | Revisão: estado atual verificado em produção (9 páginas + APIs 200); foco do site explicitado como **100% institucional**; integração com CRM/leads movida para Fora de Escopo |

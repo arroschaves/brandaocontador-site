@@ -3,44 +3,44 @@
 @tailwind utilities;
 
 /* ============================================
-   BRANDÃO CONTABILIDADE — Design System v4.0
-   Paleta: Verde Esmeralda + Dourado Premium
+   BRANDÃO CONTABILIDADE — Design System v5.0
+   Identidade oficial: Ouro (dourado) + Preto + Branco
    ============================================ */
 
 @layer base {
   :root {
-    --background: 42 33% 98%;
-    --foreground: 210 24% 15%;
+    --background: 40 45% 98%;
+    --foreground: 220 16% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 24% 15%;
+    --card-foreground: 220 16% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 24% 15%;
+    --popover-foreground: 220 16% 12%;
 
-    --primary: 156 71% 30%;
+    --primary: 38 85% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 42 25% 94%;
-    --secondary-foreground: 210 24% 15%;
+    --secondary: 40 32% 93%;
+    --secondary-foreground: 220 16% 12%;
 
-    --accent: 36 78% 56%;
-    --accent-foreground: 28 62% 18%;
+    --accent: 40 90% 55%;
+    --accent-foreground: 30 60% 15%;
 
-    --muted: 42 20% 95%;
-    --muted-foreground: 212 10% 40%;
+    --muted: 40 25% 94%;
+    --muted-foreground: 215 12% 40%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 23% 86%;
-    --input: 35 23% 86%;
-    --ring: 156 71% 30%;
+    --border: 40 22% 86%;
+    --input: 40 22% 86%;
+    --ring: 38 85% 45%;
 
     --radius: 1rem;
 
-    --gold: 36 78% 56%;
-    --gold-light: 39 100% 95%;
+    --gold: 38 85% 45%;
+    --gold-light: 42 100% 95%;
     --emerald: 156 71% 30%;
     --emerald-light: 152 44% 94%;
     --success: 152 69% 41%;
@@ -49,36 +49,36 @@
   }
 
   .dark {
-    --background: 210 24% 8%;
-    --foreground: 42 20% 94%;
+    --background: 220 20% 8%;
+    --foreground: 42 25% 94%;
 
-    --card: 210 24% 10%;
-    --card-foreground: 42 20% 94%;
+    --card: 220 20% 11%;
+    --card-foreground: 42 25% 94%;
 
-    --popover: 210 24% 10%;
-    --popover-foreground: 42 20% 94%;
+    --popover: 220 20% 11%;
+    --popover-foreground: 42 25% 94%;
 
-    --primary: 154 68% 44%;
+    --primary: 40 85% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 18% 15%;
-    --secondary-foreground: 42 20% 94%;
+    --secondary: 220 18% 15%;
+    --secondary-foreground: 42 25% 94%;
 
-    --accent: 39 75% 58%;
+    --accent: 42 90% 60%;
     --accent-foreground: 32 55% 12%;
 
-    --muted: 210 18% 15%;
-    --muted-foreground: 38 10% 68%;
+    --muted: 220 18% 15%;
+    --muted-foreground: 40 12% 68%;
 
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 18% 20%;
-    --input: 210 18% 20%;
-    --ring: 154 68% 44%;
+    --border: 220 18% 20%;
+    --input: 220 18% 20%;
+    --ring: 40 85% 50%;
 
-    --gold: 39 75% 58%;
-    --gold-light: 39 35% 18%;
+    --gold: 40 85% 52%;
+    --gold-light: 40 35% 18%;
     --emerald-light: 154 30% 16%;
   }
 
@@ -122,20 +122,20 @@
   /* Cards */
   .glass-card {
     @apply backdrop-blur-xl border rounded-[1.75rem];
-    background-color: hsl(var(--card) / 0.78);
-    border-color: hsl(var(--border) / 0.7);
+    background-color: hsl(var(--card) / 0.94);
+    border-color: hsl(var(--border) / 0.8);
     box-shadow: 0 18px 45px hsl(210 24% 15% / 0.06);
     @apply transition-all duration-300;
   }
 
   .glass-card:hover {
-    border-color: hsl(var(--primary) / 0.2);
+    border-color: hsl(var(--primary) / 0.3);
   }
 
   .glass-card-static {
     @apply backdrop-blur-xl border rounded-[1.75rem];
-    background-color: hsl(var(--card) / 0.82);
-    border-color: hsl(var(--border) / 0.7);
+    background-color: hsl(var(--card) / 0.96);
+    border-color: hsl(var(--border) / 0.8);
     box-shadow: 0 18px 45px hsl(210 24% 15% / 0.06);
   }
 
@@ -251,7 +251,7 @@
 @layer utilities {
   /* Gradientes premium */
   .gradient-primary {
-    @apply bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700;
+    @apply bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600;
   }
 
   .gradient-gold {
@@ -418,8 +418,8 @@
 
   /* Glow suave para elementos em destaque */
   .glow-primary {
-    box-shadow: 0 0 20px hsl(160 84% 39% / 0.15),
-                0 0 60px hsl(160 84% 39% / 0.05);
+    box-shadow: 0 0 20px hsl(40 85% 45% / 0.18),
+                0 0 60px hsl(40 85% 45% / 0.08);
   }
 
   .glow-gold {
