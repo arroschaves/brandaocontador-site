@@ -168,8 +168,8 @@ export default function FerramentasPage() {
             <span className="w-12 h-[1px] bg-primary"></span>
             <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Ferramentas Úteis</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
-            CALCULADORAS <span className="text-primary italic font-display">& SIMULADORES</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tighter leading-[0.95] mb-4">
+            Calculadoras <span className="text-primary italic font-display">e simuladores</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl font-sans text-lg">
             Ferramentas práticas para ajudar na tomada de decisões. Calcule custos, simule enquadramento tributário e planeje seus gastos.

@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 /**
  * Favicon dinâmico — Brandão Contabilidade
- * Gera o ícone da aba do navegador com "B" em amber sobre fundo obsidian
+ * Monograma "BC" em ouro sobre fundo preto (identidade oficial da marca)
  */
 export const runtime = 'edge';
 export const size = { width: 32, height: 32 };
@@ -19,20 +19,20 @@ export default function Icon() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     background: '#0A0A0B',
-                    borderRadius: '4px',
-                    border: '2px solid #FFB000',
+                    borderRadius: '6px',
+                    border: '2px solid #C9A227',
                 }}
             >
                 <span
                     style={{
-                        fontSize: '22px',
+                        fontSize: '17px',
                         fontWeight: 900,
-                        color: '#FFB000',
+                        color: '#C9A227',
                         fontFamily: 'system-ui, sans-serif',
-                        fontStyle: 'italic',
+                        letterSpacing: '-1px',
                     }}
                 >
-                    B
+                    BC
                 </span>
             </div>
         ),

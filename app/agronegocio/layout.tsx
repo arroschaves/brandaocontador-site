@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Agronegócio e Indicadores de Mercado | Brandão Contabilidade',
+    title: 'Agronegócio e Indicadores de Mercado',
     description: 'Acompanhe indicadores de mercado, câmbio e conteúdo para agronegócio com foco em Mato Grosso do Sul e apoio contábil especializado.',
     alternates: {
         canonical: '/agronegocio',

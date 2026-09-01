@@ -61,6 +61,8 @@ const SOURCES: NewsSource[] = [
     { type: 'rss', url: 'https://g1.globo.com/rss/g1/economia/', categoria: 'fiscal', icon: '💰', fonte: 'G1 Economia' },
     { type: 'rss', url: 'https://g1.globo.com/rss/g1/economia/agronegocios/', categoria: 'agronegocio', icon: '🌾', fonte: 'G1 Agro' },
     { type: 'rss', url: 'https://cfc.org.br/feed/', categoria: 'contabilidade', icon: '📋', fonte: 'CFC' },
+    { type: 'rss', url: 'https://fenacon.org.br/feed/', categoria: 'contabilidade', icon: '🏢', fonte: 'Fenacon' },
+    { type: 'rss', url: 'https://www.crcms.org.br/feed/', categoria: 'contabilidade', icon: '🧾', fonte: 'CRC-MS' },
     { type: 'rss', url: 'https://www.gov.br/receitafederal/pt-br/assuntos/noticias/RSS', categoria: 'tributaria', icon: '🏛️', fonte: 'Receita Federal' },
     { type: 'html', url: 'https://www.gov.br/esocial/pt-br/noticias', categoria: 'trabalhista', icon: '👥', fonte: 'eSocial' },
     { type: 'html', url: 'https://www.sefaz.ms.gov.br/noticias/', categoria: 'sefaz_ms', icon: '📍', fonte: 'SEFAZ MS' },

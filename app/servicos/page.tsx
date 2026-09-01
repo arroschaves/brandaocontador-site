@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Serviços Contábeis em Sidrolândia - MS | Brandão Contabilidade',
+  title: 'Serviços Contábeis em Sidrolândia - MS',
   description: 'Serviços contábeis, fiscais, trabalhistas, societários e para agronegócio em Sidrolândia - MS, com atendimento para empresas e produtores rurais.',
   alternates: {
     canonical: '/servicos',
@@ -23,7 +23,7 @@ export default function ServicosPage() {
       title: 'Contabilidade Empresarial',
       description: 'Organização contábil para sua empresa operar com mais clareza, controle e segurança nas decisões.',
       icon: Calculator,
-      color: 'from-emerald-500 to-teal-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'Apuração de impostos (ICMS, IPI, PIS, COFINS)',
         'Escrituração Fiscal Digital (EFD)',
@@ -36,7 +36,7 @@ export default function ServicosPage() {
       title: 'Soluções Societárias',
       description: 'Abertura, estruturação e regularização com orientação prática para cada etapa da empresa.',
       icon: Building2,
-      color: 'from-blue-500 to-indigo-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'Consulta de viabilidade e registro',
         'Inscrições municipais e estaduais',
@@ -49,7 +49,7 @@ export default function ServicosPage() {
       title: 'Departamento Pessoal',
       description: 'Rotinas trabalhistas e folha com mais previsibilidade, conformidade e menos ruído no dia a dia.',
       icon: Users,
-      color: 'from-purple-500 to-violet-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'Folha de pagamento robusta',
         'eSocial e DCTFWeb',
@@ -62,7 +62,7 @@ export default function ServicosPage() {
       title: 'IRPF & Planejamento Fiscal',
       description: 'Planejamento tributário e declarações com foco em reduzir exposição e ganhar eficiência.',
       icon: FileText,
-      color: 'from-amber-500 to-orange-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'IRPF para investidores',
         'Planejamento tributário anual',
@@ -75,7 +75,7 @@ export default function ServicosPage() {
       title: 'Consultoria Estratégica',
       description: 'Leitura de números e operação para transformar dados em decisões mais seguras.',
       icon: TrendingUp,
-      color: 'from-rose-500 to-pink-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'Análise de viabilidade econômica',
         'Fluxo de caixa projetado',
@@ -88,7 +88,7 @@ export default function ServicosPage() {
       title: 'Agronegócio',
       description: 'Atendimento especializado para produtores e empresas do agro, com leitura técnica da operação.',
       icon: Leaf,
-      color: 'from-green-500 to-lime-500',
+      color: 'from-amber-400 via-yellow-500 to-amber-600',
       detalhes: [
         'LCDPR — Livro Caixa Digital',
         'ITR e ADA',
@@ -175,7 +175,7 @@ export default function ServicosPage() {
 
       {/* CTA */}
       <section className="py-20 bg-primary relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-yellow-600 opacity-95" />
         <div className="container-custom text-center relative z-10">
           <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
             O melhor momento para organizar sua operação é antes do problema aparecer.
@@ -188,7 +188,7 @@ export default function ServicosPage() {
               href="https://wa.me/5567996011356"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-3 bg-white text-emerald-700 px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:brightness-110 transition-all active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-3 bg-white text-amber-700 px-8 py-4 font-semibold rounded-xl shadow-lg hover:shadow-xl hover:brightness-110 transition-all active:scale-[0.98]"
             >
               <Phone className="w-5 h-5" />
               Solicitar atendimento

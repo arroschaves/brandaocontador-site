@@ -123,8 +123,8 @@ export default function NoticiasPage() {
             <span className="w-12 h-[1px] bg-primary"></span>
             <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Central de Informações</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
-            NOTÍCIAS <span className="text-primary italic font-display">CONTÁBEIS</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tighter leading-[0.95] mb-4">
+            Notícias <span className="text-primary italic font-display">contábeis</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl font-sans text-lg">
             Informações atualizadas sobre legislação, tributação, obrigações e mercado, com foco em fontes reais e acompanhamento útil para empresas e agronegócio.

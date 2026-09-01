@@ -86,8 +86,8 @@ export default function MercadoAgroPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const graos = data?.agroIndices.filter(c => c.codigo === 'IFMILHO') || [];
-  const pecuaria = data?.agroIndices.filter(c => c.codigo === 'IFBOI') || [];
+  const graos = data?.agroIndices.filter(c => c.codigo === 'IFMILHO' || c.codigo === 'SOJA') || [];
+  const pecuaria = data?.agroIndices.filter(c => c.codigo === 'IFBOI' || c.codigo === 'BEZERRO') || [];
 
   const formatarPreco = (item: CommodityPrice) => {
     if (item.tipo === 'preco') {
@@ -111,7 +111,7 @@ export default function MercadoAgroPage() {
                 Painel <span className="text-primary">Agro</span>
               </h1>
               <p className="text-muted-foreground mt-3 max-w-lg">
-                Preços reais do agro (R$/saca e R$/@), câmbio e indicadores macroeconômicos de fontes oficiais: Banco Central, BrasilAPI e B3.
+                Preços reais do agro (R$/saca, R$/@ e R$/cabeça), câmbio e indicadores macroeconômicos de fontes públicas: Banco Central, BrasilAPI, B3 e ECAMPO.
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -225,7 +225,7 @@ export default function MercadoAgroPage() {
               <Wheat className="w-5 h-5 text-amber-500" />
             </div>
             <h2 className="text-xl font-display font-bold text-foreground">Grãos</h2>
-            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider ml-2">B3 — contrato futuro (preço real)</span>
+            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider ml-2">Preços de referência do mercado</span>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             {graos.map((item, i) => (
@@ -265,7 +265,7 @@ export default function MercadoAgroPage() {
               <Beef className="w-5 h-5 text-rose-500" />
             </div>
             <h2 className="text-xl font-display font-bold text-foreground">Pecuária</h2>
-            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider ml-2">B3 — contrato futuro (preço real)</span>
+            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider ml-2">Preços de referência do mercado</span>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {pecuaria.map((item, i) => (
@@ -298,7 +298,7 @@ export default function MercadoAgroPage() {
       <section className="py-8 border-t border-border">
         <div className="container-custom">
           <p className="text-[10px] text-muted-foreground font-mono text-center max-w-3xl mx-auto leading-relaxed">
-            {data?.observacao || 'Painel em modo estrito: exibe apenas dados de fontes oficiais públicas integradas no momento.'} Dólar: PTAX/Banco Central (fallback AwesomeAPI). SELIC e IPCA: Banco Central (fallback BrasilAPI). Milho e boi: preços reais de contratos futuros divulgados pela B3 em planilhas públicas diárias.
+            {data?.observacao || 'Painel em modo estrito: exibe apenas dados de fontes oficiais públicas integradas no momento.'} Dólar: PTAX/Banco Central (fallback AwesomeAPI). SELIC e IPCA: Banco Central (fallback BrasilAPI). Milho e boi: preços reais de contratos futuros divulgados pela B3. Soja (R$/saca) e bezerro (R$/cabeça): preços de referência do ECAMPO.
           </p>
         </div>
       </section>

@@ -11,7 +11,7 @@ import { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-  title: 'Reforma Tributária 2026 | IBS CBS IS — Brandão Contabilidade',
+  title: 'Reforma Tributária 2026 | IBS, CBS e IS',
   description: 'Guia completo da Reforma Tributária 2026: IBS, CBS, IS, cronograma de transição, impactos para empresas, agronegócio e MEI em Mato Grosso do Sul. Atualizado.',
   alternates: {
     canonical: '/reforma-tributaria',
@@ -176,8 +176,8 @@ export default function ReformaTributariaPage() {
             <span className="w-12 h-[1px] bg-primary"></span>
             <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Atualizado 2026</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.8] mb-6">
-            REFORMA <span className="text-primary italic font-display">TRIBUTÁRIA</span>
+          <h1 className="text-5xl md:text-7xl font-display font-bold tracking-tighter leading-[0.95] mb-6">
+            Reforma <span className="text-primary italic font-display">tributária</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl font-sans leading-relaxed mb-8">
             Guia completo da nova tributação brasileira: IBS, CBS e Imposto Seletivo.

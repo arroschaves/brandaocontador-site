@@ -11,7 +11,7 @@ import { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-    title: 'Links Úteis e Certidões Negativas em MS | Brandão Contabilidade',
+    title: 'Links Úteis e Certidões Negativas em MS',
     description: 'Acesse links úteis, certidões negativas, Receita Federal, SEFAZ MS, eSocial, INSS e portais para empresas em Sidrolândia - MS e região.',
     alternates: {
         canonical: '/links-uteis',
@@ -301,8 +301,8 @@ export default function LinksUteisPage() {
                         <span className="w-12 h-[1px] bg-primary"></span>
                         <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Acesso Rápido</span>
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
-                        LINKS ÚTEIS E <span className="text-primary italic font-display">CERTIDÕES</span>
+                    <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tighter leading-[0.95] mb-4">
+                        Links úteis e <span className="text-primary italic font-display">certidões</span>
                     </h1>
                     <p className="text-muted-foreground max-w-3xl font-sans text-lg">
                         Todos os portais governamentais, certidões negativas e ferramentas de consulta que sua empresa precisa — em um só lugar.

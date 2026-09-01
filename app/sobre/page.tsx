@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Sobre a Brandão Contabilidade | 31+ Anos em Sidrolândia - MS',
+  title: 'Nossa História | 31+ Anos em Sidrolândia - MS',
   description: 'Conheça a história da Brandão Contabilidade, escritório com mais de 31 anos de experiência em contabilidade para empresas e agronegócio em Sidrolândia - MS.',
   alternates: {
     canonical: '/sobre',
@@ -107,8 +107,8 @@ export default function SobrePage() {
             <span className="w-12 h-[1px] bg-primary"></span>
             <span className="text-xs font-mono text-primary tracking-[0.4em] uppercase">Quem Somos</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-[0.85] mb-4">
-            NOSSA <span className="text-primary italic font-display">HISTÓRIA</span>
+          <h1 className="text-5xl md:text-6xl font-display font-bold tracking-tighter leading-[0.95] mb-4">
+            Nossa <span className="text-primary italic font-display">história</span>
           </h1>
           <p className="text-muted-foreground max-w-2xl font-sans text-lg">
             Mais de 30 anos transformando números em decisões estratégicas para empresas e produtores rurais em Sidrolândia e região.

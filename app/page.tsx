@@ -172,7 +172,7 @@ export default function Home() {
           NÚMEROS — BARRA DE AUTORIDADE
           ═══════════════════════════════════════════ */}
       <section className="py-12 bg-primary text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-yellow-600 opacity-95" />
         <div className="container-custom relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
@@ -186,6 +186,50 @@ export default function Home() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-white/70">{stat.label}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          PAINEL AGRO — CHAMADA PARA O AGRO
+          ═══════════════════════════════════════════ */}
+      <section className="py-14 bg-background section-shell">
+        <div className="container-custom">
+          <div className="relative overflow-hidden rounded-[2rem] border border-primary/20 glass-card p-8 md:p-10 reveal">
+            <div className="absolute inset-0 gradient-hero pointer-events-none" />
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center gap-8">
+              <div className="flex-1 space-y-4">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  <Tractor className="w-3 h-3" /> Painel Agro ao vivo
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground leading-tight">
+                  Soja, milho, boi e <span className="text-primary">bezerro</span> — acompanhe os preços do agro
+                </h2>
+                <p className="text-muted-foreground leading-relaxed max-w-xl">
+                  Indicadores de mercado, câmbio e preços de referência (R$/saca, R$/@ e R$/cabeça) atualizados de fontes públicas. Se você é produtor rural ou atua no agronegócio, essa página é para você.
+                </p>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  <Link href="/agronegocio" className="btn-primary px-7 py-3.5 text-sm">
+                    Ver cotações do agro
+                    <ArrowUpRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 flex-shrink-0 lg:w-80">
+                {[
+                  { label: 'Soja', value: 'R$/saca', icon: Leaf },
+                  { label: 'Milho', value: 'R$/saca', icon: TrendingUp },
+                  { label: 'Boi gordo', value: 'R$/@', icon: Tractor },
+                  { label: 'Bezerro', value: 'R$/cabeça', icon: Users },
+                ].map((item, i) => (
+                  <div key={i} className="rounded-2xl border border-border/70 bg-card/60 p-4 text-center">
+                    <item.icon className="w-5 h-5 text-primary mx-auto mb-2" />
+                    <p className="text-sm font-bold text-foreground">{item.label}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -209,12 +253,12 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { title: 'Contabilidade Empresarial', icon: Calculator, desc: 'Mais organização financeira, demonstrativos confiáveis e apoio para sua empresa crescer com segurança.', color: 'from-emerald-500 to-teal-500' },
-              { title: 'Departamento Pessoal', icon: Users, desc: 'Folha, eSocial e rotinas trabalhistas conduzidas com atenção técnica e menos risco operacional.', color: 'from-blue-500 to-indigo-500' },
-              { title: 'Legalização de Empresas', icon: Shield, desc: 'Abertura, alteração e regularização com orientação clara para você avançar sem burocracia desnecessária.', color: 'from-purple-500 to-violet-500' },
-              { title: 'Agronegócio', icon: Tractor, desc: 'Atendimento contábil pensado para a realidade do produtor rural e das empresas do agro.', color: 'from-green-500 to-lime-500' },
-              { title: 'Planejamento Tributário', icon: TrendingUp, desc: 'Leitura tributária estratégica para enquadrar melhor sua operação e proteger margem.', color: 'from-amber-500 to-orange-500' },
-              { title: 'Certificado Digital', icon: FileText, desc: 'Emissão e renovação com suporte direto para não travar obrigações e assinaturas importantes.', color: 'from-rose-500 to-pink-500' },
+              { title: 'Contabilidade Empresarial', icon: Calculator, desc: 'Mais organização financeira, demonstrativos confiáveis e apoio para sua empresa crescer com segurança.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
+              { title: 'Departamento Pessoal', icon: Users, desc: 'Folha, eSocial e rotinas trabalhistas conduzidas com atenção técnica e menos risco operacional.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
+              { title: 'Legalização de Empresas', icon: Shield, desc: 'Abertura, alteração e regularização com orientação clara para você avançar sem burocracia desnecessária.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
+              { title: 'Agronegócio', icon: Tractor, desc: 'Atendimento contábil pensado para a realidade do produtor rural e das empresas do agro.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
+              { title: 'Planejamento Tributário', icon: TrendingUp, desc: 'Leitura tributária estratégica para enquadrar melhor sua operação e proteger margem.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
+              { title: 'Certificado Digital', icon: FileText, desc: 'Emissão e renovação com suporte direto para não travar obrigações e assinaturas importantes.', color: 'from-amber-400 via-yellow-500 to-amber-600' },
             ].map((service, i) => (
               <Link
                 key={i}

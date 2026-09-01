@@ -38,6 +38,8 @@ let lastKnown: {
   ipca?: MacroIndicator;
   milho?: AgroIndex;
   boi?: AgroIndex;
+  soja?: AgroIndex;
+  bezerro?: AgroIndex;
 } = {};
 
 interface MacroIndicator {
@@ -88,6 +90,9 @@ const B3_SHEETS = {
     descricao: 'Preço do contrato futuro de boi gordo (BGI) com maior liquidez, divulgado oficialmente pela B3 — referência diária para pecuaristas.',
   },
 } as const;
+
+// ECAMPO — preços de referência do agronegócio brasileiro (acessível de servidor)
+const ECAMPO_URL = 'https://www.ecampo.com.br/commodite';
 
 /** Fetch com timeout — evita travamentos quando uma fonte externa não responde */
 async function fetchWithTimeout(url: string, timeoutMs: number = FETCH_TIMEOUT_MS): Promise<Response> {
@@ -342,6 +347,79 @@ async function fetchB3Index(sheet: (typeof B3_SHEETS)[keyof typeof B3_SHEETS]): 
   };
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+interface EcampoQuote {
+  nome: string;
+  unidade: string;
+  valor: number;
+  data: string;
+}
+
+/**
+ * Extrai a cotação de um produto da página de commodities do ECAMPO.
+ * A página lista todos os produtos com data/preço/unidade; usamos a
+ * cotação nominal (ex.: "Soja - PR", "Bezerro - MS") como referência.
+ * Acessível de datacenter (usa apenas fetch de página HTML).
+ */
+async function fetchEcampoQuote(product: string): Promise<EcampoQuote> {
+  const response = await fetchWithTimeout(ECAMPO_URL);
+  const html = await response.text();
+  const text = html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const pattern = new RegExp(
+    `${escapeRegExp(product)}[^0-9]{0,40}?(\\d{2}/\\d{2}/\\d{4})\\s+R\\$\\s+([\\d.,]+)\\s+([a-zA-ZÀ-ú@]{1,12})`,
+    'i'
+  );
+  const match = pattern.exec(text);
+  if (!match) throw new Error(`Produto "${product}" não encontrado no ECAMPO`);
+
+  return {
+    nome: product,
+    unidade: match[3],
+    valor: parseFloat(match[2].replace(/\./g, '').replace(',', '.')),
+    data: match[1],
+  };
+}
+
+/**
+ * Monta indicadores Agro a partir do ECAMPO, com resiliência:
+ * cada produto é buscado isoladamente; falha → último valor conhecido.
+ */
+async function fetchEcampoAgro(): Promise<{ soja?: AgroIndex; bezerro?: AgroIndex }> {
+  const [sojaResult, bezerroResult] = await Promise.allSettled([
+    fetchEcampoQuote('Soja - PR'),
+    fetchEcampoQuote('Bezerro - MS'),
+  ]);
+
+  const makeIndex = (q: EcampoQuote, codigo: string): AgroIndex => ({
+    nome: q.nome,
+    codigo,
+    valor: q.valor,
+    unidade: codigo === 'SOJA' ? 'R$/saca 60kg' : 'R$/cabeça',
+    variacao: 0,
+    atualizado: q.data,
+    referencia: q.data,
+    fonte: 'ECAMPO',
+    descricao:
+      codigo === 'SOJA'
+        ? 'Preço de referência da soja (R$/saca 60kg), região Sul — acompanha a cotação do grão no mercado brasileiro.'
+        : 'Preço de referência do bezerro de reposição em Mato Grosso do Sul (R$/cabeça) — indicador importante para a pecuária regional.',
+    tipo: 'preco',
+  });
+
+  return {
+    soja: sojaResult.status === 'fulfilled' ? makeIndex(sojaResult.value, 'SOJA') : undefined,
+    bezerro: bezerroResult.status === 'fulfilled' ? makeIndex(bezerroResult.value, 'BEZERRO') : undefined,
+  };
+}
+
 /* ════════════════════════════════════════════
    GET — monta o painel com resiliência
    ════════════════════════════════════════════ */
@@ -357,12 +435,13 @@ export async function GET() {
   }
 
   // Busca todas as fontes em paralelo, cada uma isolada (Promise.allSettled)
-  const [dolarResult, selicResult, ipcaResult, milhoResult, boiResult] = await Promise.allSettled([
+  const [dolarResult, selicResult, ipcaResult, milhoResult, boiResult, ecampoAgroResult] = await Promise.allSettled([
     fetchDolar(),
     fetchSelic(),
     fetchIpca(),
     fetchB3Index(B3_SHEETS.milho),
     fetchB3Index(B3_SHEETS.boi),
+    fetchEcampoAgro(),
   ]);
 
   // Resolve cada indicador: valor novo → usa; falha → último valor conhecido
@@ -379,6 +458,20 @@ export async function GET() {
   const milho = resolveSource(milhoResult, lastKnown.milho, 'milho', usouCacheAntigo);
   const boi = resolveSource(boiResult, lastKnown.boi, 'boi', usouCacheAntigo);
 
+  const ecampoAgro = ecampoAgroResult.status === 'fulfilled' ? ecampoAgroResult.value : {};
+  const soja = resolveSource(
+    { status: ecampoAgro.soja ? 'fulfilled' : 'rejected', value: ecampoAgro.soja } as PromiseSettledResult<AgroIndex | null>,
+    lastKnown.soja,
+    'soja',
+    usouCacheAntigo
+  );
+  const bezerro = resolveSource(
+    { status: ecampoAgro.bezerro ? 'fulfilled' : 'rejected', value: ecampoAgro.bezerro } as PromiseSettledResult<AgroIndex | null>,
+    lastKnown.bezerro,
+    'bezerro',
+    usouCacheAntigo
+  );
+
   // Quando a fonte de dólar não fornece variação (ex.: ECB diária), calcula vs último valor
   if (dolar && dolar.variacao === 0 && lastKnown.dolar && lastKnown.dolar.compra > 0 && Math.abs(lastKnown.dolar.compra - dolar.compra) > 0.0001) {
     dolar = { ...dolar, variacao: ((dolar.compra - lastKnown.dolar.compra) / lastKnown.dolar.compra) * 100 };
@@ -390,6 +483,8 @@ export async function GET() {
   if (ipca) lastKnown.ipca = ipca;
   if (milho) lastKnown.milho = milho;
   if (boi) lastKnown.boi = boi;
+  if (soja) lastKnown.soja = soja;
+  if (bezerro) lastKnown.bezerro = bezerro;
 
   for (const failure of usouCacheAntigo) {
     console.warn(`[COTACOES] Fonte falhou e usou último valor conhecido: ${failure}`);
@@ -420,10 +515,10 @@ export async function GET() {
       selic: selic ?? { valor: 0, atualizado: '-', fonte: 'indisponível' },
       ipca: ipca ?? { valor: 0, atualizado: '-', fonte: 'indisponível' },
     },
-    agroIndices: [milho, boi].filter((item): item is AgroIndex => item !== null),
+    agroIndices: [milho, boi, soja, bezerro].filter((item): item is AgroIndex => item !== null),
     observacao: parcial
       ? `Algumas fontes externas estavam indisponíveis (${usouCacheAntigo.join(', ')}). Exibindo último valor conhecido para esses indicadores.`
-      : 'Painel com dados oficiais de fontes públicas (Banco Central, BrasilAPI e B3). Milho e boi exibem preços reais de contratos futuros (R$/saca e R$/@).',
+      : 'Painel com dados oficiais de fontes públicas (Banco Central, BrasilAPI, B3 e ECAMPO). Milho, boi, soja e bezerro exibem preços de referência (R$/saca, R$/@ e R$/cabeça).',
     atualizadoEm: new Date().toISOString(),
     stale: parcial,
   };

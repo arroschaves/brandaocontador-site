@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Contato | Brandão Contabilidade — Sidrolândia MS',
+    title: 'Contato em Sidrolândia - MS',
     description: 'Entre em contato com a Brandão Contabilidade em Sidrolândia - MS. WhatsApp (67) 99601-1356, e-mail e formulário online. Atendimento especializado para empresas e agronegócio.',
     alternates: {
         canonical: '/contato',
