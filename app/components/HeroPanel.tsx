@@ -14,14 +14,21 @@ interface LiveQuote {
   fonte: string;
 }
 
+interface MacroItem {
+  label: string;
+  valor: string;
+  hint: string;
+}
+
 /**
  * Painel do hero (lado direito) — profundo e profissional:
  *  - Pilares do ecossistema em grid 2x2
- *  - Mini "Painel Agro ao vivo" com cotações reais (Soja, Milho, Boi, Bezerro)
+ *  - Mini "Mercado ao vivo" com Dólar, SELIC, IPCA + cotações do agro (Soja, Milho, Boi, Bezerro)
  *  - Indicadores de confiança + CTA
  */
 export default function HeroPanel() {
   const [quotes, setQuotes] = useState<LiveQuote[]>([]);
+  const [macros, setMacros] = useState<MacroItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
 
@@ -34,6 +41,24 @@ export default function HeroPanel() {
       .then((r) => r.json())
       .then((d) => {
         if (!active) return;
+        // Indicadores macro: Dólar, SELIC e IPCA
+        const m: MacroItem[] = [];
+        if (d?.dolar && typeof d.dolar.compra === 'number') {
+          m.push({
+            label: 'Dólar',
+            valor: 'R$ ' + d.dolar.compra.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            hint: 'compra',
+          });
+        }
+        if (d?.macro?.selic && typeof d.macro.selic.valor === 'number') {
+          m.push({ label: 'SELIC', valor: d.macro.selic.valor.toLocaleString('pt-BR') + '%', hint: 'a.a.' });
+        }
+        if (d?.macro?.ipca && typeof d.macro.ipca.valor === 'number') {
+          m.push({ label: 'IPCA', valor: d.macro.ipca.valor.toLocaleString('pt-BR') + '%', hint: '12m' });
+        }
+        setMacros(m);
+
+        // Cotações do agro (ordem fixa: milho, boi, soja, bezerro)
         const list: LiveQuote[] = (d?.agroIndices || []).map((a: any) => ({
           nome: a.nome, valor: a.valor, unidade: a.unidade, fonte: a.fonte,
         }));
@@ -90,12 +115,15 @@ export default function HeroPanel() {
         ))}
       </div>
 
-      {/* Painel Agro ao vivo */}
+      {/* Mercado ao vivo */}
       <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-4">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <p className="text-xs font-bold text-foreground">Painel Agro ao vivo</p>
+          <div>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <p className="text-xs font-bold text-foreground">Mercado ao vivo</p>
+            </div>
+            <p className="text-[10px] text-muted-foreground">Dólar • SELIC • IPCA • agro</p>
           </div>
           <Link href="/agronegocio" className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
             Ver painel <ArrowUpRight className="w-3 h-3" />
@@ -103,26 +131,38 @@ export default function HeroPanel() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 gap-2">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-12 rounded-xl bg-muted/40 animate-pulse" />
-            ))}
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2">{[0, 1, 2].map((i) => <div key={i} className="h-16 rounded-xl bg-muted/40 animate-pulse" />)}</div>
+            <div className="grid grid-cols-2 gap-2">{[0, 1, 2, 3].map((i) => <div key={i} className="h-12 rounded-xl bg-muted/40 animate-pulse" />)}</div>
           </div>
-        ) : offline || quotes.length === 0 ? (
+        ) : offline || (macros.length === 0 && quotes.length === 0) ? (
           <p className="text-[11px] text-muted-foreground">
-            Cotações indisponíveis no momento. Acesse o Painel Agro para acompanhar soja, milho, boi e bezerro.
+            Cotações indisponíveis no momento. Acesse o Painel Agro para acompanhar mercado e agronegócio.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
-            {quotes.map((q, i) => (
-              <div key={i} className="rounded-xl border border-border/60 bg-card/70 p-3">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide truncate">{q.nome}</p>
-                <p className="text-base font-display font-bold text-foreground leading-tight">
-                  R$ {q.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-                <p className="text-[9px] text-muted-foreground font-mono">{q.unidade}</p>
+          <div className="space-y-2">
+            {macros.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {macros.map((m, i) => (
+                  <div key={i} className="rounded-xl border border-border/60 bg-card/70 p-2.5 text-center">
+                    <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide">{m.label}</p>
+                    <p className="text-sm font-display font-bold text-foreground leading-tight truncate">{m.valor}</p>
+                    <p className="text-[9px] text-muted-foreground font-mono">{m.hint}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              {quotes.map((q, i) => (
+                <div key={i} className="rounded-xl border border-border/60 bg-card/70 p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide truncate">{q.nome}</p>
+                  <p className="text-base font-display font-bold text-foreground leading-tight">
+                    R$ {q.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground font-mono">{q.unidade}</p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
